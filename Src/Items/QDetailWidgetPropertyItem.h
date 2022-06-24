@@ -5,6 +5,7 @@
 #include "QBoxLayout"
 #include "QSplitter"
 #include "QJsonObject"
+#include "QPropertyHandler.h"
 
 class QDetailWidgetPropertyItem;
 class QPushButton;
@@ -65,28 +66,18 @@ QList<int> GetIDListFromType() {
 		return GetIDListFromType<__VA_ARGS__>(); \
 	}
 
-class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
+class QDetailWidgetPropertyItem : public QDetailWidgetItem {
+
 public:
-	using Getter = std::function<QVariant()>;
-	using Setter = std::function<void(QVariant)>;
-	using TypeId = int;
+	using TypeId = QPropertyHandler::TypeId;
 
-	QDetailWidgetPropertyItem();
-
-	void Initialize(TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter,QJsonObject inMetaData = QJsonObject());
+	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler, QJsonObject inMetaData = QJsonObject());
 
 	void SetValue(QVariant inValue);
 
 	QVariant GetValue();
 
 	void ResetValue();
-
-	TypeId GetTypeID();
-
-	template<typename Type>
-	bool canConvert() {
-		return QMetaType::canConvert(QMetaType(GetTypeID()), QMetaType::fromType<Type>());
-	}
 
 	QString GetName();
 
@@ -103,15 +94,20 @@ public:
 	void RefleshSplitterFactor();
 
 	const QJsonObject& GetMetaData() const;
-private:
+
+	template<typename Type>
+	bool canConvert() {
+		return QMetaType::canConvert(QMetaType(GetHandler()->GetTypeID()), QMetaType::fromType<Type>());
+	}
+
+	QPropertyHandler* GetHandler() const { return mHandler; }
+	void SetHandler(QPropertyHandler* inHandler);
+protected:
+	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
-	TypeId mTypeID = 0;
-	QString mName;
-	Getter mGetter;
-	Setter mSetter;
-	QVariant mInitialValue;
-	bool mIsChanged = false;
+	QPropertyHandler* mHandler = nullptr;
+
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	QJsonObject mMetaData;
 };

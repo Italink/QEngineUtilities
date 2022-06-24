@@ -3,7 +3,15 @@
 
 QWidget* QDPI_Color::GenerateValueWidget() {
 	QColorButton* colorButton = new QColorButton(GetValue().value<QColor>());
-	connect(colorButton, &QColorButton::AsColorChanged, this, &QDPI_Color::SetValue);
+
+	GetHandler()->Bind(colorButton, &QColorButton::AsColorChanged,
+		[colorButton]() {
+			return colorButton->GetColor();
+		},
+		[colorButton](QVariant var) {
+			colorButton->SetColor(var.value<QColor>());
+		}
+		);
 	return colorButton;
 }
 

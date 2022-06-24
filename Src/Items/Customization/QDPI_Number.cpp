@@ -10,12 +10,26 @@
 				MetaData["Min"].toVariant().value<Type>(), \
 				MetaData["Max"].toVariant().value<Type>() \
 			); \
-			connect(numberBox, &QNumberBox::AsValueChanged, this, &QDPI_Number::SetValue);\
+			GetHandler()->Bind(numberBox, &QNumberBox::AsValueChanged,\
+			[numberBox]() {\
+				return numberBox->GetVar();\
+			},\
+			[numberBox](QVariant var) {\
+				numberBox->SetVar(var);\
+			}\
+			);\
 			return numberBox; \
 		} \
 		else { \
 			QNumberBox* numberBox = new QNumberBox(GetValue().value<Type>()); \
-			connect(numberBox, &QNumberBox::AsValueChanged, this, &QDPI_Number::SetValue); \
+			GetHandler()->Bind(numberBox, &QNumberBox::AsValueChanged,\
+			[numberBox]() {\
+				return numberBox->GetVar();\
+			},\
+			[numberBox](QVariant var) {\
+				numberBox->SetVar(var);\
+			}\
+			);\
 			return numberBox;\
 		} \
 		break; \
@@ -23,7 +37,7 @@
 
 QWidget* QDPI_Number::GenerateValueWidget() {
 	const QJsonObject& MetaData = GetMetaData();
-	switch (GetTypeID()) {
+	switch (GetHandler()->GetTypeID()) {
 		Q_DETAIL_FOR_EACH_NUMBER_TYPE(Q_DETAIL_NUMBER_SWITCH_CASE, Q_DETAIL_NUMBER_SWITCH_CASE)
 	default:
 		return nullptr;

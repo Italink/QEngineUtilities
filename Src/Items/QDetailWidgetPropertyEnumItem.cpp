@@ -32,9 +32,17 @@ void QDetailWidgetPropertyEnumItem::BuildContentAndChildren() {
 		comboBox->addItem(data["Name"].toString());
 		mNameToValueMap[data["Name"].toString()] = data["Value"].toInt();
 	}
-	connect(comboBox, &QComboBox::currentTextChanged, this, [this](QString text) {
-		SetValue(GetEnumValueByName(text));
-	});
+	GetHandler()->Bind(
+		comboBox,
+		&QComboBox::currentTextChanged,
+		[comboBox, this]() {
+			return mNameToValueMap.value(comboBox->currentText());
+		},
+		[comboBox, this](QVariant var) {
+			comboBox->setCurrentText(mNameToValueMap.key(var.toInt()));;
+		}
+	);
+
 	comboBox->setMinimumWidth(90);
 	GetContent()->SetNameWidgetByText(GetName());
 	GetContent()->SetValueWidget(comboBox);

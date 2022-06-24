@@ -13,23 +13,37 @@ QWidget* QDPI_String::GenerateValueWidget() {
 		if (type == "Line") {
 			QLineEdit* lineEdit = new QLineEdit(GetValue().toString());
 			lineEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
-			QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this](QString text) {
-				SetValue(QVariant::fromValue(text));
-			});
+			GetHandler()->Bind(lineEdit, &QLineEdit::textChanged,
+				[lineEdit]() {
+					return  lineEdit->text();
+				},
+				[lineEdit](QVariant var) {
+					lineEdit->setText(var.toString());
+				});
 			return lineEdit;
 		}
 		else if (type == "MultiLine") {
 			QTextEdit* textEdit = new QTextEdit(GetValue().toString());
-			QObject::connect(textEdit, &QTextEdit::textChanged, this, [this, textEdit]() {
-				SetValue(textEdit->toPlainText());
-			});
+			GetHandler()->Bind(textEdit, &QTextEdit::textChanged,
+				[textEdit]() {
+					return  textEdit->toPlainText();
+				},
+				[textEdit](QVariant var) {
+					textEdit->setText(var.toString());
+				});
 			textEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
 			textEdit->setFixedHeight(metaData.value("Height").toDouble());
 			return textEdit;
 		}
 		else if (type == "FilePath") {
 			QFilePathBox* filePathBox = new QFilePathBox(GetValue().toString());
-			QObject::connect(filePathBox, &QFilePathBox::AsPathChanged, this, &QDPI_String::SetValue);
+			GetHandler()->Bind(filePathBox, &QFilePathBox::AsPathChanged,
+				[filePathBox]() {
+					return  filePathBox->GetFilePath();
+				},
+				[filePathBox](QVariant var) {
+					filePathBox->SetFilePath(var.toString());
+				});
 			return filePathBox;
 		}
 		else if (type == "Combo") {
@@ -37,9 +51,14 @@ QWidget* QDPI_String::GenerateValueWidget() {
 			for (auto item : metaData.value("ComboList").toArray()) {
 				comboBox->addItem(item.toString());
 			}
-			connect(comboBox, &QComboBox::currentTextChanged, this, [this](QString text) {
-				SetValue(text);
-			});
+			GetHandler()->Bind(comboBox, &QComboBox::currentTextChanged,
+				[comboBox]() {
+					return comboBox->currentText();
+				},
+				[comboBox](QVariant var) {
+					comboBox->setCurrentText(var.toString());
+				});
+
 			comboBox->setMinimumWidth(90);
 			return comboBox;
 		}
@@ -48,25 +67,25 @@ QWidget* QDPI_String::GenerateValueWidget() {
 		if (type == "Line") {
 			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(GetValue().value<std::string>()));
 			lineEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
-			QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this](QString text) {
-				SetValue(QVariant::fromValue(text.toStdString()));
-			});
+			//QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this](QString text) {
+			//	SetValue(QVariant::fromValue(text.toStdString()));
+			//});
 			return lineEdit;
 		}
 		else if (type == "MultiLine") {
 			QTextEdit* textEdit = new QTextEdit(QString::fromStdString(GetValue().value<std::string>()));
-			QObject::connect(textEdit, &QTextEdit::textChanged, this, [this, textEdit]() {
-				SetValue(QVariant::fromValue(textEdit->toPlainText().toStdString()));
-			});
+			//QObject::connect(textEdit, &QTextEdit::textChanged, this, [this, textEdit]() {
+			//	SetValue(QVariant::fromValue(textEdit->toPlainText().toStdString()));
+			//});
 			textEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
 			textEdit->setFixedHeight(metaData.value("Height").toDouble());
 			return textEdit;
 		}
 		else if (type == "FilePath") {
 			QFilePathBox* filePathBox = new QFilePathBox(GetValue().toString());
-			QObject::connect(filePathBox, &QFilePathBox::AsPathChanged, this, [this](QString path) {
-				SetValue(QVariant::fromValue(path.toStdString()));
-			});
+			//QObject::connect(filePathBox, &QFilePathBox::AsPathChanged, this, [this](QString path) {
+			//	SetValue(QVariant::fromValue(path.toStdString()));
+			//});
 			return filePathBox;
 		}
 		else if (type == "Combo") {
@@ -74,12 +93,13 @@ QWidget* QDPI_String::GenerateValueWidget() {
 			for (auto item : metaData.value("ComboList").toArray()) {
 				comboBox->addItem(item.toString());
 			}
-			connect(comboBox, &QComboBox::currentTextChanged, this, [this](QString text) {
-				SetValue(QVariant::fromValue(text.toStdString()));
-			});
+			//connect(comboBox, &QComboBox::currentTextChanged, this, [this](QString text) {
+			//	SetValue(QVariant::fromValue(text.toStdString()));
+			//});
 			comboBox->setMinimumWidth(90);
 			return comboBox;
 		}
 	}
+	return nullptr;
 }
 

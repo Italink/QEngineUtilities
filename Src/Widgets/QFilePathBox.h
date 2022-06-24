@@ -11,6 +11,8 @@ class QFilePathBox :public QWidget
 	Q_OBJECT
 public:
 	QFilePathBox(QString inPath);
+	void SetFilePath(QString inPath);
+	QString GetFilePath();
 Q_SIGNALS:
 	void AsPathChanged(QString);
 private:

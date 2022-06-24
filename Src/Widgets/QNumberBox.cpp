@@ -102,6 +102,7 @@ QVariant QNumberBox::GetVar()
 void QNumberBox::SetVar(QVariant var)
 {
 	mNumberAdaptor->SetVar(var);
+	mLeValue->setText(mNumberAdaptor->GetText());
 }
 
 void QNumberBox::enterEvent(QEnterEvent* event) {

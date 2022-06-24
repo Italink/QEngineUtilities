@@ -3,6 +3,7 @@
 #include "QDetailWidget.h"
 #include "QLabel"
 #include "QPainter"
+#include "QDetailWidgetManager.h"
 
 
 class QDetailWidgetPropertyResetButton :public QPushButton {
@@ -112,51 +113,56 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 			}
 		}
 	});
-	connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
 }
 
-void QDetailWidgetPropertyItem::Initialize(TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter, QJsonObject inMetaData) {
-	mTypeID = inTypeID;
-	mName = inName;
-	mGetter = inGetter;
-	mSetter = inSetter;
-	mInitialValue = inGetter();
-	mMetaData = inMetaData;
-}
-
-void QDetailWidgetPropertyItem::SetValue(QVariant value)
+QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler, QJsonObject inMetaData /*= QJsonObject()*/)
 {
-	mIsChanged = (value != mInitialValue);
-	RefleshResetButtonStatus();
-	mSetter(value);
+	for (auto& filter : QDetailWidgetManager::instance()->GetPropertyItemFilterList()) {
+		if (filter.first(inHandler->GetTypeID())) {
+			QDetailWidgetPropertyItem* item = filter.second();
+			item->SetHandler(inHandler);
+			item->mMetaData = inMetaData;
+			return item;
+		}
+	}
+
+	auto iter = QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().find(inHandler->GetTypeID());
+	if (iter != QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().end()) {
+		QDetailWidgetPropertyItem* item = (*iter)();
+		item->SetHandler(inHandler);
+		item->mMetaData = inMetaData;
+		return item;
+	}
+	qWarning() << QString("Name: %1, TypeID: %2 : is not registered !").arg(inHandler->GetName()).arg(inHandler->GetTypeID());
+	return nullptr;
+}
+
+void QDetailWidgetPropertyItem::SetValue(QVariant inValue)
+{
+	mHandler->SetValue(inValue);
 }
 
 QVariant QDetailWidgetPropertyItem::GetValue()
 {
-	return mGetter();
+	return mHandler->GetValue();
 }
 
-void QDetailWidgetPropertyItem::ResetValue() {
-	if (mIsChanged) {
-		SetValue(mInitialValue);
-	}
-}
-
-QDetailWidgetPropertyItem::TypeId QDetailWidgetPropertyItem::GetTypeID() {
-	return mTypeID;
+void QDetailWidgetPropertyItem::ResetValue()
+{
+	mHandler->ResetValue();
 }
 
 QString QDetailWidgetPropertyItem::GetName()
 {
-	return mName;
+	return GetHandler()->GetName();
 }
 
 QString QDetailWidgetPropertyItem::GetKeywords() {
-	return mName + QDebug::toString(GetValue());
+	return GetHandler()->GetName() + QDebug::toString(mHandler->GetValue());
 }
 
 void QDetailWidgetPropertyItem::BuildContentAndChildren() {
-	mContent->SetNameWidgetByText(mName);
+	mContent->SetNameWidgetByText(GetHandler()->GetName());
 	mContent->SetValueWidget(GenerateValueWidget());
 	treeWidget()->setItemWidget(this, 0, mContent);
 }
@@ -173,7 +179,16 @@ const QJsonObject& QDetailWidgetPropertyItem::GetMetaData() const {
 	return mMetaData;
 }
 
+void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)
+{
+	mHandler = inHandler;
+	QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, inHandler, &QPropertyHandler::ResetValue);
+	QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, [this]() {
+		RefleshResetButtonStatus();
+	});
+}
+
 void QDetailWidgetPropertyItem::RefleshResetButtonStatus()
 {
-	mContent->GetResetButton()->setEnabled(mIsChanged);
+	mContent->GetResetButton()->setEnabled(GetHandler()->IsChanged());
 }

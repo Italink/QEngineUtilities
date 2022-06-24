@@ -56,13 +56,13 @@ private:
 	int Int = 0;
 	float Float = 0;
 	double LimitedDouble = 5;
-	bool Bool;
-	TestEnum Enum;
+	bool Bool = true;
+	TestEnum Enum = One;
 	QString QtString;
 	std::string StdString;
 	QString AsMultiLineString;
 	QString AsPath;
-	QString AsCombo;
+	QString AsCombo = "A";
 	QVector2D Vec2;
 	QVector3D Vec3;
 	QVector4D Vec4;

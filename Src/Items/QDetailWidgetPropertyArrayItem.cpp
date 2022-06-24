@@ -23,27 +23,28 @@ void QDetailWidgetPropertyArrayItem::BuildContentAndChildren() {
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
 	for (int i = 0; i < iterable.size(); i++) {
-		QDetailWidgetPropertyItem* item = QDetailWidgetManager::instance()->CreatePropertyItem(
-			iterable.valueMetaType().id(),
-			QString::number(i),
-			[this,i]() {
-			QVariant varList = GetValue();
-			QSequentialIterable iterable = varList.value<QSequentialIterable>();
-			QMetaType valueMetaType = iterable.metaContainer().valueMetaType();
-			return iterable.at(i);
-		},
-			[this,i](QVariant var) {
-			QVariant varList = GetValue();
-			QSequentialIterable iterable = varList.value<QSequentialIterable>();
-			const QMetaSequence metaSequence = iterable.metaContainer();
-			void* containterPtr = const_cast<void*>(iterable.constIterable());
-			QtPrivate::QVariantTypeCoercer coercer;
-			const void* dataPtr = coercer.coerce(var, var.metaType());
-			metaSequence.setValueAtIndex(containterPtr, i, dataPtr);
-			SetValue(varList);
-		},
-		GetMetaData()
-		);
+		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
+			QPropertyHandler::FindOrCreate(GetContent(),
+				iterable.valueMetaType().id(),
+				QString::number(i),
+				[this, i]() {
+					QVariant varList = GetValue();
+					QSequentialIterable iterable = varList.value<QSequentialIterable>();
+					QMetaType valueMetaType = iterable.metaContainer().valueMetaType();
+					return iterable.at(i);
+				},
+				[this, i](QVariant var) {
+					QVariant varList = GetValue();
+					QSequentialIterable iterable = varList.value<QSequentialIterable>();
+					const QMetaSequence metaSequence = iterable.metaContainer();
+					void* containterPtr = const_cast<void*>(iterable.constIterable());
+					QtPrivate::QVariantTypeCoercer coercer;
+					const void* dataPtr = coercer.coerce(var, var.metaType());
+					metaSequence.setValueAtIndex(containterPtr, i, dataPtr);
+					SetValue(varList);
+				}
+				), 
+			GetMetaData());
 		if(item){
 			item->AttachTo(this);
 		}

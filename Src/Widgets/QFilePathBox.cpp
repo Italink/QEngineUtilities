@@ -20,3 +20,13 @@ QFilePathBox::QFilePathBox(QString inPath)
 			mLePath->setText(path);
 	});
 }
+
+void QFilePathBox::SetFilePath(QString inPath)
+{
+	mLePath->setText(inPath);
+}
+
+QString QFilePathBox::GetFilePath()
+{
+	return mLePath->text();
+}

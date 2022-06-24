@@ -4,8 +4,13 @@
 QWidget* QDPI_Bool::GenerateValueWidget() {
 	QCheckBox* checkBox = new QCheckBox;
 	checkBox->setCheckState(GetValue().toBool() ? Qt::Checked : Qt::Unchecked);
-	QObject::connect(checkBox, &QCheckBox::stateChanged, this, [this](int var) {
-		SetValue(var == Qt::Checked);
-	});
+	GetHandler()->Bind(checkBox, &QCheckBox::stateChanged,
+		[checkBox]() {
+			return checkBox->checkState() == Qt::Checked;
+		},
+		[checkBox](QVariant var) {
+			checkBox->setCheckState(var.toBool() ? Qt::Checked : Qt::Unchecked);
+		}
+		);
 	return checkBox;
 }

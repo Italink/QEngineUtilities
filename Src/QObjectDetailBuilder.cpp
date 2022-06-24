@@ -27,11 +27,13 @@ void QObjectDetailBuilder::BuildDefault()
 
 void QObjectDetailBuilder::AddNewProperty(QMetaProperty inProperty)
 {
-	QDetailWidgetPropertyItem* item = QDetailWidgetManager::instance()->CreatePropertyItem(
-		inProperty.typeId(),
-		inProperty.name(),
-		[Object = mObject, inProperty]() {return inProperty.read(Object); },
-		[Object = mObject, inProperty](QVariant var) { inProperty.write(Object, var); },
+	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
+		QPropertyHandler::FindOrCreate(mObject,
+			inProperty.typeId(),
+			inProperty.name(),
+			[Object = mObject, inProperty]() {return inProperty.read(Object); },
+			[Object = mObject, inProperty](QVariant var) { inProperty.write(Object, var); }
+		),
 		GetPropertyMetaData(inProperty)
 	);
 
