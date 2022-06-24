@@ -2,7 +2,7 @@
 #define QObjectDetailBuilder_h__
 
 #include "QObject"
-#include "QObjectEx.h"
+#include "QMetaDataDefine.h"
 
 class QTreeWidgetItem; 
 class QDetailWidget;

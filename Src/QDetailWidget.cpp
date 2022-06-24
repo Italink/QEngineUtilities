@@ -7,6 +7,7 @@
 #include "Items\QDetailWidgetItem.h"
 #include "Items\QDetailWidgetPropertyItem.h"
 #include "Items\QDetailWidgetCategoryItem.h"
+#include "Widgets\Toolkits\QSvgIcon.h"
 
 QDetailSearcher::QDetailSearcher()
 	: mLeSearch(new QLineEdit)
@@ -45,6 +46,7 @@ QDetailWidget{
 	qproperty-GridLineColor:rgb(5,5,5);
 	qproperty-CategoryColor:rgb(61,61,61);  
 	qproperty-HoveredColor:rgb(51,51,51); 
+	qproperty-IconColor:rgb(251,251,251); 
 }
 QLineEdit,QTextEdit{
 	background-color:rgb(5,5,5);
@@ -187,6 +189,16 @@ QColor QDetailWidget::GetShadowColor() const
 void QDetailWidget::SetShadowColor(QColor val)
 {
 	mShadowColor = val;
+}
+
+QColor QDetailWidget::GetIconColor() const
+{
+	return QSvgIcon::GetIconColor();
+}
+
+void QDetailWidget::SetIconColor(QColor val)
+{
+	QSvgIcon::setIconColor(val);
 }
 
 QDetailWidgetCategoryItem* QDetailWidget::FindOrAddCategory(QString inName)

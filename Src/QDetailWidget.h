@@ -25,8 +25,10 @@ class QDetailWidget: public QTreeWidget{
 	Q_PROPERTY(QColor ShadowColor READ GetShadowColor WRITE SetShadowColor)
 	Q_PROPERTY(QColor CategoryColor READ GetCategoryColor WRITE SetCategoryColor)
 	Q_PROPERTY(QColor HoveredColor READ GetHoveredColor WRITE SetHoveredColor)
+	Q_PROPERTY(QColor IconColor READ GetIconColor WRITE SetIconColor)
 public:
 	QDetailWidget();
+
 	void SetObjects(const QList<QObject*>& inObjects);
 
 	void Recreate();
@@ -40,13 +42,16 @@ public:
 	void SetGridLineColor(QColor val);
 
 	QColor GetShadowColor() const;
-	void SetShadowColor(QColor val)
-		;
+	void SetShadowColor(QColor val);
+
 	QColor GetCategoryColor() const { return mCategoryColor; }
 	void SetCategoryColor(QColor val) { mCategoryColor = val; }
 
 	QColor GetHoveredColor() const { return mHoveredColor; }
 	void SetHoveredColor(QColor val) { mHoveredColor = val; }
+
+	QColor GetIconColor() const;
+	void SetIconColor(QColor val);
 
 	QDetailWidgetCategoryItem* FindOrAddCategory(QString inName);
 
@@ -62,7 +67,7 @@ private:
 	QColor mShadowColor;
 	QColor mCategoryColor;
 	QColor mHoveredColor;
-
+	
 	QList<int> mSplitterSizes = { 200,200,30 };
 
 	QDetailSearcher* mSearcher = nullptr;

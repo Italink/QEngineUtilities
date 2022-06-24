@@ -12,7 +12,7 @@ void QNumberBox::CreateUI(){
 	mLbName = new QLabel;
 	mLeValue = new QLineEdit_HasFocusSignal;
 	mLbArrow = new QLabel;
-	mIconArrow = new QSvgIcon(":/Resources/Icons/box_arrow.png");
+	mIconArrow = new QSvgIcon(":/Resources/box_arrow.png");
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setContentsMargins(0, 0, 0, 0);
 	h->addWidget(mLbName);

@@ -4,6 +4,7 @@
 #include "QLabel"
 #include "QPainter"
 #include "QDetailWidgetManager.h"
+#include "Widgets/Toolkits/QSvgIcon.h"
 
 
 class QDetailWidgetPropertyResetButton :public QPushButton {
@@ -11,11 +12,11 @@ protected:
 	virtual void paintEvent(QPaintEvent*) {
 		QPainter painter(this);
 		if (isEnabled()) {
-			painter.fillRect(rect(), Qt::red);
+			mIcon.getIcon().paint(&painter, rect().adjusted(5, 5, -5, -5));
 		}
 	}
+	QSvgIcon mIcon = QSvgIcon(":/Resources/reset.png");
 };
-
 
 QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPropertyItem* inRow) 
 	: mRow(inRow)

@@ -12,6 +12,7 @@
 
 QDetailWidgetManager::QDetailWidgetManager()
 {
+	Q_INIT_RESOURCE(Resources);
 	RegisterBuiltIn();
 }
 

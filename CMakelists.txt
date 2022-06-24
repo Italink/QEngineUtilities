@@ -2,23 +2,25 @@ cmake_minimum_required(VERSION 3.5)
 
 project(QDetailWidget VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Core5Compat Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
 
 file(GLOB_RECURSE PROJECT_SOURCE FILES Src/*.h Src/*.cpp)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Src FILES ${PROJECT_SOURCE})
 
-add_executable(QDetailWidget
+qt6_add_resources(QRC_FILES Resources.qrc)
+
+add_library(QDetailWidget
     ${PROJECT_SOURCE}
+    ${QRC_FILES}
 )
 
 target_link_libraries(QDetailWidget PUBLIC 
@@ -28,3 +30,5 @@ target_link_libraries(QDetailWidget PUBLIC
 target_include_directories(QDetailWidget PUBLIC
     Src 
 ) 
+
+add_subdirectory(Example)

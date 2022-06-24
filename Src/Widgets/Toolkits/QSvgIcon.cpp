@@ -48,6 +48,11 @@ void QSvgIcon::setIconColor(QColor color) {
 	}
 }
 
+QColor QSvgIcon::GetIconColor()
+{
+	return mDefaultColor;
+}
+
 void QSvgIcon::updateIcon() {
 	QPixmap pixmap(mPath);
 	if (pixmap.isNull())

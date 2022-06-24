@@ -3,10 +3,11 @@
 
 #include "QObject"
 #include "Types/QColors.h"
-#include "QObjectEx.h"
 #include "qvectornd.h"
+#include "QMetaDataDefine.h"
 #include "QFile"
 #include "QDir"
+
 
 class TestObject :public QObject {
 	Q_OBJECT

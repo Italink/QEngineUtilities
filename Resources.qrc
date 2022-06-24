@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/box_arrow.png</file>
+        <file>Resources/reset.png</file>
+        <file>Resources/undo.png</file>
+    </qresource>
+</RCC>
