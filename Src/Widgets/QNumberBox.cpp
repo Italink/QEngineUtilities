@@ -10,7 +10,7 @@ void QNumberBox::CreateUI(){
 	setStyleSheet("QLineEdit{background-color:transparent; font-size:11px;}");
 	resize(60, 30);
 	mLbName = new QLabel;
-	mLeValue = new QFocusLineEdit;
+	mLeValue = new QLineEdit_HasFocusSignal;
 	mLbArrow = new QLabel;
 	mIconArrow = new QSvgIcon(":/Resources/Icons/box_arrow.png");
 	QHBoxLayout* h = new QHBoxLayout(this);
@@ -40,7 +40,7 @@ void QNumberBox::CreateUI(){
 
 void QNumberBox::ConnectUI()
 {
-	connect(mLeValue, &QFocusLineEdit::loseFocus, this, [this]() {
+	connect(mLeValue, &QLineEdit_HasFocusSignal::loseFocus, this, [this]() {
 		SetEditEnabled(false);
 	});
 	connect(mLeValue, &QLineEdit::editingFinished, this, [this]() {

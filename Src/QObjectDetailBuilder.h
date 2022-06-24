@@ -17,7 +17,7 @@ public:
 
 	QString GetPropertyCategoryName(QString inPropertyName);
 
-	QJsonObject GetPropertyMetaData(QString inPropertyName);
+	QJsonObject GetPropertyMetaData(QMetaProperty inProperty);
 protected:
 	void ReadObjectMetaData();
 public:

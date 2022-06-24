@@ -18,6 +18,6 @@ QWidget* QDPI_Vector::GenerateValueWidget() {
 		connect(vec2Box, &QVector2DBox::AsValueChanged, this, &QDPI_Vector::SetValue);
 		return vec2Box;
 	}
-	
+	return nullptr;
 }
 

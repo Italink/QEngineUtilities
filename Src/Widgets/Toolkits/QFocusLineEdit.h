@@ -2,9 +2,9 @@
 #define QFocusLineEdit_h__
 
 #include <QLineEdit>
+#include "QPainter"
 
-class QFocusLineEdit : public QLineEdit
-{
+class QLineEdit_HasFocusSignal : public QLineEdit {
 	Q_OBJECT
 public:
 	Q_SIGNAL void loseFocus();
@@ -14,5 +14,6 @@ protected:
 		Q_EMIT loseFocus();
 	}
 };
+
 
 #endif // QFocusLineEdit_h__

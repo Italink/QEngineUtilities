@@ -14,6 +14,8 @@ class TestObject :public QObject {
 	Q_PROPERTY(float Float READ GetFloat WRITE SetFloat)
 	Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
 	Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
+	Q_PROPERTY(TestEnum Enum READ GetEnum WRITE SetEnum)
+
 	Q_PROPERTY(QString QtString READ GetQtString WRITE SetQtString)
 	Q_PROPERTY(std::string StdString READ GetStdString WRITE SetStdString)
 	Q_PROPERTY(QString AsMultiLineString READ GetAsMultiLineString WRITE SetAsMultiLineString)
@@ -26,10 +28,12 @@ class TestObject :public QObject {
 	Q_PROPERTY(QColors Colors READ GetColors WRITE SetColors)
 	Q_PROPERTY(QList<QColor> ColorList READ GetIntList WRITE SetIntList)
 	Q_PROPERTY(std::vector<QColor> StdColorList READ GetStdColorList WRITE SetStdColorList)
+	Q_PROPERTY(QMap<QString,QColor> ColorMap READ GetColorMap WRITE SetColorMap)
+
 
 	Q_META_BEGIN(TestObject)
 		Q_META_CATEGORY(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
-		Q_META_CATEGORY(Color,Color,Colors, ColorList, StdColorList)
+		Q_META_CATEGORY(Color,Color,Colors, ColorList, StdColorList,ColorMap)
 		Q_META_CATEGORY(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
 		Q_META_CATEGORY(Other,Bool)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
@@ -39,12 +43,21 @@ class TestObject :public QObject {
 		Q_META_STRING_AS_FILE_PATH(AsPath)
 		Q_META_STRING_AS_COMBO(AsCombo,A,B,C,D)
 	Q_META_END()
+
+public:
+	enum TestEnum {
+		One,
+		Two,
+		Three
+	};
+	Q_ENUM(TestEnum)
 private:
 	QString String;
 	int Int = 0;
 	float Float = 0;
 	double LimitedDouble = 5;
 	bool Bool;
+	TestEnum Enum;
 	QString QtString;
 	std::string StdString;
 	QString AsMultiLineString;
@@ -57,7 +70,7 @@ private:
 	QColors Colors;
 	QList<QColor> ColorList{ Qt::red,Qt::green,Qt::blue };
 	std::vector<QColor> StdColorList{ Qt::red,Qt::green,Qt::blue };
-
+	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
 	QFile File;
 	QDir Dir;
 public:
@@ -81,6 +94,9 @@ public:
 
 	bool GetBool() const { return Bool; }
 	void SetBool(bool val) { Bool = val; }
+
+	TestObject::TestEnum GetEnum() const { return Enum; }
+	void SetEnum(TestObject::TestEnum val) { Enum = val; }
 
 	std::vector<QColor> GetStdColorList() const { return StdColorList; }
 	void SetStdColorList(std::vector<QColor> val) { StdColorList = val; }
@@ -114,7 +130,9 @@ public:
 
 	QString GetAsCombo() const { return AsCombo; }
 	void SetAsCombo(QString val) { AsCombo = val; }
-};
 
+	QMap<QString, QColor> GetColorMap() const { return ColorMap; }
+	void SetColorMap(QMap<QString, QColor> val) { ColorMap = val; }
+};
 
 #endif // TestObject_h__

@@ -10,6 +10,7 @@ class QDetailWidgetPropertyItem;
 class QPushButton;
 
 class QDetailWidgetPropertyItemWidget : public QSplitter {
+	Q_OBJECT
 	friend class QDetailWidgetRow;
 private:
 	QWidget* mNameContent = nullptr;
@@ -25,7 +26,10 @@ private:
 
 protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
+
 public:
+	Q_SIGNAL void AsRequsetReset();
+
 	QDetailWidgetPropertyItemWidget(QDetailWidgetPropertyItem* inRow);
 
 	void RefleshSplitterFactor();
@@ -35,7 +39,7 @@ public:
 	void SetValueWidget(QWidget* inWidget);
 	QHBoxLayout* GetNameContentLayout() const;
 	QHBoxLayout* GetValueContentLayout() const;
-
+	QPushButton* GetResetButton() const { return mResetButton; }
 };
 
 template<typename Aux_type>
@@ -60,7 +64,6 @@ QList<int> GetIDListFromType() {
 	inline static QList<int> SupportedTypes() {	\
 		return GetIDListFromType<__VA_ARGS__>(); \
 	}
-
 
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 public:
@@ -100,6 +103,8 @@ public:
 	void RefleshSplitterFactor();
 
 	const QJsonObject& GetMetaData() const;
+private:
+	void RefleshResetButtonStatus();
 private:
 	TypeId mTypeID = 0;
 	QString mName;

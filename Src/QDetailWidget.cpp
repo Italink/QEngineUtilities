@@ -22,7 +22,6 @@ QDetailSearcher::QDetailSearcher()
 	});
 }
 
-
 QDetailWidget::QDetailWidget()
 	: mSearcher(new QDetailSearcher)
 {
@@ -64,6 +63,15 @@ QPushButton,QComboBox{
 	border: 1px solid transparent;
 }
 
+QComboBox QAbstractItemView {
+	padding: 0px 0px 4px 0px;
+    border: 0px solid transparent;
+	border-radius: 0px;
+	color: rgb(200,200,200);
+    selection-color: rgb(255,255,255);
+	background-color: rgb(26,26,26);
+    selection-background-color: rgb(49,49,49); 
+}
 )"
 	);
 	connect(this, &QTreeWidget::itemPressed, this, [](QTreeWidgetItem* item, int) {

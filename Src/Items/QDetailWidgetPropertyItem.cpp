@@ -2,6 +2,18 @@
 #include "QPushButton"
 #include "QDetailWidget.h"
 #include "QLabel"
+#include "QPainter"
+
+
+class QDetailWidgetPropertyResetButton :public QPushButton {
+protected:
+	virtual void paintEvent(QPaintEvent*) {
+		QPainter painter(this);
+		if (isEnabled()) {
+			painter.fillRect(rect(), Qt::red);
+		}
+	}
+};
 
 
 QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPropertyItem* inRow) 
@@ -10,7 +22,7 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	, mNameContentLayout(new QHBoxLayout)
 	, mValueContent(new QWidget)
 	, mValueContentLayout(new QHBoxLayout)
-	, mResetButton(new QPushButton) {
+	, mResetButton(new QDetailWidgetPropertyResetButton) {
 	setHandleWidth(1);
 	mNameContent->setLayout(mNameContentLayout);
 	mNameContent->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Preferred);
@@ -20,13 +32,13 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	mValueContent->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Preferred);
 	mValueContentLayout->setAlignment(Qt::AlignCenter);
 	mValueContentLayout->setContentsMargins(10, 2, 10, 2);
-	mResetButton->setMinimumSize(30, 30);
+	mResetButton->setMinimumWidth(30);
+	mResetButton->setEnabled(false);
 	addWidget(mNameContent);
 	addWidget(mValueContent);
 	addWidget(mResetButton);
-
+	connect(mResetButton, &QPushButton::clicked, this, &QDetailWidgetPropertyItemWidget::AsRequsetReset);
 }
-
 
 void QDetailWidgetPropertyItemWidget::RefleshSplitterFactor() {
 	QDetailWidget* widget = dynamic_cast<QDetailWidget*>(mRow->treeWidget());
@@ -72,7 +84,6 @@ QHBoxLayout* QDetailWidgetPropertyItemWidget::GetValueContentLayout() const {
 	return mValueContentLayout;
 }
 
-
 void QDetailWidgetPropertyItemWidget::resizeEvent(QResizeEvent* event) {
 	QSplitter::resizeEvent(event);
 	RefleshSplitterFactor();
@@ -101,6 +112,7 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 			}
 		}
 	});
+	connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
 }
 
 void QDetailWidgetPropertyItem::Initialize(TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter, QJsonObject inMetaData) {
@@ -115,6 +127,7 @@ void QDetailWidgetPropertyItem::Initialize(TypeId inTypeID, QString inName, Gett
 void QDetailWidgetPropertyItem::SetValue(QVariant value)
 {
 	mIsChanged = (value != mInitialValue);
+	RefleshResetButtonStatus();
 	mSetter(value);
 }
 
@@ -158,4 +171,9 @@ void QDetailWidgetPropertyItem::RefleshSplitterFactor() {
 
 const QJsonObject& QDetailWidgetPropertyItem::GetMetaData() const {
 	return mMetaData;
+}
+
+void QDetailWidgetPropertyItem::RefleshResetButtonStatus()
+{
+	mContent->GetResetButton()->setEnabled(mIsChanged);
 }
