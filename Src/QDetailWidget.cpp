@@ -1,52 +1,49 @@
 #include "QDetailWidget.h"
-#include "QPainter"
-#include "QLineEdit"
-#include "QPushButton"
 #include "QBoxLayout"
-#include "QObjectDetailBuilder.h"
-#include "Items\QDetailWidgetItem.h"
-#include "Items\QDetailWidgetPropertyItem.h"
-#include "Items\QDetailWidgetCategoryItem.h"
-#include "Widgets\Toolkits\QSvgIcon.h"
+#include "QDetailWidgetPrivate.h"
 
-QDetailSearcher::QDetailSearcher()
-	: mLeSearch(new QLineEdit)
-	, mPbSearch(new QPushButton) {
-	QHBoxLayout* h = new QHBoxLayout(this);
-	h->addWidget(mLeSearch);
-	h->addWidget(mPbSearch);
-	h->setContentsMargins(0, 0, 0, 0);
-	mPbSearch->setFixedWidth(30);
-	mLeSearch->setPlaceholderText("Search...");
-	connect(mLeSearch, &QLineEdit::editingFinished, this, [this]() {
-		Q_EMIT AsRequestSearch(mLeSearch->text());
-	});
+QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle /*= Unreal*/)
+	: mSearcher(new QDetailSearcher)
+	, mTreeWidget(new QDetailTreeWidget)
+{
+	QVBoxLayout* v = new QVBoxLayout(this);
+	v->setContentsMargins(0, 5, 0, 5);
+	v->addWidget(mSearcher);
+	v->addWidget(mTreeWidget);
+	SetStyle(inStyle);
+
+	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
+
 }
 
-QDetailWidget::QDetailWidget()
-	: mSearcher(new QDetailSearcher)
-{
-	setColumnCount(1);
-	setIndentation(15);
-	setHeaderHidden(true);
-	setContextMenuPolicy(Qt::CustomContextMenu);
-	setColumnWidth(0, 120);
-	setSelectionMode(QAbstractItemView::SingleSelection);
-	setFrameStyle(QFrame::NoFrame);
-	setStyleSheet(R"(
+
+void QDetailWidget::SetObjects(const QList<QObject*>& inObjects) {
+	mTreeWidget->SetObjects(inObjects);
+}
+
+void QDetailWidget::SetStyle(Style inStyle) {
+	switch (inStyle) {
+	case QDetailWidget::Unreal: {
+		setStyleSheet(R"(
+QDetailWidget{
+	background-color:rgb(36,36,36);
+}
 QWidget{
 	color:rgb(220,220,220);
 }
-QNumberBox{
+QHoverWidget{
 	background-color:rgb(10,10,10);
+	qproperty-HoverColor:rgb(79, 110, 242); 
 }
-QDetailWidget{
+
+QDetailTreeWidget{
 	background-color:rgb(36,36,36);
 	qproperty-ShadowColor:rgb(5,5,5);
 	qproperty-GridLineColor:rgb(5,5,5);
 	qproperty-CategoryColor:rgb(61,61,61);  
 	qproperty-HoveredColor:rgb(51,51,51); 
 	qproperty-IconColor:rgb(251,251,251); 
+	qproperty-ArrowColor:rgb(220,220,220); 
 }
 QLineEdit,QTextEdit{
 	background-color:rgb(5,5,5);
@@ -62,7 +59,8 @@ QLineEdit:hover,QTextEdit:hover,QPushButton:hover,QComboBox:hover{
 QPushButton,QComboBox{
 	background-color:rgb(5,5,5);
 	color: rgb(220,220,220);
-	border: 1px solid transparent;
+	padding: 2px 5px 2px 5px; 
+	border: 1px outset rgb(50,50,50);
 }
 
 QComboBox QAbstractItemView {
@@ -74,238 +72,127 @@ QComboBox QAbstractItemView {
 	background-color: rgb(26,26,26);
     selection-background-color: rgb(49,49,49); 
 }
+
+QScrollBar:vertical,
+QScrollBar:horizontal  {
+    width: 8px;
+    background:  rgb(5,5,5);
+}
+
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    background:  rgb(100,100,100);
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {
+    background:  rgba(200,200,200,150);
+}
+QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical,
+QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {
+    width: 0;
+    height: 0;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
 )"
-	);
-	connect(this, &QTreeWidget::itemPressed, this, [](QTreeWidgetItem* item, int) {
-	});
-
-	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
+);
+		break;
+	}
+	case Qt: {
+		setStyleSheet(R"(
+QDetailWidget{
+	background-color:rgb(255,255,255);
+}
+QWidget{
+	color:rgb(30,30,30);
+}
+QHoverWidget{
+	background-color:rgb(255,255,255);
+	qproperty-HoverColor:rgb(65,205,82); 
 }
 
-void QDetailWidget::SetObjects(const QList<QObject*>& inObjects)
-{
-	mObjects = inObjects;
-	Recreate();
+QDetailTreeWidget{
+	background-color:rgb(240,240,240);
+	qproperty-ShadowColor:rgb(220,220,220);
+	qproperty-GridLineColor: rgb(220,220,220);
+	qproperty-CategoryColor:rgb(255,255,255);
+	qproperty-HoveredColor:rgb(245,245,245); 
+	qproperty-IconColor:rgb(65,205,82); 
+	qproperty-ArrowColor:rgb(65,205,82); 
 }
 
-void QDetailWidget::Recreate()
-{
-	clear();
-	QTreeWidgetItem* searchItem = new QTreeWidgetItem;
-	addTopLevelItem(searchItem);
-	setItemWidget(searchItem, 0, mSearcher);
-	if (mObjects.isEmpty())
-		return;
-	for (QObject* object : mObjects) {
-		if (object == nullptr)
-			continue;
-		QObjectDetailBuilder builder(object, this);
-		//const QSharedPointer<IObjectDetailCustomization>& customizer = QDetailWidgetManager::instance()->getObjectDetailCustomizer(object->metaObject());
-		//if (customizer) {
-		//	customizer->Build(builder);
-		//}
-		//else {
-			builder.BuildDefault();
-		//}
-	}
+QLineEdit,QTextEdit{
+	background-color:rgb(255,255,255);
+	border-radius: 3px;
+	color: rgb(30,30,30);
+	border: 1px solid transparent;
 }
 
-void SearchByKeywordsInternal(QString inKeywords, QTreeWidgetItem* inItem) {
-	if (inItem == nullptr)
-		return;
-	inItem->setHidden(true);
-	QString keywordsInRow;
-	QDetailWidgetItem* item = dynamic_cast<QDetailWidgetItem*>(inItem);
-	if (item) {
-		keywordsInRow = item->GetKeywords();
+QLineEdit:hover,QTextEdit:hover,QPushButton:hover,QComboBox:hover{
+	border: 1px solid rgb(65,205,82);
+}
+
+QPushButton,QComboBox{
+	background-color:rgb(220,220,220);
+	color: rgb(50,50,50);
+	padding: 2px 5px 2px 5px; 
+	border: 1px outset rgb(150,150,150);
+}
+
+QComboBox QAbstractItemView {
+	padding: 0px 0px 4px 0px;
+    border: 0px solid transparent;
+	border-radius: 0px;
+	color: rgb(50,50,50);
+    selection-color: rgb(255,255,255);
+	background-color: rgb(220,220,220);
+    selection-background-color: rgb(250,250,250); 
+}
+
+QScrollBar:vertical,
+QScrollBar:horizontal  {
+    width: 8px;
+    background:  rgb(240,240,240);
+}
+
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    background:  rgb(65,205,82);
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {
+    background:  rgb(255,255,255);
+}
+QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical,
+QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {
+    width: 0;
+    height: 0;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+
+)"
+
+
+);
+		break;
 	}
-	else {
-		keywordsInRow = inItem->text(0);
-	}
-	if (keywordsInRow.contains(inKeywords,Qt::CaseInsensitive)) {
-		while (inItem&&inItem->isHidden()) {
-			inItem->setHidden(false);
-			inItem->setExpanded(true);
-			inItem = inItem->parent();
-		}
-		return;
-	}
-	for (int i = 0; i < inItem->childCount(); i++) {
-		SearchByKeywordsInternal(inKeywords, inItem->child(i));
+	default:
+		break;
 	}
 }
 
 void QDetailWidget::SearchByKeywords(QString inKeywords) {
-	if (inKeywords.isEmpty()) {
-		QTreeWidgetItemIterator Iterator(this);
-		while (*Iterator) {
-			(*Iterator)->setHidden(false);
-			++Iterator;
-		}
-	}
-	else {
-		for (int i = 1; i < topLevelItemCount(); i++) {
-			SearchByKeywordsInternal(inKeywords, topLevelItem(i));
-		}
-	}
+	mTreeWidget->SearchByKeywords(inKeywords);
 }
-
-QList<int> QDetailWidget::GetSplitterSizes() const
-{
-	return mSplitterSizes;
-}
-
-void QDetailWidget::SetSplitterSizes(int item0, int item1, int item2)
-{
-	mSplitterSizes = { item0 ,item1,item2 };
-	UpdateSplitterFactor();
-}
-
-QColor QDetailWidget::GetGridLineColor() const
-{
-	return mGridLineColor;
-}
-
-void QDetailWidget::SetGridLineColor(QColor val)
-{
-	mGridLineColor = val;
-
-	QTreeWidgetItemIterator Iterator(this);
-	while (*Iterator) {
-		QDetailWidgetPropertyItem* item = dynamic_cast<QDetailWidgetPropertyItem*>(*Iterator);
-		if (item) {
-			item->GetContent()->setStyleSheet(QString("QSplitter::handle {background-color: %1;}").arg(mGridLineColor.name(QColor::HexArgb)));
-			item->RefleshSplitterFactor();
-		}
-		++Iterator;
-	}
-}
-
-QColor QDetailWidget::GetShadowColor() const
-{
-	return mShadowColor;
-}
-
-void QDetailWidget::SetShadowColor(QColor val)
-{
-	mShadowColor = val;
-}
-
-QColor QDetailWidget::GetIconColor() const
-{
-	return QSvgIcon::GetIconColor();
-}
-
-void QDetailWidget::SetIconColor(QColor val)
-{
-	QSvgIcon::setIconColor(val);
-}
-
-QDetailWidgetCategoryItem* QDetailWidget::FindOrAddCategory(QString inName)
-{
-	for (int i = 0; i < topLevelItemCount(); i++) {
-		QTreeWidgetItem* item = topLevelItem(i);
-		if (item->text(0) == inName)
-			return dynamic_cast<QDetailWidgetCategoryItem*>(item);
-	}
-	QDetailWidgetCategoryItem* newItem = new QDetailWidgetCategoryItem( inName );
-	newItem->setSizeHint(0, { 25,25 });
-	newItem->AttachTo(this);
-	return newItem;
-}
-
-void QDetailWidget::UpdateSplitterFactor()
-{
-	QTreeWidgetItemIterator Iterator(this);
-	while (*Iterator) {
-		QDetailWidgetPropertyItem* item = dynamic_cast<QDetailWidgetPropertyItem*>(*Iterator);
-		if (item) {
-			item->RefleshSplitterFactor();
-		}
-		++Iterator;
-	}
-}
-
-void QDetailWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const
-{
-	bool hovered = false;
-	bool seleted = false;
-	bool hasChildren = false;
-	bool isExpanded = false;
-	int level = 0;
-
-	QTreeWidgetItem* item = itemFromIndex(index);
-	QModelIndex parent = index.parent();
-	while (parent.isValid()) {
-		level++;
-		parent = parent.parent();
-	}
-	QRect branchRect(options.rect.x() + level * indentation(), options.rect.y(), indentation(), options.rect.height());
-	QPoint mousePos = mapFromGlobal(QCursor::pos());
-	seleted = item->isSelected();
-	hovered = options.rect.contains(mousePos);
-	hasChildren = item->childCount() > 0;
-	isExpanded = item->isExpanded();
-
-	painter->save();
-
-	if (level == 0) {
-		painter->fillRect(options.rect, mCategoryColor);
-	}
-
-	QPen pen(mGridLineColor);
-	pen.setWidth(1);
-	painter->setPen(pen);
-	if (hovered) {
-		painter->setBrush(mHoveredColor);
-	}
-	else
-		painter->setBrush(Qt::NoBrush);
-	painter->drawRect(options.rect);
-
-	if (hasChildren) {
-		QBrush brush = options.palette.brush(QPalette::WindowText);
-		if (hovered)
-			brush.setColor(QColor(42, 140, 254));
-		QPolygonF arrow;
-		QPointF center = branchRect.center();
-		painter->setBrush(brush);
-		painter->setPen(Qt::NoPen);
-		painter->setRenderHint(QPainter::Antialiasing);
-		if (item->isExpanded()) {
-			arrow << center + QPointF(5, -3) << center + QPointF(0, 5) << center + QPointF(-5, -3);
-		}
-		else {
-			arrow << center + QPointF(-3, -5) << center + QPointF(5, 0) << center + QPointF(-3, 5);
-		}
-		painter->drawPolygon(arrow);
-	}
-	QRect shadowRect(options.rect.x(), options.rect.y(), 6, options.rect.height());
-	QLinearGradient shadowColor;
-	
-	shadowColor.setColorAt(0, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue(), 0));
-	shadowColor.setColorAt(1, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue()));
-
-	for (int i = 0; i < level; i++) {
-		shadowRect.moveRight((i + 1) * indentation());
-		shadowColor.setStart(shadowRect.topLeft());
-		shadowColor.setFinalStop(shadowRect.topRight());
-		painter->fillRect(shadowRect, shadowColor);
-	}
-
-	QStyleOptionViewItem opt = options;
-	if (level == 0) {
-		opt.rect.moveLeft(indentation());
-	}
-	painter->restore();
-	itemDelegateForIndex(index)->paint(painter, opt, index);
-}
-
-void QDetailWidget::showEvent(QShowEvent* event)
-{
-	QTreeWidget::showEvent(event);
-	int resetItemWidth = 30;
-	int width0 = (width() - resetItemWidth) / 2;
-	SetSplitterSizes(width0, width0, resetItemWidth);
-}
-

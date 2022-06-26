@@ -1,5 +1,5 @@
 #include "QObjectDetailBuilder.h"
-#include "QDetailWidget.h"
+#include "QDetailWidgetPrivate.h"
 #include "QJsonObject"
 #include "qmetaobject.h"
 #include "QMetaProperty"
@@ -8,7 +8,7 @@
 #include "QDetailWidgetManager.h"
 #include "Items\QDetailWidgetCategoryItem.h"
 
-QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailWidget* inWidget)
+QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailTreeWidget* inWidget)
 	: mObject(mObject)
 	, mWidget(inWidget)
 {

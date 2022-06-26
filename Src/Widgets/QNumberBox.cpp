@@ -9,25 +9,14 @@ void QNumberBox::CreateUI(){
 	setFixedHeight(20);
 	setStyleSheet("QLineEdit{background-color:transparent; font-size:11px;}");
 	resize(60, 30);
-	mLbName = new QLabel;
 	mLeValue = new QLineEdit_HasFocusSignal;
 	mLbArrow = new QLabel;
-	mIconArrow = new QSvgIcon(":/Resources/box_arrow.png");
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setContentsMargins(0, 0, 0, 0);
-	h->addWidget(mLbName);
+	h->setSpacing(0);
 	h->addWidget(mLeValue);
 	h->addWidget(mLbArrow);
-	mLbName->setContentsMargins(2, 0, 0, 2);
-	mLbName->setAlignment(Qt::AlignCenter);
-	mLbName->setFixedHeight(height());
-	if (mLbName->text().isEmpty())
-		mLbName->setVisible(false);
-	mLbArrow->setFixedSize(height(), height());
-	mIconArrow->setUpdateCallBack([this]() {
-		mLbArrow->setPixmap(mIconArrow->getIcon().pixmap(mLbArrow->size()));
-	});
-
+	mLbArrow->setFixedSize(2, height());
 	mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 	mLeValue->setFixedHeight(height());
 	mLeValue->setFrame(QFrame::NoFrame);
@@ -56,13 +45,6 @@ void QNumberBox::ConnectUI()
 			}
 		}
 	});
-}
-
-void QNumberBox::SetHoverd(bool hoverd) {
-	if (mHoverd != hoverd) {
-		mHoverd = hoverd;
-		update();
-	}
 }
 
 void QNumberBox::SetEditEnabled(bool enable)
@@ -103,16 +85,6 @@ void QNumberBox::SetVar(QVariant var)
 {
 	mNumberAdaptor->SetVar(var);
 	mLeValue->setText(mNumberAdaptor->GetText());
-}
-
-void QNumberBox::enterEvent(QEnterEvent* event) {
-	QWidget::enterEvent(event);
-	SetHoverd(true);
-}
-
-void QNumberBox::leaveEvent(QEvent* event) {
-	QWidget::leaveEvent(event);
-	SetHoverd(false);
 }
 
 void QNumberBox::mousePressEvent(QMouseEvent* event)
@@ -157,17 +129,12 @@ void QNumberBox::mouseMoveEvent(QMouseEvent* event)
 
 void QNumberBox::paintEvent(QPaintEvent* event)
 {
-	QWidget::paintEvent(event);
+	QHoverWidget::paintEvent(event);
 	QPainter painter(this);
-	if (mNumberAdaptor->GetFactor() > 0) {
-		QRect overRect = mLeValue->geometry().adjusted(1, 1, -1, -1);
-		overRect.setWidth(overRect.width() * mNumberAdaptor->GetFactor());
-		painter.fillRect(overRect, QColor(100, 100, 100, 50));
-	}
-	if (mHoverd) {
-		painter.setPen(QPen(QColor(79, 110, 242), 1));
-		painter.setBrush(Qt::NoBrush);
-		painter.drawRect(rect().adjusted(1,1,-1,-1));
+	if (mNumberAdaptor->GetLimitedFactor() > 0) {
+		QRect overRect = rect().adjusted(3, 3, -3, -3);
+		overRect.setWidth(overRect.width() * mNumberAdaptor->GetLimitedFactor());
+		painter.fillRect(overRect, mHoverd ? mHoverColor : QColor(100, 100, 100, 50));
 	}
 }
 
@@ -175,9 +142,3 @@ QSize QNumberBox::sizeHint() const
 {
 	return { 60,30 };
 }
-
-void QNumberBox::focusOutEvent(QFocusEvent* event) {
-	QWidget::focusOutEvent(event);
-	SetHoverd(false);
-}
-

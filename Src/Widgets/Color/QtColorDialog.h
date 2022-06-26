@@ -20,6 +20,7 @@ private:
 	void ConnectUI();
 	void SetCurrentColorInternal(QColor color);
 	void RefleshChannelGradiant();
+	virtual void focusOutEvent(QFocusEvent* e);
 Q_SIGNALS:
 	void AsColorChanged(QColor);
 private:

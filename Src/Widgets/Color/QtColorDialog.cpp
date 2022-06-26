@@ -30,9 +30,14 @@ void QtColorDialog::SetColor(QColor color) {
 int QtColorDialog::Exec(QColor color)
 {
 	mLastColor = color;
+	setAttribute(Qt::WA_DeleteOnClose);
+	SetColor(color);
 	mColorPreview->setComparisonColor(color);
 	SetCurrentColorInternal(color);
-	return QDialog::exec();
+	activateWindow();
+	setFocus();
+	show();
+	return 0;
 }
 
 void QtColorDialog::CreateUI()
@@ -256,4 +261,8 @@ void QtColorDialog::RefleshChannelGradiant()
 	stops.push_back(QGradientStop{ 0.0f,begin });
 	stops.push_back(QGradientStop{ 1.0f,end });
 	mValueBox->SetGradientStops(stops);
+}
+
+void QtColorDialog::focusOutEvent(QFocusEvent* e) {
+	this->close();
 }

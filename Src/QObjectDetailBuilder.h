@@ -5,11 +5,11 @@
 #include "QMetaDataDefine.h"
 
 class QTreeWidgetItem; 
-class QDetailWidget;
+class QDetailTreeWidget;
 
 class QObjectDetailBuilder {
 public:
-	QObjectDetailBuilder(QObject* inObject, QDetailWidget* inWidget );
+	QObjectDetailBuilder(QObject* inObject, QDetailTreeWidget* inWidget );
 
 	void BuildDefault();
 
@@ -22,7 +22,7 @@ protected:
 	void ReadObjectMetaData();
 public:
 	QObject* mObject = nullptr;
-	QDetailWidget* mWidget = nullptr;
+	QDetailTreeWidget* mWidget = nullptr;
 	QObjectMetaData mMetaData;
 };
 

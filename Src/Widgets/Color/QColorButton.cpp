@@ -8,16 +8,6 @@ QColorButton::QColorButton(QColor color)
 	setMinimumWidth(100);
 	setFixedHeight(20);
 	SetColor(color);
-	QObject::connect(this, &QPushButton::clicked, this, [&]() {
-		QtColorDialog* dialog = new QtColorDialog;
-		dialog->setAttribute(Qt::WA_DeleteOnClose);
-		dialog->SetColor(mColor);
-		QObject::connect(dialog, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
-			SetColor(color);
-			Q_EMIT AsColorChanged(mColor);
-		});
-		dialog->show();
-	});
 }
 
 void QColorButton::SetColor(QColor color)
@@ -33,9 +23,20 @@ QColor QColorButton::GetColor() const
 
 void QColorButton::paintEvent(QPaintEvent* event)
 {
+	QHoverWidget::paintEvent(event);
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(mColor);
-	painter.drawRoundedRect(rect(), 2, 2);
+	painter.drawRoundedRect(rect().adjusted(2,2,-2,-2), 2, 2);
+}
+
+void QColorButton::mousePressEvent(QMouseEvent* event) {
+	QHoverWidget::mousePressEvent(event);
+	QtColorDialog* dialog = new QtColorDialog;
+	QObject::connect(dialog, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
+		SetColor(color);
+		Q_EMIT AsColorChanged(mColor);
+	});
+	dialog->Exec(mColor);
 }

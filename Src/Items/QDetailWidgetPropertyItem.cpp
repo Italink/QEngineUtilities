@@ -1,6 +1,6 @@
 #include "QDetailWidgetPropertyItem.h"
 #include "QPushButton"
-#include "QDetailWidget.h"
+#include "QDetailWidgetPrivate.h"
 #include "QLabel"
 #include "QPainter"
 #include "QDetailWidgetManager.h"
@@ -34,8 +34,9 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	mValueContent->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Preferred);
 	mValueContentLayout->setAlignment(Qt::AlignCenter);
 	mValueContentLayout->setContentsMargins(10, 2, 10, 2);
-	mResetButton->setMinimumWidth(30);
+	mResetButton->setFixedSize(25,25);
 	mResetButton->setEnabled(false);
+	setMinimumHeight(25);
 	addWidget(mNameContent);
 	addWidget(mValueContent);
 	addWidget(mResetButton);
@@ -43,7 +44,7 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 }
 
 void QDetailWidgetPropertyItemWidget::RefleshSplitterFactor() {
-	QDetailWidget* widget = dynamic_cast<QDetailWidget*>(mRow->treeWidget());
+	QDetailTreeWidget* widget = dynamic_cast<QDetailTreeWidget*>(mRow->treeWidget());
 	if (widget) {
 		blockSignals(true);
 		QList<int> sizes = widget->GetSplitterSizes();
@@ -95,7 +96,7 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 	: mContent(new QDetailWidgetPropertyItemWidget(this))
 {
 	QObject::connect(mContent, &QSplitter::splitterMoved, [this](int pos, int index) {
-		QDetailWidget* widget = dynamic_cast<QDetailWidget*>(treeWidget());
+		QDetailTreeWidget* widget = dynamic_cast<QDetailTreeWidget*>(treeWidget());
 		if (widget) {
 			QList<int> sizes = widget->GetSplitterSizes();
 			if (index == 2) {

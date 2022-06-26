@@ -5,6 +5,7 @@
 #include "QLabel"
 #include "Toolkits\QFocusLineEdit.h"
 #include "Toolkits\QSvgIcon.h"
+#include "Toolkits\QHoverWidget.h"
 
 class QNumberBoxAdaptorBase {
 public:
@@ -13,7 +14,7 @@ public:
 	virtual void SetVar(QVariant var) = 0;
 	virtual void SetText(QString text) = 0;
 	virtual void MoveOffset(QPointF offset) = 0;
-	virtual double GetFactor() = 0;
+	virtual double GetLimitedFactor() = 0;
 };
 
 template<typename NumericType>
@@ -59,7 +60,7 @@ public:
 		mLimited.max = max;
 	}
 
-	virtual double GetFactor() override {
+	virtual double GetLimitedFactor() override {
 		if (mLimited.enabled) {
 			return (mValue - mLimited.min) / (double)(mLimited.max - mLimited.min);
 		}
@@ -103,9 +104,8 @@ private:
 	NumericType mValue;
 };
 
-class QNumberBox :public QWidget {
+class QNumberBox :public QHoverWidget{
 	Q_OBJECT
-	
 public:
 	template<typename NumericType>
 	QNumberBox(NumericType inValue, bool inLimitedEnabled = false, NumericType inMin = 0, NumericType inMax = 100) {
@@ -123,16 +123,11 @@ public:
 	QVariant GetVar();
 	void SetVar(QVariant var);
 
-	using QWidget::QWidget;
 Q_SIGNALS:
 	void AsValueChanged(QVariant);
 protected:
 	void CreateUI();
 	void ConnectUI();
-	void SetHoverd(bool hoverd);
-
-	virtual void enterEvent(QEnterEvent* event) override;
-	virtual void leaveEvent(QEvent* event) override;
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -140,14 +135,11 @@ protected:
 	virtual QSize sizeHint() const override;
 private:
 	QSharedPointer<QNumberBoxAdaptorBase> mNumberAdaptor;
-	QLabel* mLbName;
 	QLineEdit_HasFocusSignal* mLeValue;
 	QLabel* mLbArrow;
-	QSvgIcon* mIconArrow;
 	QPointF mClickPosition;
-	bool mHoverd = false;
 protected:
-	void focusOutEvent(QFocusEvent* event) override;
+
 };
 
 

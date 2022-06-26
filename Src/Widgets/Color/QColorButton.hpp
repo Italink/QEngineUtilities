@@ -1,9 +1,9 @@
 #ifndef QColorButton_h__
 #define QColorButton_h__
 
-#include <QPushButton>
+#include "Widgets\Toolkits\QHoverWidget.h"
 
-class QColorButton :public QPushButton {
+class QColorButton :public QHoverWidget {
 	Q_OBJECT
 public:
 	QColorButton(QColor color);
@@ -12,7 +12,8 @@ public:
 Q_SIGNALS:
 	void AsColorChanged(QColor color);
 protected:
-	void paintEvent(QPaintEvent* event) override;
+	virtual void paintEvent(QPaintEvent* event) override;
+	virtual void mousePressEvent(QMouseEvent* event) override;
 private:
 	QColor mColor;
 };
