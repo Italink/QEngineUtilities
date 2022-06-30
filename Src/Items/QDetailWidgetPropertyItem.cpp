@@ -4,6 +4,7 @@
 #include "QLabel"
 #include "QPainter"
 #include "QDetailWidgetManager.h"
+
 #include "Widgets/Toolkits/QSvgIcon.h"
 
 
@@ -169,6 +170,12 @@ void QDetailWidgetPropertyItem::BuildContentAndChildren() {
 	treeWidget()->setItemWidget(this, 0, mContent);
 }
 
+void QDetailWidgetPropertyItem::BuildMenu(QMenu& inMenu)
+{
+	inMenu.addAction("Copy");
+	inMenu.addAction("Paste");
+}
+
 QDetailWidgetPropertyItemWidget* QDetailWidgetPropertyItem::GetContent() const {
 	return mContent;
 }
@@ -184,10 +191,11 @@ const QJsonObject& QDetailWidgetPropertyItem::GetMetaData() const {
 void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)
 {
 	mHandler = inHandler;
-	QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, inHandler, &QPropertyHandler::ResetValue);
-	QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, [this]() {
-		RefleshResetButtonStatus();
-	});
+	QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
+	QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyItem::RefleshResetButtonStatus);
+	if (QTreeWidgetItem::parent() != nullptr) {
+		BuildContentAndChildren();
+	}
 }
 
 void QDetailWidgetPropertyItem::RefleshResetButtonStatus()

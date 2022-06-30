@@ -53,7 +53,7 @@ void QPropertyHandler::SetValue(QVariant value)
 			mIsChanged = (value != mInitialValue);
 		}
 		mSetter(value);
-		for (auto& binder : mBinderList) {
+		for (auto& binder : mBinderMap.values()) {
 			QVariant var = binder.mGetter();
 			if (var != value) {
 				binder.mSetter(value);

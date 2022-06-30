@@ -14,7 +14,7 @@ void QDetailWidgetCategoryItem::BuildContentAndChildren() {
 }
 
 
-void QDetailWidgetCategoryItem::OnCreateMenu(QMenu& inMenu) {
+void QDetailWidgetCategoryItem::BuildMenu(QMenu& inMenu) {
 
 }
 

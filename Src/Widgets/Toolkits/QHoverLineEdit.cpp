@@ -21,7 +21,6 @@ public:
 	void SetPlaceholderColor(QColor val) { mPlaceholderColor = val; }
 };
 
-
 QHoverLineEdit::QHoverLineEdit(QString inText)
 	: mLineEdit(new QLineEditOverride())
 

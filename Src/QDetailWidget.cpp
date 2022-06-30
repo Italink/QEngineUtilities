@@ -13,7 +13,6 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 	SetStyle(inStyle);
 
 	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
-
 }
 
 

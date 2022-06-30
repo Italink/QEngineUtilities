@@ -13,14 +13,14 @@ class QtColorDialog :public QDialog {
 	Q_OBJECT
 public:
 	QtColorDialog();
+	~QtColorDialog();
 	void SetColor(QColor color);
-	int Exec(QColor color);
+	static int CreateAndShow(QColor color);
 private:
 	void CreateUI();
 	void ConnectUI();
 	void SetCurrentColorInternal(QColor color);
 	void RefleshChannelGradiant();
-	virtual void focusOutEvent(QFocusEvent* e);
 Q_SIGNALS:
 	void AsColorChanged(QColor);
 private:
@@ -39,6 +39,8 @@ private:
 	ColorLineEdit* mLeHex;
 	QColor mCurrentColor;
 	QColor mLastColor;
+public:
+	inline static QtColorDialog* Current = nullptr;
 };
 
 #endif // QtColorDialog_h__

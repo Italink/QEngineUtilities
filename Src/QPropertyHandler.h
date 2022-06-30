@@ -35,8 +35,11 @@ public:
 	void Bind(OObjectType* inObject, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
 		connect(inObject, inNotify, this, [this, inGetter]() {
 			SetValue(inGetter());
-			});
-		mBinderList << QPropertyBinder{ inGetter,inSetter };
+		});
+		mBinderMap[inObject] = QPropertyBinder{ inGetter,inSetter };
+		connect(inObject, &QObject::destroyed, this,[this, inObject]() {
+			mBinderMap.remove(inObject);
+		});
 	}
 
 Q_SIGNALS:
@@ -50,7 +53,7 @@ private:
 	Setter mSetter;
 	QVariant mInitialValue;
 	bool mIsChanged = false;
-	QList<QPropertyBinder> mBinderList;
+	QMap<QObject*,QPropertyBinder> mBinderMap;
 };
 
 #endif // QPropertyHandler_h__

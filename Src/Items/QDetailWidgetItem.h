@@ -5,11 +5,11 @@
 
 class QDetailWidgetItem : public QTreeWidgetItem {
 public:
-	virtual QString GetKeywords() = 0;
+	virtual QString GetKeywords() { return QString(); };
 
-	virtual void BuildContentAndChildren() = 0;
+	virtual void BuildContentAndChildren() {};
 
-	virtual void OnCreateMenu(QMenu& inMenu) = 0;
+	virtual void BuildMenu(QMenu& inMenu) {};
 
 	virtual void InsertChild(int index, QDetailWidgetItem* inItem) {
 		inItem->AttachTo(this, index);
@@ -32,6 +32,11 @@ public:
 		this->BuildContentAndChildren();
 	}
 
+	void Clear(){
+		for (auto child : takeChildren()) {
+			delete child;
+		}
+	}
 };
 
 

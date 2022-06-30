@@ -6,6 +6,7 @@
 #include "QObjectDetailBuilder.h"
 #include "QPainter"
 #include "QPushButton"
+#include "QApplication"
 
 #include "Items\QDetailWidgetCategoryItem.h"
 #include "Items\QDetailWidgetItem.h"
@@ -46,6 +47,12 @@ QDetailTreeWidget::QDetailTreeWidget()
 	setSelectionMode(QAbstractItemView::SingleSelection);
 	setFrameStyle(QFrame::NoFrame);
 	connect(this, &QTreeWidget::itemPressed, this, [](QTreeWidgetItem* item, int) {
+		if (qApp->mouseButtons() & Qt::RightButton) {
+			QDetailWidgetItem* detailItem = (QDetailWidgetItem*)item;
+			QMenu menu;
+			detailItem->BuildMenu(menu);
+			menu.exec(QCursor::pos());
+		}
 	});
 }
 
@@ -245,7 +252,7 @@ void QDetailTreeWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& o
 	if (hasChildren) {
 		QColor arrowColor = mArrowColor;
 		if (hovered)
-			arrowColor.lighter();
+			arrowColor = arrowColor.lighter();
 		QPolygonF arrow;
 		QPointF center = branchRect.center();
 		painter->setBrush(arrowColor);

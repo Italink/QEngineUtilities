@@ -11,7 +11,7 @@ public:
 
 	virtual void BuildContentAndChildren() override;
 
-	virtual void OnCreateMenu(QMenu& inMenu) override;
+	virtual void BuildMenu(QMenu& inMenu) override;
 
 	QString GetCategoryName() const;
 

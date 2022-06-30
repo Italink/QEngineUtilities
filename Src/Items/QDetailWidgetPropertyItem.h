@@ -6,6 +6,7 @@
 #include "QSplitter"
 #include "QJsonObject"
 #include "QPropertyHandler.h"
+#include "QMenu"
 
 class QDetailWidgetPropertyItem;
 class QPushButton;
@@ -21,10 +22,8 @@ private:
 	QWidget* mValueContent = nullptr;
 	QHBoxLayout* mValueContentLayout = nullptr;
 	QWidget* mValueWidget = nullptr;
-
 	QDetailWidgetPropertyItem* mRow = nullptr;
 	QPushButton* mResetButton = nullptr;
-
 protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
 
@@ -66,7 +65,7 @@ QList<int> GetIDListFromType() {
 		return GetIDListFromType<__VA_ARGS__>(); \
 	}
 
-class QDetailWidgetPropertyItem : public QDetailWidgetItem {
+class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 
 public:
 	using TypeId = QPropertyHandler::TypeId;
@@ -75,17 +74,15 @@ public:
 
 	void SetValue(QVariant inValue);
 
-	QVariant GetValue();
+	virtual void SetHandler(QPropertyHandler* inHandler);
 
-	void ResetValue();
-
-	QString GetName();
+	virtual void ResetValue();
 
 	virtual QString GetKeywords() override;
 
 	virtual void BuildContentAndChildren() override;
 
-	virtual void OnCreateMenu(QMenu& inMenu) override {}
+	virtual void BuildMenu(QMenu& inMenu) override;
 
 	virtual QWidget* GenerateValueWidget() = 0;
 
@@ -100,16 +97,25 @@ public:
 		return QMetaType::canConvert(QMetaType(GetHandler()->GetTypeID()), QMetaType::fromType<Type>());
 	}
 
+	QVariant GetValue();
+	QString GetName();
 	QPropertyHandler* GetHandler() const { return mHandler; }
-	void SetHandler(QPropertyHandler* inHandler);
+
+	bool CanRename() const { return mCanRename; }
+	void SetRenameEnabled(bool val) { mCanRename = val; }
+
+	bool CanReorderChildren() const { return mCanReorderChildren; }
+	void SetReorderChildrenEnabled(bool val) { mCanReorderChildren = val; }
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
-
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	QJsonObject mMetaData;
+	bool mCanRename = false;
+	bool mCanReorderChildren = false;
+
 };
 
 #endif // QDetailWidgetPropertyItem_h__

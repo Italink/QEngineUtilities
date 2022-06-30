@@ -33,10 +33,9 @@ void QColorButton::paintEvent(QPaintEvent* event)
 
 void QColorButton::mousePressEvent(QMouseEvent* event) {
 	QHoverWidget::mousePressEvent(event);
-	QtColorDialog* dialog = new QtColorDialog;
-	QObject::connect(dialog, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
+	QtColorDialog::CreateAndShow(mColor);
+	QObject::connect(QtColorDialog::Current, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
 		SetColor(color);
 		Q_EMIT AsColorChanged(mColor);
 	});
-	dialog->Exec(mColor);
 }

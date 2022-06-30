@@ -21,28 +21,38 @@ QtColorDialog::QtColorDialog()
 	ConnectUI();
 }
 
+QtColorDialog::~QtColorDialog()
+{
+	Current = nullptr;
+}
+
 void QtColorDialog::SetColor(QColor color) {
 	mLastColor = color;
 	mColorPreview->setComparisonColor(color);
 	SetCurrentColorInternal(color);
 }
 
-int QtColorDialog::Exec(QColor color)
+int QtColorDialog::CreateAndShow(QColor color)
 {
-	mLastColor = color;
-	setAttribute(Qt::WA_DeleteOnClose);
-	SetColor(color);
-	mColorPreview->setComparisonColor(color);
-	SetCurrentColorInternal(color);
-	activateWindow();
-	setFocus();
-	show();
+	QtColorDialog* dialog = QtColorDialog::Current;
+	dialog->disconnect();
+	if (dialog == nullptr) {
+		dialog = new QtColorDialog;
+		dialog->setAttribute(Qt::WA_DeleteOnClose);
+		dialog->SetColor(color);
+		dialog->SetCurrentColorInternal(color);
+		QtColorDialog::Current = dialog;
+	}
+	dialog->activateWindow();
+	dialog->setFocus();
+	dialog->show();
 	return 0;
 }
 
 void QtColorDialog::CreateUI()
 {
 	mColorWheel->setSelectorShape(ColorWheel::ShapeSquare);
+	mColorWheel->setFocusPolicy(Qt::NoFocus);
 	QVBoxLayout* v = new QVBoxLayout(this);
 	QHBoxLayout* h = new QHBoxLayout();
 	h->addWidget(mColorWheel,5);
@@ -100,6 +110,8 @@ void QtColorDialog::ConnectUI()
 		if (color.isValid()) {
 			SetCurrentColorInternal(color);
 		}
+		this->activateWindow();
+		this->setFocus();
 	});
 
 	connect(mLeHex, &ColorLineEdit::OnColorChanged, this, [this](QColor color) {
@@ -261,8 +273,4 @@ void QtColorDialog::RefleshChannelGradiant()
 	stops.push_back(QGradientStop{ 0.0f,begin });
 	stops.push_back(QGradientStop{ 1.0f,end });
 	mValueBox->SetGradientStops(stops);
-}
-
-void QtColorDialog::focusOutEvent(QFocusEvent* e) {
-	this->close();
 }
