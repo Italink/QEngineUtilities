@@ -1,9 +1,9 @@
 #include "QDPI_String.h"
-#include "QLineEdit"
-#include "QTextEdit"
 #include "QComboBox"
 #include "QJsonArray"
 #include "Widgets\QFilePathBox.h"
+#include "Widgets\Toolkits\QHoverLineEdit.h"
+#include "Widgets\Toolkits\QHoverTextEdit.h"
 
 QWidget* QDPI_String::GenerateValueWidget() {
 	const QJsonObject& metaData = GetMetaData();
@@ -11,27 +11,27 @@ QWidget* QDPI_String::GenerateValueWidget() {
 
 	if (canConvert<QString>()) {
 		if (type == "Line") {
-			QLineEdit* lineEdit = new QLineEdit(GetValue().toString());
-			lineEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
-			GetHandler()->Bind(lineEdit, &QLineEdit::textChanged,
+			QHoverLineEdit* lineEdit = new QHoverLineEdit(GetValue().toString());
+			lineEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
+			GetHandler()->Bind(lineEdit, &QHoverLineEdit::AsTextChanged,
 				[lineEdit]() {
-					return  lineEdit->text();
+					return  lineEdit->GetText();
 				},
 				[lineEdit](QVariant var) {
-					lineEdit->setText(var.toString());
+					lineEdit->SetText(var.toString());
 				});
 			return lineEdit;
 		}
 		else if (type == "MultiLine") {
-			QTextEdit* textEdit = new QTextEdit(GetValue().toString());
-			GetHandler()->Bind(textEdit, &QTextEdit::textChanged,
+			QHoverTextEdit* textEdit = new QHoverTextEdit(GetValue().toString());
+			GetHandler()->Bind(textEdit, &QHoverTextEdit::AsTextChanged,
 				[textEdit]() {
-					return  textEdit->toPlainText();
+					return  textEdit->GetText();
 				},
 				[textEdit](QVariant var) {
-					textEdit->setText(var.toString());
+					textEdit->SetText(var.toString());
 				});
-			textEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
+			textEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
 			textEdit->setFixedHeight(metaData.value("Height").toDouble());
 			return textEdit;
 		}
@@ -65,9 +65,9 @@ QWidget* QDPI_String::GenerateValueWidget() {
 	}
 	else if(canConvert<std::string>()) {
 		if (type == "Line") {
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(GetValue().value<std::string>()));
-			lineEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
-			//QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this](QString text) {
+			QHoverLineEdit* lineEdit = new QHoverLineEdit(QString::fromStdString(GetValue().value<std::string>()));
+			lineEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
+			//QObject::connect(lineEdit, &QHoverLineEdit::AsTextChanged, this, [this](QString text) {
 			//	SetValue(QVariant::fromValue(text.toStdString()));
 			//});
 			return lineEdit;

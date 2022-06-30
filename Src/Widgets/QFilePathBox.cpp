@@ -1,32 +1,33 @@
 #include "QFilePathBox.h"
-#include "QLineEdit"
 #include "QPushButton"
 #include "QBoxLayout"
 #include "QFileDialog"
+#include "Toolkits/QHoverLineEdit.h"
+
 QFilePathBox::QFilePathBox(QString inPath) 
-	: mLePath(new QLineEdit)
+	: mLePath(new QHoverLineEdit)
 	, mPbOpen(new QPushButton("Open"))
 {
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->addWidget(mLePath);
 	h->addWidget(mPbOpen);
 	h->setContentsMargins(0, 0, 0, 0);
-	mLePath->setText(inPath);
-	mLePath->setReadOnly(true);
-	connect(mLePath, &QLineEdit::textChanged, this, &QFilePathBox::AsPathChanged);
+	mLePath->SetText(inPath);
+	mLePath->GetQLineEdit()-> setReadOnly(true);
+	connect(mLePath, &QHoverLineEdit::AsTextChanged, this, &QFilePathBox::AsPathChanged);
 	connect(mPbOpen, &QPushButton::clicked, this, [this]() {
 		QString path = QFileDialog::getOpenFileName(nullptr);
 		if (!path.isEmpty())
-			mLePath->setText(path);
+			mLePath->SetText(path);
 	});
 }
 
 void QFilePathBox::SetFilePath(QString inPath)
 {
-	mLePath->setText(inPath);
+	mLePath->SetText(inPath);
 }
 
 QString QFilePathBox::GetFilePath()
 {
-	return mLePath->text();
+	return mLePath->GetText();
 }

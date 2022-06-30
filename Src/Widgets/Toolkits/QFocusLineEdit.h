@@ -3,6 +3,7 @@
 
 #include <QLineEdit>
 #include "QPainter"
+#include "QHoverLineEdit.h"
 
 class QLineEdit_HasFocusSignal : public QLineEdit {
 	Q_OBJECT

@@ -7,15 +7,16 @@
 #include "QPainter"
 #include "QPushButton"
 
-#include "Widgets\Toolkits\QSvgIcon.h"
 #include "Items\QDetailWidgetCategoryItem.h"
 #include "Items\QDetailWidgetItem.h"
 #include "Items\QDetailWidgetPropertyItem.h"
+#include "Widgets\Toolkits\QHoverLineEdit.h"
+#include "Widgets\Toolkits\QSvgIcon.h"
 
 QDetailSearcher::QDetailSearcher()
 	: mLbSearch(new QLabel)
 	, mIconSearch(new QSvgIcon(":/Resources/search.png"))
-	, mLeSearch(new QLineEdit)
+	, mLeSearch(new QHoverLineEdit)
 	, mPbSearch(new QPushButton) {
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->addWidget(mLbSearch);
@@ -24,14 +25,14 @@ QDetailSearcher::QDetailSearcher()
 	h->setContentsMargins(0,0,0,0);
 	mPbSearch->setFixedWidth(30);
 	mLeSearch->setMinimumHeight(20);
-	mLeSearch->setPlaceholderText("Search...");
+	mLeSearch->SetPlaceholdText("Search...");
 	mLbSearch->setFixedSize(20, 20);
 	mIconSearch->setUpdateCallBack([this]() {
 		mLbSearch->setPixmap(mIconSearch->getIcon().pixmap(mLbSearch->size()));
 	});
 
-	connect(mLeSearch, &QLineEdit::editingFinished, this, [this]() {
-		Q_EMIT AsRequestSearch(mLeSearch->text());
+	connect(mLeSearch, &QHoverLineEdit::AsEditingFinished, this, [this]() {
+		Q_EMIT AsRequestSearch(mLeSearch->GetText());
 	});
 }
 

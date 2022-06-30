@@ -40,7 +40,6 @@ protected:
 		QWidget::focusOutEvent(event);
 		SetHoverd(false);
 	}
-
 protected:
 	QColor mHoverColor;
 	bool mHoverd = false;

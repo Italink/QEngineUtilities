@@ -6,7 +6,7 @@
 
 
 class QPushButton;
-class QLineEdit;
+class QHoverLineEdit;
 class QDetailWidgetCategoryItem;
 class QLabel;
 class QSvgIcon;
@@ -20,7 +20,7 @@ Q_SIGNALS:
 private:
 	QLabel* mLbSearch;
 	QSvgIcon* mIconSearch;
-	QLineEdit* mLeSearch;
+	QHoverLineEdit* mLeSearch;
 	QPushButton* mPbSearch;
 };
 

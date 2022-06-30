@@ -12,11 +12,11 @@ void QNumberBox::CreateUI(){
 	mLeValue = new QLineEdit_HasFocusSignal;
 	mLbArrow = new QLabel;
 	QHBoxLayout* h = new QHBoxLayout(this);
-	h->setContentsMargins(0, 0, 0, 0);
+	h->setContentsMargins(2, 2, 2, 2);
 	h->setSpacing(0);
 	h->addWidget(mLeValue);
 	h->addWidget(mLbArrow);
-	mLbArrow->setFixedSize(2, height());
+	mLbArrow->setFixedSize(1, height());
 	mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 	mLeValue->setFixedHeight(height());
 	mLeValue->setFrame(QFrame::NoFrame);

@@ -3,7 +3,7 @@
 
 #include "QWidget"
 
-class QLineEdit; 
+class QHoverLineEdit;
 class QPushButton; 
 
 class QFilePathBox :public QWidget
@@ -16,7 +16,7 @@ public:
 Q_SIGNALS:
 	void AsPathChanged(QString);
 private:
-	QLineEdit* mLePath;
+	QHoverLineEdit* mLePath;
 	QPushButton* mPbOpen;
 };
 

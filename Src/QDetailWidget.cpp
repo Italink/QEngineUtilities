@@ -111,8 +111,11 @@ QDetailWidget{
 QWidget{
 	color:rgb(30,30,30);
 }
+QHoverLineEdit{
+	qproperty-PlaceholdColor:rgb(65,205,82); 
+}
 QHoverWidget{
-	background-color:rgb(255,255,255);
+	background-color:transparent;
 	qproperty-HoverColor:rgb(65,205,82); 
 }
 
@@ -128,20 +131,15 @@ QDetailTreeWidget{
 
 QLineEdit,QTextEdit{
 	background-color:rgb(255,255,255);
-	border-radius: 3px;
 	color: rgb(30,30,30);
-	border: 1px solid transparent;
-}
-
-QLineEdit:hover,QTextEdit:hover,QPushButton:hover,QComboBox:hover{
-	border: 1px solid rgb(65,205,82);
+	border: 1px soild transparent;
 }
 
 QPushButton,QComboBox{
-	background-color:rgb(220,220,220);
+	background-color:rgb(240,240,240);
 	color: rgb(50,50,50);
 	padding: 2px 5px 2px 5px; 
-	border: 1px outset rgb(150,150,150);
+	border: 2px outset rgb(200,200,200);
 }
 
 QComboBox QAbstractItemView {
@@ -150,7 +148,7 @@ QComboBox QAbstractItemView {
 	border-radius: 0px;
 	color: rgb(50,50,50);
     selection-color: rgb(255,255,255);
-	background-color: rgb(220,220,220);
+	background-color: rgb(240,240,240);
     selection-background-color: rgb(250,250,250); 
 }
 
@@ -180,8 +178,6 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
-
-
 )"
 
 
