@@ -2,7 +2,8 @@
 #include "QMetaObject"
 #include "QMetaProperty"
 
-QPropertyHandler::QPropertyHandler(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
+
+QPropertyHandler::QPropertyHandler(QObject* inParent, BindingLayer::TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
 	:QObject(inParent)
 {
 	mTypeID = inTypeID;
@@ -24,7 +25,7 @@ QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inObject, QString inPr
 	);
 }
 
-QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
+QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inParent, BindingLayer::TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
 {
 	for (QObject* child : inParent->children()) {
 		QPropertyHandler* handler = qobject_cast<QPropertyHandler*>(child);
@@ -74,7 +75,7 @@ void QPropertyHandler::ResetValue() {
 	}
 }
 
-QPropertyHandler::TypeId QPropertyHandler::GetTypeID() {
+BindingLayer::TypeId QPropertyHandler::GetTypeID() {
 	return mTypeID;
 }
 

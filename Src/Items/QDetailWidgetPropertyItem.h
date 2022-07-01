@@ -67,7 +67,7 @@ QList<int> GetIDListFromType() {
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 	Q_OBJECT
 public:
-	using TypeId = QPropertyHandler::TypeId;
+	using TypeId = BindingLayer::TypeId;
 
 	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler, QJsonObject inMetaData = QJsonObject());
 
@@ -112,7 +112,6 @@ public:
 
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
 
-
 Q_SIGNALS:
 	void AsRequsetRemove();
 protected:
@@ -123,7 +122,6 @@ private:
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	QJsonObject mMetaData;
 	bool mCanReorderChildren = false;
-
 	std::function<bool(QString)> mRenameCallback;
 };
 

@@ -56,7 +56,7 @@ QDetailTreeWidget::QDetailTreeWidget()
 	});
 }
 
-void QDetailTreeWidget::SetObjects(const QList<QObject*>& inObjects)
+void QDetailTreeWidget::SetObjects(const QList<BindingLayer::Instance>& inObjects)
 {
 	mObjects = inObjects;
 	Recreate();

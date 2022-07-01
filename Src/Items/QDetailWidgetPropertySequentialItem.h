@@ -18,7 +18,7 @@ protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;
 private:
-	QPropertyHandler::TypeId mValueTypeId = 0;
+	BindingLayer::TypeId mValueTypeId = 0;
 };
 
 #endif // QDetailWidgetPropertySequentialItem_h__

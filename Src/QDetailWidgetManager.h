@@ -10,7 +10,7 @@
 class QDetailWidgetManager {
 public:
 	using PropertyItemCreator = std::function<QDetailWidgetPropertyItem* ()>;
-	using PropertyItemFilter = std::function<bool(QPropertyHandler::TypeId)>;
+	using PropertyItemFilter = std::function<bool(BindingLayer::TypeId)>;
 
 	QDetailWidgetManager();
 
@@ -29,7 +29,7 @@ public:
 
 	template<typename PropertyItemType>
 	void RegisterPropertyItemFilter() {
-		PropertyItemFilter filter= [](QPropertyHandler::TypeId inType) { 
+		PropertyItemFilter filter= [](BindingLayer::TypeId inType) { 
 			return PropertyItemType::FilterType(inType); 
 		};
 		PropertyItemCreator creator = []() {
@@ -38,14 +38,14 @@ public:
 		mPropertyItemFilterList << QPair<PropertyItemFilter, PropertyItemCreator>{filter, creator};
 	}
 
-	const QHash<QPropertyHandler::TypeId, QDetailWidgetManager::PropertyItemCreator>& GetPropertyItemCreatorMap() const { return mPropertyItemCreatorMap; }
+	const QHash<BindingLayer::TypeId, QDetailWidgetManager::PropertyItemCreator>& GetPropertyItemCreatorMap() const { return mPropertyItemCreatorMap; }
 
 	const QList<QPair<QDetailWidgetManager::PropertyItemFilter, QDetailWidgetManager::PropertyItemCreator>>& GetPropertyItemFilterList() const { return mPropertyItemFilterList; }
 
 protected:
 	void RegisterBuiltIn();
 
-	QHash<QPropertyHandler::TypeId, PropertyItemCreator> mPropertyItemCreatorMap;
+	QHash<BindingLayer::TypeId, PropertyItemCreator> mPropertyItemCreatorMap;
 
 	QList<QPair<PropertyItemFilter, PropertyItemCreator>>  mPropertyItemFilterList;
 };

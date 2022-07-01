@@ -8,7 +8,7 @@
 #include "QDetailWidgetManager.h"
 #include "Items\QDetailWidgetCategoryItem.h"
 
-QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailTreeWidget* inWidget)
+QObjectDetailBuilder::QObjectDetailBuilder(BindingLayer::Instance mObject, QDetailTreeWidget* inWidget)
 	: mObject(mObject)
 	, mWidget(inWidget)
 {
@@ -56,19 +56,19 @@ QString QObjectDetailBuilder::GetPropertyCategoryName(QString inPropertyName)
 
 QJsonObject QObjectDetailBuilder::GetPropertyMetaData(QMetaProperty inProperty)
 {
-	if (inProperty.isEnumType()) {
-		QMetaEnum Enum = inProperty.enumerator();
-		QJsonObject metaData;
-		QJsonArray enumList;
-		for (int i = 0; i < Enum.keyCount(); i++) {
-			QJsonObject enumData;
-			enumData["Name"] = Enum.key(i);
-			enumData["Value"] = Enum.value(i);
-			enumList << enumData;
-		}
-		metaData["EnumList"] = enumList;
-		return metaData;
-	}
+	//if (inProperty.isEnumType()) {
+	//	QMetaEnum Enum = inProperty.enumerator();
+	//	QJsonObject metaData;
+	//	QJsonArray enumList;
+	//	for (int i = 0; i < Enum.keyCount(); i++) {
+	//		QJsonObject enumData;
+	//		enumData["Name"] = Enum.key(i);
+	//		enumData["Value"] = Enum.value(i);
+	//		enumList << enumData;
+	//	}
+	//	metaData["EnumList"] = enumList;
+	//	return metaData;
+	//}
 	return mMetaData.mPropertyMap.value(inProperty.name());
 }
 

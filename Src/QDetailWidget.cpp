@@ -14,7 +14,7 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
 }
 
-void QDetailWidget::SetObjects(const QList<QObject*>& inObjects) {
+void QDetailWidget::SetObjects(const QList<BindingLayer::Instance>& inObjects) {
 	mTreeWidget->SetObjects(inObjects);
 }
 

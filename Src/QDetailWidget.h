@@ -2,6 +2,7 @@
 #define QDetailWidget_h__
 
 #include "QWidget"
+#include "BindingLayer/BindingLayerDefine.h"
 
 class QDetailSearcher;
 class QDetailTreeWidget;
@@ -23,7 +24,7 @@ public:
 
 	QDetailWidget(QDetailWidget::Flags inFlags = QDetailWidget::DisplaySearcher, QDetailWidget::Style inStyle = QDetailWidget::Qt);
 
-	void SetObjects(const QList<QObject*>& inObjects);
+	void SetObjects(const QList<BindingLayer::Instance>& inObjects);
 	void SetStyle(QDetailWidget::Style inStyle);
 	void SearchByKeywords(QString inKeywords);
 private:

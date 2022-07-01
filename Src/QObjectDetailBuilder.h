@@ -3,13 +3,14 @@
 
 #include "QObject"
 #include "QMetaDataDefine.h"
+#include "BindingLayer/BindingLayerDefine.h"
 
 class QTreeWidgetItem; 
 class QDetailTreeWidget;
 
 class QObjectDetailBuilder {
 public:
-	QObjectDetailBuilder(QObject* inObject, QDetailTreeWidget* inWidget );
+	QObjectDetailBuilder(BindingLayer::Instance inObject, QDetailTreeWidget* inWidget );
 
 	void BuildDefault();
 
@@ -21,7 +22,7 @@ public:
 protected:
 	void ReadObjectMetaData();
 public:
-	QObject* mObject = nullptr;
+	BindingLayer::Instance mObject = nullptr;
 	QDetailTreeWidget* mWidget = nullptr;
 	QObjectMetaData mMetaData;
 };
