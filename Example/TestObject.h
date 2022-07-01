@@ -27,7 +27,7 @@ class TestObject :public QObject {
 	Q_PROPERTY(QVector4D Vec4 READ GetVec4 WRITE SetVec4)
 	Q_PROPERTY(QColor Color READ GetColor WRITE SetColor)
 	Q_PROPERTY(QColors Colors READ GetColors WRITE SetColors)
-	Q_PROPERTY(QList<QColor> ColorList READ GetIntList WRITE SetIntList)
+	Q_PROPERTY(QList<QColor> ColorList READ GetColorList WRITE SetColorList)
 	Q_PROPERTY(std::vector<QColor> StdColorList READ GetStdColorList WRITE SetStdColorList)
 	Q_PROPERTY(QMap<QString,QColor> ColorMap READ GetColorMap WRITE SetColorMap)
 
@@ -81,8 +81,8 @@ public:
 		qDebug() << Int;
 	}
 
-	QList<QColor> GetIntList() const { return ColorList; }
-	void SetIntList(QList<QColor> val) {
+	QList<QColor> GetColorList() const { return ColorList; }
+	void SetColorList(QList<QColor> val) {
 		ColorList = val; 
 		qDebug() << ColorList;
 	}
@@ -133,7 +133,10 @@ public:
 	void SetAsCombo(QString val) { AsCombo = val; }
 
 	QMap<QString, QColor> GetColorMap() const { return ColorMap; }
-	void SetColorMap(QMap<QString, QColor> val) { ColorMap = val; }
+	void SetColorMap(QMap<QString, QColor> val) { 
+		ColorMap = val; 
+		qDebug() << val;
+	}
 };
 
 #endif // TestObject_h__
