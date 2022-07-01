@@ -71,18 +71,19 @@ void QDetailWidgetPropertyItemWidget::SetNameWidget(QWidget* inWidget) {
 
 void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
 	QHoverLineEdit* nameEditor = new QHoverLineEdit();
+	nameEditor->GetQLineEdit()->setObjectName("NameEditor");
 	nameEditor->SetText(inName);
 	nameEditor->GetQLineEdit()->setEnabled(false);
 	nameEditor->SetHoverEnabled(false);
 	nameEditor->GetQLineEdit()->setAlignment(Qt::AlignLeft);
-	connect(nameEditor, &QHoverLineEdit::AsEditingFinished, this, [this,nameEditor, inName]() {
+	connect(nameEditor, &QHoverLineEdit::AsEditingFinished, this, [this,nameEditor]() {
 		auto callback = mRow->GetRenameCallback();
 		bool accepted = false;
 		if (callback) {
 			accepted = callback(nameEditor->GetText());
 		}
 		if (!accepted) {
-			nameEditor->SetText(inName);
+			nameEditor->SetText(mRow->GetName());
 		}
 		nameEditor->GetQLineEdit()->setEnabled(false);
 		nameEditor->SetHoverEnabled(false);

@@ -5,9 +5,9 @@
 #include "Items\Customization\QDPI_Number.h"
 #include "Items\Customization\QDPI_String.h"
 #include "Items\Customization\QDPI_Vector.h"
-#include "Items\QDetailWidgetPropertyArrayItem.h"
+#include "Items\QDetailWidgetPropertySequentialItem.h"
 #include "Items\QDetailWidgetPropertyEnumItem.h"
-#include "Items\QDetailWidgetPropertyMapItem.h"
+#include "Items\QDetailWidgetPropertyAssociativeItem.h"
 
 
 QDetailWidgetManager::QDetailWidgetManager()
@@ -32,6 +32,6 @@ void QDetailWidgetManager::RegisterBuiltIn()
 	RegisterPropertyItemCreator<QDPI_Vector>();
 
 	RegisterPropertyItemFilter<QDetailWidgetPropertyEnumItem>();
-	RegisterPropertyItemFilter<QDetailWidgetPropertyArrayItem>();
-	RegisterPropertyItemFilter<QDetailWidgetPropertyMapItem>();
+	RegisterPropertyItemFilter<QDetailWidgetPropertySequentialItem>();
+	RegisterPropertyItemFilter<QDetailWidgetPropertyAssociativeItem>();
 }

@@ -1,9 +1,9 @@
-#ifndef QDetailWidgetPropertyMapItem_h__
-#define QDetailWidgetPropertyMapItem_h__
+#ifndef QDetailWidgetPropertyAssociativeItem_h__
+#define QDetailWidgetPropertyAssociativeItem_h__
 
 #include "QDetailWidgetPropertyItem.h"
 
-class QDetailWidgetPropertyMapItem : public QDetailWidgetPropertyItem {
+class QDetailWidgetPropertyAssociativeItem : public QDetailWidgetPropertyItem {
 public:
 	static bool FilterType(TypeId inID);
 
@@ -22,6 +22,6 @@ private:
 	QPropertyHandler::TypeId mValueTypeId = 0;
 };
 
-#endif // QDetailWidgetPropertyMapItem_h__
+#endif // QDetailWidgetPropertyAssociativeItem_h__
 
 

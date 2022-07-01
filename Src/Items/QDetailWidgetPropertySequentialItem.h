@@ -1,11 +1,11 @@
-#ifndef QDetailWidgetPropertyArrayItem_h__
-#define QDetailWidgetPropertyArrayItem_h__
+#ifndef QDetailWidgetPropertySequentialItem_h__
+#define QDetailWidgetPropertySequentialItem_h__
 
 #include "QDetailWidgetPropertyItem.h"
 
-class QDetailWidgetPropertyArrayItem : public QDetailWidgetPropertyItem {
+class QDetailWidgetPropertySequentialItem : public QDetailWidgetPropertyItem {
 public:
-	QDetailWidgetPropertyArrayItem();
+	QDetailWidgetPropertySequentialItem();
 
 	static bool FilterType(TypeId inID);
 	virtual void SetHandler(QPropertyHandler* inHandler) override;
@@ -21,6 +21,6 @@ private:
 	QPropertyHandler::TypeId mValueTypeId = 0;
 };
 
-#endif // QDetailWidgetPropertyArrayItem_h__
+#endif // QDetailWidgetPropertySequentialItem_h__
 
 

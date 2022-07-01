@@ -1,10 +1,10 @@
-#include "QDetailWidgetPropertyMapItem.h"
+#include "QDetailWidgetPropertyAssociativeItem.h"
 #include "QMetaType"
 #include "QDetailWidgetManager.h"
 #include "QAssociativeIterable"
 #include "QPushButton"
 
-bool QDetailWidgetPropertyMapItem::FilterType(TypeId inID) {
+bool QDetailWidgetPropertyAssociativeItem::FilterType(TypeId inID) {
 	QMetaType metaType(inID);
 	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantMap>())) {
 		return true;
@@ -12,7 +12,7 @@ bool QDetailWidgetPropertyMapItem::FilterType(TypeId inID) {
 	return false;
 }
 
-void QDetailWidgetPropertyMapItem::SetHandler(QPropertyHandler* inHandler)
+void QDetailWidgetPropertyAssociativeItem::SetHandler(QPropertyHandler* inHandler)
 {
 	QDetailWidgetPropertyItem::SetHandler(inHandler);
 	QVariant var = GetValue();
@@ -20,13 +20,13 @@ void QDetailWidgetPropertyMapItem::SetHandler(QPropertyHandler* inHandler)
 	mValueTypeId = iterable.metaContainer().mappedMetaType().id();
 }
 
-void QDetailWidgetPropertyMapItem::ResetValue()
+void QDetailWidgetPropertyAssociativeItem::ResetValue()
 {
 	QDetailWidgetPropertyItem::ResetValue();
 	RecreateChildren();
 }
 
-QDetailWidgetPropertyItem* QDetailWidgetPropertyMapItem::FindItem(QString inKey)
+QDetailWidgetPropertyItem* QDetailWidgetPropertyAssociativeItem::FindItem(QString inKey)
 {
 	QDetailWidgetPropertyItem* item = nullptr;
 	for (int i = 0; i < childCount(); i++) {
@@ -39,7 +39,7 @@ QDetailWidgetPropertyItem* QDetailWidgetPropertyMapItem::FindItem(QString inKey)
 	return item;
 }
 
-void QDetailWidgetPropertyMapItem::FindOrCreateChildItem(QString inKey)
+void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey)
 {
 	QDetailWidgetPropertyItem* item = FindItem(inKey);
 	if (item != nullptr) {
@@ -90,7 +90,7 @@ void QDetailWidgetPropertyMapItem::FindOrCreateChildItem(QString inKey)
 					SetValue(varMap);
 				}),
 			GetMetaData()
-					);
+		);
 		if (item) {
 			item->AttachTo(this);
 			item->SetRenameCallback([this,item](QString name) {
@@ -100,7 +100,7 @@ void QDetailWidgetPropertyMapItem::FindOrCreateChildItem(QString inKey)
 	}
 }
 
-bool QDetailWidgetPropertyMapItem::RenameChild(QString inSrc, QString inDst)
+bool QDetailWidgetPropertyAssociativeItem::RenameChild(QString inSrc, QString inDst)
 {
 	bool canRename = false;
 	QVariant varMap = GetValue();
@@ -120,11 +120,12 @@ bool QDetailWidgetPropertyMapItem::RenameChild(QString inSrc, QString inDst)
 			mappedCoercer.coerce(var, var.metaType())
 		);;
 		SetValue(varMap);
+		RecreateChildren();
 	}
 	return canRename;
 }
 
-void QDetailWidgetPropertyMapItem::RecreateChildren()
+void QDetailWidgetPropertyAssociativeItem::RecreateChildren()
 {
 	QVariant var = GetValue();
 	QAssociativeIterable iterable = var.value<QAssociativeIterable>();
@@ -144,7 +145,7 @@ void QDetailWidgetPropertyMapItem::RecreateChildren()
 	}
 }
 
-void QDetailWidgetPropertyMapItem::CreateNewItem()
+void QDetailWidgetPropertyAssociativeItem::CreateNewItem()
 {
 	QVariant varList = GetValue();
 	QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
@@ -161,13 +162,13 @@ void QDetailWidgetPropertyMapItem::CreateNewItem()
 		item->RequestRename();
 }
 
-QWidget* QDetailWidgetPropertyMapItem::GenerateValueWidget() {
+QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {
 	QPushButton* btAppend = new QPushButton("+");
-	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertyMapItem::CreateNewItem);
+	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertyAssociativeItem::CreateNewItem);
 	return btAppend;
 }
 
-void QDetailWidgetPropertyMapItem::BuildContentAndChildren() {
+void QDetailWidgetPropertyAssociativeItem::BuildContentAndChildren() {
 	GetContent()->SetNameWidgetByText(GetName());
 	GetContent()->SetValueWidget(GenerateValueWidget());
 	treeWidget()->setItemWidget(this, 0, GetContent());

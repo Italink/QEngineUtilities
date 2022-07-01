@@ -1,15 +1,15 @@
-#include "QDetailWidgetPropertyArrayItem.h"
+#include "QDetailWidgetPropertySequentialItem.h"
 #include "QMetaType"
 #include "QSequentialIterable"
 #include "QDetailWidgetManager.h"
 #include "QPushButton"
 
-QDetailWidgetPropertyArrayItem::QDetailWidgetPropertyArrayItem()
+QDetailWidgetPropertySequentialItem::QDetailWidgetPropertySequentialItem()
 {
 	SetReorderChildrenEnabled(true);
 }
 
-bool QDetailWidgetPropertyArrayItem::FilterType(TypeId inID) {
+bool QDetailWidgetPropertySequentialItem::FilterType(TypeId inID) {
 	QMetaType metaType(inID);
 	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantList>())
 		&& !QMetaType::canConvert(metaType, QMetaType::fromType<QString>())
@@ -19,7 +19,7 @@ bool QDetailWidgetPropertyArrayItem::FilterType(TypeId inID) {
 	return false;
 }
 
-void QDetailWidgetPropertyArrayItem::SetHandler(QPropertyHandler* inHandler)
+void QDetailWidgetPropertySequentialItem::SetHandler(QPropertyHandler* inHandler)
 {
 	QDetailWidgetPropertyItem::SetHandler(inHandler);
 	QVariant var = GetValue();
@@ -27,13 +27,13 @@ void QDetailWidgetPropertyArrayItem::SetHandler(QPropertyHandler* inHandler)
 	mValueTypeId = iterable.valueMetaType().id();
 }
 
-void QDetailWidgetPropertyArrayItem::ResetValue()
+void QDetailWidgetPropertySequentialItem::ResetValue()
 {
 	QDetailWidgetPropertyItem::ResetValue();
 	RecreateChildren();
 }
 
-void QDetailWidgetPropertyArrayItem::FindOrCreateChildItem(int index)
+void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index)
 {
 	if (index < childCount()) {
 		QDetailWidgetPropertyItem* item = (QDetailWidgetPropertyItem*)child(index);
@@ -87,7 +87,7 @@ void QDetailWidgetPropertyArrayItem::FindOrCreateChildItem(int index)
 	}
 }
 
-void QDetailWidgetPropertyArrayItem::RecreateChildren()
+void QDetailWidgetPropertySequentialItem::RecreateChildren()
 {
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
@@ -99,7 +99,7 @@ void QDetailWidgetPropertyArrayItem::RecreateChildren()
 	}
 }
 
-void QDetailWidgetPropertyArrayItem::CreateNewItem()
+void QDetailWidgetPropertySequentialItem::CreateNewItem()
 {
 	QVariant varList = GetValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
@@ -114,13 +114,13 @@ void QDetailWidgetPropertyArrayItem::CreateNewItem()
 	RecreateChildren();
 }
 
-QWidget* QDetailWidgetPropertyArrayItem::GenerateValueWidget() {
+QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
 	QPushButton* btAppend = new QPushButton("+");
-	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertyArrayItem::CreateNewItem);
+	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertySequentialItem::CreateNewItem);
 	return btAppend;
 }
 
-void QDetailWidgetPropertyArrayItem::BuildContentAndChildren() {
+void QDetailWidgetPropertySequentialItem::BuildContentAndChildren() {
 	GetContent()->SetNameWidgetByText(GetName());
 	GetContent()->SetValueWidget(GenerateValueWidget());
 	treeWidget()->setItemWidget(this, 0, GetContent());

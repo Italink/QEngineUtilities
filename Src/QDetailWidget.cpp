@@ -11,10 +11,8 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 	v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
 	SetStyle(inStyle);
-
 	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
 }
-
 
 void QDetailWidget::SetObjects(const QList<QObject*>& inObjects) {
 	mTreeWidget->SetObjects(inObjects);
@@ -34,7 +32,6 @@ QHoverWidget{
 	background-color:rgb(10,10,10);
 	qproperty-HoverColor:rgb(79, 110, 242); 
 }
-
 QDetailTreeWidget{
 	background-color:rgb(36,36,36);
 	qproperty-ShadowColor:rgb(5,5,5);
@@ -112,13 +109,13 @@ QWidget{
 	color:rgb(30,30,30);
 }
 QHoverLineEdit{
+	background-color:transparent;
 	qproperty-PlaceholdColor:rgb(65,205,82); 
 }
 QHoverWidget{
 	background-color:transparent;
 	qproperty-HoverColor:rgb(65,205,82); 
 }
-
 QDetailTreeWidget{
 	background-color:rgb(240,240,240);
 	qproperty-ShadowColor:rgb(220,220,220);
@@ -129,10 +126,14 @@ QDetailTreeWidget{
 	qproperty-ArrowColor:rgb(65,205,82); 
 }
 QSplitter::handle {background-color: rgb(220,220,220);}
+
 QLineEdit,QTextEdit{
 	background-color:rgb(255,255,255);
 	color: rgb(30,30,30);
 	border: 1px soild transparent;
+}
+QLineEdit#NameEditor{
+	background-color:transparent;
 }
 
 QPushButton,QComboBox{
@@ -179,8 +180,6 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
 )"
-
-
 );
 		break;
 	}
