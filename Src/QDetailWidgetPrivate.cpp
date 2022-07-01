@@ -140,15 +140,6 @@ QColor QDetailTreeWidget::GetGridLineColor() const
 void QDetailTreeWidget::SetGridLineColor(QColor val)
 {
 	mGridLineColor = val;
-	QTreeWidgetItemIterator Iterator(this);
-	while (*Iterator) {
-		QDetailWidgetPropertyItem* item = dynamic_cast<QDetailWidgetPropertyItem*>(*Iterator);
-		if (item) {
-			item->GetContent()->setStyleSheet(QString("QSplitter::handle {background-color: %1;}").arg(mGridLineColor.name(QColor::HexArgb)));
-			item->RefleshSplitterFactor();
-		}
-		++Iterator;
-	}
 }
 
 QColor QDetailTreeWidget::GetShadowColor() const

@@ -44,6 +44,7 @@ QDetailTreeWidget{
 	qproperty-IconColor:rgb(251,251,251); 
 	qproperty-ArrowColor:rgb(220,220,220); 
 }
+QSplitter::handle {background-color: rgb(5,5,5);}
 QLineEdit,QTextEdit{
 	background-color:rgb(5,5,5);
 	border-radius: 3px;
@@ -127,7 +128,7 @@ QDetailTreeWidget{
 	qproperty-IconColor:rgb(65,205,82); 
 	qproperty-ArrowColor:rgb(65,205,82); 
 }
-
+QSplitter::handle {background-color: rgb(220,220,220);}
 QLineEdit,QTextEdit{
 	background-color:rgb(255,255,255);
 	color: rgb(30,30,30);

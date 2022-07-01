@@ -6,6 +6,7 @@
 #include "QDetailWidgetManager.h"
 
 #include "Widgets/Toolkits/QSvgIcon.h"
+#include "Widgets/Toolkits/QHoverLineEdit.h"
 
 
 class QDetailWidgetPropertyResetButton :public QPushButton {
@@ -62,12 +63,31 @@ void QDetailWidgetPropertyItemWidget::SetNameWidget(QWidget* inWidget) {
 	}
 	else {
 		mNameContentLayout->replaceWidget(mNameWidget, inWidget);
+		mNameWidget->setParent(nullptr);
+		mNameWidget->deleteLater();
 	}
 	mNameWidget = inWidget;
 }
 
 void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
-	SetNameWidget(new QLabel(inName));
+	QHoverLineEdit* nameEditor = new QHoverLineEdit();
+	nameEditor->SetText(inName);
+	nameEditor->GetQLineEdit()->setEnabled(false);
+	nameEditor->SetHoverEnabled(false);
+	nameEditor->GetQLineEdit()->setAlignment(Qt::AlignLeft);
+	connect(nameEditor, &QHoverLineEdit::AsEditingFinished, this, [this,nameEditor, inName]() {
+		auto callback = mRow->GetRenameCallback();
+		bool accepted = false;
+		if (callback) {
+			accepted = callback(nameEditor->GetText());
+		}
+		if (!accepted) {
+			nameEditor->SetText(inName);
+		}
+		nameEditor->GetQLineEdit()->setEnabled(false);
+		nameEditor->SetHoverEnabled(false);
+	});
+	SetNameWidget(nameEditor);
 }
 
 void QDetailWidgetPropertyItemWidget::SetValueWidget(QWidget* inWidget) {
@@ -76,6 +96,8 @@ void QDetailWidgetPropertyItemWidget::SetValueWidget(QWidget* inWidget) {
 	}
 	else {
 		mValueContentLayout->replaceWidget(mValueWidget, inWidget);
+		mValueWidget->setParent(nullptr);
+		mValueWidget->deleteLater();
 	}
 	mValueWidget = inWidget;
 }
@@ -86,6 +108,18 @@ QHBoxLayout* QDetailWidgetPropertyItemWidget::GetNameContentLayout() const {
 
 QHBoxLayout* QDetailWidgetPropertyItemWidget::GetValueContentLayout() const {
 	return mValueContentLayout;
+}
+
+void QDetailWidgetPropertyItemWidget::ShowRenameEditor()
+{
+	QHoverLineEdit* nameEdit = qobject_cast<QHoverLineEdit*>(mNameWidget);
+	if (nameEdit) {
+		nameEdit->SetHoverEnabled(true);
+		nameEdit->GetQLineEdit()->setEnabled(true);
+		nameEdit->GetQLineEdit()->selectAll();
+		nameEdit->GetQLineEdit()->activateWindow();
+		nameEdit->GetQLineEdit()->setFocus();
+	}
 }
 
 void QDetailWidgetPropertyItemWidget::resizeEvent(QResizeEvent* event) {
@@ -160,6 +194,12 @@ QString QDetailWidgetPropertyItem::GetName()
 	return GetHandler()->GetName();
 }
 
+void QDetailWidgetPropertyItem::RequestRename()
+{
+	if (CanRename())
+		mContent->ShowRenameEditor();
+}
+
 QString QDetailWidgetPropertyItem::GetKeywords() {
 	return GetHandler()->GetName() + QDebug::toString(mHandler->GetValue());
 }
@@ -174,6 +214,8 @@ void QDetailWidgetPropertyItem::BuildMenu(QMenu& inMenu)
 {
 	inMenu.addAction("Copy");
 	inMenu.addAction("Paste");
+	if(CanRename())
+		inMenu.addAction("Rename", [this]() {  RequestRename(); });
 }
 
 QDetailWidgetPropertyItemWidget* QDetailWidgetPropertyItem::GetContent() const {

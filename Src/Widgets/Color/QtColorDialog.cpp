@@ -38,11 +38,10 @@ int QtColorDialog::CreateAndShow(QColor color)
 	dialog->disconnect();
 	if (dialog == nullptr) {
 		dialog = new QtColorDialog;
-		dialog->setAttribute(Qt::WA_DeleteOnClose);
-		dialog->SetColor(color);
-		dialog->SetCurrentColorInternal(color);
 		QtColorDialog::Current = dialog;
 	}
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->SetColor(color);
 	dialog->activateWindow();
 	dialog->setFocus();
 	dialog->show();

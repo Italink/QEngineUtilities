@@ -26,20 +26,19 @@ private:
 	QPushButton* mResetButton = nullptr;
 protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
-
 public:
 	Q_SIGNAL void AsRequsetReset();
 
 	QDetailWidgetPropertyItemWidget(QDetailWidgetPropertyItem* inRow);
 
 	void RefleshSplitterFactor();
-
 	void SetNameWidget(QWidget* inWidget);
 	void SetNameWidgetByText(QString inName);
 	void SetValueWidget(QWidget* inWidget);
 	QHBoxLayout* GetNameContentLayout() const;
 	QHBoxLayout* GetValueContentLayout() const;
 	QPushButton* GetResetButton() const { return mResetButton; }
+	void ShowRenameEditor();
 };
 
 template<typename Aux_type>
@@ -66,7 +65,7 @@ QList<int> GetIDListFromType() {
 	}
 
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
-
+	Q_OBJECT
 public:
 	using TypeId = QPropertyHandler::TypeId;
 
@@ -101,11 +100,21 @@ public:
 	QString GetName();
 	QPropertyHandler* GetHandler() const { return mHandler; }
 
-	bool CanRename() const { return mCanRename; }
-	void SetRenameEnabled(bool val) { mCanRename = val; }
+	void RequestRename();
+
+	bool CanRename() const { return mRenameCallback ? true : false; }
 
 	bool CanReorderChildren() const { return mCanReorderChildren; }
+
 	void SetReorderChildrenEnabled(bool val) { mCanReorderChildren = val; }
+
+	void SetRenameCallback(std::function<bool(QString)> val) { mRenameCallback = val; }
+
+	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
+
+
+Q_SIGNALS:
+	void AsRequsetRemove();
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
@@ -113,9 +122,9 @@ private:
 	QPropertyHandler* mHandler = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	QJsonObject mMetaData;
-	bool mCanRename = false;
 	bool mCanReorderChildren = false;
 
+	std::function<bool(QString)> mRenameCallback;
 };
 
 #endif // QDetailWidgetPropertyItem_h__
