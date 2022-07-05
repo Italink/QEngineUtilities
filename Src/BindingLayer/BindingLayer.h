@@ -1,16 +1,15 @@
-#ifndef BindingLayerBase_h__
-#define BindingLayerBase_h__
+#ifndef BindingLayer_h__
+#define BindingLayer_h__
 
 #include "QObject"
 #include "QVariant"
 #include "QAssociativeIterable"
 #include "QSequentialIterable"
 
-namespace BindingLayerBase {
+namespace BindingLayer {
 	using TypeId = unsigned int;
 	using Instance = QObject*;
 	using Variant = QVariant;
-
 	template<typename _Ty>
 	TypeId GetTypeId() {
 		return QMetaTypeId2<_Ty>::qt_metatype_id();
@@ -40,4 +39,4 @@ namespace BindingLayerBase {
 	Variant QStringToAnyString(const QString& inSrcString, TypeId inDstString);
 };
 
-#endif // BindingLayerBase_h__
+#endif // BindingLayer_h__

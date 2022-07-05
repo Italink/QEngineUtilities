@@ -2,7 +2,7 @@
 #define QDetailWidget_h__
 
 #include "QWidget"
-#include "BindingLayer/BindingLayerDefine.h"
+#include "BindingLayer/BindingLayer.h"
 
 class QDetailSearcher;
 class QDetailTreeWidget;

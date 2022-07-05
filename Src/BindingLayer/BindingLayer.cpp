@@ -1,21 +1,21 @@
-#include "BindingLayerBase.h"
+#include "BindingLayer.h"
 
-BindingLayerBase::TypeId BindingLayerBase::GetTypeId(const Variant& inVar)
+BindingLayer::TypeId BindingLayer::GetTypeId(const Variant& inVar)
 {
 	return inVar.typeId();
 }
 
-BindingLayerBase::Variant BindingLayerBase::GetProperty(Instance inInstance, QString inName)
+BindingLayer::Variant BindingLayer::GetProperty(Instance inInstance, QString inName)
 {
 	return inInstance->property(inName.toLocal8Bit());
 }
 
-void BindingLayerBase::SetProperty(Instance inInstance, QString inName, Variant inVar)
+void BindingLayer::SetProperty(Instance inInstance, QString inName, Variant inVar)
 {
 	inInstance->setProperty(inName.toLocal8Bit(), inVar);
 }
 
-bool BindingLayerBase::IsAssociative(TypeId inId)
+bool BindingLayer::IsAssociative(TypeId inId)
 {
 	QMetaType metaType(inId);
 	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantMap>())) {
@@ -24,20 +24,20 @@ bool BindingLayerBase::IsAssociative(TypeId inId)
 	return false;
 }
 
-QList<BindingLayerBase::Variant> BindingLayerBase::GetAssociativeKeyList(const Variant& inAssociative)
+QList<BindingLayer::Variant> BindingLayer::GetAssociativeKeyList(const Variant& inAssociative)
 {
 	QAssociativeIterable iterable = inAssociative.value<QAssociativeIterable>();
 	QList<Variant> keyList;
 	return keyList;
 }
 
-BindingLayerBase::Variant BindingLayerBase::GetAssociativeValue(const Variant& inAssociative, const QString& inKey)
+BindingLayer::Variant BindingLayer::GetAssociativeValue(const Variant& inAssociative, const QString& inKey)
 {
 	QAssociativeIterable iterable = inAssociative.value<QAssociativeIterable>();
 	return iterable.value(inKey);
 }
 
-void BindingLayerBase::SetAssociativeValue(Variant& inAssociative, const QString& inKey, const Variant& inVar)
+void BindingLayer::SetAssociativeValue(Variant& inAssociative, const QString& inKey, const Variant& inVar)
 {
 	QAssociativeIterable iterable = inAssociative.value<QAssociativeIterable>();
 	QMetaAssociation metaAssociation = iterable.metaContainer();
@@ -48,13 +48,13 @@ void BindingLayerBase::SetAssociativeValue(Variant& inAssociative, const QString
 	metaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, metaAssociation.keyMetaType()), dataPtr);
 }
 
-bool BindingLayerBase::AssociativeContainKey(const Variant& inAssociative, const Variant& inKey)
+bool BindingLayer::AssociativeContainKey(const Variant& inAssociative, const Variant& inKey)
 {
 	QAssociativeIterable iterable = inAssociative.value<QAssociativeIterable>();
 	return iterable.containsKey(inKey);
 }
 
-bool BindingLayerBase::IsSequential(TypeId inId)
+bool BindingLayer::IsSequential(TypeId inId)
 {
 	QMetaType metaType(inId);
 	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantMap>())) {
@@ -63,20 +63,20 @@ bool BindingLayerBase::IsSequential(TypeId inId)
 	return false;
 }
 
-unsigned int BindingLayerBase::GetSequentialCount(const Variant& inSequential)
+unsigned int BindingLayer::GetSequentialCount(const Variant& inSequential)
 {
 	QSequentialIterable iterable = inSequential.value<QSequentialIterable>();
 	return iterable.size();
 }
 
-BindingLayerBase::Variant BindingLayerBase::GetSequentialValue(const Variant& inSequential, int inIndex)
+BindingLayer::Variant BindingLayer::GetSequentialValue(const Variant& inSequential, int inIndex)
 {
 	QSequentialIterable iterable = inSequential.value<QSequentialIterable>();
 	QMetaType valueMetaType = iterable.metaContainer().valueMetaType();
 	return iterable.at(inIndex);
 }
 
-void BindingLayerBase::SetSequentialValue(Variant& inSequential, int inIndex, const Variant& inVar)
+void BindingLayer::SetSequentialValue(Variant& inSequential, int inIndex, const Variant& inVar)
 {
 	QSequentialIterable iterable = inSequential.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
@@ -86,7 +86,7 @@ void BindingLayerBase::SetSequentialValue(Variant& inSequential, int inIndex, co
 	metaSequence.setValueAtIndex(containterPtr, inIndex, dataPtr);
 }
 
-void BindingLayerBase::PushSequentialValue(Variant& inSequential, const Variant& inVar, bool isBack /*= true */)
+void BindingLayer::PushSequentialValue(Variant& inSequential, const Variant& inVar, bool isBack /*= true */)
 {
 	QSequentialIterable iterable = inSequential.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
@@ -100,7 +100,7 @@ void BindingLayerBase::PushSequentialValue(Variant& inSequential, const Variant&
 		metaSequence.addValueAtBegin(containterPtr, dataPtr);
 }
 
-void BindingLayerBase::PopSequentialValue(Variant& inSequential, bool isBack /*= true*/)
+void BindingLayer::PopSequentialValue(Variant& inSequential, bool isBack /*= true*/)
 {
 	QSequentialIterable iterable = inSequential.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
@@ -111,22 +111,22 @@ void BindingLayerBase::PopSequentialValue(Variant& inSequential, bool isBack /*=
 		metaSequence.removeValueAtBegin(containterPtr);
 }
 
-bool BindingLayerBase::CanConvert(TypeId inSrc, TypeId inDst)
+bool BindingLayer::CanConvert(TypeId inSrc, TypeId inDst)
 {
 	return QMetaType::canConvert(QMetaType(inSrc), QMetaType(inDst));
 }
 
-bool BindingLayerBase::IsStringType(TypeId inId)
+bool BindingLayer::IsStringType(TypeId inId)
 {
 	return QMetaTypeId2<QString>::qt_metatype_id() == inId;
 }
 
-QString BindingLayerBase::AnyStringToQString(const Variant& inVar)
+QString BindingLayer::AnyStringToQString(const Variant& inVar)
 {
 	return inVar.value<QString>();
 }
 
-BindingLayerBase::Variant BindingLayerBase::QStringToAnyString(const QString& inSrcString, TypeId inDstString)
+BindingLayer::Variant BindingLayer::QStringToAnyString(const QString& inSrcString, TypeId inDstString)
 {
 	return inSrcString;
 }

@@ -3,7 +3,7 @@
 
 #include "QObject"
 #include "QTreeWidget"
-#include "BindingLayer/BindingLayerDefine.h"
+#include "BindingLayer/BindingLayer.h"
 
 class QPushButton;
 class QHoverLineEdit;

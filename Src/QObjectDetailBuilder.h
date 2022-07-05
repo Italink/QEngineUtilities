@@ -3,7 +3,7 @@
 
 #include "QObject"
 #include "QMetaDataDefine.h"
-#include "BindingLayer/BindingLayerDefine.h"
+#include "BindingLayer/BindingLayer.h"
 
 class QTreeWidgetItem; 
 class QDetailTreeWidget;

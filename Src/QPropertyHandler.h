@@ -3,7 +3,7 @@
 
 #include "QObject"
 #include "QVariant"
-#include "BindingLayer/BindingLayerDefine.h"
+#include "BindingLayer/BindingLayer.h"
 
 class QPropertyHandler : public QObject{
 	Q_OBJECT
