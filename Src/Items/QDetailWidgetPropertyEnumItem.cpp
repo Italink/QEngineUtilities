@@ -3,7 +3,7 @@
 #include "QSequentialIterable"
 #include "QDetailWidgetManager.h"
 #include "QComboBox"
-#include "QJsonArray"
+#include "QMetaEnum"
 
 bool QDetailWidgetPropertyEnumItem::FilterType(TypeId inID) {
 	QMetaType metaType(inID);
@@ -25,27 +25,29 @@ QWidget* QDetailWidgetPropertyEnumItem::GenerateValueWidget() {
 }
 
 void QDetailWidgetPropertyEnumItem::BuildContentAndChildren() {
-	QComboBox* comboBox = new QComboBox();
-	QJsonArray enumList = GetMetaData()["EnumList"].toArray();
-	for (auto enumData : enumList) {
-		const QJsonObject& data = enumData.toObject();
-		comboBox->addItem(data["Name"].toString());
-		mNameToValueMap[data["Name"].toString()] = data["Value"].toInt();
-	}
-	GetHandler()->Bind(
-		comboBox,
-		&QComboBox::currentTextChanged,
-		[comboBox, this]() {
-			return mNameToValueMap.value(comboBox->currentText());
-		},
-		[comboBox, this](QVariant var) {
-			comboBox->setCurrentText(mNameToValueMap.key(var.toInt()));;
+	BindingLayer::Variant var = GetValue();
+	const QMetaObject* metaObj = var.metaType().metaObject(); 
+	if (metaObj){
+		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->enumeratorOffset());
+		QComboBox* comboBox = new QComboBox();
+		for (int i = 0; i < metaEnum.keyCount(); i++) {
+			comboBox->addItem(metaEnum.key(i));
+			mNameToValueMap[metaEnum.key(i)] = metaEnum.value(i);
 		}
-	);
-
-	comboBox->setMinimumWidth(90);
-	GetContent()->SetNameWidgetByText(GetName());
-	GetContent()->SetValueWidget(comboBox);
-	treeWidget()->setItemWidget(this, 0, GetContent());
+		GetHandler()->Bind(
+			comboBox,
+			&QComboBox::currentTextChanged,
+			[comboBox, this]() {
+				return mNameToValueMap.value(comboBox->currentText());
+			},
+			[comboBox, this](QVariant var) {
+				comboBox->setCurrentText(mNameToValueMap.key(var.toInt()));;
+			}
+			);
+		comboBox->setMinimumWidth(90);
+		GetContent()->SetNameWidgetByText(GetName());
+		GetContent()->SetValueWidget(comboBox);
+		treeWidget()->setItemWidget(this, 0, GetContent());
+	}
 }
 

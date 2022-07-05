@@ -21,9 +21,7 @@ public:
 		Unreal = 0,
 		Qt,
 	};
-
 	QDetailWidget(QDetailWidget::Flags inFlags = QDetailWidget::DisplaySearcher, QDetailWidget::Style inStyle = QDetailWidget::Qt);
-
 	void SetObjects(const QList<BindingLayer::Instance>& inObjects);
 	void SetStyle(QDetailWidget::Style inStyle);
 	void SearchByKeywords(QString inKeywords);

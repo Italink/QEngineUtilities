@@ -33,6 +33,7 @@ public:
 
 	template<typename OObjectType, typename... T>
 	void Bind(OObjectType* inObject, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
+		inSetter(GetValue());
 		connect(inObject, inNotify, this, [this, inGetter]() {
 			SetValue(inGetter());
 		});
