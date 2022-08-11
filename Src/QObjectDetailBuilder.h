@@ -3,14 +3,13 @@
 
 #include "QObject"
 #include "QMetaDataDefine.h"
-#include "BindingLayer/BindingLayer.h"
 
 class QTreeWidgetItem; 
 class QDetailTreeWidget;
 
 class QObjectDetailBuilder {
 public:
-	QObjectDetailBuilder(BindingLayer::Instance inObject, QDetailTreeWidget* inWidget );
+	QObjectDetailBuilder(QObject* inObject, QDetailTreeWidget* inWidget );
 
 	void BuildDefault();
 
@@ -18,11 +17,12 @@ public:
 
 	QString GetPropertyCategoryName(QString inPropertyName);
 
-	QJsonObject GetPropertyMetaData(QMetaProperty inProperty);
+	QVariantHash GetPropertyMetaData(QMetaProperty inProperty);
+
 protected:
 	void ReadObjectMetaData();
 public:
-	BindingLayer::Instance mObject = nullptr;
+	QObject* mObject = nullptr;
 	QDetailTreeWidget* mWidget = nullptr;
 	QObjectMetaData mMetaData;
 };

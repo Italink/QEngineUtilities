@@ -8,7 +8,7 @@
 #include "QDetailWidgetManager.h"
 #include "Items\QDetailWidgetCategoryItem.h"
 
-QObjectDetailBuilder::QObjectDetailBuilder(BindingLayer::Instance mObject, QDetailTreeWidget* inWidget)
+QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailTreeWidget* inWidget)
 	: mObject(mObject)
 	, mWidget(inWidget)
 {
@@ -45,7 +45,7 @@ void QObjectDetailBuilder::AddNewProperty(QMetaProperty inProperty)
 
 QString QObjectDetailBuilder::GetPropertyCategoryName(QString inPropertyName)
 {
-	QString categoryName = mMetaData.mPropertyMap.value(inPropertyName)["Category"].toString();
+	QString categoryName = mMetaData.mPropertiesMetaData.value(inPropertyName)["Category"].toString();
 	if (categoryName.isEmpty())
 		categoryName = mObject->objectName();
 	if (categoryName.isEmpty())
@@ -54,7 +54,7 @@ QString QObjectDetailBuilder::GetPropertyCategoryName(QString inPropertyName)
 }
 
 
-QJsonObject QObjectDetailBuilder::GetPropertyMetaData(QMetaProperty inProperty)
+QVariantHash QObjectDetailBuilder::GetPropertyMetaData(QMetaProperty inProperty)
 {
 	//if (inProperty.isEnumType()) {
 	//	QMetaEnum Enum = inProperty.enumerator();
@@ -69,7 +69,7 @@ QJsonObject QObjectDetailBuilder::GetPropertyMetaData(QMetaProperty inProperty)
 	//	metaData["EnumList"] = enumList;
 	//	return metaData;
 	//}
-	return mMetaData.mPropertyMap.value(inProperty.name());
+	return mMetaData.mPropertiesMetaData.value(inProperty.name());
 }
 
 void QObjectDetailBuilder::ReadObjectMetaData()
@@ -79,8 +79,8 @@ void QObjectDetailBuilder::ReadObjectMetaData()
 		if (QString(method.name()).endsWith("_GetMetaData")) {
 			QObjectMetaData MetaData;
 			if (method.invoke(mObject, Q_RETURN_ARG(QObjectMetaData, MetaData))) {
-				for (auto PropertyIter = MetaData.mPropertyMap.begin(); PropertyIter != MetaData.mPropertyMap.end(); ++PropertyIter) {
-					 mMetaData.mPropertyMap[PropertyIter.key()] = PropertyIter.value();
+				for (auto PropertyIter = MetaData.mPropertiesMetaData.begin(); PropertyIter != MetaData.mPropertiesMetaData.end(); ++PropertyIter) {
+					 mMetaData.mPropertiesMetaData[PropertyIter.key()] = PropertyIter.value();
 				}
 				for (auto categoryName : MetaData.mCategoryList) {
 					mMetaData.mCategoryList << categoryName;

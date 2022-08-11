@@ -3,16 +3,16 @@
 
 #include "QObject"
 #include "QVariant"
-#include "BindingLayer/BindingLayer.h"
 
 class QPropertyHandler : public QObject{
 	Q_OBJECT
 public:
-	using Getter = std::function<BindingLayer::Variant()>;
-	using Setter = std::function<void(BindingLayer::Variant)>;
+	using TypeId = unsigned int;;
+	using Getter = std::function<QVariant()>;
+	using Setter = std::function<void(QVariant)>;
 
 	static QPropertyHandler* FindOrCreate(QObject* inObject, QString inPropertyName);
-	static QPropertyHandler* FindOrCreate(QObject* inParent, BindingLayer::TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
+	static QPropertyHandler* FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
 
 	void SetValue(QVariant inValue);
 
@@ -20,7 +20,7 @@ public:
 
 	void ResetValue();
 
-	BindingLayer::TypeId GetTypeID();
+	TypeId GetTypeID();
 
 	bool IsChanged() const { return mIsChanged; }
 
@@ -46,9 +46,9 @@ public:
 Q_SIGNALS:
 	void AsValueChanged();
 private:
-	QPropertyHandler(QObject* inParent, BindingLayer::TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
+	QPropertyHandler(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
 private:
-	BindingLayer::TypeId mTypeID = 0;
+	TypeId mTypeID = 0;
 	QString mName;
 	Getter mGetter;
 	Setter mSetter;

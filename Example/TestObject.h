@@ -58,7 +58,7 @@ private:
 	float Float = 0;
 	double LimitedDouble = 5;
 	bool Bool = true;
-	TestEnum Enum = One;
+	TestEnum Enum = Two;
 	QString QtString;
 	std::string StdString;
 	QString AsMultiLineString;

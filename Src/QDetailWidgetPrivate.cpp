@@ -56,7 +56,7 @@ QDetailTreeWidget::QDetailTreeWidget()
 	});
 }
 
-void QDetailTreeWidget::SetObjects(const QList<BindingLayer::Instance>& inObjects)
+void QDetailTreeWidget::SetObjects(const QList<QObject*>& inObjects)
 {
 	mObjects = inObjects;
 	Recreate();
@@ -275,7 +275,6 @@ void QDetailTreeWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& o
 		opt.rect.moveLeft(indentation());
 	}
 	painter->restore();
-
 	itemDelegateForIndex(index)->paint(painter, opt, index);
 }
 

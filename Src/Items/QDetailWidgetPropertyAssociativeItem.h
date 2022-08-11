@@ -6,7 +6,6 @@
 class QDetailWidgetPropertyAssociativeItem : public QDetailWidgetPropertyItem {
 public:
 	static bool FilterType(TypeId inID);
-
 	virtual void SetHandler(QPropertyHandler* inHandler) override;
 	virtual void ResetValue() override;
 protected:
@@ -19,7 +18,7 @@ protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;
 private:
-	BindingLayer::TypeId mValueTypeId = 0;
+	QPropertyHandler::TypeId mValueTypeId = 0;
 };
 
 #endif // QDetailWidgetPropertyAssociativeItem_h__

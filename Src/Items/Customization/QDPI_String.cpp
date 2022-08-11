@@ -6,13 +6,11 @@
 #include "Widgets\Toolkits\QHoverTextEdit.h"
 
 QWidget* QDPI_String::GenerateValueWidget() {
-	const QJsonObject& metaData = GetMetaData();
-	QString type = metaData.value("Type").toString();
-
+	QString type = GetMetaData("Type").toString();
 	if (canConvert<QString>()) {
 		if (type == "Line") {
 			QHoverLineEdit* lineEdit = new QHoverLineEdit(GetValue().toString());
-			lineEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
+			lineEdit->SetPlaceholdText(GetMetaData("PlaceholderText").toString());
 			GetHandler()->Bind(lineEdit, &QHoverLineEdit::AsTextChanged,
 				[lineEdit]() {
 					return  lineEdit->GetText();
@@ -31,8 +29,8 @@ QWidget* QDPI_String::GenerateValueWidget() {
 				[textEdit](QVariant var) {
 					textEdit->SetText(var.toString());
 				});
-			textEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
-			textEdit->setFixedHeight(metaData.value("Height").toDouble());
+			textEdit->SetPlaceholdText(GetMetaData("PlaceholderText").toString());
+			textEdit->setFixedHeight(GetMetaData("Height").toDouble());
 			return textEdit;
 		}
 		else if (type == "FilePath") {
@@ -48,8 +46,8 @@ QWidget* QDPI_String::GenerateValueWidget() {
 		}
 		else if (type == "Combo") {
 			QComboBox* comboBox = new QComboBox();
-			for (auto item : metaData.value("ComboList").toArray()) {
-				comboBox->addItem(item.toString());
+			for (auto item : GetMetaData("ComboList").toStringList()) {
+				comboBox->addItem(item);
 			}
 			GetHandler()->Bind(comboBox, &QComboBox::currentTextChanged,
 				[comboBox]() {
@@ -66,7 +64,7 @@ QWidget* QDPI_String::GenerateValueWidget() {
 	else if(canConvert<std::string>()) {
 		if (type == "Line") {
 			QHoverLineEdit* lineEdit = new QHoverLineEdit(QString::fromStdString(GetValue().value<std::string>()));
-			lineEdit->SetPlaceholdText(metaData.value("PlaceholderText").toString());
+			lineEdit->SetPlaceholdText(GetMetaData("PlaceholderText").toString());
 			//QObject::connect(lineEdit, &QHoverLineEdit::AsTextChanged, this, [this](QString text) {
 			//	SetValue(QVariant::fromValue(text.toStdString()));
 			//});
@@ -77,8 +75,8 @@ QWidget* QDPI_String::GenerateValueWidget() {
 			//QObject::connect(textEdit, &QTextEdit::textChanged, this, [this, textEdit]() {
 			//	SetValue(QVariant::fromValue(textEdit->toPlainText().toStdString()));
 			//});
-			textEdit->setPlaceholderText(metaData.value("PlaceholderText").toString());
-			textEdit->setFixedHeight(metaData.value("Height").toDouble());
+			textEdit->setPlaceholderText(GetMetaData("PlaceholderText").toString());
+			textEdit->setFixedHeight(GetMetaData("Height").toDouble());
 			return textEdit;
 		}
 		else if (type == "FilePath") {
@@ -90,8 +88,8 @@ QWidget* QDPI_String::GenerateValueWidget() {
 		}
 		else if (type == "Combo") {
 			QComboBox* comboBox = new QComboBox();
-			for (auto item : metaData.value("ComboList").toArray()) {
-				comboBox->addItem(item.toString());
+			for (auto item : GetMetaData("ComboList").toStringList()) {
+				comboBox->addItem(item);
 			}
 			//connect(comboBox, &QComboBox::currentTextChanged, this, [this](QString text) {
 			//	SetValue(QVariant::fromValue(text.toStdString()));
@@ -102,4 +100,3 @@ QWidget* QDPI_String::GenerateValueWidget() {
 	}
 	return nullptr;
 }
-

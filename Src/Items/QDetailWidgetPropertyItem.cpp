@@ -153,7 +153,7 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 	});
 }
 
-QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler, QJsonObject inMetaData /*= QJsonObject()*/)
+QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler, QVariantHash inMetaData /*= QVariantHash()*/)
 {
 	for (auto& filter : QDetailWidgetManager::instance()->GetPropertyItemFilterList()) {
 		if (filter.first(inHandler->GetTypeID())) {
@@ -227,8 +227,13 @@ void QDetailWidgetPropertyItem::RefleshSplitterFactor() {
 	mContent->RefleshSplitterFactor();
 }
 
-const QJsonObject& QDetailWidgetPropertyItem::GetMetaData() const {
+const QVariantHash& QDetailWidgetPropertyItem::GetMetaData() const {
 	return mMetaData;
+}
+
+QVariant QDetailWidgetPropertyItem::GetMetaData(const QString& Key)
+{
+	return mMetaData.value(Key);
 }
 
 void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)

@@ -7,8 +7,8 @@
 			QNumberBox* numberBox = new QNumberBox( \
 				GetValue().value<Type>(), \
 				true, \
-				MetaData["Min"].toVariant().value<Type>(), \
-				MetaData["Max"].toVariant().value<Type>() \
+				MetaData["Min"].value<Type>(), \
+				MetaData["Max"].value<Type>() \
 			); \
 			GetHandler()->Bind(numberBox, &QNumberBox::AsValueChanged,\
 			[numberBox]() {\
@@ -36,7 +36,7 @@
 	} \
 
 QWidget* QDPI_Number::GenerateValueWidget() {
-	const QJsonObject& MetaData = GetMetaData();
+	const QVariantHash& MetaData = GetMetaData();
 	switch (GetHandler()->GetTypeID()) {
 		Q_DETAIL_FOR_EACH_NUMBER_TYPE(Q_DETAIL_NUMBER_SWITCH_CASE, Q_DETAIL_NUMBER_SWITCH_CASE)
 	default:

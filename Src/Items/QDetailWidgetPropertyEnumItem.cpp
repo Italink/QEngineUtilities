@@ -25,7 +25,7 @@ QWidget* QDetailWidgetPropertyEnumItem::GenerateValueWidget() {
 }
 
 void QDetailWidgetPropertyEnumItem::BuildContentAndChildren() {
-	BindingLayer::Variant var = GetValue();
+	QVariant var = GetValue();
 	const QMetaObject* metaObj = var.metaType().metaObject(); 
 	if (metaObj){
 		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->enumeratorOffset());

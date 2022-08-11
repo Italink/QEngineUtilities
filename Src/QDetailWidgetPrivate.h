@@ -3,7 +3,6 @@
 
 #include "QObject"
 #include "QTreeWidget"
-#include "BindingLayer/BindingLayer.h"
 
 class QPushButton;
 class QHoverLineEdit;
@@ -35,7 +34,7 @@ class QDetailTreeWidget: public QTreeWidget{
 public:
 	QDetailTreeWidget();
 
-	void SetObjects(const QList<BindingLayer::Instance>& inObjects);
+	void SetObjects(const QList<QObject*>& inObjects);
 
 	void Recreate();
 
@@ -70,7 +69,7 @@ protected:
 	virtual void drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const override;
 	virtual void showEvent(QShowEvent* event) override;
 private:
-	QList<BindingLayer::Instance> mObjects;
+	QList<QObject*> mObjects;
 
 	QColor mGridLineColor;
 	QColor mShadowColor;

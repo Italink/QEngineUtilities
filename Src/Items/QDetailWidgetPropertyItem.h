@@ -28,7 +28,6 @@ protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
 public:
 	Q_SIGNAL void AsRequsetReset();
-
 	QDetailWidgetPropertyItemWidget(QDetailWidgetPropertyItem* inRow);
 
 	void RefleshSplitterFactor();
@@ -67,9 +66,9 @@ QList<int> GetIDListFromType() {
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 	Q_OBJECT
 public:
-	using TypeId = BindingLayer::TypeId;
+	using TypeId = QPropertyHandler::TypeId;
 
-	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler, QJsonObject inMetaData = QJsonObject());
+	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler, QVariantHash inMetaData = QVariantHash());
 
 	void SetValue(QVariant inValue);
 
@@ -89,7 +88,8 @@ public:
 
 	void RefleshSplitterFactor();
 
-	const QJsonObject& GetMetaData() const;
+	const QVariantHash& GetMetaData() const;
+	QVariant GetMetaData(const QString& Key);
 
 	template<typename Type>
 	bool canConvert() {
@@ -97,7 +97,9 @@ public:
 	}
 
 	QVariant GetValue();
+
 	QString GetName();
+
 	QPropertyHandler* GetHandler() const { return mHandler; }
 
 	void RequestRename();
@@ -111,16 +113,13 @@ public:
 	void SetRenameCallback(std::function<bool(QString)> val) { mRenameCallback = val; }
 
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
-
-Q_SIGNALS:
-	void AsRequsetRemove();
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
-	QJsonObject mMetaData;
+	QVariantHash mMetaData;
 	bool mCanReorderChildren = false;
 	std::function<bool(QString)> mRenameCallback;
 };

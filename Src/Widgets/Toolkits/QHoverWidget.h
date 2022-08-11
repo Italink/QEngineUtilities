@@ -48,7 +48,6 @@ protected:
 	QColor mHoverColor;
 	bool mHoverd = false;
 	bool mHoverEnabled = true;
-
 };
 
 
