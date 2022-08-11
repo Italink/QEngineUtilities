@@ -44,7 +44,7 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey)
 	QDetailWidgetPropertyItem* item = FindItem(inKey);
 	if (item != nullptr) {
 		item->SetHandler(QPropertyHandler::FindOrCreate(
-			GetContent(),
+			GetParentObeject(),
 			mValueTypeId,
 			inKey,
 			[this, inKey]() {
@@ -69,7 +69,7 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey)
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
 			QPropertyHandler::FindOrCreate(
-				GetContent(),
+				GetParentObeject(),
 				mValueTypeId,
 				inKey,
 				[this, inKey]() {
@@ -174,4 +174,3 @@ void QDetailWidgetPropertyAssociativeItem::BuildContentAndChildren() {
 	treeWidget()->setItemWidget(this, 0, GetContent());
 	RecreateChildren();
 }
-

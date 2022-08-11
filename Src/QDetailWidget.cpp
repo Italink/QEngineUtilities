@@ -1,6 +1,7 @@
 #include "QDetailWidget.h"
 #include "QBoxLayout"
 #include "QDetailWidgetPrivate.h"
+#include "QUndoView"
 
 QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle /*= Unreal*/)
 	: mSearcher(new QDetailSearcher)
@@ -8,6 +9,8 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 {
 	QVBoxLayout* v = new QVBoxLayout(this);
 	v->setContentsMargins(0, 5, 0, 5);
+	mUndoView = new QUndoView(&mTreeWidget->mUndoStack);
+	v->addWidget(mUndoView);
 	v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
 	SetStyle(inStyle);
@@ -16,6 +19,7 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 
 void QDetailWidget::SetObjects(const QList<QObject*>& inObjects) {
 	mTreeWidget->SetObjects(inObjects);
+	return;
 }
 
 void QDetailWidget::SetStyle(Style inStyle) {

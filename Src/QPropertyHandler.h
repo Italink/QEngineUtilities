@@ -3,6 +3,9 @@
 
 #include "QObject"
 #include "QVariant"
+#include "QUndoStack"
+
+class QDetailUndoEntry;
 
 class QPropertyHandler : public QObject{
 	Q_OBJECT
@@ -14,16 +17,12 @@ public:
 	static QPropertyHandler* FindOrCreate(QObject* inObject, QString inPropertyName);
 	static QPropertyHandler* FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
 
-	void SetValue(QVariant inValue);
-
+	void SetValue(QVariant inValue, bool bPushUndoStack = false);
 	QVariant GetValue();
-
 	void ResetValue();
 
 	TypeId GetTypeID();
-
 	bool IsChanged() const { return mIsChanged; }
-
 	QString GetName();
 
 	struct QPropertyBinder{
@@ -32,14 +31,14 @@ public:
 	};
 
 	template<typename OObjectType, typename... T>
-	void Bind(OObjectType* inObject, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
+	void Bind(OObjectType* inAdjuster, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
 		inSetter(GetValue());
-		connect(inObject, inNotify, this, [this, inGetter]() {
-			SetValue(inGetter());
+		connect(inAdjuster, inNotify, this, [this, inGetter]() {
+			SetValue(inGetter(), true);
 		});
-		mBinderMap[inObject] = QPropertyBinder{ inGetter,inSetter };
-		connect(inObject, &QObject::destroyed, this,[this, inObject]() {
-			mBinderMap.remove(inObject);
+		mBinderMap[inAdjuster] = QPropertyBinder{ inGetter,inSetter };
+		connect(inAdjuster, &QObject::destroyed, this,[this, inAdjuster]() {
+			mBinderMap.remove(inAdjuster);
 		});
 	}
 
@@ -55,6 +54,7 @@ private:
 	QVariant mInitialValue;
 	bool mIsChanged = false;
 	QMap<QObject*,QPropertyBinder> mBinderMap;
+	QDetailUndoEntry* mUndoEntry = nullptr;
 };
 
 #endif // QPropertyHandler_h__

@@ -138,9 +138,6 @@ private:
 	QLineEdit_HasFocusSignal* mLeValue;
 	QLabel* mLbArrow;
 	QPointF mClickPosition;
-protected:
-
 };
-
 
 #endif // QNumberBox_h__

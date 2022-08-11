@@ -101,6 +101,7 @@ public:
 	QString GetName();
 
 	QPropertyHandler* GetHandler() const { return mHandler; }
+	QObject* GetParentObeject() const { return mHandler->parent(); }
 
 	void RequestRename();
 
@@ -113,6 +114,7 @@ public:
 	void SetRenameCallback(std::function<bool(QString)> val) { mRenameCallback = val; }
 
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
+
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();

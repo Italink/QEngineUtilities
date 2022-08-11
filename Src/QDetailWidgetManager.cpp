@@ -26,7 +26,7 @@ void QDetailWidgetManager::RegisterBuiltIn()
 {
 	RegisterPropertyItemCreator<QDPI_Bool>();
 	RegisterPropertyItemCreator<QDPI_Color>();
-	RegisterPropertyItemCreator<QDPI_Colors>();
+	//RegisterPropertyItemCreator<QDPI_Colors>();
 	RegisterPropertyItemCreator<QDPI_Number>();
 	RegisterPropertyItemCreator<QDPI_String>();
 	RegisterPropertyItemCreator<QDPI_Vector>();

@@ -28,7 +28,8 @@ void QObjectDetailBuilder::BuildDefault()
 void QObjectDetailBuilder::AddNewProperty(QMetaProperty inProperty)
 {
 	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
-		QPropertyHandler::FindOrCreate(mObject,
+		QPropertyHandler::FindOrCreate(
+			mObject,
 			inProperty.typeId(),
 			inProperty.name(),
 			[Object = mObject, inProperty]() {return inProperty.read(Object); },

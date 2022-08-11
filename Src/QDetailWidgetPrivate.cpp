@@ -58,8 +58,16 @@ QDetailTreeWidget::QDetailTreeWidget()
 
 void QDetailTreeWidget::SetObjects(const QList<QObject*>& inObjects)
 {
+	for (auto& Object : mObjects) {
+		QDetailUndoEntry* UndoEntry = Object->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
+		mUndoStack.RemoveEntry(UndoEntry);
+	}
 	mObjects = inObjects;
 	Recreate();
+	for (auto& Object : mObjects) {
+		QDetailUndoEntry* UndoEntry = Object->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
+		mUndoStack.AddEntry(UndoEntry);
+	}
 }
 
 void QDetailTreeWidget::Recreate()
@@ -120,6 +128,17 @@ void QDetailTreeWidget::SearchByKeywords(QString inKeywords) {
 		}
 	}
 }
+
+void QDetailTreeWidget::Undo()
+{
+	mUndoStack.undo();
+}
+
+void QDetailTreeWidget::Redo()
+{
+	mUndoStack.redo();
+}
+
 
 QList<int> QDetailTreeWidget::GetSplitterSizes() const
 {

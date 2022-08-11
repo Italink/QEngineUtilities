@@ -3,6 +3,7 @@
 
 #include "QObject"
 #include "QTreeWidget"
+#include "Undo/QDetailUndoStack.h"
 
 class QPushButton;
 class QHoverLineEdit;
@@ -36,9 +37,13 @@ public:
 
 	void SetObjects(const QList<QObject*>& inObjects);
 
-	void Recreate();
-
 	void SearchByKeywords(QString inKeywords);
+
+	void Undo();
+
+	void Redo();
+
+	void Recreate();
 
 	QList<int> GetSplitterSizes() const;
 	void SetSplitterSizes(int item0, int item1, int item2);
@@ -62,23 +67,22 @@ public:
 	void SetArrowColor(QColor val) { mArrowColor = val; }
 
 	QDetailWidgetCategoryItem* FindOrAddCategory(QString inName);
-
-	using QTreeWidget::QTreeWidget;
 protected:
 	void UpdateSplitterFactor();
 	virtual void drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const override;
 	virtual void showEvent(QShowEvent* event) override;
+	using QTreeWidget::QTreeWidget;
 private:
 	QList<QObject*> mObjects;
-
 	QColor mGridLineColor;
 	QColor mShadowColor;
 	QColor mCategoryColor;
 	QColor mHoveredColor;
 	QColor mArrowColor;
-	
 	QList<int> mSplitterSizes = { 200,400,30 };
-
+public:
+	QDetailUndoStack mUndoStack;
 };
+
 
 #endif // QDetailWidget_h__

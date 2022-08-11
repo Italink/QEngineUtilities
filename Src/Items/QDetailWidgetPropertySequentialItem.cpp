@@ -37,7 +37,8 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index)
 {
 	if (index < childCount()) {
 		QDetailWidgetPropertyItem* item = (QDetailWidgetPropertyItem*)child(index);
-		item->SetHandler(QPropertyHandler::FindOrCreate(GetContent(),
+		item->SetHandler(QPropertyHandler::FindOrCreate(
+			GetParentObeject(),
 			mValueTypeId,
 			QString::number(index),
 			[this, index]() {
@@ -60,7 +61,8 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index)
 	}
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
-			QPropertyHandler::FindOrCreate(GetContent(),
+			QPropertyHandler::FindOrCreate(
+				GetParentObeject(),
 				mValueTypeId,
 				QString::number(index),
 				[this, index]() {

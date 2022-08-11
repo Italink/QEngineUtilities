@@ -3,14 +3,15 @@
 
 #include "QWidget"
 
+
 class QDetailSearcher;
 class QDetailTreeWidget;
+class QUndoView;
 
 class QDetailWidget :public QWidget {
 	Q_OBJECT
 public:
 	using QWidget = QWidget;
-
 	enum Flag {
 		DisplaySearcher = 0x0
 	};
@@ -27,6 +28,7 @@ public:
 private:
 	QDetailSearcher* mSearcher = nullptr;
 	QDetailTreeWidget* mTreeWidget = nullptr;
+	QUndoView* mUndoView = nullptr;
 };
 
 #endif // QDetailWidget_h__
