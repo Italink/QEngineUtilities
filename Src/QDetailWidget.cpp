@@ -9,8 +9,6 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 {
 	QVBoxLayout* v = new QVBoxLayout(this);
 	v->setContentsMargins(0, 5, 0, 5);
-	mUndoView = new QUndoView(&mTreeWidget->mUndoStack);
-	v->addWidget(mUndoView);
 	v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
 	SetStyle(inStyle);

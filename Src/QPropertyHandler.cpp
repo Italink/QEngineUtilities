@@ -53,12 +53,12 @@ QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inParent, TypeId inTyp
 
 class QPropertyAssignCommand : public QUndoCommand {
 public:
-	QPropertyAssignCommand(QString inPropertyName, QVariant inPreValue, QVariant inPostValue, QPropertyHandler::Setter inSetter)
+	QPropertyAssignCommand(QString inDesc, QVariant inPreValue, QVariant inPostValue, QPropertyHandler::Setter inSetter)
 		: mPreValue(inPreValue)
 		, mPostValue(inPostValue)
 		, mSetter(inSetter)
 	{
-		setText("Assign: " + inPropertyName);
+		setText(inDesc);
 		mAssignTime = QTime::currentTime().msecsSinceStartOfDay();
 	}
 protected:
@@ -75,7 +75,7 @@ protected:
 	virtual bool mergeWith(const QUndoCommand* other) override {
 		if (other->text() == other->text()) {
 			const QPropertyAssignCommand* cmd = static_cast<const QPropertyAssignCommand*>(other);
-			if (cmd->mAssignTime - mAssignTime < 200) {
+			if (cmd->mAssignTime - mAssignTime < 500) {
 				mAssignTime = cmd->mAssignTime;
 				mPostValue = cmd->mPostValue;
 				return true;
@@ -90,16 +90,16 @@ protected:
 	int mAssignTime = 0;
 };
 
-void QPropertyHandler::SetValue(QVariant value, bool bPushUndoStack)
+
+void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDesc)
 {
 	QVariant last = GetValue();
-	if (last != value) {
-		if (mInitialValue.metaType().flags() & QMetaType::IsEnumeration ) 
-			mIsChanged = value.toInt() != mInitialValue.toInt();
-		else 
-			mIsChanged = (value != mInitialValue);
-		
+	if (last != inValue) {
 		QPropertyHandler::Setter AssignSetter = [this](QVariant inVar) {
+			if (mInitialValue.metaType().flags() & QMetaType::IsEnumeration)
+				mIsChanged = inVar.toInt() != mInitialValue.toInt();
+			else
+				mIsChanged = (inVar != mInitialValue);
 			mSetter(inVar);
 			for (auto& binder : mBinderMap.values()) {
 				QVariant var = binder.mGetter();
@@ -107,12 +107,12 @@ void QPropertyHandler::SetValue(QVariant value, bool bPushUndoStack)
 					binder.mSetter(inVar);
 				}
 			}
+			Q_EMIT AsValueChanged();
 		};
-		if (bPushUndoStack) 
-			mUndoEntry->Push(new QPropertyAssignCommand(GetName(), last, value, AssignSetter));
-		else 
-			AssignSetter(value);
-		Q_EMIT AsValueChanged();
+		if (!isPushUndoStackWithDesc.isEmpty())
+			mUndoEntry->Push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter));
+		else
+			AssignSetter(inValue);
 	}
 }
 
@@ -123,7 +123,7 @@ QVariant QPropertyHandler::GetValue()
 
 void QPropertyHandler::ResetValue() {
 	if (mIsChanged) {
-		SetValue(mInitialValue);
+		SetValue(mInitialValue, "Reset: " + GetName());
 	}
 }
 

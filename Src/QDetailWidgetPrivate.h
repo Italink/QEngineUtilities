@@ -71,17 +71,21 @@ protected:
 	void UpdateSplitterFactor();
 	virtual void drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const override;
 	virtual void showEvent(QShowEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent* event) override;
 	using QTreeWidget::QTreeWidget;
 private:
 	QList<QObject*> mObjects;
+
 	QColor mGridLineColor;
 	QColor mShadowColor;
 	QColor mCategoryColor;
 	QColor mHoveredColor;
 	QColor mArrowColor;
 	QList<int> mSplitterSizes = { 200,400,30 };
-public:
+
 	QDetailUndoStack mUndoStack;
+
+
 };
 
 

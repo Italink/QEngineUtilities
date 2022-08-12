@@ -17,7 +17,7 @@ public:
 	static QPropertyHandler* FindOrCreate(QObject* inObject, QString inPropertyName);
 	static QPropertyHandler* FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
 
-	void SetValue(QVariant inValue, bool bPushUndoStack = false);
+	void SetValue(QVariant inValue,QString isPushUndoStackWithDesc = QString());
 	QVariant GetValue();
 	void ResetValue();
 
@@ -34,7 +34,7 @@ public:
 	void Bind(OObjectType* inAdjuster, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
 		inSetter(GetValue());
 		connect(inAdjuster, inNotify, this, [this, inGetter]() {
-			SetValue(inGetter(), true);
+			SetValue(inGetter(), "Assign: "+ GetName());
 		});
 		mBinderMap[inAdjuster] = QPropertyBinder{ inGetter,inSetter };
 		connect(inAdjuster, &QObject::destroyed, this,[this, inAdjuster]() {

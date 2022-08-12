@@ -10,6 +10,10 @@
 
 
 class QDetailWidgetPropertyResetButton :public QPushButton {
+public:
+	QDetailWidgetPropertyResetButton() {
+		setFocusPolicy(Qt::NoFocus);
+	}
 protected:
 	virtual void paintEvent(QPaintEvent*) {
 		QPainter painter(this);

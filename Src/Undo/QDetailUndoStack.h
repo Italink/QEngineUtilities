@@ -11,6 +11,8 @@ public:
 	void AddEntry(QDetailUndoEntry* entry);
 	void RemoveEntry(QDetailUndoEntry* entry);
 	void Push(QDetailUndoEntry* entry, QUndoCommand* cmd);
+	void Undo();
+	void Redo();
 private:
 	QList<QDetailUndoEntry*> mEntryList;
 

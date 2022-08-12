@@ -1,4 +1,5 @@
-#include "QDetailUndoStack.h"
+﻿#include "QDetailUndoStack.h"
+#include "Widgets/Toolkits/QNotification.h"
 
 void QDetailUndoStack::AddEntry(QDetailUndoEntry* entry)
 {
@@ -29,6 +30,22 @@ void QDetailUndoStack::Push(QDetailUndoEntry* entry, QUndoCommand* cmd)
 	mCommandToEntry[cmd] = entry;
 }
 
+void QDetailUndoStack::Undo()
+{
+	if (canUndo()) {
+		QNotification::ShowMessage("Undo", undoText(), 2000);
+		undo();
+	}
+}
+
+void QDetailUndoStack::Redo()
+{
+	if (canRedo()) {
+		QNotification::ShowMessage("Redo", undoText(), 2000);
+		redo();
+	}
+}
+
 void QDetailUndoEntry::BeginMacro(const QString& text)
 {
 	if (mStack)
@@ -46,4 +63,3 @@ void QDetailUndoEntry::EndMacro()
 	if (mStack)
 		mStack->endMacro();
 }
-

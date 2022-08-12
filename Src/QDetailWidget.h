@@ -28,7 +28,6 @@ public:
 private:
 	QDetailSearcher* mSearcher = nullptr;
 	QDetailTreeWidget* mTreeWidget = nullptr;
-	QUndoView* mUndoView = nullptr;
 };
 
 #endif // QDetailWidget_h__

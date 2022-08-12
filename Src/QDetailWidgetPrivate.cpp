@@ -7,6 +7,7 @@
 #include "QPainter"
 #include "QPushButton"
 #include "QApplication"
+#include "QKeyEvent"
 
 #include "Items\QDetailWidgetCategoryItem.h"
 #include "Items\QDetailWidgetItem.h"
@@ -131,12 +132,12 @@ void QDetailTreeWidget::SearchByKeywords(QString inKeywords) {
 
 void QDetailTreeWidget::Undo()
 {
-	mUndoStack.undo();
+	mUndoStack.Undo();
 }
 
 void QDetailTreeWidget::Redo()
 {
-	mUndoStack.redo();
+	mUndoStack.Redo();
 }
 
 
@@ -303,3 +304,18 @@ void QDetailTreeWidget::showEvent(QShowEvent* event)
 	UpdateSplitterFactor();
 }
 
+void QDetailTreeWidget::keyPressEvent(QKeyEvent* event)
+{
+	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier)) {
+		switch (event->key()) {
+		case Qt::Key_Z: {
+			Undo();
+			break;
+		}
+		case Qt::Key_Y: {
+			Redo();
+			break;
+		}
+		}
+	}
+}
