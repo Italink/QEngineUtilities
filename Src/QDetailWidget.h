@@ -2,11 +2,28 @@
 #define QDetailWidget_h__
 
 #include "QWidget"
-
+#include "QInstance.h"
 
 class QDetailSearcher;
 class QDetailTreeWidget;
 class QUndoView;
+
+template<typename Instance>
+typename std::enable_if<QtPrivate::IsPointerToGadgetHelper<Instance>::IsGadgetOrDerivedFrom>::type
+ GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, Instance inInstance) {
+	inInstanceList << QSharedPointer<QInstance_Gadget>::create(inInstance,  &std::remove_pointer<Instance>::type::staticMetaObject);
+}
+
+template<typename Instance>
+typename std::enable_if<QtPrivate::IsPointerToTypeDerivedFromQObject<Instance>::Value>::type
+GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, Instance inInstance) {
+	inInstanceList << QSharedPointer<QInstance_Object>::create(inInstance);
+}
+
+template<typename... Instances>
+void GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, Instances... inInstance) {
+	(..., GenerateGadgetOrObject(inInstanceList, inInstance));
+}
 
 class QDetailWidget :public QWidget {
 	Q_OBJECT
@@ -22,7 +39,16 @@ public:
 		Qt,
 	};
 	QDetailWidget(QDetailWidget::Flags inFlags = QDetailWidget::DisplaySearcher, QDetailWidget::Style inStyle = QDetailWidget::Qt);
-	void SetObjects(const QList<QObject*>& inObjects);
+
+	template<typename... Instances>
+	void SetInstances(Instances... inInstances) {
+		QList<QSharedPointer<QInstance>> InstanceList;
+		GenerateGadgetOrObject(InstanceList, inInstances...);
+		SetInstanceList(InstanceList);
+	}
+
+	void SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstance);
+
 	void SetStyle(QDetailWidget::Style inStyle);
 	void SearchByKeywords(QString inKeywords);
 private:

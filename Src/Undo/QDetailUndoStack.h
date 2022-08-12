@@ -21,6 +21,7 @@ private:
 
 class QDetailUndoEntry: public QObject {
 	friend class QDetailUndoStack;
+	Q_OBJECT
 public:
 	QDetailUndoEntry(QObject *inParent = nullptr):QObject(inParent){}
 	void BeginMacro(const QString& text);

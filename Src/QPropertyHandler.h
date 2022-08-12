@@ -4,6 +4,7 @@
 #include "QObject"
 #include "QVariant"
 #include "QUndoStack"
+#include "QInstance.h"
 
 class QDetailUndoEntry;
 
@@ -14,8 +15,8 @@ public:
 	using Getter = std::function<QVariant()>;
 	using Setter = std::function<void(QVariant)>;
 
-	static QPropertyHandler* FindOrCreate(QObject* inObject, QString inPropertyName);
-	static QPropertyHandler* FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
+	static QPropertyHandler* FindOrCreate(QInstance* inInstance, QString inPropertyName);
+	static QPropertyHandler* FindOrCreate(QObject* inOuter, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter);
 
 	void SetValue(QVariant inValue,QString isPushUndoStackWithDesc = QString());
 	QVariant GetValue();

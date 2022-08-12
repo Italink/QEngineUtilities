@@ -21,28 +21,28 @@ QPropertyHandler::QPropertyHandler(QObject* inParent, TypeId inTypeID, QString i
 	}
 }
 
-QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inObject, QString inPropertyName)
+QPropertyHandler* QPropertyHandler::FindOrCreate(QInstance* inInstance, QString inPropertyName)
 {
-	int index = inObject->metaObject()->indexOfProperty(inPropertyName.toLocal8Bit());
-	QMetaProperty metaProperty = inObject->metaObject()->property(index);
-	return FindOrCreate(inObject,
+	int index = inInstance->GetMetaObject()->indexOfProperty(inPropertyName.toLocal8Bit());
+	QMetaProperty metaProperty = inInstance->GetMetaObject()->property(index);
+	return FindOrCreate(inInstance->GetOuterObject(),
 		metaProperty.typeId(),
 		inPropertyName,
-		[Object = inObject, metaProperty]() {return metaProperty.read(Object); },
-		[Object = inObject, metaProperty](QVariant var) { metaProperty.write(Object, var); }
+		[inInstance, metaProperty]() {return inInstance->GetProperty(metaProperty); },
+		[inInstance, metaProperty](QVariant var) { inInstance->SetProperty(metaProperty, var); }
 	);
 }
 
-QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
+QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inOuter, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter)
 {
-	for (QObject* child : inParent->children()) {
+	for (QObject* child : inOuter->children()) {
 		QPropertyHandler* handler = qobject_cast<QPropertyHandler*>(child);
 		if (handler && handler->GetName() == inName) {
 			return handler;
 		}
 	}
 	QPropertyHandler* handler = new QPropertyHandler(
-		inParent,
+		inOuter,
 		inTypeID,
 		inName,
 		inGetter,
@@ -51,12 +51,14 @@ QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inParent, TypeId inTyp
 	return handler;
 }
 
+
 class QPropertyAssignCommand : public QUndoCommand {
 public:
-	QPropertyAssignCommand(QString inDesc, QVariant inPreValue, QVariant inPostValue, QPropertyHandler::Setter inSetter)
+	QPropertyAssignCommand(QString inDesc, QVariant inPreValue, QVariant inPostValue, QPropertyHandler::Setter inSetter, QPropertyHandler* inHandler)
 		: mPreValue(inPreValue)
 		, mPostValue(inPostValue)
 		, mSetter(inSetter)
+		, mHandler(inHandler)
 	{
 		setText(inDesc);
 		mAssignTime = QTime::currentTime().msecsSinceStartOfDay();
@@ -73,12 +75,14 @@ protected:
 	}
 
 	virtual bool mergeWith(const QUndoCommand* other) override {
-		if (other->text() == other->text()) {
+		if ( other->text() == other->text()) {
 			const QPropertyAssignCommand* cmd = static_cast<const QPropertyAssignCommand*>(other);
-			if (cmd->mAssignTime - mAssignTime < 500) {
-				mAssignTime = cmd->mAssignTime;
-				mPostValue = cmd->mPostValue;
-				return true;
+			if (cmd&&mHandler == cmd->mHandler) {
+				if (cmd->mAssignTime - mAssignTime < 500) {
+					mAssignTime = cmd->mAssignTime;
+					mPostValue = cmd->mPostValue;
+					return true;
+				}
 			}
 		}
 		return false;
@@ -88,6 +92,7 @@ protected:
 	QVariant mPostValue;
 	QPropertyHandler::Setter mSetter;
 	int mAssignTime = 0;
+	QPropertyHandler* mHandler = nullptr;
 };
 
 
@@ -110,7 +115,7 @@ void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDes
 			Q_EMIT AsValueChanged();
 		};
 		if (!isPushUndoStackWithDesc.isEmpty())
-			mUndoEntry->Push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter));
+			mUndoEntry->Push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter, this));
 		else
 			AssignSetter(inValue);
 	}

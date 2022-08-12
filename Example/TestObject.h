@@ -11,7 +11,7 @@
 class TestInlineGadget{
 	Q_GADGET
 		Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
-		Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
+		//Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
 
 		Q_META_BEGIN(TestGadget)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)

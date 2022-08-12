@@ -3,13 +3,14 @@
 
 #include "QObject"
 #include "QMetaDataDefine.h"
+#include "QInstance.h"
 
 class QTreeWidgetItem; 
 class QDetailTreeWidget;
 
 class QObjectDetailBuilder {
 public:
-	QObjectDetailBuilder(QObject* inObject, QDetailTreeWidget* inWidget );
+	QObjectDetailBuilder(QSharedPointer<QInstance> inInstance, QDetailTreeWidget* inWidget );
 
 	void BuildDefault();
 
@@ -18,11 +19,10 @@ public:
 	QString GetPropertyCategoryName(QString inPropertyName);
 
 	QVariantHash GetPropertyMetaData(QMetaProperty inProperty);
-
 protected:
 	void ReadObjectMetaData();
 public:
-	QObject* mObject = nullptr;
+	QSharedPointer<QInstance> mInstance;
 	QDetailTreeWidget* mWidget = nullptr;
 	QObjectMetaData mMetaData;
 };

@@ -8,8 +8,8 @@
 #include "QDetailWidgetManager.h"
 #include "Items\QDetailWidgetCategoryItem.h"
 
-QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailTreeWidget* inWidget)
-	: mObject(mObject)
+QObjectDetailBuilder::QObjectDetailBuilder(QSharedPointer<QInstance> inInstance, QDetailTreeWidget* inWidget)
+	: mInstance(inInstance)
 	, mWidget(inWidget)
 {
 	ReadObjectMetaData();
@@ -17,8 +17,8 @@ QObjectDetailBuilder::QObjectDetailBuilder(QObject* mObject, QDetailTreeWidget* 
 
 void QObjectDetailBuilder::BuildDefault()
 {
-	for (int i = 1; i < mObject->metaObject()->propertyCount(); i++) {
-		QMetaProperty prop = mObject->metaObject()->property(i);
+	for (int i = 0; i < mInstance->GetMetaObject()->propertyCount(); i++) {
+		QMetaProperty prop = mInstance->GetMetaObject()->property(i);
 		if (!prop.isDesignable())
 			continue;
 		AddNewProperty(prop);
@@ -29,11 +29,11 @@ void QObjectDetailBuilder::AddNewProperty(QMetaProperty inProperty)
 {
 	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(
 		QPropertyHandler::FindOrCreate(
-			mObject,
+			mInstance->GetOuterObject(),
 			inProperty.typeId(),
 			inProperty.name(),
-			[Object = mObject, inProperty]() {return inProperty.read(Object); },
-			[Object = mObject, inProperty](QVariant var) { inProperty.write(Object, var); }
+			[Instance = mInstance.get(), inProperty]() {return Instance->GetProperty(inProperty); },
+			[Instance = mInstance.get(), inProperty](QVariant var) { Instance->SetProperty(inProperty, var); }
 		),
 		GetPropertyMetaData(inProperty)
 	);
@@ -48,38 +48,24 @@ QString QObjectDetailBuilder::GetPropertyCategoryName(QString inPropertyName)
 {
 	QString categoryName = mMetaData.mPropertiesMetaData.value(inPropertyName)["Category"].toString();
 	if (categoryName.isEmpty())
-		categoryName = mObject->objectName();
+		categoryName = mInstance->GetOuterObject()->objectName();
 	if (categoryName.isEmpty())
 		categoryName = "Common";
 	return categoryName;
 }
 
-
 QVariantHash QObjectDetailBuilder::GetPropertyMetaData(QMetaProperty inProperty)
 {
-	//if (inProperty.isEnumType()) {
-	//	QMetaEnum Enum = inProperty.enumerator();
-	//	QJsonObject metaData;
-	//	QJsonArray enumList;
-	//	for (int i = 0; i < Enum.keyCount(); i++) {
-	//		QJsonObject enumData;
-	//		enumData["Name"] = Enum.key(i);
-	//		enumData["Value"] = Enum.value(i);
-	//		enumList << enumData;
-	//	}
-	//	metaData["EnumList"] = enumList;
-	//	return metaData;
-	//}
 	return mMetaData.mPropertiesMetaData.value(inProperty.name());
 }
 
 void QObjectDetailBuilder::ReadObjectMetaData()
 {
-	for (int i = 0; i < mObject->metaObject()->methodCount(); i++) {
-		QMetaMethod method = mObject->metaObject()->method(i);
+	for (int i = 0; i < mInstance->GetMetaObject()->methodCount(); i++) {
+		QMetaMethod method = mInstance->GetMetaObject()->method(i);
 		if (QString(method.name()).endsWith("_GetMetaData")) {
 			QObjectMetaData MetaData;
-			if (method.invoke(mObject, Q_RETURN_ARG(QObjectMetaData, MetaData))) {
+			if (mInstance->Invoke(method, Q_RETURN_ARG(QObjectMetaData, MetaData))) {
 				for (auto PropertyIter = MetaData.mPropertiesMetaData.begin(); PropertyIter != MetaData.mPropertiesMetaData.end(); ++PropertyIter) {
 					 mMetaData.mPropertiesMetaData[PropertyIter.key()] = PropertyIter.value();
 				}

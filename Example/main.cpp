@@ -7,10 +7,16 @@
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
 
-	QDetailWidget widget;
+	TestInlineGadget gadget;
 	TestObject obj;
-	widget.SetObjects({&obj});
+
+	QDetailWidget widget;
+	widget.SetInstances( &obj);
 	widget.show();
+
+	QDetailWidget gadgetwidget;
+	gadgetwidget.SetInstances(&gadget);
+	gadgetwidget.show();
 
 	return app.exec();
 }

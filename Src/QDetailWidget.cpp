@@ -9,15 +9,17 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 {
 	QVBoxLayout* v = new QVBoxLayout(this);
 	v->setContentsMargins(0, 5, 0, 5);
+	v->addWidget(new QUndoView(&QDetailTreeWidget::mUndoStack));
 	v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
 	SetStyle(inStyle);
 	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
 }
 
-void QDetailWidget::SetObjects(const QList<QObject*>& inObjects) {
-	mTreeWidget->SetObjects(inObjects);
-	return;
+
+void QDetailWidget::SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstance)
+{
+	mTreeWidget->SetInstances(inInstance);
 }
 
 void QDetailWidget::SetStyle(Style inStyle) {

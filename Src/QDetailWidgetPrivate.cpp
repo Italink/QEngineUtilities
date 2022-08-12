@@ -57,16 +57,19 @@ QDetailTreeWidget::QDetailTreeWidget()
 	});
 }
 
-void QDetailTreeWidget::SetObjects(const QList<QObject*>& inObjects)
+void QDetailTreeWidget::SetInstances(const QList<QSharedPointer<QInstance>>& inInstance)
 {
-	for (auto& Object : mObjects) {
-		QDetailUndoEntry* UndoEntry = Object->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
+	for (auto& instance : mInstanceList) {
+		QDetailUndoEntry* UndoEntry = instance->GetOuterObject()->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
 		mUndoStack.RemoveEntry(UndoEntry);
 	}
-	mObjects = inObjects;
+	for (auto object : inInstance) {
+		mInstanceList << object;
+	}
+
 	Recreate();
-	for (auto& Object : mObjects) {
-		QDetailUndoEntry* UndoEntry = Object->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
+	for (auto& instance : mInstanceList) {
+		QDetailUndoEntry* UndoEntry = instance->GetOuterObject()->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
 		mUndoStack.AddEntry(UndoEntry);
 	}
 }
@@ -74,18 +77,18 @@ void QDetailTreeWidget::SetObjects(const QList<QObject*>& inObjects)
 void QDetailTreeWidget::Recreate()
 {
 	clear();
-	if (mObjects.isEmpty())
+	if (mInstanceList.isEmpty())
 		return;
-	for (QObject* object : mObjects) {
-		if (object == nullptr)
+	for (auto& instance : mInstanceList) {
+		if (instance.isNull())
 			continue;
-		QObjectDetailBuilder builder(object, this);
+		QObjectDetailBuilder* builder = new QObjectDetailBuilder(instance, this);
 		//const QSharedPointer<IObjectDetailCustomization>& customizer = QDetailWidgetManager::instance()->getObjectDetailCustomizer(object->metaObject());
 		//if (customizer) {
 		//	customizer->Build(builder);
 		//}
 		//else {
-			builder.BuildDefault();
+			builder->BuildDefault();
 		//}
 	}
 }

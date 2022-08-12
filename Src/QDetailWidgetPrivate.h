@@ -4,6 +4,7 @@
 #include "QObject"
 #include "QTreeWidget"
 #include "Undo/QDetailUndoStack.h"
+#include "QInstance.h"
 
 class QPushButton;
 class QHoverLineEdit;
@@ -24,6 +25,8 @@ private:
 	QPushButton* mPbSearch;
 };
 
+
+
 class QDetailTreeWidget: public QTreeWidget{
 	Q_OBJECT
 		Q_PROPERTY(QColor GridLineColor READ GetGridLineColor WRITE SetGridLineColor)
@@ -35,12 +38,11 @@ class QDetailTreeWidget: public QTreeWidget{
 public:
 	QDetailTreeWidget();
 
-	void SetObjects(const QList<QObject*>& inObjects);
+	void SetInstances(const QList<QSharedPointer<QInstance>>& inInstance);
 
 	void SearchByKeywords(QString inKeywords);
 
 	void Undo();
-
 	void Redo();
 
 	void Recreate();
@@ -74,7 +76,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* event) override;
 	using QTreeWidget::QTreeWidget;
 private:
-	QList<QObject*> mObjects;
+	QList<QSharedPointer<QInstance>> mInstanceList;
 
 	QColor mGridLineColor;
 	QColor mShadowColor;
@@ -83,9 +85,8 @@ private:
 	QColor mArrowColor;
 	QList<int> mSplitterSizes = { 200,400,30 };
 
-	QDetailUndoStack mUndoStack;
-
-
+public:
+	inline static QDetailUndoStack mUndoStack;
 };
 
 
