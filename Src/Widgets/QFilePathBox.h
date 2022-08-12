@@ -20,5 +20,4 @@ private:
 	QPushButton* mPbOpen;
 };
 
-
 #endif // QFilePathBox_h__

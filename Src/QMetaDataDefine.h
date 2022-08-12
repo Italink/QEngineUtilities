@@ -1,6 +1,9 @@
-#include "QJsonObject"
-#include "QJsonArray"
-#include "QJsonDocument"
+#ifndef QMetaDataDefine_h__
+#define QMetaDataDefine_h__
+
+#include "QString"
+#include "QVariant"
+
 
 #define Q_META_BEGIN(ClassName) \
 	Q_INVOKABLE	static QObjectMetaData ClassName##_GetMetaData(){ \
@@ -40,3 +43,5 @@ struct QObjectMetaData{
 	QHash<QString, QVariant> mClassMetaData;
 	QHash<QString, QVariantHash> mPropertiesMetaData;
 };
+
+#endif

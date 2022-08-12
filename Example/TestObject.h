@@ -2,12 +2,29 @@
 #define TestObject_h__
 
 #include "QObject"
-#include "Types/QColors.h"
 #include "qvectornd.h"
 #include "QMetaDataDefine.h"
 #include "QFile"
 #include "QDir"
+#include "QColor"
 
+class TestInlineGadget{
+	Q_GADGET
+		Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
+		Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
+
+		Q_META_BEGIN(TestGadget)
+		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
+		Q_META_END()
+private:
+	double LimitedDouble = 5;
+	bool Bool = true;
+public:
+	bool GetBool() const { return Bool; }
+	void SetBool(bool val) { Bool = val; }
+	double GetLimitedDouble() const { return LimitedDouble; }
+	void SetLimitedDouble(double val) { LimitedDouble = val; }
+};
 
 class TestObject :public QObject {
 	Q_OBJECT
@@ -26,11 +43,9 @@ class TestObject :public QObject {
 	Q_PROPERTY(QVector3D Vec3 READ GetVec3 WRITE SetVec3)
 	Q_PROPERTY(QVector4D Vec4 READ GetVec4 WRITE SetVec4)
 	Q_PROPERTY(QColor Color READ GetColor WRITE SetColor)
-	Q_PROPERTY(QColors Colors READ GetColors WRITE SetColors)
 	Q_PROPERTY(QList<QColor> ColorList READ GetColorList WRITE SetColorList)
 	Q_PROPERTY(std::vector<QColor> StdColorList READ GetStdColorList WRITE SetStdColorList)
 	Q_PROPERTY(QMap<QString,QColor> ColorMap READ GetColorMap WRITE SetColorMap)
-
 
 	Q_META_BEGIN(TestObject)
 		Q_META_CATEGORY(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
@@ -68,7 +83,6 @@ private:
 	QVector3D Vec3;
 	QVector4D Vec4;
 	QColor Color;
-	QColors Colors;
 	QList<QColor> ColorList{ Qt::red,Qt::green,Qt::blue };
 	std::vector<QColor> StdColorList{ Qt::red,Qt::green,Qt::blue };
 	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
@@ -89,9 +103,6 @@ public:
 
 	QColor GetColor() const { return Color; }
 	void SetColor(QColor val) { Color = val; }
-
-	QColors GetColors() const { return Colors; }
-	void SetColors(QColors val) { Colors = val; }
 
 	bool GetBool() const { return Bool; }
 	void SetBool(bool val) { Bool = val; }
@@ -135,7 +146,6 @@ public:
 	QMap<QString, QColor> GetColorMap() const { return ColorMap; }
 	void SetColorMap(QMap<QString, QColor> val) { 
 		ColorMap = val; 
-		qDebug() << val;
 	}
 };
 
