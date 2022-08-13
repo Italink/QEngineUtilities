@@ -2,6 +2,7 @@
 #define QNotification_h__
 
 #include "QWidget"
+#include "QHash"
 #include "QAbstractAnimation"
 
 class QNotificationBlockInterface;

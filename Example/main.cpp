@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
 	TestObject obj;
 
 	QDetailWidget widget;
-	widget.SetInstances( &obj);
+	widget.SetInstances(&obj, &gadget);
 	widget.show();
 
 	QDetailWidget gadgetwidget;

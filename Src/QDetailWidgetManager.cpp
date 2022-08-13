@@ -8,6 +8,7 @@
 #include "Items\QDetailWidgetPropertySequentialItem.h"
 #include "Items\QDetailWidgetPropertyEnumItem.h"
 #include "Items\QDetailWidgetPropertyAssociativeItem.h"
+#include "Items\QDetailWidgetPropertyInstanceItem.h"
 
 
 QDetailWidgetManager::QDetailWidgetManager()
@@ -34,4 +35,5 @@ void QDetailWidgetManager::RegisterBuiltIn()
 	RegisterPropertyItemFilter<QDetailWidgetPropertyEnumItem>();
 	RegisterPropertyItemFilter<QDetailWidgetPropertySequentialItem>();
 	RegisterPropertyItemFilter<QDetailWidgetPropertyAssociativeItem>();
+	RegisterPropertyItemFilter<QDetailWidgetPropertyInstanceItem>();
 }

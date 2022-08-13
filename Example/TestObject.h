@@ -11,7 +11,7 @@
 class TestInlineGadget{
 	Q_GADGET
 		Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
-		//Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
+		Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
 
 		Q_META_BEGIN(TestGadget)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
@@ -46,6 +46,7 @@ class TestObject :public QObject {
 	Q_PROPERTY(QList<QColor> ColorList READ GetColorList WRITE SetColorList)
 	Q_PROPERTY(std::vector<QColor> StdColorList READ GetStdColorList WRITE SetStdColorList)
 	Q_PROPERTY(QMap<QString,QColor> ColorMap READ GetColorMap WRITE SetColorMap)
+	Q_PROPERTY(TestInlineGadget InlineGadget READ GetInlineGadget WRITE SetInlineGadget)
 
 	Q_META_BEGIN(TestObject)
 		Q_META_CATEGORY(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
@@ -86,8 +87,7 @@ private:
 	QList<QColor> ColorList{ Qt::red,Qt::green,Qt::blue };
 	std::vector<QColor> StdColorList{ Qt::red,Qt::green,Qt::blue };
 	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
-	QFile File;
-	QDir Dir;
+	TestInlineGadget InlineGadget;
 public:
 	int getInt() const { return Int; }
 	void setInt(int val) {
@@ -100,6 +100,7 @@ public:
 		ColorList = val; 
 		qDebug() << ColorList;
 	}
+
 
 	QColor GetColor() const { return Color; }
 	void SetColor(QColor val) { Color = val; }
@@ -147,6 +148,8 @@ public:
 	void SetColorMap(QMap<QString, QColor> val) { 
 		ColorMap = val; 
 	}
+	TestInlineGadget GetInlineGadget() const { return InlineGadget; }
+	void SetInlineGadget(TestInlineGadget val) { InlineGadget = val; }
 };
 
 #endif // TestObject_h__

@@ -37,10 +37,14 @@ void QObjectDetailBuilder::AddNewProperty(QMetaProperty inProperty)
 		),
 		GetPropertyMetaData(inProperty)
 	);
-
-	QDetailWidgetCategoryItem* categoryItem = mWidget->FindOrAddCategory(GetPropertyCategoryName(inProperty.name()));
 	if (item) {
+		QDetailWidgetCategoryItem* categoryItem = mWidget->FindOrAddCategory(GetPropertyCategoryName(inProperty.name()));
 		item->AttachTo(categoryItem);
+	}
+	else {
+		auto it = QMetaType::metaObjectForType(inProperty.typeId());
+		//auto it = MetaObjectForType
+		qDebug() << inProperty.name();
 	}
 }
 
