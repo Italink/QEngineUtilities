@@ -11,12 +11,12 @@ int main(int argc, char** argv) {
 	TestObject obj;
 
 	QDetailWidget widget;
-	widget.SetInstances(&obj, &gadget);
+	widget.SetInstances(&obj);
 	widget.show();
 
-	QDetailWidget gadgetwidget;
-	gadgetwidget.SetInstances(&gadget);
-	gadgetwidget.show();
+	//QDetailWidget gadgetwidget;
+	//gadgetwidget.SetInstances(&gadget);
+	//gadgetwidget.show();
 
 	return app.exec();
 }

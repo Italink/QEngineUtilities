@@ -1,25 +1,32 @@
 #include "QDetailWidget.h"
 #include "QBoxLayout"
-#include "QDetailWidgetPrivate.h"
+#include "Core\QDetailWidgetPrivate.h"
 #include "QUndoView"
 
 QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle /*= Unreal*/)
 	: mSearcher(new QDetailSearcher)
 	, mTreeWidget(new QDetailTreeWidget)
+	, mFlags(inFlags)
 {
 	QVBoxLayout* v = new QVBoxLayout(this);
 	v->setContentsMargins(0, 5, 0, 5);
-	v->addWidget(new QUndoView(&QDetailTreeWidget::mUndoStack));
-	v->addWidget(mSearcher);
+	v->addWidget(new QUndoView(QDetailUndoStack::Instance()));
+	if(mFlags.testFlag(DisplaySearcher))
+		v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
 	SetStyle(inStyle);
 	connect(mSearcher, &QDetailSearcher::AsRequestSearch, this, &QDetailWidget::SearchByKeywords);
 }
 
 
-void QDetailWidget::SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstance)
+void QDetailWidget::SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstances)
 {
-	mTreeWidget->SetInstances(inInstance);
+	if (mFlags.testFlag(DisplayCategory)) {
+		for (auto& Instance : inInstances) {
+			Instance->SetMetaData("DisplayCategory",true);
+		}
+	}
+	mTreeWidget->SetInstances(inInstances);
 }
 
 void QDetailWidget::SetStyle(Style inStyle) {
@@ -171,7 +178,7 @@ QScrollBar::handle:horizontal {
 
 QScrollBar::handle:vertical:hover,
 QScrollBar::handle:horizontal:hover {
-    background:  rgb(255,255,255);
+    background:  rgb(100,230,102);
 }
 QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical,
 QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {

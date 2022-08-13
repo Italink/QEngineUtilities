@@ -2,7 +2,7 @@
 #define QDetailWidget_h__
 
 #include "QWidget"
-#include "QInstance.h"
+#include "Core/QInstance.h"
 
 class QDetailSearcher;
 class QDetailTreeWidget;
@@ -11,13 +11,13 @@ class QUndoView;
 template<typename Instance>
 typename std::enable_if<QtPrivate::IsPointerToGadgetHelper<Instance>::IsGadgetOrDerivedFrom>::type
  GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, Instance inInstance) {
-	inInstanceList << QSharedPointer<QInstance_Gadget>::create(inInstance,  &std::remove_pointer<Instance>::type::staticMetaObject);
+	inInstanceList << QInstance::CreateGadget(inInstance,  &std::remove_pointer<Instance>::type::staticMetaObject);
 }
 
 template<typename Instance>
 typename std::enable_if<QtPrivate::IsPointerToTypeDerivedFromQObject<Instance>::Value>::type
 GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, Instance inInstance) {
-	inInstanceList << QSharedPointer<QInstance_Object>::create(inInstance);
+	inInstanceList << QInstance::CreateObjcet(inInstance);
 }
 
 template<typename... Instances>
@@ -30,7 +30,8 @@ class QDetailWidget :public QWidget {
 public:
 	using QWidget = QWidget;
 	enum Flag {
-		DisplaySearcher = 0x0
+		DisplaySearcher = 0x1,
+		DisplayCategory = 0x2,
 	};
 	Q_DECLARE_FLAGS(Flags, Flag);
 
@@ -38,7 +39,8 @@ public:
 		Unreal = 0,
 		Qt,
 	};
-	QDetailWidget(QDetailWidget::Flags inFlags = QDetailWidget::DisplaySearcher, QDetailWidget::Style inStyle = QDetailWidget::Qt);
+
+	QDetailWidget(QDetailWidget::Flags inFlags = Flags(QDetailWidget::DisplaySearcher | QDetailWidget::DisplayCategory), QDetailWidget::Style inStyle = QDetailWidget::Qt);
 
 	template<typename... Instances>
 	void SetInstances(Instances... inInstances) {
@@ -47,13 +49,14 @@ public:
 		SetInstanceList(InstanceList);
 	}
 
-	void SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstance);
+	void SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstances);
 
 	void SetStyle(QDetailWidget::Style inStyle);
 	void SearchByKeywords(QString inKeywords);
 private:
 	QDetailSearcher* mSearcher = nullptr;
 	QDetailTreeWidget* mTreeWidget = nullptr;
+	Flags mFlags;
 };
 
 #endif // QDetailWidget_h__

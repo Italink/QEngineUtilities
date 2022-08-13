@@ -5,7 +5,6 @@ QHoverTextEdit::QHoverTextEdit(QString inText)
 	: mTextEdit(new QTextEdit(inText))
 {
 	connect(mTextEdit, &QTextEdit::textChanged, this, &QHoverTextEdit::AsTextChanged);
-
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->addWidget(mTextEdit);
 	h->setContentsMargins(2, 2, 2, 2);

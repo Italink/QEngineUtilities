@@ -3,55 +3,58 @@
 
 #include "QObject"
 #include "qvectornd.h"
-#include "QMetaDataDefine.h"
+#include "Core/QMetaDataDefine.h"
 #include "QFile"
 #include "QDir"
 #include "QColor"
 
+#define Q_PROPERTY_AUTO(Type,Name)\
+    Q_PROPERTY(Type Name READ get_##Name WRITE set_##Name) \
+    Type get_##Name(){ return Name; } \
+    void set_##Name(Type var){ \
+        Name = var;  \
+		qDebug()<<#Name<<": "<<var; \
+    } \
+    Type Name
+
+
 class TestInlineGadget{
 	Q_GADGET
-		Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
-		Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
-
-		Q_META_BEGIN(TestGadget)
+		Q_META_BEGIN(TestInlineGadget)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_END()
-private:
-	double LimitedDouble = 5;
-	bool Bool = true;
 public:
-	bool GetBool() const { return Bool; }
-	void SetBool(bool val) { Bool = val; }
-	double GetLimitedDouble() const { return LimitedDouble; }
-	void SetLimitedDouble(double val) { LimitedDouble = val; }
+	Q_PROPERTY_AUTO(double, LimitedDouble);
+	Q_PROPERTY_AUTO(QString, Desc) = "This is inline gadget";
 };
+
+class TestInlineObject : public QObject {
+	Q_OBJECT
+public:
+	Q_PROPERTY_AUTO(QString, Desc) = "This is inline Object";
+};
+
+static QDebug operator<<(QDebug debug, const std::string& str) {
+	return debug<<QString::fromStdString(str);
+}
+
+static QDebug operator<<(QDebug debug, const TestInlineGadget& gadget) {
+	return debug << gadget.LimitedDouble << gadget.Desc;
+}
+
+static QDebug operator<<(QDebug debug, const TestInlineObject* object) {
+	return debug << object->Desc;
+}
+
 
 class TestObject :public QObject {
 	Q_OBJECT
-	Q_PROPERTY(int Int READ getInt WRITE setInt)
-	Q_PROPERTY(float Float READ GetFloat WRITE SetFloat)
-	Q_PROPERTY(double LimitedDouble READ GetLimitedDouble WRITE SetLimitedDouble)
-	Q_PROPERTY(bool Bool READ GetBool WRITE SetBool)
-	Q_PROPERTY(TestEnum Enum READ GetEnum WRITE SetEnum)
-
-	Q_PROPERTY(QString QtString READ GetQtString WRITE SetQtString)
-	Q_PROPERTY(std::string StdString READ GetStdString WRITE SetStdString)
-	Q_PROPERTY(QString AsMultiLineString READ GetAsMultiLineString WRITE SetAsMultiLineString)
-	Q_PROPERTY(QString AsPath READ GetAsPath WRITE SetAsPath)
-	Q_PROPERTY(QString AsCombo READ GetAsCombo WRITE SetAsCombo)
-	Q_PROPERTY(QVector2D Vec2 READ GetVec2 WRITE SetVec2)
-	Q_PROPERTY(QVector3D Vec3 READ GetVec3 WRITE SetVec3)
-	Q_PROPERTY(QVector4D Vec4 READ GetVec4 WRITE SetVec4)
-	Q_PROPERTY(QColor Color READ GetColor WRITE SetColor)
-	Q_PROPERTY(QList<QColor> ColorList READ GetColorList WRITE SetColorList)
-	Q_PROPERTY(std::vector<QColor> StdColorList READ GetStdColorList WRITE SetStdColorList)
-	Q_PROPERTY(QMap<QString,QColor> ColorMap READ GetColorMap WRITE SetColorMap)
-	Q_PROPERTY(TestInlineGadget InlineGadget READ GetInlineGadget WRITE SetInlineGadget)
 
 	Q_META_BEGIN(TestObject)
 		Q_META_CATEGORY(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
 		Q_META_CATEGORY(Color,Color,Colors, ColorList, StdColorList,ColorMap)
 		Q_META_CATEGORY(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
+		Q_META_CATEGORY(Inline, InlineGadget, InlineObject)
 		Q_META_CATEGORY(Other,Bool)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_STRING_AS_LINE(QtString,"This is QString")
@@ -60,96 +63,37 @@ class TestObject :public QObject {
 		Q_META_STRING_AS_FILE_PATH(AsPath)
 		Q_META_STRING_AS_COMBO(AsCombo,A,B,C,D)
 	Q_META_END()
-
 public:
 	enum TestEnum {
 		One,
 		Two,
 		Three
 	};
-	Q_ENUM(TestEnum)
-private:
-	QString String;
-	int Int = 0;
-	float Float = 0;
-	double LimitedDouble = 5;
-	bool Bool = true;
-	TestEnum Enum = Two;
-	QString QtString;
-	std::string StdString;
-	QString AsMultiLineString;
-	QString AsPath;
-	QString AsCombo = "A";
-	QVector2D Vec2;
-	QVector3D Vec3;
-	QVector4D Vec4;
-	QColor Color;
-	QList<QColor> ColorList{ Qt::red,Qt::green,Qt::blue };
-	std::vector<QColor> StdColorList{ Qt::red,Qt::green,Qt::blue };
+	Q_ENUM(TestEnum);
+
+	Q_PROPERTY_AUTO(int, Int) = 0;
+	Q_PROPERTY_AUTO(float, Float) = 1.23;
+	Q_PROPERTY_AUTO(double, LimitedDouble) = 5;
+	Q_PROPERTY_AUTO(TestEnum, Enum);
+	Q_PROPERTY_AUTO(QString, QtString);
+	Q_PROPERTY_AUTO(std::string, StdString);
+	Q_PROPERTY_AUTO(QString, AsMultiLineString);
+	Q_PROPERTY_AUTO(QString, AsPath);
+	Q_PROPERTY_AUTO(QString, AsCombo) = "A";
+	Q_PROPERTY_AUTO(QVector2D, Vec2);
+	Q_PROPERTY_AUTO(QVector3D, Vec3);
+	Q_PROPERTY_AUTO(QVector4D, Vec4);
+	Q_PROPERTY_AUTO(QColor, Color);
+	Q_PROPERTY_AUTO(QList<QColor>, ColorList) = { Qt::red,Qt::green,Qt::blue };
+	Q_PROPERTY_AUTO(std::vector<QColor>, StdColorList) = { Qt::red,Qt::green,Qt::blue };
+
+	Q_PROPERTY(QMap<QString, QColor> ColorMap READ GetColorMap WRITE SetColorMap)
+		QMap<QString, QColor> GetColorMap() const { return ColorMap; }
+	void SetColorMap(QMap<QString, QColor> val) { ColorMap = val; }
 	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
-	TestInlineGadget InlineGadget;
-public:
-	int getInt() const { return Int; }
-	void setInt(int val) {
-		Int = val; 
-		qDebug() << Int;
-	}
 
-	QList<QColor> GetColorList() const { return ColorList; }
-	void SetColorList(QList<QColor> val) {
-		ColorList = val; 
-		qDebug() << ColorList;
-	}
-
-
-	QColor GetColor() const { return Color; }
-	void SetColor(QColor val) { Color = val; }
-
-	bool GetBool() const { return Bool; }
-	void SetBool(bool val) { Bool = val; }
-
-	TestObject::TestEnum GetEnum() const { return Enum; }
-	void SetEnum(TestObject::TestEnum val) { Enum = val; }
-
-	std::vector<QColor> GetStdColorList() const { return StdColorList; }
-	void SetStdColorList(std::vector<QColor> val) { StdColorList = val; }
-
-	double GetLimitedDouble() const { return LimitedDouble; }
-	void SetLimitedDouble(double val) { LimitedDouble = val; }
-
-	float GetFloat() const { return Float; }
-	void SetFloat(float val) { Float = val; }
-
-	QVector4D GetVec4() const { return Vec4; }
-	void SetVec4(QVector4D val) { Vec4 = val; }
-
-	QVector2D GetVec2() const { return Vec2; }
-	void SetVec2(QVector2D val) { Vec2 = val; }
-
-	QVector3D GetVec3() const { return Vec3; }
-	void SetVec3(QVector3D val) { Vec3 = val; }
-
-	QString GetQtString() const { return QtString; }
-	void SetQtString(QString val) { QtString = val; }
-
-	std::string GetStdString() const { return StdString; }
-	void SetStdString(std::string val) { StdString = val; }
-
-	QString GetAsMultiLineString() const { return AsMultiLineString; }
-	void SetAsMultiLineString(QString val) { AsMultiLineString = val; }
-
-	QString GetAsPath() const { return AsPath; }
-	void SetAsPath(QString val) { AsPath = val; }
-
-	QString GetAsCombo() const { return AsCombo; }
-	void SetAsCombo(QString val) { AsCombo = val; }
-
-	QMap<QString, QColor> GetColorMap() const { return ColorMap; }
-	void SetColorMap(QMap<QString, QColor> val) { 
-		ColorMap = val; 
-	}
-	TestInlineGadget GetInlineGadget() const { return InlineGadget; }
-	void SetInlineGadget(TestInlineGadget val) { InlineGadget = val; }
+	Q_PROPERTY_AUTO(TestInlineGadget, InlineGadget);
+	Q_PROPERTY_AUTO(TestInlineObject*, InlineObject) = new TestInlineObject;
 };
 
 #endif // TestObject_h__
