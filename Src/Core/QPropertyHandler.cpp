@@ -109,12 +109,7 @@ void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDes
 				mIsChanged = !(inVar == mInitialValue);
 			}
 			mSetter(inVar);
-			for (auto& binder : mBinderMap.values()) {
-				QVariant var = binder.mGetter();
-				if (var != inVar) {
-					binder.mSetter(inVar);
-				}
-			}
+			FlushValue();
 			Q_EMIT AsValueChanged();
 		};
 		if (!isPushUndoStackWithDesc.isEmpty())
@@ -132,6 +127,16 @@ QVariant QPropertyHandler::GetValue()
 void QPropertyHandler::ResetValue() {
 	if (mIsChanged) {
 		SetValue(mInitialValue, "Reset: " + GetPath());
+	}
+}
+
+void QPropertyHandler::FlushValue() {
+	QVariant mVar = GetValue();
+	for (auto& binder : mBinderMap.values()) {
+		QVariant var = binder.mGetter();
+		if (var != mVar) {
+			binder.mSetter(mVar);
+		}
 	}
 }
 

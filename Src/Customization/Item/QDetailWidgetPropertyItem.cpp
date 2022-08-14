@@ -267,6 +267,7 @@ void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)
 	else {
 		RebuildAttachWidget();
 	}
+	mHandler->FlushValue();
 }
 
 

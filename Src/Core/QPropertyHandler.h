@@ -21,6 +21,8 @@ public:
 	void SetValue(QVariant inValue,QString isPushUndoStackWithDesc = QString());
 	QVariant GetValue();
 	void ResetValue();
+	void FlushValue();
+
 
 	TypeId GetTypeID();
 	QString GetName();
