@@ -5,51 +5,53 @@
 #include "QHash"
 #include "QAbstractAnimation"
 
-class QNotificationBlockInterface;
+class QNotificationBlock;
 
 class QNotificationAnimation : public QAbstractAnimation {
 public:
 	QNotificationAnimation();
-	void AddNewBlock(QNotificationBlockInterface* inBlock);
+	void AddNewBlock(QNotificationBlock* inBlock);
 	void Start();
 protected:
 	virtual int duration() const override { return 200; }
 	virtual void updateCurrentTime(int currentTime) override;
 	void updateCacheGeomtry();
 private:
-	QList<QNotificationBlockInterface*> mNewBlockList;
-	QHash<QNotificationBlockInterface*,QRect> mCacheDestGeomtry;
+	QList<QNotificationBlock*> mNewBlockList;
+	QHash<QNotificationBlock*,QRect> mCacheDestGeomtry;
 	const int BlockFixedWidth = 200;
 	const int BlockSpacing = 5;
 };
 
 class QNotification {
 	friend class QNotificationAnimation;
-	friend class QNotificationBlockInterface;
+	friend class QNotificationBlock;
 public:
 	static QNotification* Instance();
 	static void ShowMessage(const QString& inTitle, const QString& inContent, float inDurationMs);
 private:
-	static void PushNewBlock(QNotificationBlockInterface* inBlock);
+	static void PushNewBlock(QNotificationBlock* inBlock);
 
-	void PushBlock(QNotificationBlockInterface* inBlock);
-	void PopBlock(QNotificationBlockInterface* inBlock);
+	void PushBlock(QNotificationBlock* inBlock);
+	void PopBlock(QNotificationBlock* inBlock);
 	QNotification() {};
-	QList<QNotificationBlockInterface*> mBlockList;
+	QList<QNotificationBlock*> mBlockList;
 	QNotificationAnimation mAnimation;
 };
 
-class QNotificationBlockInterface: public QWidget {
+class QNotificationBlock: public QWidget {
 	friend class QNotification;
+	Q_OBJECT
 public:
-	QNotificationBlockInterface();
+	QNotificationBlock();
+	using QWidget::QWidget;
 private:
 	virtual void Active() = 0;
 protected:
 	void RequestObsolete();
 };
 
-class QNotificationBlock_Message : public QNotificationBlockInterface {
+class QNotificationBlock_Message : public QNotificationBlock {
 public:
 	QNotificationBlock_Message(const QString& inTitle,const QString& inContent ,float inDuration);
 private:

@@ -15,7 +15,7 @@ public:
 	QByteArray GetStylesheet();
 private:
 	QDetailWidgetStyleManager();
-	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Qt;
+	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Unreal;
 	QHash<QDetailWidgetStyle, QByteArray> mStylesheetMap;
 };
 

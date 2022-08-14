@@ -5,6 +5,7 @@
 #include "QScreen"
 #include "QPropertyAnimation"
 #include "QTimer"
+#include "Core\QDetailWidgetStyleManager.h"
 
 QNotification* QNotification::Instance()
 {
@@ -17,12 +18,12 @@ void QNotification::ShowMessage(const QString& inTitle, const QString& inContent
 	QNotification::PushNewBlock(new QNotificationBlock_Message(inTitle, inContent, inDurationMs));
 }
 
-void QNotification::PushNewBlock(QNotificationBlockInterface* inBlock)
+void QNotification::PushNewBlock(QNotificationBlock* inBlock)
 {
 	QNotification::Instance()->mAnimation.AddNewBlock(inBlock);
 }
 
-void QNotification::PushBlock(QNotificationBlockInterface* inBlock)
+void QNotification::PushBlock(QNotificationBlock* inBlock)
 {
 	QPropertyAnimation* Anim = new QPropertyAnimation;
 	Anim->setTargetObject(inBlock);
@@ -37,7 +38,7 @@ void QNotification::PushBlock(QNotificationBlockInterface* inBlock)
 	});
 }
 
-void QNotification::PopBlock(QNotificationBlockInterface* inBlock)
+void QNotification::PopBlock(QNotificationBlock* inBlock)
 {
 	QPropertyAnimation* Anim = new QPropertyAnimation;
 	Anim->setTargetObject(inBlock);
@@ -63,7 +64,7 @@ QNotificationAnimation::QNotificationAnimation()
 	});
 }
 
-void QNotificationAnimation::AddNewBlock(QNotificationBlockInterface* inBlock)
+void QNotificationAnimation::AddNewBlock(QNotificationBlock* inBlock)
 {
 	mNewBlockList << inBlock;
 	inBlock->setFixedWidth(BlockFixedWidth);
@@ -123,14 +124,14 @@ void QNotificationAnimation::updateCacheGeomtry()
 	}
 }
 
-QNotificationBlockInterface::QNotificationBlockInterface()
+QNotificationBlock::QNotificationBlock()
 {
 	setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
-
+	setStyleSheet(QDetailWidgetStyleManager::Instance()->GetStylesheet());
 	//setAttribute(Qt::WA_TranslucentBackground);
 }
 
-void QNotificationBlockInterface::RequestObsolete()
+void QNotificationBlock::RequestObsolete()
 {
 	QNotification::Instance()->PopBlock(this);
 }

@@ -18,7 +18,7 @@ QWidget{
 	color:rgb(220,220,220);
 	background-color:rgb(36,36,36);
 }
-QtColorDialog{
+QtColorDialog,QNotificationBlock{
 	border: 1px solid black;
 }
 QHoverWidget{
@@ -98,7 +98,7 @@ QDetailWidget{
 QWidget{
 	color:rgb(30,30,30);
 }
-QtColorDialog{
+QtColorDialog,QNotificationBlock{
 	border: 1px solid white;
 }
 QHoverLineEdit{
