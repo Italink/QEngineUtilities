@@ -1,6 +1,7 @@
 #include "QColorButton.hpp"
 #include "QtColorDialog.h"
 #include <QPainter>
+#include "Core\QDetailWidgetStyleManager.h"
 
 QColorButton::QColorButton(QColor color)
 	: mColor(color)
@@ -33,7 +34,10 @@ void QColorButton::paintEvent(QPaintEvent* event)
 
 void QColorButton::mousePressEvent(QMouseEvent* event) {
 	QHoverWidget::mousePressEvent(event);
-	QtColorDialog::CreateAndShow(mColor);
+	QRect geom = rect();
+	geom.moveTopLeft(mapToGlobal(QPoint(0, 0)));
+	QtColorDialog::CreateAndShow(mColor, geom);
+	QtColorDialog::Current->setStyleSheet(QDetailWidgetStyleManager::Instance()->GetStylesheet());
 	QObject::connect(QtColorDialog::Current, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
 		SetColor(color);
 		Q_EMIT AsColorChanged(mColor);

@@ -14,6 +14,7 @@ protected:
 	bool RenameChild(QString inSrc, QString inDst);
 	void RecreateChildren();
 	void CreateNewItem();
+	void RemoveItem(QString inKey);
 protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;

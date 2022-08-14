@@ -63,35 +63,74 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 				if (index != 0) {
 					QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
 					moveUp->setFixedSize(20, 20);
+					connect(moveUp, &QSvgButton::clicked, this, [index,this]() {
+						MoveItem(index, index - 1);
+					});
 					item->AddValueWidget(moveUp);
 				}
 				else {
-					item->GetContent()->GetValueContentLayout()->addSpacing(20);
+					item->GetContent()->GetValueContentLayout()->addSpacing(22);
 				}
 				if (index != mCount - 1) {
 					QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
 					moveDown->setFixedSize(20, 20);
+					connect(moveDown, &QSvgButton::clicked, this, [index, this]() {
+						MoveItem(index, index + 1);
+					});
 					item->AddValueWidget(moveDown);	
 				}
 				else {
-					item->GetContent()->GetValueContentLayout()->addSpacing(20);
+					item->GetContent()->GetValueContentLayout()->addSpacing(22);
 				}
 				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
 				deleteButton->setFixedSize(20, 20);
+				connect(deleteButton, &QSvgButton::clicked, this, [index, this]() {
+					RemoveItem(index);
+				});
 				item->AddValueWidget(deleteButton);
 			});
 			item->AttachTo(this);
+			item->setExpanded(true);
 		}
 	}
 }
 
+void QDetailWidgetPropertySequentialItem::MoveItem(int inSrcIndex, int inDstIndex) {
+	QVariant varList = GetValue();
+	QSequentialIterable iterable = varList.value<QSequentialIterable>();
+	const QMetaSequence metaSequence = iterable.metaContainer();
+	void* containterPtr = const_cast<void*>(iterable.constIterable());
+	QtPrivate::QVariantTypeCoercer coercer;
+	QVariant srcVar = iterable.at(inSrcIndex);
+	QVariant dstVar = iterable.at(inDstIndex);
+	metaSequence.setValueAtIndex(containterPtr, inDstIndex, coercer.coerce(srcVar, srcVar.metaType()));
+	metaSequence.setValueAtIndex(containterPtr, inSrcIndex, coercer.coerce(dstVar, dstVar.metaType()));
+	SetValue(varList, QString("%1 Move: %2->%3").arg(GetHandler()->GetPath()).arg(inSrcIndex).arg(inDstIndex));
+}
+
+void QDetailWidgetPropertySequentialItem::RemoveItem(int inIndex) {
+	QVariant varList = GetValue();
+	QSequentialIterable iterable = varList.value<QSequentialIterable>();
+	const QMetaSequence metaSequence = iterable.metaContainer();
+	void* containterPtr = const_cast<void*>(iterable.constIterable());
+	QtPrivate::QVariantTypeCoercer coercer;
+	for (int i = inIndex; i < iterable.size() - 1; i++) {
+		QVariant nextVar = iterable.at(i + 1);
+		metaSequence.setValueAtIndex(containterPtr, inIndex, coercer.coerce(nextVar, nextVar.metaType()));
+	}
+	metaSequence.removeValueAtEnd(containterPtr);
+	SetValue(varList, QString("%1 Remove: %2").arg(GetHandler()->GetPath()).arg(inIndex));
+}
+
 void QDetailWidgetPropertySequentialItem::RecreateChildren() {
-	Clear();
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
 	mCount = iterable.size();
 	for (int i = 0; i < iterable.size(); i++) {
 		FindOrCreateChildItem(i);
+	}
+	while (childCount() > iterable.size()) {
+		delete takeChild(iterable.size());
 	}
 }
 
@@ -105,7 +144,7 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 	const void* dataPtr = coercer.coerce(var, var.metaType());
 	metaSequence.addValue(containterPtr, dataPtr);
 
-	SetValue(varList, QString("%1 Append %2").arg(GetHandler()->GetPath()).arg(metaSequence.size(containterPtr) - 1));
+	SetValue(varList, QString("%1 Append: %2").arg(GetHandler()->GetPath()).arg(metaSequence.size(containterPtr) - 1));
 	setExpanded(true);
 	child(childCount() - 1)->setExpanded(true);
 }

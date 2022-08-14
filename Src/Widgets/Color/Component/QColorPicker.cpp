@@ -12,6 +12,7 @@ QColor QColorPicker::Pick()
 QColorPicker::QColorPicker()
 	: QDialog()
 {
+	setFocusPolicy(Qt::NoFocus);
 	setWindowFlag(Qt::FramelessWindowHint);
 	setGeometry(QApplication::primaryScreen()->geometry());
 	setCursor(QCursor(QPixmap(":/Resource/pen.png"), 0, 19));

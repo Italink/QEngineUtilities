@@ -33,7 +33,7 @@ public:
 	void RefleshSplitterFactor();
 	void SetNameWidget(QWidget* inWidget);
 	void SetNameWidgetByText(QString inName);
-	void ClearValueWidget();
+	void ClearValueAttachWidget();
 	void AddValueWidget(QWidget* inWidget);
 	QHBoxLayout* GetNameContentLayout() const;
 	QHBoxLayout* GetValueContentLayout() const;
@@ -79,13 +79,14 @@ public:
 	virtual QString GetKeywords() override;
 
 	virtual void BuildContentAndChildren() override;
+	void RebuildAttachWidget();
 
 	virtual void BuildMenu(QMenu& inMenu) override;
 
 	virtual ItemType Type() const override { return ItemType::Property; }
 
 	virtual QWidget* GenerateValueWidget() = 0;
-	void ClearValueWidget();
+
 	void AddValueWidget(QWidget* inWigdet);
 	void AddValueLayout(QLayout* inLayout);
 
@@ -121,6 +122,7 @@ protected:
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
+	QWidget* mValueWidget = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	std::function<bool(QString)> mRenameCallback;
 	std::function<void()> mBuildContentAndChildrenCallback;

@@ -92,11 +92,12 @@ void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
 	SetNameWidget(nameEditor);
 }
 
-void QDetailWidgetPropertyItemWidget::ClearValueWidget() {
-	while (auto item = mValueContentLayout->takeAt(0)) {
-		item->widget()->setParent(nullptr);
-		item->widget()->deleteLater();
-		delete item;
+void QDetailWidgetPropertyItemWidget::ClearValueAttachWidget() {
+	while (auto item = mValueContentLayout->takeAt(1)) {
+		if (item->widget()) {
+			item->widget()->setParent(nullptr);
+			item->widget()->deleteLater();
+		}
 	}
 }
 
@@ -206,15 +207,18 @@ QString QDetailWidgetPropertyItem::GetKeywords() {
 
 void QDetailWidgetPropertyItem::BuildContentAndChildren() {
 	mContent->SetNameWidgetByText(GetHandler()->GetName());
-	ClearValueWidget();
-	AddValueWidget(GenerateValueWidget());
-	if (mBuildContentAndChildrenCallback)
-		mBuildContentAndChildrenCallback();
+	if (mValueWidget==nullptr) {
+		mValueWidget = GenerateValueWidget();
+		AddValueWidget(mValueWidget);
+	}
+	RebuildAttachWidget();
 	treeWidget()->setItemWidget(this, 0, mContent);
 }
 
-void QDetailWidgetPropertyItem::ClearValueWidget() {
-	mContent->ClearValueWidget();
+void QDetailWidgetPropertyItem::RebuildAttachWidget() {
+	mContent->ClearValueAttachWidget();
+	if (mBuildContentAndChildrenCallback)
+		mBuildContentAndChildrenCallback();
 }
 
 void QDetailWidgetPropertyItem::AddValueWidget(QWidget* inWigdet) {
@@ -252,13 +256,19 @@ QVariant QDetailWidgetPropertyItem::GetMetaData(const QString& Key)
 
 void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)
 {
-	mHandler = inHandler;
-	QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
-	QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyItem::RefleshResetButtonStatus);
-	if (QTreeWidgetItem::parent() != nullptr) {
-		BuildContentAndChildren();
+	if (mHandler != inHandler) {
+		mHandler = inHandler;
+		QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
+		QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyItem::RefleshResetButtonStatus);
+		if (QTreeWidgetItem::parent() != nullptr) {
+			BuildContentAndChildren();
+		}
+	}
+	else {
+		RebuildAttachWidget();
 	}
 }
+
 
 void QDetailWidgetPropertyItem::RefleshResetButtonStatus()
 {

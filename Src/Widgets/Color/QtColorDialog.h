@@ -15,7 +15,8 @@ public:
 	QtColorDialog();
 	~QtColorDialog();
 	void SetColor(QColor color);
-	static int CreateAndShow(QColor color);
+	static int CreateAndShow(QColor color,QRect inButtonGemotry);
+	void SetCloseWhenLoseFocus(bool val) { bCloseWhenLoseFocus = val; }
 private:
 	void CreateUI();
 	void ConnectUI();
@@ -39,8 +40,13 @@ private:
 	ColorLineEdit* mLeHex;
 	QColor mCurrentColor;
 	QColor mLastColor;
+	bool bCloseWhenLoseFocus = false;
+	using QWidget = QWidget;
 public:
 	inline static QtColorDialog* Current = nullptr;
+protected:
+	void focusOutEvent(QFocusEvent* event) override;
+
 };
 
 #endif // QtColorDialog_h__

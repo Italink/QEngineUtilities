@@ -35,11 +35,13 @@ ColorWheel::ColorWheel(QWidget* parent, Private* data) :
 {
 	p->setup();
 	setAcceptDrops(true);
+	setFocusPolicy(Qt::NoFocus);
 }
 
 ColorWheel::ColorWheel(QWidget* parent) :
 	ColorWheel(parent, new Private(this))
 {
+	setFocusPolicy(Qt::NoFocus);
 }
 
 ColorWheel::~ColorWheel()
@@ -203,7 +205,6 @@ void ColorWheel::mousePressEvent(QMouseEvent* ev)
 {
 	if (ev->buttons() & Qt::LeftButton)
 	{
-		setFocus();
 		QLineF ray = p->line_to_point(ev->pos());
 		if (ray.length() <= p->inner_radius())
 			p->mouse_status = DragSquare;

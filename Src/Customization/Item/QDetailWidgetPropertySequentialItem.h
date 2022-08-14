@@ -11,6 +11,8 @@ public:
 	void ResetValue() override;
 protected:
 	void FindOrCreateChildItem(int index);
+	void MoveItem(int inSrcIndex, int inDstIndex);
+	void RemoveItem(int inIndex);
 	void RecreateChildren();
 	void CreateNewItem();
 protected:

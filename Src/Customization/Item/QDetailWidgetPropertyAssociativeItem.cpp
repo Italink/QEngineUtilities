@@ -65,10 +65,13 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
-			item->SetBuildContentAndChildrenCallback([item]() {
+			item->SetBuildContentAndChildrenCallback([item,inKey,this]() {
 				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
 				deleteButton->setFixedSize(20, 20);
 				item->AddValueWidget(deleteButton);
+				connect(deleteButton, &QSvgButton::clicked, this, [inKey, this]() {
+					RemoveItem(inKey);
+				});
 			});
 			item->SetRenameCallback([this, item](QString name) {
 				return RenameChild(item->GetName(), name);
@@ -101,19 +104,28 @@ bool QDetailWidgetPropertyAssociativeItem::RenameChild(QString inSrc, QString in
 }
 
 void QDetailWidgetPropertyAssociativeItem::RecreateChildren() {
-	Clear();
 	QVariant var = GetValue();
 	QAssociativeIterable iterable = var.value<QAssociativeIterable>();
 	for (auto iter = iterable.begin(); iter != iterable.end(); ++iter) {
 		QString key = iter.key().toString();
 		FindOrCreateChildItem(key);
 	}
+	int i = 0;
+	while (i < childCount()) {
+		QDetailWidgetPropertyItem* currItem = (QDetailWidgetPropertyItem*)child(i);
+		if (currItem && !iterable.containsKey(currItem->GetName())) {
+			delete takeChild(i);
+		}
+		else {
+			i++;
+		}
+	}
 }
 
 void QDetailWidgetPropertyAssociativeItem::CreateNewItem() {
 	QVariant varList = GetValue();
 	QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
-	const QMetaAssociation metaSequence = iterable.metaContainer();
+	const QMetaAssociation metaAssociation = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
 	QString newKey = "Item0";
@@ -125,11 +137,23 @@ void QDetailWidgetPropertyAssociativeItem::CreateNewItem() {
 	QVariant value = QPropertyHandler::CreateNewVariant(mValueTypeId);
 	const void* keyDataPtr = coercer.coerce(key, key.metaType());
 	const void* valueDataPtr = coercer.coerce(value, value.metaType());
-	//metaSequence.insertKey(containterPtr, keyDataPtr);
-	metaSequence.setMappedAtKey(containterPtr, keyDataPtr, valueDataPtr);
+	//metaAssociation.insertKey(containterPtr, keyDataPtr);
+	metaAssociation.setMappedAtKey(containterPtr, keyDataPtr, valueDataPtr);
 	SetValue(varList,QString("%1 Insert: %2").arg(GetHandler()->GetPath()).arg(newKey));
 	setExpanded(true);
 	FindItem(newKey)->setExpanded(true);
+}
+
+void QDetailWidgetPropertyAssociativeItem::RemoveItem(QString inKey) {
+	QVariant varList = GetValue();
+	QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
+	const QMetaAssociation metaAssociation = iterable.metaContainer();
+	void* containterPtr = const_cast<void*>(iterable.constIterable());
+	QtPrivate::QVariantTypeCoercer coercer;
+	QVariant key(inKey);
+	const void* keyDataPtr = coercer.coerce(key, key.metaType());
+	metaAssociation.removeKey(containterPtr, keyDataPtr);
+	SetValue(varList, QString("%1 Remove: %2").arg(GetHandler()->GetPath()).arg(inKey));
 }
 
 QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {

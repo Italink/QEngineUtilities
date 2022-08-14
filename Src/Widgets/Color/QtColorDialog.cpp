@@ -32,8 +32,7 @@ void QtColorDialog::SetColor(QColor color) {
 	SetCurrentColorInternal(color);
 }
 
-int QtColorDialog::CreateAndShow(QColor color)
-{
+int QtColorDialog::CreateAndShow(QColor color, QRect inButtonGemotry) {
 	QtColorDialog* dialog = QtColorDialog::Current;
 	dialog->disconnect();
 	if (dialog == nullptr) {
@@ -41,15 +40,23 @@ int QtColorDialog::CreateAndShow(QColor color)
 		QtColorDialog::Current = dialog;
 	}
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->SetCloseWhenLoseFocus(true);
 	dialog->SetColor(color);
+	dialog->show();
 	dialog->activateWindow();
 	dialog->setFocus();
-	dialog->show();
+	QRect mGeom = dialog->geometry();
+
+	mGeom.moveCenter(inButtonGemotry.center());
+	mGeom.moveTop(inButtonGemotry.bottom());
+	dialog->setGeometry(mGeom);
 	return 0;
 }
 
 void QtColorDialog::CreateUI()
 {
+	setWindowFlags(Qt::FramelessWindowHint|Qt::ToolTip);
+	setFocusPolicy(Qt::NoFocus);
 	mColorWheel->setSelectorShape(ColorWheel::ShapeSquare);
 	mColorWheel->setFocusPolicy(Qt::NoFocus);
 	QVBoxLayout* v = new QVBoxLayout(this);
@@ -94,6 +101,7 @@ void QtColorDialog::CreateUI()
 	mColorPreview->setDisplayMode(ColorPreview::SplitColor);
 	mColorWheel->setMinimumSize(150, 150);
 	mColorWheel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	mPbPick->setFocusPolicy(Qt::NoFocus);
 	mPbOk->setFocusPolicy(Qt::NoFocus);
 	mPbCancel->setFocusPolicy(Qt::NoFocus);
 }
@@ -105,12 +113,20 @@ void QtColorDialog::ConnectUI()
 	});
 
 	connect(mPbPick, &QPushButton::clicked, this, [this]() {
+		bool flag = false;
+		if (bCloseWhenLoseFocus) {
+			flag = bCloseWhenLoseFocus;
+			bCloseWhenLoseFocus = false;
+		}
 		QColor color = QColorPicker::Pick();
 		if (color.isValid()) {
 			SetCurrentColorInternal(color);
 		}
 		this->activateWindow();
 		this->setFocus();
+		if (flag) {
+			bCloseWhenLoseFocus = true;
+		}
 	});
 
 	connect(mLeHex, &ColorLineEdit::OnColorChanged, this, [this](QColor color) {
@@ -272,4 +288,11 @@ void QtColorDialog::RefleshChannelGradiant()
 	stops.push_back(QGradientStop{ 0.0f,begin });
 	stops.push_back(QGradientStop{ 1.0f,end });
 	mValueBox->SetGradientStops(stops);
+}
+
+void QtColorDialog::focusOutEvent(QFocusEvent* event) {
+	qDebug() << event->reason() << this->focusWidget();
+	if (bCloseWhenLoseFocus&& event->reason()==Qt::FocusReason::ActiveWindowFocusReason) {
+		close();
+	}
 }

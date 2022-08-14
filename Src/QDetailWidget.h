@@ -36,12 +36,8 @@ public:
 	};
 	Q_DECLARE_FLAGS(Flags, Flag);
 
-	enum Style {
-		Unreal = 0,
-		Qt,
-	};
 
-	QDetailWidget(QDetailWidget::Flags inFlags = Flags(QDetailWidget::DisplaySearcher | QDetailWidget::DisplayCategory), QDetailWidget::Style inStyle = QDetailWidget::Qt);
+	QDetailWidget(QDetailWidget::Flags inFlags = Flags(QDetailWidget::DisplaySearcher | QDetailWidget::DisplayCategory));
 
 	template<typename... Instances>
 	void SetInstances(Instances... inInstances) {
@@ -52,7 +48,6 @@ public:
 
 	void SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstances);
 
-	void SetStyle(QDetailWidget::Style inStyle);
 	void SearchByKeywords(QString inKeywords);
 private:
 	QDetailSearcher* mSearcher = nullptr;
