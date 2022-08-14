@@ -68,7 +68,6 @@ class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 	Q_OBJECT
 public:
 	using TypeId = QPropertyHandler::TypeId;
-
 	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler);
 
 	void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
@@ -88,6 +87,7 @@ public:
 	virtual QWidget* GenerateValueWidget() = 0;
 	void ClearValueWidget();
 	void AddValueWidget(QWidget* inWigdet);
+	void AddValueLayout(QLayout* inLayout);
 
 	QDetailWidgetPropertyItemWidget* GetContent() const;
 

@@ -3,6 +3,7 @@
 #include "QSequentialIterable"
 #include "Customization\QDetailWidgetManager.h"
 #include "QPushButton"
+#include "Widgets\Toolkits\QSvgButton.h"
 
 QDetailWidgetPropertySequentialItem::QDetailWidgetPropertySequentialItem() {
 }
@@ -58,19 +59,39 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
+			item->SetBuildContentAndChildrenCallback([item,this,index]() {
+				if (index != 0) {
+					QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
+					moveUp->setFixedSize(20, 20);
+					item->AddValueWidget(moveUp);
+				}
+				else {
+					item->GetContent()->GetValueContentLayout()->addSpacing(20);
+				}
+				if (index != mCount - 1) {
+					QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
+					moveDown->setFixedSize(20, 20);
+					item->AddValueWidget(moveDown);	
+				}
+				else {
+					item->GetContent()->GetValueContentLayout()->addSpacing(20);
+				}
+				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
+				deleteButton->setFixedSize(20, 20);
+				item->AddValueWidget(deleteButton);
+			});
 			item->AttachTo(this);
 		}
 	}
 }
 
 void QDetailWidgetPropertySequentialItem::RecreateChildren() {
+	Clear();
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
+	mCount = iterable.size();
 	for (int i = 0; i < iterable.size(); i++) {
 		FindOrCreateChildItem(i);
-	}
-	while (childCount() > iterable.size()) {
-		delete takeChild(iterable.size());
 	}
 }
 
@@ -90,7 +111,8 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 }
 
 QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
-	QPushButton* btAppend = new QPushButton("+");
+	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
+	btAppend->setFixedSize(20, 20);
 	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertySequentialItem::CreateNewItem);
 	return btAppend;
 }

@@ -20,6 +20,7 @@ QString QDetailWidgetPropertyEnumItem::GetKeywords()
 	return GetName() + mNameToValueMap.keys().join("");
 }
 
+
 QWidget* QDetailWidgetPropertyEnumItem::GenerateValueWidget() {
 	QVariant var = GetValue();
 	const QMetaObject* metaObj = var.metaType().metaObject();

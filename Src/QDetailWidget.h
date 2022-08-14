@@ -30,6 +30,7 @@ class QDetailWidget :public QWidget {
 public:
 	using QWidget = QWidget;
 	enum Flag {
+		None = 0x0,
 		DisplaySearcher = 0x1,
 		DisplayCategory = 0x2,
 	};

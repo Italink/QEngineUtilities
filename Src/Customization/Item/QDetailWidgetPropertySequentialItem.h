@@ -18,6 +18,7 @@ protected:
 	virtual void BuildContentAndChildren() override;
 private:
 	QPropertyHandler::TypeId mValueTypeId = 0;
+	int mCount = 0;
 };
 
 #endif // QDetailWidgetPropertySequentialItem_h__

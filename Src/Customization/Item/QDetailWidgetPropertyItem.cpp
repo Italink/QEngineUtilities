@@ -41,6 +41,7 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	mValueContent->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Preferred);
 	mValueContentLayout->setAlignment(Qt::AlignCenter);
 	mValueContentLayout->setContentsMargins(10, 2, 10, 2);
+	mValueContentLayout->setSpacing(2);
 	mResetButton->setFixedSize(25,25);
 	mResetButton->setEnabled(false);
 	setMinimumHeight(25);
@@ -218,6 +219,10 @@ void QDetailWidgetPropertyItem::ClearValueWidget() {
 
 void QDetailWidgetPropertyItem::AddValueWidget(QWidget* inWigdet) {
 	mContent->AddValueWidget(inWigdet);
+}
+
+void QDetailWidgetPropertyItem::AddValueLayout(QLayout* inLayout) {
+	mContent->GetValueContentLayout()->addLayout(inLayout);
 }
 
 void QDetailWidgetPropertyItem::BuildMenu(QMenu& inMenu)

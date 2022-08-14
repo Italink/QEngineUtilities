@@ -13,7 +13,7 @@
     Type get_##Name(){ return Name; } \
     void set_##Name(Type var){ \
         Name = var;  \
-		qDebug()<<#Name<<": "<<var; \
+		qDebug()<<"Set "<<#Name<<": "<<var; \
     } \
     Type Name
 
@@ -78,7 +78,7 @@ public:
 	Q_PROPERTY_AUTO(int, Int) = 0;
 	Q_PROPERTY_AUTO(float, Float) = 1.23;
 	Q_PROPERTY_AUTO(double, LimitedDouble) = 5;
-	Q_PROPERTY_AUTO(TestEnum, Enum);
+	Q_PROPERTY_AUTO(TestEnum, Enum) = TestEnum::One;
 	Q_PROPERTY_AUTO(QString, QtString);
 	Q_PROPERTY_AUTO(std::string, StdString);
 	Q_PROPERTY_AUTO(QString, AsMultiLineString);

@@ -10,7 +10,6 @@ QDetailWidget::QDetailWidget(Flags inFlags /*= DisplaySearcher*/, Style inStyle 
 {
 	QVBoxLayout* v = new QVBoxLayout(this);
 	v->setContentsMargins(0, 5, 0, 5);
-	v->addWidget(new QUndoView(QDetailUndoStack::Instance()));
 	if(mFlags.testFlag(DisplaySearcher))
 		v->addWidget(mSearcher);
 	v->addWidget(mTreeWidget);
@@ -49,7 +48,7 @@ QDetailTreeWidget{
 	qproperty-GridLineColor:rgb(5,5,5);
 	qproperty-CategoryColor:rgb(61,61,61);  
 	qproperty-HoveredColor:rgb(51,51,51); 
-	qproperty-IconColor:rgb(251,251,251); 
+	qproperty-IconColor:rgb(200,200,200); 
 	qproperty-ArrowColor:rgb(220,220,220); 
 }
 QSplitter::handle {background-color: rgb(5,5,5);}

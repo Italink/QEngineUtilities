@@ -2,7 +2,7 @@
 #include "QMetaType"
 #include "Customization\QDetailWidgetManager.h"
 #include "QAssociativeIterable"
-#include "QPushButton"
+#include "Widgets\Toolkits\QSvgButton.h"
 
 bool QDetailWidgetPropertyAssociativeItem::FilterType(TypeId inID) {
 	QMetaType metaType(inID);
@@ -66,7 +66,9 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
 			item->SetBuildContentAndChildrenCallback([item]() {
-				item->AddValueWidget(new QPushButton("HaHa"));
+				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
+				deleteButton->setFixedSize(20, 20);
+				item->AddValueWidget(deleteButton);
 			});
 			item->SetRenameCallback([this, item](QString name) {
 				return RenameChild(item->GetName(), name);
@@ -99,21 +101,12 @@ bool QDetailWidgetPropertyAssociativeItem::RenameChild(QString inSrc, QString in
 }
 
 void QDetailWidgetPropertyAssociativeItem::RecreateChildren() {
+	Clear();
 	QVariant var = GetValue();
 	QAssociativeIterable iterable = var.value<QAssociativeIterable>();
 	for (auto iter = iterable.begin(); iter != iterable.end(); ++iter) {
 		QString key = iter.key().toString();
 		FindOrCreateChildItem(key);
-	}
-	int i = 0;
-	while (i < childCount()) {
-		QDetailWidgetPropertyItem* currItem = (QDetailWidgetPropertyItem*)child(i);
-		if (currItem && !iterable.containsKey(currItem->GetName())) {
-			delete takeChild(i);
-		}
-		else {
-			i++;
-		}
 	}
 }
 
@@ -140,7 +133,8 @@ void QDetailWidgetPropertyAssociativeItem::CreateNewItem() {
 }
 
 QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {
-	QPushButton* btAppend = new QPushButton("+");
+	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
+	btAppend->setFixedSize(20, 20);
 	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertyAssociativeItem::CreateNewItem);
 	return btAppend;
 }
