@@ -10,7 +10,6 @@ public:
 	virtual QString GetKeywords() override;
 protected:
 	virtual QWidget* GenerateValueWidget() override;
-	virtual void BuildContentAndChildren() override;
 private:
 	QHash<QString, int> mNameToValueMap;
 };

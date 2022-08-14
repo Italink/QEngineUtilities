@@ -100,7 +100,6 @@ void QNotificationAnimation::updateCurrentTime(int currentTime)
 		QRect CurRect = Iter.key()->geometry();
 		QRect NextRect = interp(CurRect, Iter.value(), currentTime /(float) duration());
 		Iter.key()->setGeometry(NextRect);
-		qDebug() << currentTime << NextRect;
 	}
 }
 

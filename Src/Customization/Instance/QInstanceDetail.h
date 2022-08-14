@@ -27,7 +27,7 @@ protected:
 private:
 	void PreBuildCategory();
 protected:
-	QWeakPointer<QInstance> mInstance;
+	QSharedPointer<QInstance> mInstance;
 	QDetailTreeWidget* mWidget = nullptr;
 	QDetailWidgetItem* mRoot = nullptr;
 };

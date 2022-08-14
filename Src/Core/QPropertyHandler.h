@@ -37,17 +37,20 @@ public:
 		Setter mSetter;
 	};
 
+	QDetailUndoEntry* GetUndoEntry() const { return mUndoEntry; }
 	template<typename OObjectType, typename... T>
 	void Bind(OObjectType* inAdjuster, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
 		inSetter(GetValue());
 		connect(inAdjuster, inNotify, this, [this, inGetter]() {
-			SetValue(inGetter(), "Assign: "+ GetName());
+			SetValue(inGetter(), "Assign: "+ GetPath());
 		});
 		mBinderMap[inAdjuster] = QPropertyBinder{ inGetter,inSetter };
 		connect(inAdjuster, &QObject::destroyed, this,[this, inAdjuster]() {
 			mBinderMap.remove(inAdjuster);
 		});
 	}
+
+	static QVariant CreateNewVariant(TypeId inId);
 Q_SIGNALS:
 	void AsValueChanged();
 private:

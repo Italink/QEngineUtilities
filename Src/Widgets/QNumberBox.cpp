@@ -1,8 +1,8 @@
 #include "QNumberBox.h"
 #include "QHBoxLayout"
 #include "QPainter"
-#include "QStyleOption"
 #include "qevent.h"
+#include "QValidator"
 
 void QNumberBox::CreateUI(){
 	setAttribute(Qt::WA_StyledBackground);

@@ -56,9 +56,9 @@ void QInstanceDetail::Initialize( QSharedPointer<QInstance> inInstance, QDetailW
 
 void QInstanceDetail::Build() {
 	PreBuildCategory();
-	for (int i = 0; i < mInstance.lock()->GetMetaObject()->propertyCount(); i++) {
-		QMetaProperty prop = mInstance.lock()->GetMetaObject()->property(i);
-		QPropertyHandler* propHandler = mInstance.lock()->CreatePropertyHandler(prop);
+	for (int i = 0; i < mInstance->GetMetaObject()->propertyCount(); i++) {
+		QMetaProperty prop = mInstance->GetMetaObject()->property(i);
+		QPropertyHandler* propHandler = mInstance->CreatePropertyHandler(prop);
 		AddProperty(propHandler);
 	}
 }
@@ -66,10 +66,10 @@ void QInstanceDetail::Build() {
 void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
 	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(inPropertyHandler);
 	if (item) {
-		if (true) {
+		if (mInstance->GetMetaData("DisplayCategory").toBool()) {
 			QString categoryName = inPropertyHandler->GetMetaData("Category").toString();
 			if (categoryName.isEmpty())
-				categoryName = mInstance.lock()->GetOuterObject()->objectName();
+				categoryName = mInstance->GetOuterObject()->objectName();
 			if (categoryName.isEmpty())
 				categoryName = "Common";
 			QDetailWidgetCategoryItem* categoryItem = FindOrAddCategory(categoryName);
@@ -85,8 +85,8 @@ void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
 }
 
 void QInstanceDetail::PreBuildCategory() {
-	if (true) {
-		for (auto categoryName : mInstance.lock()->GetCategoryList()) {
+	if (mInstance->GetMetaData("DisplayCategory").toBool()) {
+		for (auto categoryName : mInstance->GetCategoryList()) {
 			FindOrAddCategory(categoryName);
 		}
 	}

@@ -20,6 +20,7 @@ public:
 	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) = 0;
 	virtual QObject* GetOuterObject() = 0;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) = 0;
+	virtual void UpdateDataPtr(void* inPtr) = 0;
 	bool IsValid() { return GetOuterObject() != nullptr; }
 
 	QPropertyHandler* CreatePropertyHandler(const QMetaProperty& inProperty);
@@ -46,6 +47,7 @@ public:
 	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
 	virtual QObject* GetOuterObject() override;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
+	virtual void UpdateDataPtr(void* inPtr) override;
 private:
 	void* mPtr = nullptr;
 	const QMetaObject* mMetaObject = nullptr;
@@ -61,6 +63,7 @@ public:
 	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
 	virtual QObject* GetOuterObject() override;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
+	virtual void UpdateDataPtr(void* inPtr) override;
 private:
 	QObject* mObject = nullptr;
 };

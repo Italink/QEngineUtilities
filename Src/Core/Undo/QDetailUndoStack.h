@@ -3,6 +3,7 @@
 
 #include "QUndoStack"
 #include "QHash"
+#include "QMap"
 
 class QDetailUndoEntry;
 
@@ -16,7 +17,7 @@ public:
 	void Redo();
 private:
 	QList<QDetailUndoEntry*> mEntryList;
-	QHash<QUndoCommand*, QDetailUndoEntry*> mCommandToEntry;
+	QMap<const QUndoCommand*, QDetailUndoEntry*> mCommandToEntry;
 };
 
 class QDetailUndoEntry: public QObject {
@@ -28,6 +29,9 @@ public:
 	void BeginMacro(const QString& text);
 	void Push(QUndoCommand* cmd);
 	void EndMacro();
+Q_SIGNALS:
+	void AsUndo();
+	void AsRedo();
 };
 
 #endif // QDetailUndoStack_h__

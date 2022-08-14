@@ -6,7 +6,7 @@
 
 #include "Core\QDetailWidgetPrivate.h"
 #include "Customization\QDetailWidgetManager.h"
-#include "Widgets/Toolkits/QHoverLineEdit.h"
+#include "Widgets/Toolkits/QNameLabel.h"
 #include "Widgets/Toolkits/QSvgIcon.h"
 
 
@@ -77,13 +77,8 @@ void QDetailWidgetPropertyItemWidget::SetNameWidget(QWidget* inWidget) {
 }
 
 void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
-	QHoverLineEdit* nameEditor = new QHoverLineEdit();
-	nameEditor->GetQLineEdit()->setObjectName("NameEditor");
-	nameEditor->SetText(inName);
-	nameEditor->GetQLineEdit()->setEnabled(false);
-	nameEditor->SetHoverEnabled(false);
-	nameEditor->GetQLineEdit()->setAlignment(Qt::AlignLeft);
-	connect(nameEditor, &QHoverLineEdit::AsEditingFinished, this, [this,nameEditor]() {
+	QNameLabel* nameEditor = new QNameLabel(inName);
+	connect(nameEditor, &QNameLabel::AsNameChanged, this, [this,nameEditor]() {
 		auto callback = mRow->GetRenameCallback();
 		bool accepted = false;
 		if (callback) {
@@ -92,24 +87,21 @@ void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
 		if (!accepted) {
 			nameEditor->SetText(mRow->GetName());
 		}
-		nameEditor->GetQLineEdit()->setEnabled(false);
-		nameEditor->SetHoverEnabled(false);
 	});
 	SetNameWidget(nameEditor);
 }
 
-void QDetailWidgetPropertyItemWidget::SetValueWidget(QWidget* inWidget) {
-	if (mValueWidget == nullptr) {
-		if(inWidget)
-			mValueContentLayout->addWidget(inWidget);
+void QDetailWidgetPropertyItemWidget::ClearValueWidget() {
+	while (auto item = mValueContentLayout->takeAt(0)) {
+		item->widget()->setParent(nullptr);
+		item->widget()->deleteLater();
+		delete item;
 	}
-	else {
-		if(inWidget)
-			mValueContentLayout->replaceWidget(mValueWidget, inWidget);
-		mValueWidget->setParent(nullptr);
-		mValueWidget->deleteLater();
-	}
-	mValueWidget = inWidget;
+}
+
+void QDetailWidgetPropertyItemWidget::AddValueWidget(QWidget* inWidget) {
+	if(inWidget)
+		mValueContentLayout->addWidget(inWidget);
 }
 
 QHBoxLayout* QDetailWidgetPropertyItemWidget::GetNameContentLayout() const {
@@ -122,13 +114,9 @@ QHBoxLayout* QDetailWidgetPropertyItemWidget::GetValueContentLayout() const {
 
 void QDetailWidgetPropertyItemWidget::ShowRenameEditor()
 {
-	QHoverLineEdit* nameEdit = qobject_cast<QHoverLineEdit*>(mNameWidget);
+	QNameLabel* nameEdit = qobject_cast<QNameLabel*>(mNameWidget);
 	if (nameEdit) {
-		nameEdit->SetHoverEnabled(true);
-		nameEdit->GetQLineEdit()->setEnabled(true);
-		nameEdit->GetQLineEdit()->selectAll();
-		nameEdit->GetQLineEdit()->activateWindow();
-		nameEdit->GetQLineEdit()->setFocus();
+		nameEdit->ShowRenameEditor();
 	}
 }
 
@@ -182,9 +170,8 @@ QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* i
 	return nullptr;
 }
 
-void QDetailWidgetPropertyItem::SetValue(QVariant inValue)
-{
-	mHandler->SetValue(inValue);
+void QDetailWidgetPropertyItem::SetValue(QVariant inValue, QString isPushUndoStackWithDesc /*= QString()*/) {
+	mHandler->SetValue(inValue, isPushUndoStackWithDesc);
 }
 
 QVariant QDetailWidgetPropertyItem::GetValue()
@@ -208,14 +195,29 @@ void QDetailWidgetPropertyItem::RequestRename()
 		mContent->ShowRenameEditor();
 }
 
+void QDetailWidgetPropertyItem::SetBuildContentAndChildrenCallback(std::function<void()> val) {
+	mBuildContentAndChildrenCallback = val;
+}
+
 QString QDetailWidgetPropertyItem::GetKeywords() {
 	return GetHandler()->GetName() + QDebug::toString(mHandler->GetValue());
 }
 
 void QDetailWidgetPropertyItem::BuildContentAndChildren() {
 	mContent->SetNameWidgetByText(GetHandler()->GetName());
-	mContent->SetValueWidget(GenerateValueWidget());
+	ClearValueWidget();
+	AddValueWidget(GenerateValueWidget());
+	if (mBuildContentAndChildrenCallback)
+		mBuildContentAndChildrenCallback();
 	treeWidget()->setItemWidget(this, 0, mContent);
+}
+
+void QDetailWidgetPropertyItem::ClearValueWidget() {
+	mContent->ClearValueWidget();
+}
+
+void QDetailWidgetPropertyItem::AddValueWidget(QWidget* inWigdet) {
+	mContent->AddValueWidget(inWigdet);
 }
 
 void QDetailWidgetPropertyItem::BuildMenu(QMenu& inMenu)

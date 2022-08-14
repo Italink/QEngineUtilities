@@ -38,6 +38,10 @@ void QDetailUndoStack::Undo()
 	if (canUndo()) {
 		QNotification::ShowMessage("Undo", undoText(), 2000);
 		undo();
+		QDetailUndoEntry* entry = mCommandToEntry.value(command(index()));
+		if (entry) {
+			entry->AsUndo();
+		}
 	}
 }
 
@@ -45,7 +49,11 @@ void QDetailUndoStack::Redo()
 {
 	if (canRedo()) {
 		QNotification::ShowMessage("Redo", undoText(), 2000);
+		QDetailUndoEntry* entry = mCommandToEntry.value(command(index()));
 		redo();
+		if (entry) {
+			entry->AsRedo();
+		}
 	}
 }
 
@@ -64,7 +72,7 @@ void QDetailUndoEntry::BeginMacro(const QString& text)
 
 void QDetailUndoEntry::Push(QUndoCommand* cmd)
 {
-	QDetailUndoStack::Instance()->push(cmd);
+	QDetailUndoStack::Instance()->Push(this, cmd);
 }
 
 void QDetailUndoEntry::EndMacro()

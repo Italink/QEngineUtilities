@@ -3,6 +3,7 @@
 #include "QMetaProperty"
 #include "QTime"
 #include "Undo/QDetailUndoStack.h"
+#include "QRegularExpression"
 
 QPropertyHandler::QPropertyHandler(QObject* inParent, TypeId inTypeID, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
 	: QObject(inParent)
@@ -102,10 +103,11 @@ void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDes
 	QVariant last = GetValue();
 	if (last != inValue) {
 		QPropertyHandler::Setter AssignSetter = [this](QVariant inVar) {
-			if (mInitialValue.metaType().flags() & QMetaType::IsEnumeration)
+			if (mInitialValue.metaType().flags().testFlag(QMetaType::IsEnumeration))
 				mIsChanged = inVar.toInt() != mInitialValue.toInt();
-			else
-				mIsChanged = (inVar != mInitialValue);
+			else if(!mInitialValue.metaType().flags().testFlag(QMetaType::IsGadget)){
+				mIsChanged = !(inVar == mInitialValue);
+			}
 			mSetter(inVar);
 			for (auto& binder : mBinderMap.values()) {
 				QVariant var = binder.mGetter();
@@ -129,7 +131,7 @@ QVariant QPropertyHandler::GetValue()
 
 void QPropertyHandler::ResetValue() {
 	if (mIsChanged) {
-		SetValue(mInitialValue, "Reset: " + GetName());
+		SetValue(mInitialValue, "Reset: " + GetPath());
 	}
 }
 
@@ -156,5 +158,38 @@ QVariant QPropertyHandler::GetMetaData(const QString& inKey) {
 
 const QVariantHash& QPropertyHandler::GetMetaData() const {
 	return mMetaData;
+}
+
+QVariant QPropertyHandler::CreateNewVariant(TypeId inId) {
+	QMetaType metaType(inId);
+	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
+	QRegularExpressionMatch match = reg.match(metaType.name());
+	QStringList matchTexts = match.capturedTexts();
+	if (!matchTexts.isEmpty()) {
+		QMetaType rawMetaType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
+		if (rawMetaType.isValid()) {
+			void* ptr = QMetaType::create(rawMetaType.id());
+			QVariant sharedPtr(metaType);
+			memcpy(sharedPtr.data(), &ptr, sizeof(ptr));
+			return sharedPtr;
+		}
+	}
+	else if (metaType.flags().testFlag(QMetaType::IsPointer)) {
+		const QMetaObject* metaObject = metaType.metaObject();
+		if (metaObject) {
+			QObject* obj = metaObject->newInstance();
+			if (obj)
+				return QVariant::fromValue(obj);
+		}
+		QMetaType rawMetaType = QMetaType::fromName(QString(metaType.name()).remove("*").toLocal8Bit());
+		if (rawMetaType.isValid()) {
+			void* ptr = QMetaType::create(rawMetaType.id());
+			return QVariant::fromValue<>(ptr);
+		}
+		else {
+			return QVariant();
+		}
+	}
+	return QVariant(metaType);
 }
 

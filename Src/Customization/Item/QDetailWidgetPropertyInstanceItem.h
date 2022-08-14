@@ -19,6 +19,8 @@ private:
 	const QMetaObject* mMetaObject = nullptr;
 	QSharedPointer<QInstance> mInstance;
 	QVariant mInstanceVar;
+	bool bIsSharedPointer = false;
+	bool bIsPointer = false;
 };
 
 #endif // QDetailWidgetPropertyInstanceItem_h__

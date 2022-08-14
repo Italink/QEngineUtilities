@@ -5,7 +5,6 @@
 #include "QPushButton"
 
 QDetailWidgetPropertySequentialItem::QDetailWidgetPropertySequentialItem() {
-	SetReorderChildrenEnabled(true);
 }
 
 bool QDetailWidgetPropertySequentialItem::FilterType(TypeId inID) {
@@ -23,11 +22,11 @@ void QDetailWidgetPropertySequentialItem::SetHandler(QPropertyHandler* inHandler
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
 	mValueTypeId = iterable.valueMetaType().id();
+	connect(GetHandler(), &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertySequentialItem::RecreateChildren);
 }
 
 void QDetailWidgetPropertySequentialItem::ResetValue() {
 	QDetailWidgetPropertyItem::ResetValue();
-	RecreateChildren();
 }
 
 void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
@@ -81,12 +80,13 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 	const QMetaSequence metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
-	QMetaType valueType(mValueTypeId);
-	QVariant var(valueType);
+	QVariant var = QPropertyHandler::CreateNewVariant(mValueTypeId);
 	const void* dataPtr = coercer.coerce(var, var.metaType());
 	metaSequence.addValue(containterPtr, dataPtr);
-	SetValue(varList);
-	RecreateChildren();
+
+	SetValue(varList, QString("%1 Append %2").arg(GetHandler()->GetPath()).arg(metaSequence.size(containterPtr) - 1));
+	setExpanded(true);
+	child(childCount() - 1)->setExpanded(true);
 }
 
 QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
@@ -96,9 +96,7 @@ QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
 }
 
 void QDetailWidgetPropertySequentialItem::BuildContentAndChildren() {
-	GetContent()->SetNameWidgetByText(GetName());
-	GetContent()->SetValueWidget(GenerateValueWidget());
-	treeWidget()->setItemWidget(this, 0, GetContent());
+	QDetailWidgetPropertyItem::BuildContentAndChildren();
 	RecreateChildren();
 }
 

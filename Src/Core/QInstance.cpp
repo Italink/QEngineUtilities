@@ -87,6 +87,10 @@ bool QInstance_Gadget::Invoke(QMetaMethod& inMethod, QGenericReturnArgument retu
 	return inMethod.invokeOnGadget(mPtr, returnValue);
 }
 
+void QInstance_Gadget::UpdateDataPtr(void* inPtr) {
+	mPtr = inPtr;
+}
+
 QInstance_Object::QInstance_Object(QObject* inObject)
 	:mObject(inObject)
 {
@@ -115,6 +119,10 @@ QObject* QInstance_Object::GetOuterObject()
 bool QInstance_Object::Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue)
 {
 	return inMethod.invoke(mObject, returnValue);
+}
+
+void QInstance_Object::UpdateDataPtr(void* inPtr) {
+	mObject = static_cast<QObject*>(inPtr);
 }
 
 QPropertyHandler* QInstance::CreatePropertyHandler(const QMetaProperty& inProperty) {

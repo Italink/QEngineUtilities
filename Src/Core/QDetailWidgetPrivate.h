@@ -25,8 +25,6 @@ private:
 	QPushButton* mPbSearch;
 };
 
-
-
 class QDetailTreeWidget: public QTreeWidget{
 	Q_OBJECT
 		Q_PROPERTY(QColor GridLineColor READ GetGridLineColor WRITE SetGridLineColor)

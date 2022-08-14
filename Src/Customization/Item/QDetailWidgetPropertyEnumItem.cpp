@@ -21,13 +21,9 @@ QString QDetailWidgetPropertyEnumItem::GetKeywords()
 }
 
 QWidget* QDetailWidgetPropertyEnumItem::GenerateValueWidget() {
-	return nullptr;
-}
-
-void QDetailWidgetPropertyEnumItem::BuildContentAndChildren() {
 	QVariant var = GetValue();
-	const QMetaObject* metaObj = var.metaType().metaObject(); 
-	if (metaObj){
+	const QMetaObject* metaObj = var.metaType().metaObject();
+	if (metaObj) {
 		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->enumeratorOffset());
 		QComboBox* comboBox = new QComboBox();
 		for (int i = 0; i < metaEnum.keyCount(); i++) {
@@ -38,16 +34,14 @@ void QDetailWidgetPropertyEnumItem::BuildContentAndChildren() {
 			comboBox,
 			&QComboBox::currentTextChanged,
 			[comboBox, this]() {
-				return mNameToValueMap.value(comboBox->currentText());
-			},
+			return mNameToValueMap.value(comboBox->currentText());
+		},
 			[comboBox, this](QVariant var) {
-				comboBox->setCurrentText(mNameToValueMap.key(var.toInt()));;
-			}
-			);
+			comboBox->setCurrentText(mNameToValueMap.key(var.toInt()));;
+		}
+		);
 		comboBox->setMinimumWidth(90);
-		GetContent()->SetNameWidgetByText(GetName());
-		GetContent()->SetValueWidget(comboBox);
-		treeWidget()->setItemWidget(this, 0, GetContent());
+		return comboBox;
 	}
+	return nullptr;
 }
-

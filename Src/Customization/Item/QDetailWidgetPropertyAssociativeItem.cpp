@@ -17,11 +17,11 @@ void QDetailWidgetPropertyAssociativeItem::SetHandler(QPropertyHandler* inHandle
 	QVariant var = GetValue();
 	QAssociativeIterable iterable = var.value<QAssociativeIterable>();
 	mValueTypeId = iterable.metaContainer().mappedMetaType().id();
+	connect(GetHandler(), &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyAssociativeItem::RecreateChildren);
 }
 
 void QDetailWidgetPropertyAssociativeItem::ResetValue() {
 	QDetailWidgetPropertyItem::ResetValue();
-	RecreateChildren();
 }
 
 QDetailWidgetPropertyItem* QDetailWidgetPropertyAssociativeItem::FindItem(QString inKey) {
@@ -65,10 +65,13 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
-			item->AttachTo(this);
+			item->SetBuildContentAndChildrenCallback([item]() {
+				item->AddValueWidget(new QPushButton("HaHa"));
+			});
 			item->SetRenameCallback([this, item](QString name) {
 				return RenameChild(item->GetName(), name);
 			});
+			item->AttachTo(this);
 		}
 	}
 }
@@ -85,14 +88,12 @@ bool QDetailWidgetPropertyAssociativeItem::RenameChild(QString inSrc, QString in
 		void* containterPtr = const_cast<void*>(iterable.constIterable());
 		QMetaAssociation metaAssociation = iterable.metaContainer();
 		metaAssociation.removeKey(containterPtr, keyCoercer.coerce(inSrc, QMetaType::fromType<QString>()));
-		//metaAssociation.insertKey(containterPtr, keyCoercer.coerce(inDst, QMetaType::fromType<QString>()));
 		metaAssociation.setMappedAtKey(
 			containterPtr,
 			keyCoercer.coerce(inDst, QMetaType::fromType<QString>()),
 			mappedCoercer.coerce(var, var.metaType())
 		);;
-		SetValue(varMap);
-		RecreateChildren();
+		SetValue(varMap, QString("Rename: %1 -> %2").arg(inSrc).arg(inDst));
 	}
 	return canRename;
 }
@@ -122,14 +123,20 @@ void QDetailWidgetPropertyAssociativeItem::CreateNewItem() {
 	const QMetaAssociation metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
-	QVariant var(QString("Item"));
-	const void* dataPtr = coercer.coerce(var, var.metaType());
-	metaSequence.insertKey(containterPtr, dataPtr);
-	SetValue(varList);
-	RecreateChildren();
-	QDetailWidgetPropertyItem* item = FindItem("Item");
-	if (item)
-		item->RequestRename();
+	QString newKey = "Item0";
+	int index = 0;
+	while (iterable.containsKey(newKey)) {
+		newKey = "Item" + QString::number(++index);
+	}
+	QVariant key(newKey);
+	QVariant value = QPropertyHandler::CreateNewVariant(mValueTypeId);
+	const void* keyDataPtr = coercer.coerce(key, key.metaType());
+	const void* valueDataPtr = coercer.coerce(value, value.metaType());
+	//metaSequence.insertKey(containterPtr, keyDataPtr);
+	metaSequence.setMappedAtKey(containterPtr, keyDataPtr, valueDataPtr);
+	SetValue(varList,QString("%1 Insert: %2").arg(GetHandler()->GetPath()).arg(newKey));
+	setExpanded(true);
+	FindItem(newKey)->setExpanded(true);
 }
 
 QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {
@@ -139,8 +146,6 @@ QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {
 }
 
 void QDetailWidgetPropertyAssociativeItem::BuildContentAndChildren() {
-	GetContent()->SetNameWidgetByText(GetName());
-	GetContent()->SetValueWidget(GenerateValueWidget());
-	treeWidget()->setItemWidget(this, 0, GetContent());
+	QDetailWidgetPropertyItem::BuildContentAndChildren();
 	RecreateChildren();
 }

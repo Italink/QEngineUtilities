@@ -4,19 +4,22 @@
 #include "TestObject.h"
 #include "QDetailWidget.h"
 
+
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
 
+	qRegisterMetaType<TestInlineObject>();
+	qRegisterMetaType<TestInlineObject*>();
+	qRegisterMetaType<TestInlineGadget>();
+	qRegisterMetaType<TestInlineGadget*>();
+	qRegisterMetaType<QSharedPointer<TestInlineGadget>>();
+	qRegisterMetaType<std::shared_ptr<TestInlineGadget>>();
+
 	TestInlineGadget gadget;
 	TestObject obj;
-
 	QDetailWidget widget;
 	widget.SetInstances(&obj);
 	widget.show();
-
-	//QDetailWidget gadgetwidget;
-	//gadgetwidget.SetInstances(&gadget);
-	//gadgetwidget.show();
 
 	return app.exec();
 }

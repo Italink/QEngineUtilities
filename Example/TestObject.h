@@ -24,8 +24,8 @@ class TestInlineGadget{
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_END()
 public:
-	Q_PROPERTY_AUTO(double, LimitedDouble);
-	Q_PROPERTY_AUTO(QString, Desc) = "This is inline gadget";
+	Q_PROPERTY_AUTO(double, LimitedDouble) = 1;
+	Q_PROPERTY_AUTO(QString, Desc) = "This is inline Gadget";
 };
 
 class TestInlineObject : public QObject {
@@ -42,9 +42,13 @@ static QDebug operator<<(QDebug debug, const TestInlineGadget& gadget) {
 	return debug << gadget.LimitedDouble << gadget.Desc;
 }
 
-static QDebug operator<<(QDebug debug, const TestInlineObject* object) {
-	return debug << object->Desc;
+static QDebug operator<<(QDebug debug, const std::shared_ptr<TestInlineGadget>& gadget) {
+	return debug << gadget->LimitedDouble << gadget->Desc;
 }
+
+//static QDebug operator<<(QDebug debug, const TestInlineObject* object) {
+//	return debug << object->Desc;
+//}
 
 
 class TestObject :public QObject {
@@ -54,7 +58,7 @@ class TestObject :public QObject {
 		Q_META_CATEGORY(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
 		Q_META_CATEGORY(Color,Color,Colors, ColorList, StdColorList,ColorMap)
 		Q_META_CATEGORY(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
-		Q_META_CATEGORY(Inline, InlineGadget, InlineObject)
+		Q_META_CATEGORY(Inline, InlineGadget, InlineGadgetPtr, InlineGadgetSPtr, InlineGadgetStdSPtr, InlineObject, InlineObjectSPtr, InlineObjectList, InlineGadgetList, InlineGadgetPtrList, InlineGadgetSPtrList, InlineGadgetStdPtrList, InlineGadgetSPtrMap)
 		Q_META_CATEGORY(Other,Bool)
 		Q_META_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_STRING_AS_LINE(QtString,"This is QString")
@@ -88,12 +92,33 @@ public:
 	Q_PROPERTY_AUTO(std::vector<QColor>, StdColorList) = { Qt::red,Qt::green,Qt::blue };
 
 	Q_PROPERTY(QMap<QString, QColor> ColorMap READ GetColorMap WRITE SetColorMap)
-		QMap<QString, QColor> GetColorMap() const { return ColorMap; }
-	void SetColorMap(QMap<QString, QColor> val) { ColorMap = val; }
+
+	QMap<QString, QColor> GetColorMap() const { return ColorMap; }
+	void SetColorMap(QMap<QString, QColor> val) {
+		ColorMap = val;
+		qDebug() << "ColorMap: " << ColorMap;
+	}
 	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
 
 	Q_PROPERTY_AUTO(TestInlineGadget, InlineGadget);
+	Q_PROPERTY_AUTO(TestInlineGadget*, InlineGadgetPtr) = new TestInlineGadget;
+	Q_PROPERTY_AUTO(QSharedPointer<TestInlineGadget>, InlineGadgetSPtr) = QSharedPointer<TestInlineGadget>::create();
+	Q_PROPERTY_AUTO(std::shared_ptr<TestInlineGadget>, InlineGadgetStdSPtr) = std::make_shared<TestInlineGadget>();
 	Q_PROPERTY_AUTO(TestInlineObject*, InlineObject) = new TestInlineObject;
+	Q_PROPERTY_AUTO(QSharedPointer<TestInlineObject>, InlineObjectSPtr) = QSharedPointer<TestInlineObject>::create();
+	Q_PROPERTY_AUTO(QList<TestInlineObject*>, InlineObjectList) = { };
+	Q_PROPERTY_AUTO(QList<TestInlineGadget>, InlineGadgetList) = { };
+	Q_PROPERTY_AUTO(QList<TestInlineGadget*>, InlineGadgetPtrList) = { };
+	Q_PROPERTY_AUTO(QList<QSharedPointer<TestInlineGadget>>, InlineGadgetSPtrList) = { };
+	Q_PROPERTY_AUTO(QList<std::shared_ptr<TestInlineGadget>>, InlineGadgetStdPtrList) = { };
+
+	Q_PROPERTY(QMap<QString, QSharedPointer<TestInlineGadget>> InlineGadgetSPtrMap READ GetInlineGadgetSPtrMap WRITE SetInlineGadgetSPtrMap)
+	QMap<QString, QSharedPointer<TestInlineGadget>> GetInlineGadgetSPtrMap() const { return InlineGadgetSPtrMap; }
+	void SetInlineGadgetSPtrMap(QMap<QString,QSharedPointer<TestInlineGadget>> val) { InlineGadgetSPtrMap = val; }
+	QMap<QString, QSharedPointer<TestInlineGadget>> InlineGadgetSPtrMap;
 };
+
+Q_DECLARE_METATYPE(QSharedPointer<TestInlineGadget>);
+Q_DECLARE_METATYPE(std::shared_ptr<TestInlineGadget>);
 
 #endif // TestObject_h__

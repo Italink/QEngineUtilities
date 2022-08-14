@@ -33,7 +33,8 @@ public:
 	void RefleshSplitterFactor();
 	void SetNameWidget(QWidget* inWidget);
 	void SetNameWidgetByText(QString inName);
-	void SetValueWidget(QWidget* inWidget);
+	void ClearValueWidget();
+	void AddValueWidget(QWidget* inWidget);
 	QHBoxLayout* GetNameContentLayout() const;
 	QHBoxLayout* GetValueContentLayout() const;
 	QPushButton* GetResetButton() const { return mResetButton; }
@@ -70,7 +71,7 @@ public:
 
 	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler);
 
-	void SetValue(QVariant inValue);
+	void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
 
 	virtual void SetHandler(QPropertyHandler* inHandler);
 
@@ -85,6 +86,8 @@ public:
 	virtual ItemType Type() const override { return ItemType::Property; }
 
 	virtual QWidget* GenerateValueWidget() = 0;
+	void ClearValueWidget();
+	void AddValueWidget(QWidget* inWigdet);
 
 	QDetailWidgetPropertyItemWidget* GetContent() const;
 
@@ -109,22 +112,18 @@ public:
 
 	bool CanRename() const { return mRenameCallback ? true : false; }
 
-	bool CanReorderChildren() const { return mCanReorderChildren; }
-
-	void SetReorderChildrenEnabled(bool val) { mCanReorderChildren = val; }
-
 	void SetRenameCallback(std::function<bool(QString)> val) { mRenameCallback = val; }
-
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
 
+	void SetBuildContentAndChildrenCallback(std::function<void()> val);
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
-	bool mCanReorderChildren = false;
 	std::function<bool(QString)> mRenameCallback;
+	std::function<void()> mBuildContentAndChildrenCallback;
 };
 
 #endif // QDetailWidgetPropertyItem_h__
