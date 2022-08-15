@@ -5,9 +5,9 @@
 #include "Undo/QDetailUndoStack.h"
 #include "QRegularExpression"
 
-QPropertyHandler::QPropertyHandler(QObject* inParent, TypeId inTypeID, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
+QPropertyHandler::QPropertyHandler(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
 	: QObject(inParent)
-	, mTypeID(inTypeID)
+	, mType(inType)
 	, mPath(inPropertyPath)
 	, mGetter(inGetter)
 	, mSetter(inSetter)
@@ -21,6 +21,11 @@ QPropertyHandler::QPropertyHandler(QObject* inParent, TypeId inTypeID, QString i
 	else {
 		mUndoEntry = new QDetailUndoEntry(inParent);
 	}
+
+	auto IsVisible = mMetaData.find("Visible");
+	if (IsVisible != mMetaData.end()) {
+		SetVisible(IsVisible->toBool());
+	}
 }
 
 QPropertyHandler* QPropertyHandler::FindOrCreate(QInstance* inInstance, QString inPropertyName, QVariantHash inMetaData)
@@ -28,14 +33,14 @@ QPropertyHandler* QPropertyHandler::FindOrCreate(QInstance* inInstance, QString 
 	int index = inInstance->GetMetaObject()->indexOfProperty(inPropertyName.toLocal8Bit());
 	QMetaProperty metaProperty = inInstance->GetMetaObject()->property(index);
 	return FindOrCreate(inInstance->GetOuterObject(),
-		metaProperty.typeId(),
+		metaProperty.metaType(),
 		inPropertyName,
 		[inInstance, metaProperty]() {return inInstance->GetProperty(metaProperty); },
 		[inInstance, metaProperty](QVariant var) { inInstance->SetProperty(metaProperty, var); }
 	);
 }
 
-QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inOuter, TypeId inTypeID, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData /*= QVariantHash()*/)
+QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inOuter, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData /*= QVariantHash()*/)
 {
 	for (QObject* child : inOuter->children()) {
 		QPropertyHandler* handler = qobject_cast<QPropertyHandler*>(child);
@@ -45,7 +50,7 @@ QPropertyHandler* QPropertyHandler::FindOrCreate(QObject* inOuter, TypeId inType
 	}
 	QPropertyHandler* handler = new QPropertyHandler(
 		inOuter,
-		inTypeID,
+		inType,
 		inPropertyPath,
 		inGetter,
 		inSetter,
@@ -109,7 +114,9 @@ void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDes
 				mIsChanged = !(inVar == mInitialValue);
 			}
 			mSetter(inVar);
-			FlushValue();
+			for (auto& binder : mBinderMap.values()) {
+				binder.mSetter(inVar);
+			}
 			Q_EMIT AsValueChanged();
 		};
 		if (!isPushUndoStackWithDesc.isEmpty())
@@ -140,8 +147,8 @@ void QPropertyHandler::FlushValue() {
 	}
 }
 
-QPropertyHandler::TypeId QPropertyHandler::GetTypeID() {
-	return mTypeID;
+QMetaType QPropertyHandler::GetType() {
+	return mType;
 }
 
 QString QPropertyHandler::GetName()
@@ -165,36 +172,48 @@ const QVariantHash& QPropertyHandler::GetMetaData() const {
 	return mMetaData;
 }
 
-QVariant QPropertyHandler::CreateNewVariant(TypeId inId) {
-	QMetaType metaType(inId);
+bool QPropertyHandler::IsVisible() const
+{
+	return mIsVisible;
+}
+
+void QPropertyHandler::SetVisible(bool val)
+{
+	mIsVisible = val;
+}
+
+QVariant QPropertyHandler::CreateNewVariant(QMetaType inOutputType, QMetaType inRealType)
+{
 	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
-	QRegularExpressionMatch match = reg.match(metaType.name());
+	QRegularExpressionMatch match = reg.match(inOutputType.name());
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
-		QMetaType rawMetaType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
-		if (rawMetaType.isValid()) {
-			void* ptr = QMetaType::create(rawMetaType.id());
-			QVariant sharedPtr(metaType);
+		if(!inRealType.isValid())
+			QMetaType inRealType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
+		if (inRealType.isValid()) {
+			void* ptr = inRealType.create();
+			QVariant sharedPtr(inOutputType);
 			memcpy(sharedPtr.data(), &ptr, sizeof(ptr));
 			return sharedPtr;
 		}
 	}
-	else if (metaType.flags().testFlag(QMetaType::IsPointer)) {
-		const QMetaObject* metaObject = metaType.metaObject();
-		if (metaObject) {
+	else if (inOutputType.flags().testFlag(QMetaType::IsPointer)) {
+		const QMetaObject* metaObject = inOutputType.metaObject();
+		if (metaObject && metaObject->inherits(&QObject::staticMetaObject)) {
 			QObject* obj = metaObject->newInstance();
 			if (obj)
 				return QVariant::fromValue(obj);
 		}
-		QMetaType rawMetaType = QMetaType::fromName(QString(metaType.name()).remove("*").toLocal8Bit());
-		if (rawMetaType.isValid()) {
-			void* ptr = QMetaType::create(rawMetaType.id());
+		if (!inRealType.isValid())
+			QMetaType inRealType = QMetaType::fromName(QString(inOutputType.name()).remove("*").toLocal8Bit());
+		if (inRealType.isValid()) {
+			void* ptr = inRealType.create();
 			return QVariant::fromValue<>(ptr);
 		}
 		else {
 			return QVariant();
 		}
 	}
-	return QVariant(metaType);
+	return QVariant(inOutputType);
 }
 

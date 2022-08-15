@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
 	TestInlineGadget gadget;
 	TestObject obj;
-	QDetailWidget widget(QDetailWidgetFlag::DisplayCategory|QDetailWidgetFlag::DisplaySearcher);
+	QDetailWidget widget(QDetailWidgetFlag::DisplaySearcher);
 	widget.SetInstances(&obj);
 	widget.show();
 	return app.exec();

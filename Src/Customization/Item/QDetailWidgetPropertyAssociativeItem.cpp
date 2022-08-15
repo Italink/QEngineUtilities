@@ -4,9 +4,8 @@
 #include "QAssociativeIterable"
 #include "Widgets\Toolkits\QSvgButton.h"
 
-bool QDetailWidgetPropertyAssociativeItem::FilterType(TypeId inID) {
-	QMetaType metaType(inID);
-	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantMap>())) {
+bool QDetailWidgetPropertyAssociativeItem::FilterType(QMetaType inType) {
+	if (QMetaType::canConvert(inType, QMetaType::fromType<QVariantMap>())) {
 		return true;
 	}
 	return false;
@@ -16,7 +15,7 @@ void QDetailWidgetPropertyAssociativeItem::SetHandler(QPropertyHandler* inHandle
 	QDetailWidgetPropertyItem::SetHandler(inHandler);
 	QVariant var = GetValue();
 	QAssociativeIterable iterable = var.value<QAssociativeIterable>();
-	mValueTypeId = iterable.metaContainer().mappedMetaType().id();
+	mValueType = iterable.metaContainer().mappedMetaType();
 	connect(GetHandler(), &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyAssociativeItem::RecreateChildren);
 }
 
@@ -40,7 +39,7 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 	QDetailWidgetPropertyItem* item = FindItem(inKey);
 	QPropertyHandler* handler = QPropertyHandler::FindOrCreate(
 		GetParentObject(),
-		mValueTypeId,
+		mValueType,
 		GetHandler()->GetSubPath(inKey),
 		[this, inKey]() {
 		QVariant varMap = GetValue();
@@ -65,17 +64,19 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
-			item->SetBuildContentAndChildrenCallback([item,inKey,this]() {
+			if (!GetHandler()->GetMetaData("FixedSize").toBool()) {
 				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
 				deleteButton->setFixedSize(20, 20);
 				item->AddValueWidget(deleteButton);
 				connect(deleteButton, &QSvgButton::clicked, this, [inKey, this]() {
 					RemoveItem(inKey);
+					});
+			}
+			if (!GetHandler()->GetMetaData("FixedKey").toBool()) {
+				item->SetRenameCallback([this, item](QString name) {
+					return RenameChild(item->GetName(), name);
 				});
-			});
-			item->SetRenameCallback([this, item](QString name) {
-				return RenameChild(item->GetName(), name);
-			});
+			}
 			item->AttachTo(this);
 		}
 	}
@@ -134,7 +135,7 @@ void QDetailWidgetPropertyAssociativeItem::CreateNewItem() {
 		newKey = "Item" + QString::number(++index);
 	}
 	QVariant key(newKey);
-	QVariant value = QPropertyHandler::CreateNewVariant(mValueTypeId);
+	QVariant value = QPropertyHandler::CreateNewVariant(mValueType);
 	const void* keyDataPtr = coercer.coerce(key, key.metaType());
 	const void* valueDataPtr = coercer.coerce(value, value.metaType());
 	//metaAssociation.insertKey(containterPtr, keyDataPtr);
@@ -157,6 +158,9 @@ void QDetailWidgetPropertyAssociativeItem::RemoveItem(QString inKey) {
 }
 
 QWidget* QDetailWidgetPropertyAssociativeItem::GenerateValueWidget() {
+	if (GetHandler()->GetMetaData("FixedSize").toBool()) {
+		return nullptr;
+	}
 	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
 	btAppend->setFixedSize(20, 20);
 	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertyAssociativeItem::CreateNewItem);

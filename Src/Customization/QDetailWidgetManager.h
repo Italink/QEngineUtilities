@@ -8,9 +8,14 @@
 #include "Instance/QInstanceDetail.h"
 #include "QMap"
 
+inline size_t qHash(const QMetaType& key, size_t seed)
+{
+	return  key.id();
+}
+
 class QDetailWidgetManager {
 public:
-	using PropertyTypeFilter = std::function<bool(QPropertyHandler::TypeId)>;
+	using PropertyTypeFilter = std::function<bool(QMetaType)>;
 	using PropertyItemCreator = std::function<QDetailWidgetPropertyItem* ()>;
 
 	using InstanceTypeFilter = std::function<bool(const QSharedPointer<QInstance>& )>;
@@ -22,18 +27,18 @@ public:
 
 	template<typename PropertyItemType>
 	void RegisterPropertyItemCreator() {
-		QList<int> typeIdList = PropertyItemType::SupportedTypes();
+		QList<QMetaType> typeList = PropertyItemType::SupportedTypes();
 		PropertyItemCreator creator = []() {
 			return new PropertyItemType();
 		};
-		for (int id : typeIdList) {
-			mPropertyItemCreatorMap[id] = creator;
+		for (QMetaType type : typeList) {
+			mPropertyItemCreatorMap[type] = creator;
 		}
 	}
 
 	template<typename PropertyItemType>
 	void RegisterPropertyItemFilter() {
-		PropertyTypeFilter filter= [](QPropertyHandler::TypeId inType) { 
+		PropertyTypeFilter filter= [](QMetaType inType) {
 			return PropertyItemType::FilterType(inType); 
 		};
 		PropertyItemCreator creator = []() {
@@ -53,14 +58,14 @@ public:
 		mInstanceFilterList << QPair<InstanceTypeFilter, InstanceDetailCreator>{filter, creator};
 	}
 
-	const QHash<QPropertyHandler::TypeId,PropertyItemCreator>& GetPropertyItemCreatorMap() const { return mPropertyItemCreatorMap; }
+	const QHash<QMetaType,PropertyItemCreator>& GetPropertyItemCreatorMap() const { return mPropertyItemCreatorMap; }
 	const QList<QPair<PropertyTypeFilter,PropertyItemCreator>>& GetPropertyItemFilterList() const { return mPropertyItemFilterList; }
 	const QList<QPair<InstanceTypeFilter, InstanceDetailCreator>>& GetInstanceDetailFilterList() const { return mInstanceFilterList; }
 protected:
 	void RegisterBuiltIn();
 
 private:
-	QHash<QPropertyHandler::TypeId, PropertyItemCreator> mPropertyItemCreatorMap;
+	QHash<QMetaType, PropertyItemCreator> mPropertyItemCreatorMap;
 	QList<QPair<PropertyTypeFilter, PropertyItemCreator>>  mPropertyItemFilterList;
 	QList<QPair<InstanceTypeFilter, InstanceDetailCreator>>  mInstanceFilterList;
 };

@@ -64,10 +64,12 @@ void QInstanceDetail::Build() {
 }
 
 void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
+	QString categoryName = inPropertyHandler->GetMetaData("Category").toString();
+	if (mInstance->GetCategoryMap()[categoryName])
+		return;
 	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(inPropertyHandler);
 	if (item) {
-		if (mInstance->GetMetaData("DisplayCategory").toBool()) {
-			QString categoryName = inPropertyHandler->GetMetaData("Category").toString();
+		if (mInstance->GetMetaData("CategoryEnabled").toBool()) {
 			if (categoryName.isEmpty())
 				categoryName = mInstance->GetOuterObject()->objectName();
 			if (categoryName.isEmpty())
@@ -85,9 +87,10 @@ void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
 }
 
 void QInstanceDetail::PreBuildCategory() {
-	if (mInstance->GetMetaData("DisplayCategory").toBool()) {
-		for (auto categoryName : mInstance->GetCategoryList()) {
-			FindOrAddCategory(categoryName);
+	if (mInstance->GetMetaData("CategoryEnabled").toBool()) {
+		for (auto category = mInstance->GetCategoryMap().begin(); category != mInstance->GetCategoryMap().end();++category) {
+			if(category.value())
+				FindOrAddCategory(category.key());
 		}
 	}
 }

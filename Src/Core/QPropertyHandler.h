@@ -11,12 +11,11 @@ class QDetailUndoEntry;
 class QPropertyHandler : public QObject{
 	Q_OBJECT
 public:
-	using TypeId = unsigned int;;
 	using Getter = std::function<QVariant()>;
 	using Setter = std::function<void(QVariant)>;
 
 	static QPropertyHandler* FindOrCreate(QInstance* inInstance, QString inPropertyPath, QVariantHash inMetaData = QVariantHash());
-	static QPropertyHandler* FindOrCreate(QObject* inOuter, TypeId inTypeID, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData = QVariantHash());
+	static QPropertyHandler* FindOrCreate(QObject* inOuter, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData = QVariantHash());
 
 	void SetValue(QVariant inValue,QString isPushUndoStackWithDesc = QString());
 	QVariant GetValue();
@@ -24,13 +23,16 @@ public:
 	void FlushValue();
 
 
-	TypeId GetTypeID();
+	QMetaType GetType();
 	QString GetName();
 	QString GetPath();
 	QString GetSubPath(const QString& inSubName);
 
 	QVariant GetMetaData(const QString& inKey);
 	const QVariantHash& GetMetaData() const;
+
+	bool IsVisible() const;
+	void SetVisible(bool val);
 
 	bool IsChanged() const { return mIsChanged; }
 
@@ -52,18 +54,21 @@ public:
 		});
 	}
 
-	static QVariant CreateNewVariant(TypeId inId);
+	static QVariant CreateNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
+
 Q_SIGNALS:
 	void AsValueChanged();
+	void AsVisibleChanged();
 private:
-	QPropertyHandler(QObject* inParent, TypeId inTypeID, QString inName, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
+	QPropertyHandler(QObject* inParent, QMetaType inType, QString inName, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
 private:
-	TypeId mTypeID = 0;
+	QMetaType mType;
 	QString mPath;
 	Getter mGetter;
 	Setter mSetter;
 	QVariant mInitialValue;
 	bool mIsChanged = false;
+	bool mIsVisible = true;
 	QVariantHash mMetaData;
 	QMap<QObject*,QPropertyBinder> mBinderMap;
 	QDetailUndoEntry* mUndoEntry = nullptr;

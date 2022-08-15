@@ -33,8 +33,8 @@ void QInstance::SetMetaData(const QString& inKey, QVariant inVar) {
 	mMetaData.mInstanceMetaData[inKey] = inVar;
 }
 
-const	QList<QString>& QInstance::GetCategoryList() {
-	return mMetaData.mCategoryList;
+const QHash<QString, bool>& QInstance::GetCategoryMap() {
+	return mMetaData.mCategories;;
 }
 
 const QHash<QString, QVariantHash>& QInstance::GetPropertiesMetaData() {
@@ -50,9 +50,8 @@ void QInstance::LoadMetaData() {
 				for (auto PropertyIter = MetaData.mPropertiesMetaData.begin(); PropertyIter != MetaData.mPropertiesMetaData.end(); ++PropertyIter) {
 					mMetaData.mPropertiesMetaData[PropertyIter.key()] = PropertyIter.value();
 				}
-				for (auto categoryName : MetaData.mCategoryList) {
-					mMetaData.mCategoryList << categoryName;
-				}
+				mMetaData.mCategories.insert(MetaData.mCategories);
+				mMetaData.mInstanceMetaData.insert(MetaData.mInstanceMetaData);
 			}
 		}
 	}
@@ -128,7 +127,7 @@ void QInstance_Object::UpdateDataPtr(void* inPtr) {
 QPropertyHandler* QInstance::CreatePropertyHandler(const QMetaProperty& inProperty) {
 	QPropertyHandler* propHandler = QPropertyHandler::FindOrCreate(
 		GetOuterObject(),
-		inProperty.typeId(),
+		inProperty.metaType(),
 		inProperty.name(),
 		[this, inProperty]() {return GetProperty(inProperty); },
 		[this, inProperty](QVariant var) { SetProperty(inProperty, var); },

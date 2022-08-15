@@ -155,20 +155,20 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler)
 {
 	for (auto& filter : QDetailWidgetManager::instance()->GetPropertyItemFilterList()) {
-		if (filter.first(inHandler->GetTypeID())) {
+		if (filter.first(inHandler->GetType())) {
 			QDetailWidgetPropertyItem* item = filter.second();
 			item->SetHandler(inHandler);
 			return item;
 		}
 	}
 
-	auto iter = QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().find(inHandler->GetTypeID());
+	auto iter = QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().find(inHandler->GetType());
 	if (iter != QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().end()) {
 		QDetailWidgetPropertyItem* item = (*iter)();
 		item->SetHandler(inHandler);
 		return item;
 	}
-	qWarning() << QString("Name: %1, TypeID: %2 : is not registered !").arg(inHandler->GetName()).arg(inHandler->GetTypeID());
+	qWarning() << QString("Name: %1, Type: %2 : is not registered !").arg(inHandler->GetName()).arg(inHandler->GetType().name());
 	return nullptr;
 }
 

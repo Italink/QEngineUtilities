@@ -42,32 +42,31 @@ public:
 };
 
 template<typename Aux_type>
-void GetIDListFromTypeInternal(QList<int>& inIDList) {}
+void GetIDListFromTypeInternal(QList<QMetaType>& inIDList) {}
 
 template<typename Aux_type, typename Head, typename... Tail>
-void GetIDListFromTypeInternal(QList<int>& inIDList) {
+void GetIDListFromTypeInternal(QList<QMetaType>& inIDList) {
 	if (QMetaTypeId2<Head>::Defined) {
-		inIDList << QMetaTypeId2<Head>::qt_metatype_id();
+		inIDList << QMetaType::fromType<Head>();
 	}
 	GetIDListFromTypeInternal<Aux_type, Tail...>(inIDList);
 }
 
 template<typename... Args>
-QList<int> GetIDListFromType() {
-	QList<int> idList;
+QList<QMetaType> GetIDListFromType() {
+	QList<QMetaType> idList;
 	GetIDListFromTypeInternal<void, Args...>(idList);
 	return idList;
 }
 
 #define Q_DETAIL_SUPPORTED_TYPES(...)	\
-	inline static QList<int> SupportedTypes() {	\
+	inline static QList<QMetaType> SupportedTypes() {	\
 		return GetIDListFromType<__VA_ARGS__>(); \
 	}
 
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 	Q_OBJECT
 public:
-	using TypeId = QPropertyHandler::TypeId;
 	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler);
 
 	void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
@@ -99,7 +98,7 @@ public:
 
 	template<typename Type>
 	bool canConvert() {
-		return QMetaType::canConvert(QMetaType(GetHandler()->GetTypeID()), QMetaType::fromType<Type>());
+		return QMetaType::canConvert(GetHandler()->GetType(), QMetaType::fromType<Type>());
 	}
 
 	QVariant GetValue();

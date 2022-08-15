@@ -3,7 +3,7 @@
 #include "Core\QDetailWidgetPrivate.h"
 #include "Core\QDetailWidgetStyleManager.h"
 
-QDetailWidget::QDetailWidget(QDetailWidgetFlags inFlags /*= Flags(DisplaySearcher | DisplayCategory)*/)
+QDetailWidget::QDetailWidget(QDetailWidgetFlags inFlags)
 	: mSearcher(new QDetailSearcher)
 	, mTreeWidget(new QDetailTreeWidget)
 	, mFlags(inFlags) {
@@ -19,11 +19,6 @@ QDetailWidget::QDetailWidget(QDetailWidgetFlags inFlags /*= Flags(DisplaySearche
 
 void QDetailWidget::SetInstanceList(const QList<QSharedPointer<QInstance>>& inInstances)
 {
-	if (mFlags.testFlag(QDetailWidgetFlag::DisplayCategory)) {
-		for (auto& Instance : inInstances) {
-			Instance->SetMetaData("DisplayCategory",true);
-		}
-	}
 	mTreeWidget->SetInstances(inInstances);
 }
 

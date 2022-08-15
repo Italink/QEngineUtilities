@@ -8,10 +8,9 @@
 QDetailWidgetPropertySequentialItem::QDetailWidgetPropertySequentialItem() {
 }
 
-bool QDetailWidgetPropertySequentialItem::FilterType(TypeId inID) {
-	QMetaType metaType(inID);
-	if (QMetaType::canConvert(metaType, QMetaType::fromType<QVariantList>())
-		&& !QMetaType::canConvert(metaType, QMetaType::fromType<QString>())
+bool QDetailWidgetPropertySequentialItem::FilterType(QMetaType inID) {
+	if (QMetaType::canConvert(inID, QMetaType::fromType<QVariantList>())
+		&& !QMetaType::canConvert(inID, QMetaType::fromType<QString>())
 		) {
 		return true;
 	}
@@ -22,7 +21,7 @@ void QDetailWidgetPropertySequentialItem::SetHandler(QPropertyHandler* inHandler
 	QDetailWidgetPropertyItem::SetHandler(inHandler);
 	QVariant var = GetValue();
 	QSequentialIterable iterable = var.value<QSequentialIterable>();
-	mValueTypeId = iterable.valueMetaType().id();
+	mValueType = iterable.valueMetaType();
 	connect(GetHandler(), &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertySequentialItem::RecreateChildren);
 }
 
@@ -33,7 +32,7 @@ void QDetailWidgetPropertySequentialItem::ResetValue() {
 void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 	QPropertyHandler* handler = QPropertyHandler::FindOrCreate(
 		GetParentObject(),
-		mValueTypeId,
+		mValueType,
 		GetHandler()->GetSubPath(QString::number(index)),
 		[this, index]() {
 		QVariant varList = GetValue();
@@ -60,34 +59,38 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
 			item->SetBuildContentAndChildrenCallback([item,this,index]() {
-				if (index != 0) {
-					QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
-					moveUp->setFixedSize(20, 20);
-					connect(moveUp, &QSvgButton::clicked, this, [index,this]() {
-						MoveItem(index, index - 1);
-					});
-					item->AddValueWidget(moveUp);
+				if (!GetHandler()->GetMetaData("FixedOrder").toBool()) {
+					if (index != 0) {
+						QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
+						moveUp->setFixedSize(20, 20);
+						connect(moveUp, &QSvgButton::clicked, this, [index, this]() {
+							MoveItem(index, index - 1);
+							});
+						item->AddValueWidget(moveUp);
+					}
+					else {
+						item->GetContent()->GetValueContentLayout()->addSpacing(22);
+					}
+					if (index != mCount - 1) {
+						QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
+						moveDown->setFixedSize(20, 20);
+						connect(moveDown, &QSvgButton::clicked, this, [index, this]() {
+							MoveItem(index, index + 1);
+							});
+						item->AddValueWidget(moveDown);
+					}
+					else {
+						item->GetContent()->GetValueContentLayout()->addSpacing(22);
+					}
 				}
-				else {
-					item->GetContent()->GetValueContentLayout()->addSpacing(22);
+				if (!GetHandler()->GetMetaData("FixedSize").toBool()) {
+					QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
+					deleteButton->setFixedSize(20, 20);
+					connect(deleteButton, &QSvgButton::clicked, this, [index, this]() {
+						RemoveItem(index);
+						});
+					item->AddValueWidget(deleteButton);
 				}
-				if (index != mCount - 1) {
-					QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
-					moveDown->setFixedSize(20, 20);
-					connect(moveDown, &QSvgButton::clicked, this, [index, this]() {
-						MoveItem(index, index + 1);
-					});
-					item->AddValueWidget(moveDown);	
-				}
-				else {
-					item->GetContent()->GetValueContentLayout()->addSpacing(22);
-				}
-				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
-				deleteButton->setFixedSize(20, 20);
-				connect(deleteButton, &QSvgButton::clicked, this, [index, this]() {
-					RemoveItem(index);
-				});
-				item->AddValueWidget(deleteButton);
 			});
 			item->AttachTo(this);
 			item->setExpanded(true);
@@ -140,7 +143,7 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 	const QMetaSequence metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
-	QVariant var = QPropertyHandler::CreateNewVariant(mValueTypeId);
+	QVariant var = QPropertyHandler::CreateNewVariant(mValueType);
 	const void* dataPtr = coercer.coerce(var, var.metaType());
 	metaSequence.addValue(containterPtr, dataPtr);
 
@@ -150,6 +153,8 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 }
 
 QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
+	if (GetHandler()->GetMetaData("FixedSize").toBool())
+		return nullptr;
 	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
 	btAppend->setFixedSize(20, 20);
 	connect(btAppend, &QPushButton::clicked, this, &QDetailWidgetPropertySequentialItem::CreateNewItem);

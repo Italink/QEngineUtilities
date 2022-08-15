@@ -5,7 +5,7 @@
 
 class QDetailWidgetPropertyAssociativeItem : public QDetailWidgetPropertyItem {
 public:
-	static bool FilterType(TypeId inID);
+	static bool FilterType(QMetaType inID);
 	virtual void SetHandler(QPropertyHandler* inHandler) override;
 	virtual void ResetValue() override;
 protected:
@@ -19,7 +19,7 @@ protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;
 private:
-	QPropertyHandler::TypeId mValueTypeId = 0;
+	QMetaType mValueType;
 };
 
 #endif // QDetailWidgetPropertyAssociativeItem_h__

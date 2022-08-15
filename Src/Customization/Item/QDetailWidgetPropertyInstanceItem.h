@@ -6,7 +6,7 @@ class QInstance;
 
 class QDetailWidgetPropertyInstanceItem : public QDetailWidgetPropertyItem {
 public:
-	static bool FilterType(TypeId inID);
+	static bool FilterType(QMetaType inID);
 	virtual void SetHandler(QPropertyHandler* inHandler) override;
 	virtual void ResetValue() override;
 protected:

@@ -5,7 +5,7 @@
 #include "QComboBox"
 #include "QMetaEnum"
 
-bool QDetailWidgetPropertyEnumItem::FilterType(TypeId inID) {
+bool QDetailWidgetPropertyEnumItem::FilterType(QMetaType inID) {
 	QMetaType metaType(inID);
 	return metaType.flags() & QMetaType::IsEnumeration;
 }

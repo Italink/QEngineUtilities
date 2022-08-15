@@ -5,7 +5,7 @@
 
 class QDetailWidgetPropertyEnumItem : public QDetailWidgetPropertyItem {
 public:
-	static bool FilterType(TypeId inID);
+	static bool FilterType(QMetaType inID);
 	int GetEnumValueByName(QString inName);
 	virtual QString GetKeywords() override;
 protected:

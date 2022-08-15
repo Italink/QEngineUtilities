@@ -28,7 +28,6 @@ void GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, In
 enum class QDetailWidgetFlag {
 	None = 0x0,
 	DisplaySearcher = 0x1,
-	DisplayCategory = 0x2,
 };
 
 Q_DECLARE_FLAGS(QDetailWidgetFlags, QDetailWidgetFlag);
@@ -39,7 +38,7 @@ class QDetailWidget :public QWidget {
 public:
 	using QWidget = QWidget;
 
-	QDetailWidget(QDetailWidgetFlags inFlags = QDetailWidgetFlag::DisplaySearcher | QDetailWidgetFlag::DisplayCategory);
+	QDetailWidget(QDetailWidgetFlags inFlags = QDetailWidgetFlag::DisplaySearcher);
 
 	template<typename... Instances>
 	void SetInstances(Instances... inInstances) {

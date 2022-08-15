@@ -6,7 +6,7 @@
 class QDetailWidgetPropertySequentialItem : public QDetailWidgetPropertyItem {
 public:
 	QDetailWidgetPropertySequentialItem();
-	static bool FilterType(TypeId inID);
+	static bool FilterType(QMetaType inID);
 	virtual void SetHandler(QPropertyHandler* inHandler) override;
 	void ResetValue() override;
 protected:
@@ -19,7 +19,7 @@ protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;
 private:
-	QPropertyHandler::TypeId mValueTypeId = 0;
+	QMetaType mValueType;
 	int mCount = 0;
 };
 

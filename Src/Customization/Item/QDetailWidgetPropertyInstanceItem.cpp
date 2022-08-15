@@ -1,14 +1,14 @@
 #include "QDetailWidgetPropertyInstanceItem.h"
 #include "Core\QInstance.h"
+#include "Core\Undo\QDetailUndoStack.h"
 #include "Customization\QDetailWidgetManager.h"
 #include "QAssociativeIterable"
+#include "QComboBox"
 #include "QMetaType"
-#include "Core\Undo\QDetailUndoStack.h"
 
-bool QDetailWidgetPropertyInstanceItem::FilterType(TypeId inID) {
-	QMetaType metaType(inID);
+bool QDetailWidgetPropertyInstanceItem::FilterType(QMetaType inID) {
 	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
-	QRegularExpressionMatch match = reg.match(metaType.name(),0,QRegularExpression::MatchType::PartialPreferCompleteMatch,QRegularExpression::AnchorAtOffsetMatchOption);
+	QRegularExpressionMatch match = reg.match(inID.name(),0,QRegularExpression::MatchType::PartialPreferCompleteMatch,QRegularExpression::AnchorAtOffsetMatchOption);
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
 		QString metaTypeName = matchTexts.back() + "*";
@@ -20,7 +20,7 @@ bool QDetailWidgetPropertyInstanceItem::FilterType(TypeId inID) {
 			qWarning() << QString("You will have to register %1 with Q_DECLARE_METATYPE() and qRegisterMetaType().").arg(metaTypeName);
 		}
 	}
-	return metaType.metaObject() != nullptr;
+	return inID.metaObject() != nullptr;
 }
 
 void QDetailWidgetPropertyInstanceItem::SetHandler(QPropertyHandler* inHandler)
@@ -38,7 +38,7 @@ void QDetailWidgetPropertyInstanceItem::ResetValue()
 
 void QDetailWidgetPropertyInstanceItem::RecreateInstance() {
 	mInstanceVar = GetValue();
-	QMetaType metaType(GetHandler()->GetTypeID());
+	QMetaType metaType(GetHandler()->GetType());
 	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(metaType.name());
 	QStringList matchTexts = match.capturedTexts();
@@ -99,6 +99,26 @@ void QDetailWidgetPropertyInstanceItem::RecreateChildren()
 }
 
 QWidget* QDetailWidgetPropertyInstanceItem::GenerateValueWidget() {
+	QStringList SubTypeList = GetHandler()->GetMetaData("SubTypeList").toStringList();
+	if (!SubTypeList.isEmpty()) {
+		QComboBox* comboBox = new QComboBox();
+		for (int i = 0; i < SubTypeList.size(); i++) {
+			comboBox->addItem(SubTypeList[i]);
+		}
+		connect(comboBox, &QComboBox::currentTextChanged, this, [comboBox,this](const QString& inText) {
+			QMetaType type = QMetaType::fromName(comboBox->currentText().toLocal8Bit());
+			QVariant Var;
+			if (type.isValid()) {
+				Var = QPropertyHandler::CreateNewVariant(GetHandler()->GetType(), type);
+			}
+			SetValue(Var);
+			RecreateChildren();
+		});
+		connect(GetHandler(), &QPropertyHandler::AsValueChanged, comboBox, [comboBox,this]() {
+			comboBox->setCurrentText(GetValue().metaType().name());
+		});
+		return comboBox;
+	}
 	return nullptr;
 }
 

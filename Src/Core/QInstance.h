@@ -21,7 +21,7 @@ public:
 	virtual QObject* GetOuterObject() = 0;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) = 0;
 	virtual void UpdateDataPtr(void* inPtr) = 0;
-	bool IsValid() { return GetOuterObject() != nullptr; }
+	virtual bool IsValid() { return GetOuterObject() != nullptr; }
 
 	QPropertyHandler* CreatePropertyHandler(const QMetaProperty& inProperty);
 
@@ -29,7 +29,7 @@ public:
 
 	QVariant GetMetaData(const QString& inKey);
 	void SetMetaData(const QString& inKey, QVariant inVar);
-	const QList<QString>& GetCategoryList();
+	const QHash<QString, bool>& GetCategoryMap();
 	const QHash<QString,QVariantHash>& GetPropertiesMetaData();
 private:
 	void LoadMetaData();
@@ -48,6 +48,7 @@ public:
 	virtual QObject* GetOuterObject() override;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
 	virtual void UpdateDataPtr(void* inPtr) override;
+	virtual bool IsValid() { return GetOuterObject() != nullptr && mPtr != nullptr; }
 private:
 	void* mPtr = nullptr;
 	const QMetaObject* mMetaObject = nullptr;
