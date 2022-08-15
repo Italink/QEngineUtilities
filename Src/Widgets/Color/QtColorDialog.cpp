@@ -48,7 +48,10 @@ int QtColorDialog::CreateAndShow(QColor color, QRect inButtonGemotry) {
 	QRect mGeom = dialog->geometry();
 
 	mGeom.moveCenter(inButtonGemotry.center());
-	mGeom.moveTop(inButtonGemotry.bottom());
+	mGeom.moveBottom(inButtonGemotry.top());
+	if (mGeom.top() < 0) {
+		mGeom.moveTop(inButtonGemotry.bottom());
+	}
 	dialog->setGeometry(mGeom);
 	return 0;
 }

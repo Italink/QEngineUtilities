@@ -72,6 +72,7 @@ protected:
 	virtual void showEvent(QShowEvent* event) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
 	using QTreeWidget::QTreeWidget;
+
 private:
 	QList<QSharedPointer<QInstance>> mInstanceList;
 

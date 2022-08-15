@@ -4,7 +4,9 @@
 #include "QString"
 #include "QVariant"
 
+#define Q_META_DATA_ENABLED 1
 
+#if Q_META_DATA_ENABLED
 #define Q_META_BEGIN(ClassName) \
 	Q_INVOKABLE	static QMetaData ClassName##_GetMetaData(){ \
 		QMetaData MetaData;		\
@@ -12,6 +14,7 @@
 #define Q_META_END(...) \
 		return MetaData; \
 	}
+
 #define Q_META_NUMBER_LIMITED(PropertyName,Min,Max) \
 	MetaData.mPropertiesMetaData[#PropertyName]["Min"] = Min; \
 	MetaData.mPropertiesMetaData[#PropertyName]["Max"] = Max; 
@@ -37,8 +40,35 @@
 #define Q_META_STRING_AS_COMBO(PropertyName,...) \
 	MetaData.mPropertiesMetaData[#PropertyName]["Type"] = "Combo";  \
 	MetaData.mPropertiesMetaData[#PropertyName]["ComboList"] = QString(#__VA_ARGS__).split(',');  
+#else
 
-struct QMetaData{
+#define Q_META_EMPTY(...)
+#define Q_META_BEGIN(...)
+#define Q_META_END(...)
+
+#define Q_META_CATEGORY_DEFINE(...) 
+#define Q_META_CATEGORY_ENABLED(...) 
+#define Q_META_CATEGORY_VISIBLE(...) 
+
+#define Q_META_P_VISIBLE(...)
+#define Q_META_P_ENABLED(...)
+#define Q_META_P_ENABLED_BY_CONDITION(...)
+
+#define Q_META_P_NUMBER_LIMITED(...) 
+#define Q_META_P_STRING_AS_LINE(...) 
+#define Q_META_P_STRING_AS_MULTI_LINE(...) 
+#define Q_META_P_STRING_AS_FILE_PATH(...) 
+#define Q_META_P_STRING_AS_COMBO(...)
+#define Q_META_P_FILE_FILTER(...)
+#define Q_META_P_INSTANCE_DISPLAY_CATEGORY(...)
+#define Q_META_P_INSTANCE_SUBTYPE(...)
+#define Q_META_P_ARRAY_USE_FIXED_ORDER(...)
+#define Q_META_P_ARRAY_USE_FIXED_SIZE(...)
+#define Q_META_P_MAP_USE_FIXED_KEY(...)
+#define Q_META_P_MAP_USE_FIXED_SIZE(...)
+#endif
+
+struct QMetaData {
 	QList<QString> mCategoryList;
 	QVariantHash mInstanceMetaData;
 	QHash<QString, QVariantHash> mPropertiesMetaData;

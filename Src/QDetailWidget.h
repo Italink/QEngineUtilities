@@ -25,19 +25,21 @@ void GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, In
 	(..., GenerateGadgetOrObject(inInstanceList, inInstance));
 }
 
+enum class QDetailWidgetFlag {
+	None = 0x0,
+	DisplaySearcher = 0x1,
+	DisplayCategory = 0x2,
+};
+
+Q_DECLARE_FLAGS(QDetailWidgetFlags, QDetailWidgetFlag);
+Q_DECLARE_OPERATORS_FOR_FLAGS(QDetailWidgetFlags)
+
 class QDetailWidget :public QWidget {
 	Q_OBJECT
 public:
 	using QWidget = QWidget;
-	enum Flag {
-		None = 0x0,
-		DisplaySearcher = 0x1,
-		DisplayCategory = 0x2,
-	};
-	Q_DECLARE_FLAGS(Flags, Flag);
 
-
-	QDetailWidget(QDetailWidget::Flags inFlags = Flags(QDetailWidget::DisplaySearcher | QDetailWidget::DisplayCategory));
+	QDetailWidget(QDetailWidgetFlags inFlags = QDetailWidgetFlag::DisplaySearcher | QDetailWidgetFlag::DisplayCategory);
 
 	template<typename... Instances>
 	void SetInstances(Instances... inInstances) {
@@ -52,7 +54,9 @@ public:
 private:
 	QDetailSearcher* mSearcher = nullptr;
 	QDetailTreeWidget* mTreeWidget = nullptr;
-	Flags mFlags;
+	QDetailWidgetFlags mFlags;
 };
+
+
 
 #endif // QDetailWidget_h__
