@@ -90,6 +90,7 @@ void QDetailWidgetPropertyInstanceItem::RecreateInstance() {
 void QDetailWidgetPropertyInstanceItem::RecreateChildren()
 {
 	RecreateInstance();
+	ReflushInstanceComboBox();
 	while (childCount() > 0) {
 		delete takeChild(0);
 	}
@@ -97,28 +98,47 @@ void QDetailWidgetPropertyInstanceItem::RecreateChildren()
 		QInstanceDetail* detail = QInstanceDetail::FindOrCreate(mInstance, this);
 		detail->Build();
 	}
+
 }
 
-QWidget* QDetailWidgetPropertyInstanceItem::GenerateValueWidget() {
-	QStringList SubTypeList = GetHandler()->GetMetaData("SubTypeList").toStringList();
-	if (!SubTypeList.isEmpty()) {
-		QComboBox* comboBox = new QComboBox();
+void QDetailWidgetPropertyInstanceItem::ReflushInstanceComboBox()
+{
+	if (mInstanceComboBox) {
+		mInstanceComboBox->disconnect();
+		mInstanceComboBox->clear();
+		QStringList SubTypeList = GetHandler()->GetMetaData("SubTypeList").toStringList();
 		for (int i = 0; i < SubTypeList.size(); i++) {
-			comboBox->addItem(SubTypeList[i]);
+			if (QMetaType::fromName(SubTypeList[i].toLocal8Bit()).isValid()) {
+				mInstanceComboBox->addItem(SubTypeList[i]);
+			}
+			else {
+				qWarning() << "An invalid type:" << SubTypeList[i];
+			}
 		}
-		connect(comboBox, &QComboBox::currentTextChanged, this, [comboBox,this](const QString& inText) {
-			QMetaType type = QMetaType::fromName(comboBox->currentText().toLocal8Bit());
+		mInstanceComboBox->setCurrentText(GetValue().metaType().name());
+		connect(mInstanceComboBox, &QComboBox::currentTextChanged, this, [this](const QString& inText) {
+			QMetaType type = QMetaType::fromName(mInstanceComboBox->currentText().toLocal8Bit());
 			QVariant Var;
 			if (type.isValid()) {
 				Var = QPropertyHandler::CreateNewVariant(GetHandler()->GetType(), type);
 			}
-			SetValue(Var);
+			SetValue(Var, GetHandler()->GetPath() + "Set Instance :" + mInstanceComboBox->currentText());
 			RecreateChildren();
-		});
-		connect(GetHandler(), &QPropertyHandler::AsValueChanged, comboBox, [comboBox,this]() {
-			comboBox->setCurrentText(GetValue().metaType().name());
-		});
-		return comboBox;
+			});
+		connect(GetHandler(), &QPropertyHandler::AsValueChanged, mInstanceComboBox, [this]() {
+			mInstanceComboBox->setCurrentText(GetValue().metaType().name());
+			});
+	}
+}
+
+QWidget* QDetailWidgetPropertyInstanceItem::GenerateValueWidget() {
+
+	QStringList SubTypeList = GetHandler()->GetMetaData("SubTypeList").toStringList();
+	if (!SubTypeList.isEmpty()) {
+		if (!mInstanceComboBox) {
+			mInstanceComboBox = new QComboBox();
+		}
+		return mInstanceComboBox;
 	}
 	return nullptr;
 }

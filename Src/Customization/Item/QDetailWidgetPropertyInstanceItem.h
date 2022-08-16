@@ -2,7 +2,9 @@
 #define QDetailWidgetPropertyInstanceItem_h__
 
 #include "QDetailWidgetPropertyItem.h"
+
 class QInstance;
+class QComboBox;
 
 class QDetailWidgetPropertyInstanceItem : public QDetailWidgetPropertyItem {
 public:
@@ -12,6 +14,7 @@ public:
 protected:
 	void RecreateInstance();
 	void RecreateChildren();
+	void ReflushInstanceComboBox();
 protected:
 	virtual QWidget* GenerateValueWidget() override;
 	virtual void BuildContentAndChildren() override;
@@ -21,6 +24,8 @@ private:
 	QVariant mInstanceVar;
 	bool bIsSharedPointer = false;
 	bool bIsPointer = false;
+
+	QComboBox* mInstanceComboBox = nullptr;
 };
 
 #endif // QDetailWidgetPropertyInstanceItem_h__

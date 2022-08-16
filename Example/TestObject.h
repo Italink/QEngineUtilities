@@ -73,7 +73,7 @@ class TestObject :public QObject {
 		Q_META_P_ARRAY_FIXED_ORDER(ColorList, true)
 		Q_META_P_MAP_FIXED_KEY(ColorMap, true)
 		Q_META_P_MAP_FIXED_SIZE(ColorMap, true)
-		Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetSPtr, TestInlineGadget, C, D);
+		Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetSPtr, TestInlineGadget, TestInlineGadget, TestInlineGadget);
 	Q_META_END()
 public:
 	enum TestEnum {
