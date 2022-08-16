@@ -24,6 +24,8 @@ class TestInlineGadget{
 		Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_END()
 public:
+	TestInlineGadget() { qDebug() << "Create"; }
+	~TestInlineGadget() { qDebug() << "Release"; }
 	Q_PROPERTY_AUTO(double, LimitedDouble) = 1;
 	Q_PROPERTY_AUTO(QString, Desc) = "This is inline Gadget";
 };
@@ -71,7 +73,7 @@ class TestObject :public QObject {
 		Q_META_P_ARRAY_FIXED_ORDER(ColorList, true)
 		Q_META_P_MAP_FIXED_KEY(ColorMap, true)
 		Q_META_P_MAP_FIXED_SIZE(ColorMap, true)
-		Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetPtr, TestInlineGadget, C, D);
+		Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetSPtr, TestInlineGadget, C, D);
 	Q_META_END()
 public:
 	enum TestEnum {
@@ -109,14 +111,12 @@ public:
 	Q_PROPERTY_AUTO(TestInlineGadget, InlineGadget);
 	Q_PROPERTY_AUTO(TestInlineGadget*, InlineGadgetPtr) = new TestInlineGadget;
 	Q_PROPERTY_AUTO(QSharedPointer<TestInlineGadget>, InlineGadgetSPtr) = QSharedPointer<TestInlineGadget>::create();
-	Q_PROPERTY_AUTO(std::shared_ptr<TestInlineGadget>, InlineGadgetStdSPtr) = std::make_shared<TestInlineGadget>();
 	Q_PROPERTY_AUTO(TestInlineObject*, InlineObject) = new TestInlineObject;
 	Q_PROPERTY_AUTO(QSharedPointer<TestInlineObject>, InlineObjectSPtr) = QSharedPointer<TestInlineObject>::create();
 	Q_PROPERTY_AUTO(QList<TestInlineObject*>, InlineObjectList) = { };
 	Q_PROPERTY_AUTO(QList<TestInlineGadget>, InlineGadgetList) = { };
 	Q_PROPERTY_AUTO(QList<TestInlineGadget*>, InlineGadgetPtrList) = { };
 	Q_PROPERTY_AUTO(QList<QSharedPointer<TestInlineGadget>>, InlineGadgetSPtrList) = { };
-	Q_PROPERTY_AUTO(QList<std::shared_ptr<TestInlineGadget>>, InlineGadgetStdPtrList) = { };
 
 	Q_PROPERTY(QMap<QString, QSharedPointer<TestInlineGadget>> InlineGadgetSPtrMap READ GetInlineGadgetSPtrMap WRITE SetInlineGadgetSPtrMap)
 	QMap<QString, QSharedPointer<TestInlineGadget>> GetInlineGadgetSPtrMap() const { return InlineGadgetSPtrMap; }

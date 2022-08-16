@@ -3,6 +3,7 @@
 #include "qsequentialiterable.h"
 #include "TestObject.h"
 #include "QDetailWidget.h"
+#include "qbasicatomic.h"
 
 
 int main(int argc, char** argv) {

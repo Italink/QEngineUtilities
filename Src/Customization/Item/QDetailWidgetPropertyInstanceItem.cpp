@@ -7,7 +7,7 @@
 #include "QMetaType"
 
 bool QDetailWidgetPropertyInstanceItem::FilterType(QMetaType inID) {
-	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
+	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(inID.name(),0,QRegularExpression::MatchType::PartialPreferCompleteMatch,QRegularExpression::AnchorAtOffsetMatchOption);
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
@@ -39,7 +39,7 @@ void QDetailWidgetPropertyInstanceItem::ResetValue()
 void QDetailWidgetPropertyInstanceItem::RecreateInstance() {
 	mInstanceVar = GetValue();
 	QMetaType metaType(GetHandler()->GetType());
-	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
+	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(metaType.name());
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
@@ -53,6 +53,7 @@ void QDetailWidgetPropertyInstanceItem::RecreateInstance() {
 		}
 		else {
 			mInstanceVar = QVariant();
+			mInstance.reset();
 		}
 	}
 	else {
