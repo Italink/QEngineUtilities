@@ -65,12 +65,14 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
 			if (!GetHandler()->GetMetaData("FixedSize").toBool()) {
-				QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
-				deleteButton->setFixedSize(20, 20);
-				item->AddValueWidget(deleteButton);
-				connect(deleteButton, &QSvgButton::clicked, this, [inKey, this]() {
-					RemoveItem(inKey);
+				item->SetBuildContentAndChildrenCallback([item, this, inKey](QHBoxLayout * inLayout) {
+					QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
+					deleteButton->setFixedSize(20, 20);
+					inLayout->addWidget(deleteButton);
+					connect(deleteButton, &QSvgButton::clicked, this, [inKey, this]() {
+						RemoveItem(inKey);
 					});
+				});
 			}
 			if (!GetHandler()->GetMetaData("FixedKey").toBool()) {
 				item->SetRenameCallback([this, item](QString name) {

@@ -31,6 +31,7 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	, mNameContentLayout(new QHBoxLayout)
 	, mValueContent(new QWidget)
 	, mValueContentLayout(new QHBoxLayout)
+	, mValueAttachLayout(new QHBoxLayout)
 	, mResetButton(new QDetailWidgetPropertyResetButton) {
 	setHandleWidth(1);
 	mNameContent->setLayout(mNameContentLayout);
@@ -42,6 +43,9 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	mValueContentLayout->setAlignment(Qt::AlignCenter);
 	mValueContentLayout->setContentsMargins(10, 2, 10, 2);
 	mValueContentLayout->setSpacing(2);
+	mValueContentLayout->addLayout(mValueAttachLayout);
+	mValueAttachLayout->setSpacing(0);
+	mValueAttachLayout->setContentsMargins(0,0,0,0);
 	mResetButton->setFixedSize(25,25);
 	mResetButton->setEnabled(false);
 	setMinimumHeight(25);
@@ -93,17 +97,22 @@ void QDetailWidgetPropertyItemWidget::SetNameWidgetByText(QString inName) {
 }
 
 void QDetailWidgetPropertyItemWidget::ClearValueAttachWidget() {
-	while (auto item = mValueContentLayout->takeAt(1)) {
+	while (auto item = mValueAttachLayout->takeAt(0)) {
 		if (item->widget()) {
 			item->widget()->setParent(nullptr);
-			item->widget()->deleteLater();
+			delete item->widget();
 		}
+		delete item;
 	}
 }
 
-void QDetailWidgetPropertyItemWidget::AddValueWidget(QWidget* inWidget) {
-	if(inWidget)
-		mValueContentLayout->addWidget(inWidget);
+void QDetailWidgetPropertyItemWidget::SetValueWidget(QWidget* inWidget)
+{
+	if (inWidget) {
+		mValueWidget = inWidget;
+		mValueContentLayout->insertWidget(0, inWidget);
+	}
+
 }
 
 QHBoxLayout* QDetailWidgetPropertyItemWidget::GetNameContentLayout() const {
@@ -197,7 +206,7 @@ void QDetailWidgetPropertyItem::RequestRename()
 		mContent->ShowRenameEditor();
 }
 
-void QDetailWidgetPropertyItem::SetBuildContentAndChildrenCallback(std::function<void()> val) {
+void QDetailWidgetPropertyItem::SetBuildContentAndChildrenCallback(std::function<void(QHBoxLayout*)> val) {
 	mBuildContentAndChildrenCallback = val;
 }
 
@@ -207,9 +216,8 @@ QString QDetailWidgetPropertyItem::GetKeywords() {
 
 void QDetailWidgetPropertyItem::BuildContentAndChildren() {
 	mContent->SetNameWidgetByText(GetHandler()->GetName());
-	if (mValueWidget==nullptr) {
-		mValueWidget = GenerateValueWidget();
-		AddValueWidget(mValueWidget);
+	if (mContent->GetValueWidget() == nullptr) {
+		SetValueWidget(GenerateValueWidget());
 	}
 	RebuildAttachWidget();
 	treeWidget()->setItemWidget(this, 0, mContent);
@@ -218,15 +226,11 @@ void QDetailWidgetPropertyItem::BuildContentAndChildren() {
 void QDetailWidgetPropertyItem::RebuildAttachWidget() {
 	mContent->ClearValueAttachWidget();
 	if (mBuildContentAndChildrenCallback)
-		mBuildContentAndChildrenCallback();
+		mBuildContentAndChildrenCallback(mContent->GetValueValueAttachLayout());
 }
 
-void QDetailWidgetPropertyItem::AddValueWidget(QWidget* inWigdet) {
-	mContent->AddValueWidget(inWigdet);
-}
-
-void QDetailWidgetPropertyItem::AddValueLayout(QLayout* inLayout) {
-	mContent->GetValueContentLayout()->addLayout(inLayout);
+void QDetailWidgetPropertyItem::SetValueWidget(QWidget* inWigdet) {
+	mContent->SetValueWidget(inWigdet);
 }
 
 void QDetailWidgetPropertyItem::BuildMenu(QMenu& inMenu)
@@ -256,7 +260,7 @@ QVariant QDetailWidgetPropertyItem::GetMetaData(const QString& Key)
 
 void QDetailWidgetPropertyItem::SetHandler(QPropertyHandler* inHandler)
 {
-	if (mHandler != inHandler) {
+	if (mHandler != inHandler ) {
 		mHandler = inHandler;
 		QObject::connect(mContent, &QDetailWidgetPropertyItemWidget::AsRequsetReset, this, &QDetailWidgetPropertyItem::ResetValue);
 		QObject::connect(inHandler, &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertyItem::RefleshResetButtonStatus);

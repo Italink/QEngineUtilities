@@ -22,6 +22,9 @@ private:
 	QWidget* mValueContent = nullptr;
 	QHBoxLayout* mValueContentLayout = nullptr;
 	QWidget* mValueWidget = nullptr;
+
+	QHBoxLayout* mValueAttachLayout = nullptr;
+
 	QDetailWidgetPropertyItem* mRow = nullptr;
 	QPushButton* mResetButton = nullptr;
 protected:
@@ -34,9 +37,12 @@ public:
 	void SetNameWidget(QWidget* inWidget);
 	void SetNameWidgetByText(QString inName);
 	void ClearValueAttachWidget();
-	void AddValueWidget(QWidget* inWidget);
+	void SetValueWidget(QWidget* inWidget);
+	QWidget* GetValueWidget() const { return mValueWidget; }
+	
 	QHBoxLayout* GetNameContentLayout() const;
 	QHBoxLayout* GetValueContentLayout() const;
+	QHBoxLayout* GetValueValueAttachLayout() const { return mValueAttachLayout; }
 	QPushButton* GetResetButton() const { return mResetButton; }
 	void ShowRenameEditor();
 };
@@ -69,7 +75,7 @@ class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 public:
 	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler);
 
-	void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
+	virtual void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
 
 	virtual void SetHandler(QPropertyHandler* inHandler);
 
@@ -86,8 +92,7 @@ public:
 
 	virtual QWidget* GenerateValueWidget() = 0;
 
-	void AddValueWidget(QWidget* inWigdet);
-	void AddValueLayout(QLayout* inLayout);
+	void SetValueWidget(QWidget* inWigdet);
 
 	QDetailWidgetPropertyItemWidget* GetContent() const;
 
@@ -115,16 +120,15 @@ public:
 	void SetRenameCallback(std::function<bool(QString)> val) { mRenameCallback = val; }
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
 
-	void SetBuildContentAndChildrenCallback(std::function<void()> val);
+	void SetBuildContentAndChildrenCallback(std::function<void(QHBoxLayout*)> val);
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
-	QWidget* mValueWidget = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	std::function<bool(QString)> mRenameCallback;
-	std::function<void()> mBuildContentAndChildrenCallback;
+	std::function<void(QHBoxLayout*)> mBuildContentAndChildrenCallback;
 };
 
 #endif // QDetailWidgetPropertyItem_h__

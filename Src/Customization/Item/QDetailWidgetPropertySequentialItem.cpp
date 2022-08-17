@@ -25,10 +25,6 @@ void QDetailWidgetPropertySequentialItem::SetHandler(QPropertyHandler* inHandler
 	connect(GetHandler(), &QPropertyHandler::AsValueChanged, this, &QDetailWidgetPropertySequentialItem::RecreateChildren);
 }
 
-void QDetailWidgetPropertySequentialItem::ResetValue() {
-	QDetailWidgetPropertyItem::ResetValue();
-}
-
 void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 	QPropertyHandler* handler = QPropertyHandler::FindOrCreate(
 		GetParentObject(),
@@ -58,7 +54,7 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 	else {
 		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
 		if (item) {
-			item->SetBuildContentAndChildrenCallback([item,this,index]() {
+			item->SetBuildContentAndChildrenCallback([item,this,index](QHBoxLayout* inLayout) {
 				if (!GetHandler()->GetMetaData("FixedOrder").toBool()) {
 					if (index != 0) {
 						QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
@@ -66,10 +62,10 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 						connect(moveUp, &QSvgButton::clicked, this, [index, this]() {
 							MoveItem(index, index - 1);
 							});
-						item->AddValueWidget(moveUp);
+						inLayout->addWidget(moveUp);
 					}
 					else {
-						item->GetContent()->GetValueContentLayout()->addSpacing(22);
+						inLayout->addSpacing(22);
 					}
 					if (index != mCount - 1) {
 						QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
@@ -77,10 +73,10 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 						connect(moveDown, &QSvgButton::clicked, this, [index, this]() {
 							MoveItem(index, index + 1);
 							});
-						item->AddValueWidget(moveDown);
+						inLayout->addWidget(moveDown);
 					}
 					else {
-						item->GetContent()->GetValueContentLayout()->addSpacing(22);
+						inLayout->addSpacing(22);
 					}
 				}
 				if (!GetHandler()->GetMetaData("FixedSize").toBool()) {
@@ -89,7 +85,7 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 					connect(deleteButton, &QSvgButton::clicked, this, [index, this]() {
 						RemoveItem(index);
 						});
-					item->AddValueWidget(deleteButton);
+					inLayout->addWidget(deleteButton);
 				}
 			});
 			item->AttachTo(this);
@@ -109,6 +105,9 @@ void QDetailWidgetPropertySequentialItem::MoveItem(int inSrcIndex, int inDstInde
 	metaSequence.setValueAtIndex(containterPtr, inDstIndex, coercer.coerce(srcVar, srcVar.metaType()));
 	metaSequence.setValueAtIndex(containterPtr, inSrcIndex, coercer.coerce(dstVar, dstVar.metaType()));
 	SetValue(varList, QString("%1 Move: %2->%3").arg(GetHandler()->GetPath()).arg(inSrcIndex).arg(inDstIndex));
+
+	FroceRebuildChild(inSrcIndex);
+	FroceRebuildChild(inDstIndex);
 }
 
 void QDetailWidgetPropertySequentialItem::RemoveItem(int inIndex) {
@@ -123,6 +122,9 @@ void QDetailWidgetPropertySequentialItem::RemoveItem(int inIndex) {
 	}
 	metaSequence.removeValueAtEnd(containterPtr);
 	SetValue(varList, QString("%1 Remove: %2").arg(GetHandler()->GetPath()).arg(inIndex));
+	for (int i = inIndex; i < childCount(); i++) {
+		FroceRebuildChild(i);
+	}
 }
 
 void QDetailWidgetPropertySequentialItem::RecreateChildren() {
@@ -146,11 +148,17 @@ void QDetailWidgetPropertySequentialItem::CreateNewItem() {
 	QVariant var = QPropertyHandler::CreateNewVariant(mValueType);
 	const void* dataPtr = coercer.coerce(var, var.metaType());
 	metaSequence.addValue(containterPtr, dataPtr);
-
 	SetValue(varList, QString("%1 Append: %2").arg(GetHandler()->GetPath()).arg(metaSequence.size(containterPtr) - 1));
 	setExpanded(true);
 	child(childCount() - 1)->setExpanded(true);
 }
+
+void QDetailWidgetPropertySequentialItem::FroceRebuildChild(int inIndex)
+{
+	QDetailWidgetPropertyItem* item = (QDetailWidgetPropertyItem*)child(inIndex);
+	item->BuildContentAndChildren();
+}
+
 
 QWidget* QDetailWidgetPropertySequentialItem::GenerateValueWidget() {
 	if (GetHandler()->GetMetaData("FixedSize").toBool())

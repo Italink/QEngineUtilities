@@ -21,5 +21,6 @@ int main(int argc, char** argv) {
 	QDetailWidget widget(QDetailWidgetFlag::DisplaySearcher);
 	widget.SetInstances(&obj);
 	widget.show();
+
 	return app.exec();
 }

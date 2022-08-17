@@ -64,20 +64,14 @@ void QDetailWidgetPropertyInstanceItem::RecreateInstance() {
 		if (mMetaObject->inherits(&QObject::staticMetaObject)) {
 			QObject* object = mInstanceVar.value<QObject*>();
 			if (object) {
-				if (mInstance)
-					mInstance->UpdateDataPtr(object);
-				else
-					mInstance = QInstance::CreateObjcet(object);
+				mInstance = QInstance::CreateObjcet(object);
 			}
 		}
 		else {
 			void* ptr = mInstanceVar.data();
 			if(bIsPointer)
 				ptr = *(void**)mInstanceVar.data();
-			if (mInstance)
-				mInstance->UpdateDataPtr(ptr);
-			else
-				mInstance = QInstance::CreateGadget(ptr, mMetaObject);
+			mInstance = QInstance::CreateGadget(ptr, mMetaObject);
 			if (!bIsPointer) {
 				mInstance->SetPropertyChangedCallback([this]() {
 					GetHandler()->SetValue(mInstanceVar);
