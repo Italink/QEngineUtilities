@@ -1,4 +1,6 @@
 #include "QDetailWidgetStyleManager.h"
+#include "Widgets\Toolkits\QSvgIcon.h"
+#include "QApplication"
 
 QDetailWidgetStyleManager* QDetailWidgetStyleManager::Instance() {
 	static QDetailWidgetStyleManager Ins;
@@ -6,13 +8,68 @@ QDetailWidgetStyleManager* QDetailWidgetStyleManager::Instance() {
 }
 
 QByteArray QDetailWidgetStyleManager::GetStylesheet() {
-	return mStylesheetMap[mCurrentStyle];
+	return mStyleSheet;
+}
+
+QColor QDetailWidgetStyleManager::GetGridLineColor() const {
+	return mGridLineColor;
+}
+
+void QDetailWidgetStyleManager::SetGridLineColor(QColor val) {
+	mGridLineColor = val;
+}
+
+QColor QDetailWidgetStyleManager::GetShadowColor() const {
+	return mShadowColor;
+}
+
+void QDetailWidgetStyleManager::SetShadowColor(QColor val) {
+	mShadowColor = val;
+}
+
+QColor QDetailWidgetStyleManager::GetCategoryColor() const {
+	return mCategoryColor;
+}
+
+void QDetailWidgetStyleManager::SetCategoryColor(QColor val) {
+	mCategoryColor = val;
+}
+
+QColor QDetailWidgetStyleManager::GetHoveredColor() const {
+	return mHoveredColor;
+}
+
+void QDetailWidgetStyleManager::SetHoveredColor(QColor val) {
+	mHoveredColor = val;
+}
+
+QColor QDetailWidgetStyleManager::GetIconColor() const {
+	return QSvgIcon::GetIconColor();
+}
+
+void QDetailWidgetStyleManager::SetIconColor(QColor val) {
+	QSvgIcon::setIconColor(val);
 }
 
 QDetailWidgetStyleManager::QDetailWidgetStyleManager() {
-	mStylesheetMap[QDetailWidgetStyle::Unreal] = R"(
+	SetStyle(mCurrentStyle);
+}
+
+void QDetailWidgetStyleManager::SetStyle(QDetailWidgetStyle inStyle) {
+	if (inStyle == QDetailWidgetStyle::Unreal) {
+		mShadowColor = QColor(5, 5, 5);
+		mGridLineColor = QColor(5, 5, 5);
+		mCategoryColor = QColor(61, 61, 61);
+		mHoveredColor = QColor(51, 51, 51);
+		mSelectedColor = QColor(79, 110, 242);
+		mArrowColor = QColor(220, 220, 220);
+		QSvgIcon::setIconColor(QColor(200, 200, 200));
+		mStyleSheet = R"(
 QDetailWidget{
 	background-color:rgb(36,36,36);
+}
+QNameLabel{
+	color:rgb(220,220,220);
 }
 QWidget{
 	color:rgb(220,220,220);
@@ -25,14 +82,8 @@ QHoverWidget{
 	background-color:rgb(10,10,10);
 	qproperty-HoverColor:rgb(79, 110, 242); 
 }
-QDetailTreeWidget{
+QDetailWidget{
 	background-color:rgb(36,36,36);
-	qproperty-ShadowColor:rgb(5,5,5);
-	qproperty-GridLineColor:rgb(5,5,5);
-	qproperty-CategoryColor:rgb(61,61,61);  
-	qproperty-HoveredColor:rgb(51,51,51); 
-	qproperty-IconColor:rgb(200,200,200); 
-	qproperty-ArrowColor:rgb(220,220,220); 
 }
 QSplitter::handle {background-color: rgb(5,5,5);}
 QLineEdit,QTextEdit{
@@ -40,10 +91,6 @@ QLineEdit,QTextEdit{
 	border-radius: 3px;
 	color: rgb(220,220,220);
 	border: 1px solid transparent;
-}
-
-QLineEdit:hover,QTextEdit:hover,QPushButton:hover,QComboBox:hover{
-	border: 1px solid rgb(79, 110, 242);
 }
 
 QPushButton,QComboBox{
@@ -69,14 +116,14 @@ QScrollBar:horizontal  {
     background:  rgb(5,5,5);
 }
 
-QScrollBar::handle:vertical,
-QScrollBar::handle:horizontal {
+QScrollBar::tryDo:vertical,
+QScrollBar::tryDo:horizontal {
     background:  rgb(100,100,100);
     min-height: 30px;
 }
 
-QScrollBar::handle:vertical:hover,
-QScrollBar::handle:horizontal:hover {
+QScrollBar::tryDo:vertical:hover,
+QScrollBar::tryDo:horizontal:hover {
     background:  rgba(200,200,200,150);
 }
 QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical,
@@ -90,8 +137,16 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
 )";
-
-	mStylesheetMap[QDetailWidgetStyle::Qt] = R"(
+	}
+	else if (inStyle == QDetailWidgetStyle::Qt) {
+		mShadowColor = QColor(220, 220, 220);
+		mGridLineColor = QColor(220, 220, 220);
+		mCategoryColor = QColor(255, 255, 255);
+		mHoveredColor = QColor(245, 245, 245);
+		mSelectedColor = QColor(80, 205, 130);
+		mArrowColor = QColor(65, 205, 82);
+		QSvgIcon::setIconColor(QColor(65, 205, 82));
+		mStyleSheet = R"(
 QDetailWidget{
 	background-color:rgb(255,255,255);
 }
@@ -109,14 +164,8 @@ QHoverWidget{
 	background-color:transparent;
 	qproperty-HoverColor:rgb(65,205,82); 
 }
-QDetailTreeWidget{
+QDetailWidget{
 	background-color:rgb(240,240,240);
-	qproperty-ShadowColor:rgb(220,220,220);
-	qproperty-GridLineColor: rgb(220,220,220);
-	qproperty-CategoryColor:rgb(255,255,255);
-	qproperty-HoveredColor:rgb(245,245,245); 
-	qproperty-IconColor:rgb(65,205,82); 
-	qproperty-ArrowColor:rgb(65,205,82); 
 }
 QSplitter::handle {background-color: rgb(220,220,220);}
 
@@ -152,14 +201,14 @@ QScrollBar:horizontal  {
     background:  rgb(240,240,240);
 }
 
-QScrollBar::handle:vertical,
-QScrollBar::handle:horizontal {
+QScrollBar::tryDo:vertical,
+QScrollBar::tryDo:horizontal {
     background:  rgb(65,205,82);
     min-height: 30px;
 }
 
-QScrollBar::handle:vertical:hover,
-QScrollBar::handle:horizontal:hover {
+QScrollBar::tryDo:vertical:hover,
+QScrollBar::tryDo:horizontal:hover {
     background:  rgb(100,230,102);
 }
 QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical,
@@ -173,5 +222,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
 )";
+
+	}
 }
 

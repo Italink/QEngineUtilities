@@ -21,7 +21,7 @@ QInstanceDetail* CreateInternal(QSharedPointer<QInstance> inInstance) {
 
 
 QInstanceDetail* QInstanceDetail::FindOrCreate(QSharedPointer<QInstance> inInstance, QDetailTreeWidget* inWidget) {
-	for (auto instanceDetail : inInstance->GetOuterObject()->findChildren<QInstanceDetail*>()) {
+	for (auto instanceDetail : inInstance->GetOuterObject()->findChildren<QInstanceDetail*>(Qt::FindChildOption::FindDirectChildrenOnly)) {
 		if (instanceDetail->mWidget == inWidget) {
 			return instanceDetail;
 		}
@@ -32,7 +32,7 @@ QInstanceDetail* QInstanceDetail::FindOrCreate(QSharedPointer<QInstance> inInsta
 }
 
 QInstanceDetail* QInstanceDetail::FindOrCreate(QSharedPointer<QInstance> inInstance, QDetailWidgetItem* inRoot) {
-	for (auto instanceDetail : inInstance->GetOuterObject()->findChildren<QInstanceDetail*>()) {
+	for (auto instanceDetail : inInstance->GetOuterObject()->findChildren<QInstanceDetail*>(Qt::FindChildOption::FindDirectChildrenOnly)) {
 		if (instanceDetail->mRoot == inRoot) {
 			return instanceDetail;
 		}
@@ -67,7 +67,7 @@ void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
 	QString categoryName = inPropertyHandler->GetMetaData("Category").toString();
 	if (mInstance->GetCategoryMap()[categoryName])
 		return;
-	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(inPropertyHandler);
+	QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(inPropertyHandler, mInstance.get());
 	if (item) {
 		if (mInstance->GetMetaData("CategoryEnabled").toBool()) {
 			if (categoryName.isEmpty())
@@ -83,6 +83,7 @@ void QInstanceDetail::AddProperty(QPropertyHandler* inPropertyHandler) {
 			else
 				item->AttachTo(mRoot);
 		}
+		item->setExpanded(true);
 	}
 }
 

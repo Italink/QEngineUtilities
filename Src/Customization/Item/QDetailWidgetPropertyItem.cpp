@@ -53,6 +53,7 @@ QDetailWidgetPropertyItemWidget::QDetailWidgetPropertyItemWidget(QDetailWidgetPr
 	addWidget(mValueContent);
 	addWidget(mResetButton);
 	connect(mResetButton, &QPushButton::clicked, this, &QDetailWidgetPropertyItemWidget::AsRequsetReset);
+	setStyleSheet("background-color:transparent;");
 }
 
 void QDetailWidgetPropertyItemWidget::RefleshSplitterFactor() {
@@ -161,11 +162,12 @@ QDetailWidgetPropertyItem::QDetailWidgetPropertyItem()
 	});
 }
 
-QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler)
+QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* inHandler, QInstance* inInstance)
 {
 	for (auto& filter : QDetailWidgetManager::instance()->GetPropertyItemFilterList()) {
 		if (filter.first(inHandler->GetType())) {
 			QDetailWidgetPropertyItem* item = filter.second();
+			item->mInstance = inInstance;
 			item->SetHandler(inHandler);
 			return item;
 		}
@@ -174,6 +176,7 @@ QDetailWidgetPropertyItem* QDetailWidgetPropertyItem::Create(QPropertyHandler* i
 	auto iter = QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().find(inHandler->GetType());
 	if (iter != QDetailWidgetManager::instance()->GetPropertyItemCreatorMap().end()) {
 		QDetailWidgetPropertyItem* item = (*iter)();
+		item->mInstance = inInstance;
 		item->SetHandler(inHandler);
 		return item;
 	}
@@ -208,6 +211,12 @@ void QDetailWidgetPropertyItem::RequestRename()
 
 void QDetailWidgetPropertyItem::SetBuildContentAndChildrenCallback(std::function<void(QHBoxLayout*)> val) {
 	mBuildContentAndChildrenCallback = val;
+}
+
+QVariant QDetailWidgetPropertyItem::GetInstanceMetaData(const QString& inKey) {
+	if (mInstance)
+		return mInstance->GetMetaData(inKey);
+	return QVariant();
 }
 
 QString QDetailWidgetPropertyItem::GetKeywords() {

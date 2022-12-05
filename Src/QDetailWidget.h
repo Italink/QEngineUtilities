@@ -7,6 +7,7 @@
 class QDetailSearcher;
 class QDetailTreeWidget;
 class QUndoView;
+class QInstanceTreeWidget;
 
 template<typename Instance>
 typename std::enable_if<QtPrivate::IsPointerToGadgetHelper<Instance>::IsGadgetOrDerivedFrom>::type
@@ -28,6 +29,8 @@ void GenerateGadgetOrObject(QList<QSharedPointer<QInstance>>& inInstanceList, In
 enum class QDetailWidgetFlag {
 	None = 0x0,
 	DisplaySearcher = 0x1,
+	DisplayObjectTree = 0x2,
+	HideTopLevelObject = 0x4
 };
 
 Q_DECLARE_FLAGS(QDetailWidgetFlags, QDetailWidgetFlag);
@@ -51,6 +54,7 @@ public:
 
 	void SearchByKeywords(QString inKeywords);
 private:
+	QInstanceTreeWidget* mInstanceTree = nullptr;
 	QDetailSearcher* mSearcher = nullptr;
 	QDetailTreeWidget* mTreeWidget = nullptr;
 	QDetailWidgetFlags mFlags;

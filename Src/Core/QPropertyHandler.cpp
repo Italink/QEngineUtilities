@@ -28,6 +28,23 @@ QPropertyHandler::QPropertyHandler(QObject* inParent, QMetaType inType, QString 
 	}
 }
 
+void QPropertyHandler::TryFlushProperty(QObject* inOuter, QString inPropertyPath) {
+	QPropertyHandler* handler = QPropertyHandler::Find(inOuter, inPropertyPath);
+	if (handler) {
+		handler->FlushValue();
+	}
+}
+
+QPropertyHandler* QPropertyHandler::Find(QObject* inOuter, QString inPropertyPath) {
+	for (QObject* child : inOuter->children()) {
+		QPropertyHandler* handler = qobject_cast<QPropertyHandler*>(child);
+		if (handler && handler->GetPath() == inPropertyPath) {
+			return handler;
+		}
+	}
+	return nullptr;
+}
+
 QPropertyHandler* QPropertyHandler::FindOrCreate(QInstance* inInstance, QString inPropertyName, QVariantHash inMetaData)
 {
 	int index = inInstance->GetMetaObject()->indexOfProperty(inPropertyName.toLocal8Bit());
@@ -102,7 +119,6 @@ protected:
 	QPropertyHandler* mHandler = nullptr;
 };
 
-
 void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDesc)
 {
 	QVariant last = GetValue();
@@ -114,15 +130,16 @@ void QPropertyHandler::SetValue(QVariant inValue, QString isPushUndoStackWithDes
 				mIsChanged = !(inVar == mInitialValue);
 			}
 			mSetter(inVar);
-			for (auto& binder : mBinderMap.values()) {
-				binder.mSetter(inVar);
-			}
 			Q_EMIT AsValueChanged();
 		};
 		if (!isPushUndoStackWithDesc.isEmpty())
 			mUndoEntry->Push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter, this));
 		else
 			AssignSetter(inValue);
+	}
+	for (auto& binder : mBinderMap.values()) {
+		if(binder.mGetter()!= inValue)
+			binder.mSetter(inValue);
 	}
 }
 

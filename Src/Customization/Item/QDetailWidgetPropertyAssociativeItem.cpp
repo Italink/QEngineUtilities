@@ -41,13 +41,13 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 		GetParentObject(),
 		mValueType,
 		GetHandler()->GetSubPath(inKey),
-		[this, inKey]() {
-		QVariant varMap = GetValue();
+		[ParentHandle = GetHandler(), inKey]() {
+		QVariant varMap = ParentHandle->GetValue();
 		QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 		return iterable.value(inKey);
 	},
-		[this, inKey](QVariant var) {
-		QVariant varMap = GetValue();
+		[ParentHandle = GetHandler(),inKey](QVariant var) {
+		QVariant varMap = ParentHandle->GetValue();
 		QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 		QMetaAssociation metaAssociation = iterable.metaContainer();
 
@@ -56,13 +56,13 @@ void QDetailWidgetPropertyAssociativeItem::FindOrCreateChildItem(QString inKey) 
 		void* containterPtr = const_cast<void*>(iterable.constIterable());
 		const void* dataPtr = mappedCoercer.coerce(var, var.metaType());
 		metaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, metaAssociation.keyMetaType()), dataPtr);
-		SetValue(varMap);
+		ParentHandle->SetValue(varMap);
 	});
 	if (item != nullptr) {
 		item->SetHandler(handler);
 	}
 	else {
-		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
+		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler,GetInstance());
 		if (item) {
 			if (!GetHandler()->GetMetaData("FixedSize").toBool()) {
 				item->SetBuildContentAndChildrenCallback([item, this, inKey](QHBoxLayout * inLayout) {

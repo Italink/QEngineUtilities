@@ -8,7 +8,7 @@
 #include "QDir"
 #include "QColor"
 
-#define Q_PROPERTY_AUTO(Type,Name)\
+#define Q_PROPERTY_VAR(Type,Name)\
     Q_PROPERTY(Type Name READ get_##Name WRITE set_##Name) \
     Type get_##Name(){ return Name; } \
     void set_##Name(Type var){ \
@@ -26,14 +26,14 @@ class TestInlineGadget{
 public:
 	TestInlineGadget() { qDebug() << "Create"; }
 	~TestInlineGadget() { qDebug() << "Release"; }
-	Q_PROPERTY_AUTO(double, LimitedDouble) = 1;
-	Q_PROPERTY_AUTO(QString, Desc) = "This is inline Gadget";
+	Q_PROPERTY_VAR(double, LimitedDouble) = 1;
+	Q_PROPERTY_VAR(QString, Desc) = "This is inline Gadget";
 };
 
 class TestInlineObject : public QObject {
 	Q_OBJECT
 public:
-	Q_PROPERTY_AUTO(QString, Desc) = "This is inline Object";
+	Q_PROPERTY_VAR(QString, Desc) = "This is inline Object";
 };
 
 static QDebug operator<<(QDebug debug, const std::string& str) {
@@ -83,21 +83,21 @@ public:
 	};
 	Q_ENUM(TestEnum);
 
-	Q_PROPERTY_AUTO(int, Int) = 0;
-	Q_PROPERTY_AUTO(float, Float) = 1.23f;
-	Q_PROPERTY_AUTO(double, LimitedDouble) = 5;
-	Q_PROPERTY_AUTO(TestEnum, Enum) = TestEnum::One;
-	Q_PROPERTY_AUTO(QString, QtString);
-	Q_PROPERTY_AUTO(std::string, StdString);
-	Q_PROPERTY_AUTO(QString, AsMultiLineString);
-	Q_PROPERTY_AUTO(QString, AsPath);
-	Q_PROPERTY_AUTO(QString, AsCombo) = "A";
-	Q_PROPERTY_AUTO(QVector2D, Vec2);
-	Q_PROPERTY_AUTO(QVector3D, Vec3);
-	Q_PROPERTY_AUTO(QVector4D, Vec4);
-	Q_PROPERTY_AUTO(QColor, Color);
-	Q_PROPERTY_AUTO(QList<QColor>, ColorList) = { Qt::red,Qt::green,Qt::blue };
-	Q_PROPERTY_AUTO(std::vector<QColor>, StdColorList) = { Qt::red,Qt::green,Qt::blue };
+	Q_PROPERTY_VAR(int, Int) = 0;
+	Q_PROPERTY_VAR(float, Float) = 1.23f;
+	Q_PROPERTY_VAR(double, LimitedDouble) = 5;
+	Q_PROPERTY_VAR(TestEnum, Enum) = TestEnum::One;
+	Q_PROPERTY_VAR(QString, QtString);
+	Q_PROPERTY_VAR(std::string, StdString);
+	Q_PROPERTY_VAR(QString, AsMultiLineString);
+	Q_PROPERTY_VAR(QString, AsPath);
+	Q_PROPERTY_VAR(QString, AsCombo) = "A";
+	Q_PROPERTY_VAR(QVector2D, Vec2);
+	Q_PROPERTY_VAR(QVector3D, Vec3);
+	Q_PROPERTY_VAR(QVector4D, Vec4);
+	Q_PROPERTY_VAR(QColor, Color);
+	Q_PROPERTY_VAR(QList<QColor>, ColorList) = { Qt::red,Qt::green,Qt::blue };
+	Q_PROPERTY_VAR(std::vector<QColor>, StdColorList) = { Qt::red,Qt::green,Qt::blue };
 
 	Q_PROPERTY(QMap<QString, QColor> ColorMap READ GetColorMap WRITE SetColorMap)
 
@@ -108,15 +108,15 @@ public:
 	}
 	QMap<QString, QColor> ColorMap = { {"Red",Qt::red},{"Green",Qt::green},{"Blue",Qt::blue} };
 
-	Q_PROPERTY_AUTO(TestInlineGadget, InlineGadget);
-	Q_PROPERTY_AUTO(TestInlineGadget*, InlineGadgetPtr) = new TestInlineGadget;
-	Q_PROPERTY_AUTO(QSharedPointer<TestInlineGadget>, InlineGadgetSPtr) = QSharedPointer<TestInlineGadget>::create();
-	Q_PROPERTY_AUTO(TestInlineObject*, InlineObject) = new TestInlineObject;
-	Q_PROPERTY_AUTO(QSharedPointer<TestInlineObject>, InlineObjectSPtr) = QSharedPointer<TestInlineObject>::create();
-	Q_PROPERTY_AUTO(QList<TestInlineObject*>, InlineObjectList) = { };
-	Q_PROPERTY_AUTO(QList<TestInlineGadget>, InlineGadgetList) = { };
-	Q_PROPERTY_AUTO(QList<TestInlineGadget*>, InlineGadgetPtrList) = { };
-	Q_PROPERTY_AUTO(QList<QSharedPointer<TestInlineGadget>>, InlineGadgetSPtrList) = { };
+	Q_PROPERTY_VAR(TestInlineGadget, InlineGadget);
+	Q_PROPERTY_VAR(TestInlineGadget*, InlineGadgetPtr) = new TestInlineGadget;
+	Q_PROPERTY_VAR(QSharedPointer<TestInlineGadget>, InlineGadgetSPtr) = QSharedPointer<TestInlineGadget>::create();
+	Q_PROPERTY_VAR(TestInlineObject*, InlineObject) = new TestInlineObject;
+	Q_PROPERTY_VAR(QSharedPointer<TestInlineObject>, InlineObjectSPtr) = QSharedPointer<TestInlineObject>::create();
+	Q_PROPERTY_VAR(QList<TestInlineObject*>, InlineObjectList) = { };
+	Q_PROPERTY_VAR(QList<TestInlineGadget>, InlineGadgetList) = { };
+	Q_PROPERTY_VAR(QList<TestInlineGadget*>, InlineGadgetPtrList) = { };
+	Q_PROPERTY_VAR(QList<QSharedPointer<TestInlineGadget>>, InlineGadgetSPtrList) = { };
 
 	Q_PROPERTY(QMap<QString, QSharedPointer<TestInlineGadget>> InlineGadgetSPtrMap READ GetInlineGadgetSPtrMap WRITE SetInlineGadgetSPtrMap)
 	QMap<QString, QSharedPointer<TestInlineGadget>> GetInlineGadgetSPtrMap() const { return InlineGadgetSPtrMap; }

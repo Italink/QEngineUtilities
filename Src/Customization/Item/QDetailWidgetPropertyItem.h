@@ -10,6 +10,7 @@
 
 class QDetailWidgetPropertyItem;
 class QPushButton;
+class QInstance;
 
 class QDetailWidgetPropertyItemWidget : public QSplitter {
 	Q_OBJECT
@@ -73,7 +74,7 @@ QList<QMetaType> GetIDListFromType() {
 class QDetailWidgetPropertyItem : public QObject, public QDetailWidgetItem {
 	Q_OBJECT
 public:
-	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler);
+	static QDetailWidgetPropertyItem* Create(QPropertyHandler* inHandler, QInstance* inInstance = nullptr);
 
 	virtual void SetValue(QVariant inValue, QString isPushUndoStackWithDesc = QString());
 
@@ -121,14 +122,20 @@ public:
 	std::function<bool(QString)> GetRenameCallback() const { return mRenameCallback; }
 
 	void SetBuildContentAndChildrenCallback(std::function<void(QHBoxLayout*)> val);
+
+	QInstance* GetInstance() { return mInstance; }
+
+	QVariant GetInstanceMetaData(const QString& inKey);
 protected:
 	QDetailWidgetPropertyItem();
 	void RefleshResetButtonStatus();
 private:
 	QPropertyHandler* mHandler = nullptr;
+	QInstance* mInstance = nullptr;
 	QDetailWidgetPropertyItemWidget* mContent = nullptr;
 	std::function<bool(QString)> mRenameCallback;
 	std::function<void(QHBoxLayout*)> mBuildContentAndChildrenCallback;
+
 };
 
 #endif // QDetailWidgetPropertyItem_h__

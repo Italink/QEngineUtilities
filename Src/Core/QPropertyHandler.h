@@ -14,6 +14,8 @@ public:
 	using Getter = std::function<QVariant()>;
 	using Setter = std::function<void(QVariant)>;
 
+	static void TryFlushProperty(QObject* inOuter, QString inPropertyPath);
+	static QPropertyHandler* Find(QObject* inOuter, QString inPropertyPath);
 	static QPropertyHandler* FindOrCreate(QInstance* inInstance, QString inPropertyPath, QVariantHash inMetaData = QVariantHash());
 	static QPropertyHandler* FindOrCreate(QObject* inOuter, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData = QVariantHash());
 
@@ -21,7 +23,6 @@ public:
 	QVariant GetValue();
 	void ResetValue();
 	void FlushValue();
-
 
 	QMetaType GetType();
 	QString GetName();
@@ -53,9 +54,7 @@ public:
 			mBinderMap.remove(inAdjuster);
 		});
 	}
-
 	static QVariant CreateNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
-
 Q_SIGNALS:
 	void AsValueChanged();
 	void AsVisibleChanged();

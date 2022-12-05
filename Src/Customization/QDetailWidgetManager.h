@@ -8,10 +8,6 @@
 #include "Instance/QInstanceDetail.h"
 #include "QMap"
 
-inline size_t qHash(const QMetaType& key, size_t seed)
-{
-	return  key.id();
-}
 
 class QDetailWidgetManager {
 public:
@@ -55,7 +51,7 @@ public:
 		InstanceDetailCreator creator = []() {
 			return new InstanceDetailType();
 		};
-		mInstanceFilterList << QPair<InstanceTypeFilter, InstanceDetailCreator>{filter, creator};
+		mInstanceFilterList.insert(0, QPair<InstanceTypeFilter, InstanceDetailCreator>{filter, creator});
 	}
 
 	const QHash<QMetaType,PropertyItemCreator>& GetPropertyItemCreatorMap() const { return mPropertyItemCreatorMap; }

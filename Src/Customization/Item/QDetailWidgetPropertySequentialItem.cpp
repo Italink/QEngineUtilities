@@ -30,21 +30,21 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 		GetParentObject(),
 		mValueType,
 		GetHandler()->GetSubPath(QString::number(index)),
-		[this, index]() {
-		QVariant varList = GetValue();
+		[ParentHandle = GetHandler(), index]() {
+		QVariant varList = ParentHandle->GetValue();
 		QSequentialIterable iterable = varList.value<QSequentialIterable>();
 		QMetaType valueMetaType = iterable.metaContainer().valueMetaType();
 		return iterable.at(index);
 	},
-		[this, index](QVariant var) {
-		QVariant varList = GetValue();
+		[ParentHandle = GetHandler(), index](QVariant var) {
+		QVariant varList = ParentHandle->GetValue();
 		QSequentialIterable iterable = varList.value<QSequentialIterable>();
 		const QMetaSequence metaSequence = iterable.metaContainer();
 		void* containterPtr = const_cast<void*>(iterable.constIterable());
 		QtPrivate::QVariantTypeCoercer coercer;
 		const void* dataPtr = coercer.coerce(var, var.metaType());
 		metaSequence.setValueAtIndex(containterPtr, index, dataPtr);
-		SetValue(varList);
+		ParentHandle->SetValue(varList);
 	});
 
 	if (index < childCount()) {
@@ -52,7 +52,7 @@ void QDetailWidgetPropertySequentialItem::FindOrCreateChildItem(int index) {
 		item->SetHandler(handler);
 	}
 	else {
-		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler);
+		QDetailWidgetPropertyItem* item = QDetailWidgetPropertyItem::Create(handler,GetInstance());
 		if (item) {
 			item->SetBuildContentAndChildrenCallback([item,this,index](QHBoxLayout* inLayout) {
 				if (!GetHandler()->GetMetaData("FixedOrder").toBool()) {

@@ -13,6 +13,10 @@ inline static QStringList GetParamStringList(const QString & inStr) {
 	return result;
 }
 
+inline static QString GetEnumName(const QString& inStr) {
+	return inStr.split("::").back();
+}
+
 #if Q_META_DATA_ENABLED
 #define Q_META_BEGIN(ClassName) \
 	Q_INVOKABLE	static QMetaData ClassName##_GetMetaData(){ \
@@ -21,6 +25,13 @@ inline static QStringList GetParamStringList(const QString & inStr) {
 #define Q_META_END(...) \
 		return MetaData; \
 	}
+
+#define Q_META_LOCAL_ENUM(EnumName,...) \
+	QStringList Keys##EnumName =  GetParamStringList(#__VA_ARGS__); \
+	QVector<int> Values##EnumName = {__VA_ARGS__}; \
+	QHash<QString, int> EnumMap##EnumName;\
+	for(int i = 0; i < Keys##EnumName .size() ; i++) EnumMap##EnumName[GetEnumName(Keys##EnumName [i])] = Values##EnumName[i]; \
+	MetaData.mInstanceMetaData[#EnumName] = QVariant::fromValue<>(EnumMap##EnumName); 
 
 #define Q_META_CATEGORY_DEFINE(CategoryName,...) \
 	MetaData.mCategories[#CategoryName]; \

@@ -31,4 +31,9 @@ target_include_directories(QDetailWidget PUBLIC
     Src 
 ) 
 
-add_subdirectory(Example)
+option(QDETAIL_BUILD_EXAMPLE "Build Qt DetailWidget Example" OFF)
+
+if(QDETAIL_BUILD_EXAMPLE)
+    add_subdirectory(Example)
+endif()
+

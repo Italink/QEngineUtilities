@@ -19,9 +19,9 @@ public:
 	virtual QVariant GetProperty(const QMetaProperty& inProperty) = 0;
 	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) = 0;
 	virtual QObject* GetOuterObject() = 0;
+	virtual void* GetPtr() = 0;
 	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) = 0;
 	virtual bool IsValid() { return GetOuterObject() != nullptr; }
-
 	QPropertyHandler* CreatePropertyHandler(const QMetaProperty& inProperty);
 
 	void SetPropertyChangedCallback(std::function<void()> val) { mPropertyChangedCallback = val; }
@@ -41,12 +41,13 @@ class QInstance_Gadget: public QInstance {
 public:
 	QInstance_Gadget(void* inPtr, const QMetaObject* inMetaObject);
 	~QInstance_Gadget();
-	virtual const QMetaObject* GetMetaObject() override;
-	virtual QVariant GetProperty(const QMetaProperty& inProperty) override;
-	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
-	virtual QObject* GetOuterObject() override;
-	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
-	virtual bool IsValid() { return GetOuterObject() != nullptr && mPtr != nullptr; }
+	const QMetaObject* GetMetaObject() override;
+	QVariant GetProperty(const QMetaProperty& inProperty) override;
+	void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
+	QObject* GetOuterObject() override;
+	bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
+	bool IsValid() { return GetOuterObject() != nullptr && mPtr != nullptr; }
+	void* GetPtr() override { return mPtr; }
 private:
 	void* mPtr = nullptr;
 	const QMetaObject* mMetaObject = nullptr;
@@ -57,11 +58,12 @@ private:
 class QInstance_Object :public QInstance {
 public:
 	QInstance_Object(QObject* inObject);
-	virtual const QMetaObject* GetMetaObject() override;
-	virtual QVariant GetProperty(const QMetaProperty& inProperty) override;
-	virtual void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
-	virtual QObject* GetOuterObject() override;
-	virtual bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
+	const QMetaObject* GetMetaObject() override;
+	QVariant GetProperty(const QMetaProperty& inProperty) override;
+	void SetProperty(const QMetaProperty& inProperty, QVariant inVar) override;
+	QObject* GetOuterObject() override;
+	bool Invoke(QMetaMethod& inMethod, QGenericReturnArgument returnValue) override;
+	void* GetPtr() override { return mObject; }
 private:
 	QObject* mObject = nullptr;
 };

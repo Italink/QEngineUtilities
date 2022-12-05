@@ -12,7 +12,6 @@
 #include "Item\QDetailWidgetPropertyInstanceItem.h"
 #include "Instance\QInstanceDetail_QObject.h"
 
-
 QDetailWidgetManager::QDetailWidgetManager()
 {
 	Q_INIT_RESOURCE(Resources);
@@ -41,3 +40,4 @@ void QDetailWidgetManager::RegisterBuiltIn()
 
 	RegisterInstanceFilter<QInstanceDetail_QObject>();
 }
+

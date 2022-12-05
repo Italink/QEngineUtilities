@@ -14,6 +14,7 @@
 #include "Customization\Item\QDetailWidgetPropertyItem.h"
 #include "Widgets\Toolkits\QHoverLineEdit.h"
 #include "Widgets\Toolkits\QSvgIcon.h"
+#include "QDetailWidgetStyleManager.h"
 
 QDetailSearcher::QDetailSearcher()
 	: mLbSearch(new QLabel)
@@ -57,9 +58,10 @@ QDetailTreeWidget::QDetailTreeWidget()
 	});
 }
 
-void QDetailTreeWidget::SetInstances(const QList<QSharedPointer<QInstance>>& inInstance)
+void QDetailTreeWidget::SetInstances(const QList<QSharedPointer<QInstance>>& inInstances)
 {
-	for (auto object : inInstance) 
+	mInstanceList.clear();
+	for (auto object : inInstances) 
 		mInstanceList << object;
 	Recreate();
 }
@@ -139,52 +141,6 @@ void QDetailTreeWidget::SetSplitterSizes(int item0, int item1, int item2)
 	UpdateSplitterFactor();
 }
 
-QColor QDetailTreeWidget::GetGridLineColor() const
-{
-	return mGridLineColor;
-}
-
-void QDetailTreeWidget::SetGridLineColor(QColor val)
-{
-	mGridLineColor = val;
-}
-
-QColor QDetailTreeWidget::GetShadowColor() const
-{
-	return mShadowColor;
-}
-
-void QDetailTreeWidget::SetShadowColor(QColor val)
-{
-	mShadowColor = val;
-}
-
-QColor QDetailTreeWidget::GetCategoryColor() const {
-	return mCategoryColor;
-}
-
-void QDetailTreeWidget::SetCategoryColor(QColor val) {
-	mCategoryColor = val;
-}
-
-QColor QDetailTreeWidget::GetHoveredColor() const {
-	return mHoveredColor;
-}
-
-void QDetailTreeWidget::SetHoveredColor(QColor val) {
-	mHoveredColor = val;
-}
-
-QColor QDetailTreeWidget::GetIconColor() const
-{
-	return QSvgIcon::GetIconColor();
-}
-
-void QDetailTreeWidget::SetIconColor(QColor val)
-{
-	QSvgIcon::setIconColor(val);
-}
-
 void QDetailTreeWidget::UpdateSplitterFactor()
 {
 	QTreeWidgetItemIterator Iterator(this);
@@ -221,17 +177,17 @@ void QDetailTreeWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& o
 	painter->save();
 
 	if (item->Type() == QDetailWidgetItem::Category) 
-		painter->fillRect(options.rect.adjusted(level * indentation(),0,0,0), mCategoryColor);
-	QPen pen(mGridLineColor);
+		painter->fillRect(options.rect.adjusted(level * indentation(),0,0,0), QDetailWidgetStyleManager::Instance()->GetCategoryColor());
+	QPen pen(QDetailWidgetStyleManager::Instance()->GetGridLineColor());
 	pen.setWidth(1);
 	painter->setPen(pen);
 	if (hovered) 
-		painter->setBrush(mHoveredColor);
+		painter->setBrush(QDetailWidgetStyleManager::Instance()->GetHoveredColor());
 	else
 		painter->setBrush(Qt::NoBrush);
 	painter->drawRect(options.rect);
 	if (hasChildren) {
-		QColor arrowColor = mArrowColor;
+		QColor arrowColor = QDetailWidgetStyleManager::Instance()->GetArrowColor();
 		if (hovered)
 			arrowColor = arrowColor.lighter();
 		QPolygonF arrow;
@@ -249,7 +205,7 @@ void QDetailTreeWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& o
 	}
 	QRect shadowRect(options.rect.x(), options.rect.y(), 6, options.rect.height());
 	QLinearGradient shadowColor;
-	
+	QColor mShadowColor = QDetailWidgetStyleManager::Instance()->GetShadowColor();
 	shadowColor.setColorAt(0, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue(), 0));
 	shadowColor.setColorAt(1, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue()));
 
