@@ -9,16 +9,16 @@ QSharedPointer<QInstance_Object> QInstance::CreateObjcet(QObject* inObject) {
 }
 
 QSharedPointer<QInstance_Gadget> QInstance::CreateGadget(void* inPtr, const QMetaObject* inMetaObject) {
-	QSharedPointer<QInstance_Gadget> instance = QSharedPointer<QInstance_Gadget>::create(inPtr,inMetaObject);
+	QSharedPointer<QInstance_Gadget> instance = QSharedPointer<QInstance_Gadget>::create(inPtr, inMetaObject);
 	instance->LoadMetaData();
 	return instance;
 }
 
-QInstance_Gadget::QInstance_Gadget(void* inPtr,const QMetaObject* inMetaObject)
+QInstance_Gadget::QInstance_Gadget(void* inPtr, const QMetaObject* inMetaObject)
 	:mPtr(inPtr)
-	,mMetaObject(inMetaObject)
+	, mMetaObject(inMetaObject)
 {
-	mOuter = mOuterCacheMap.value(mPtr,nullptr);
+	mOuter = mOuterCacheMap.value(mPtr, nullptr);
 	if (mOuter == nullptr) {
 		mOuter = new QObject();
 		mOuterCacheMap[mPtr] = mOuter;
@@ -46,7 +46,7 @@ void QInstance::LoadMetaData() {
 		QMetaMethod method = GetMetaObject()->method(i);
 		if (QString(method.name()).endsWith("_GetMetaData")) {
 			QMetaData MetaData;
-			if (Invoke(method, Q_RETURN_ARG(QMetaData, MetaData))) {
+			if (Invoke(method, QGenericReturnArgument("QMetaData", &MetaData))) {
 				for (auto PropertyIter = MetaData.mPropertiesMetaData.begin(); PropertyIter != MetaData.mPropertiesMetaData.end(); ++PropertyIter) {
 					mMetaData.mPropertiesMetaData[PropertyIter.key()] = PropertyIter.value();
 				}
@@ -125,10 +125,9 @@ QPropertyHandler* QInstance::CreatePropertyHandler(const QMetaProperty& inProper
 		[this, inProperty](QVariant var) { SetProperty(inProperty, var); },
 		mMetaData.mPropertiesMetaData[inProperty.name()]
 	);
-	QObject::connect(propHandler, &QPropertyHandler::AsValueChanged,[this]() {
+	QObject::connect(propHandler, &QPropertyHandler::AsValueChanged, [this]() {
 		if (mPropertyChangedCallback)
-			mPropertyChangedCallback();
-	});
+		mPropertyChangedCallback();
+		});
 	return propHandler;
 }
-

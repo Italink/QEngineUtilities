@@ -18,7 +18,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Src FILES ${PROJECT_SOURCE})
 
 qt6_add_resources(QRC_FILES Resources.qrc)
 
-add_library(QDetailWidget
+add_library(QDetailWidget STATIC 
     ${PROJECT_SOURCE}
     ${QRC_FILES}
 )
