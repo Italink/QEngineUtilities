@@ -1,6 +1,10 @@
 #include "QInstanceTreeWidget.h"
 #include "QPainter"
 #include "QDetailWidgetStyleManager.h"
+#include "qcoreevent.h"
+#include "QPropertyHandler.h"
+#include "Customization\Instance\QInstanceDetail.h"
+#include "Undo\QDetailUndoStack.h"
 
 QInstanceTreeWidget::QInstanceTreeWidget() {
 	setHeaderHidden(true);
@@ -82,6 +86,9 @@ void QInstanceTreeWidget::AddItemInternal(QTreeWidgetItem* inParentItem, QInstan
 	if (inParentInstance->GetMetaObject()->inherits(QObject::metaObject())) {
 		QObject* Object = inParentInstance->GetOuterObject();
 		for (auto& child : Object->children()) {
+			if (IsIgnoreObject(child)) {
+				continue;
+			}
 			auto tempInstance = QInstance::CreateObjcet(child);
 			QTreeWidgetItem* item = CreateItemForInstance(tempInstance.get());
 			mItemMap[item] = tempInstance;
@@ -92,8 +99,28 @@ void QInstanceTreeWidget::AddItemInternal(QTreeWidgetItem* inParentItem, QInstan
 }
 
 void QInstanceTreeWidget::SetInstances(const QList<QSharedPointer<QInstance>>& inInstances) {
-	clear();
 	mTopLevelInstances = inInstances;
+	ForceRefresh();
+}
+
+QTreeWidgetItem* QInstanceTreeWidget::CreateItemForInstance(QInstance* InInstance) {
+	QString name;
+	name += QString::asprintf("[%s: %p] : ", InInstance->GetMetaObject()->className(),InInstance->GetPtr());
+	if (InInstance->GetMetaObject()->inherits(QObject::metaObject())) {
+		name += InInstance->GetOuterObject()->objectName();
+	}
+	QTreeWidgetItem* item = new QTreeWidgetItem({ name });
+	item->setSizeHint(0, QSize(25,25));
+	if (InInstance->IsQObject()) {
+		QObject* Object = (QObject*)InInstance->GetPtr();
+		Object->removeEventFilter(this);
+		Object->installEventFilter(this);
+	}
+	return item;
+}
+
+void QInstanceTreeWidget::ForceRefresh() {
+	clear();
 	if (mTopLevelInstances.isEmpty())
 		return;
 	for (auto& instance : mTopLevelInstances) {
@@ -106,13 +133,21 @@ void QInstanceTreeWidget::SetInstances(const QList<QSharedPointer<QInstance>>& i
 	}
 }
 
-QTreeWidgetItem* QInstanceTreeWidget::CreateItemForInstance(QInstance* InInstance) {
-	QString name;
-	name += QString::asprintf("[%s: %p] : ", InInstance->GetMetaObject()->className(),InInstance->GetPtr());
-	if (InInstance->GetMetaObject()->inherits(QObject::metaObject())) {
-		name += InInstance->GetOuterObject()->objectName();
+bool QInstanceTreeWidget::eventFilter(QObject* object, QEvent* event) {
+	if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved) {
+		QChildEvent* childEvent = static_cast<QChildEvent*>(event);
+		qDebug() << event->type() << childEvent->child() << childEvent->child()->metaObject() << childEvent->child()->metaObject()->className();
+		if(!IsIgnoreObject(childEvent->child()))
+			ForceRefresh();
 	}
-	QTreeWidgetItem* item = new QTreeWidgetItem({ name });
-	item->setSizeHint(0, QSize(25,25));
-	return item;
+	return QTreeWidget::eventFilter(object, event);
+}
+
+bool QInstanceTreeWidget::IsIgnoreObject(QObject* inObject) {
+	return inObject == nullptr
+		|| inObject->metaObject()->inherits(&QPropertyHandler::staticMetaObject)
+		|| inObject->metaObject()->inherits(&QInstanceDetail::staticMetaObject)
+		|| inObject->metaObject()->inherits(&QDetailUndoEntry::staticMetaObject)
+		|| inObject->metaObject()->inherits(&QDetailUndoStack::staticMetaObject)
+		;
 }

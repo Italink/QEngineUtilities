@@ -8,7 +8,6 @@
     Type get_##Name(){ return Name; } \
     void set_##Name(Type var){ \
         Name = var;  \
-		qDebug()<<"Set "<<#Name<<": "<<var; \
     } \
     Type Name
 

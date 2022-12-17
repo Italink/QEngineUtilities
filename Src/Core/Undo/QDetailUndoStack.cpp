@@ -57,8 +57,9 @@ void QDetailUndoStack::Redo()
 	}
 }
 
-QDetailUndoEntry::QDetailUndoEntry(QObject* inParent /*= nullptr*/) :QObject(inParent) {
+QDetailUndoEntry::QDetailUndoEntry(QObject* inParent /*= nullptr*/) {
 	QDetailUndoStack::Instance()->AddEntry(this);
+	setParent(inParent);
 }
 
 QDetailUndoEntry::~QDetailUndoEntry() {

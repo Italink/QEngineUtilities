@@ -6,8 +6,7 @@
 #include "QRegularExpression"
 
 QPropertyHandler::QPropertyHandler(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
-	: QObject(inParent)
-	, mType(inType)
+	: mType(inType)
 	, mPath(inPropertyPath)
 	, mGetter(inGetter)
 	, mSetter(inSetter)
@@ -26,6 +25,7 @@ QPropertyHandler::QPropertyHandler(QObject* inParent, QMetaType inType, QString 
 	if (IsVisible != mMetaData.end()) {
 		SetVisible(IsVisible->toBool());
 	}
+	setParent(inParent);
 }
 
 void QPropertyHandler::TryFlushProperty(QObject* inOuter, QString inPropertyPath) {

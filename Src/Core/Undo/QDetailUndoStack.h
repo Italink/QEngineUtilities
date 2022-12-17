@@ -8,6 +8,7 @@
 class QDetailUndoEntry;
 
 class QDetailUndoStack : public QUndoStack {
+	Q_OBJECT
 public:
 	static QDetailUndoStack* Instance();
 	void AddEntry(QDetailUndoEntry* entry);
