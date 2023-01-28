@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/reset.png</file>
+        <file>Resources/undo.png</file>
+        <file>Resources/search.png</file>
+        <file>Resources/delete.png</file>
+        <file>Resources/down.png</file>
+        <file>Resources/up.png</file>
+        <file>Resources/plus.png</file>
+        <file>Resources/expand.png</file>
+        <file>Resources/unexpand.png</file>
+    </qresource>
+</RCC>

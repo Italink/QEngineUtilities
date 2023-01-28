@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(QEngineEditor VERSION 0.1 LANGUAGES CXX)
+
+file(GLOB_RECURSE PROJECT_SOURCE FILES Src/*.h Src/*.cpp)
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Src FILES ${PROJECT_SOURCE})
+
+qt6_add_resources(QRC_FILES Resources.qrc)
+
+add_library(QEngineEditor STATIC 
+    ${PROJECT_SOURCE}
+    ${QRC_FILES}
+)
+
+target_link_libraries(QEngineEditor PUBLIC 
+    QEngineCore
+)
+
+target_include_directories(QEngineEditor PUBLIC
+    Src/Public
+) 
+target_include_directories(QEngineEditor PRIVATE
+    Src/Private
+) 
+set_target_properties(QEngineEditor PROPERTIES FOLDER "QEngineUtilties")
+
+option(QDETAIL_BUILD_EXAMPLE "Build Qt DetailWidget Example" OFF)
+
+if(QDETAIL_BUILD_EXAMPLE)
+    add_subdirectory(Example)
+endif()
+

@@ -1,39 +1,67 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
-project(QDetailWidget VERSION 0.1 LANGUAGES CXX)
+project(QEngineUtilties)
+
+cmake_minimum_required(VERSION 3.12)
+
+set(GCC_DEBUG_FLAGS "-g -Wall")
+
+if(CMAKE_CONFIGURATION_TYPES)
+   list(APPEND CMAKE_CONFIGURATION_TYPES DebugEditor ReleaseEditor)
+   list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
+   set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+       "Add the configurations that we need"
+       FORCE)
+   message("Available build types are now : ${CMAKE_CONFIGURATION_TYPES}")
+else()
+   message("Custom build types are not allowed...")
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUGEDITOR "${CMAKE_CXX_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_DEBUGEDITOR "${CMAKE_C_FLAGS_DEBUG}")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUGEDITOR "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUGEDITOR "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
+
+set(CMAKE_CXX_FLAGS_RELEASEEDITOR "${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_RELEASEEDITOR  "${CMAKE_C_FLAGS_RELEASE}")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASEEDITOR "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+set(CMAKE_SHARED_LINKER_FLAGS_RELEASEEDITOR "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
+
+add_compile_definitions("$<$<CONFIG:DebugEditor>:WITH_EDITOR>")
+add_compile_definitions("$<$<CONFIG:ReleaseEditor>:WITH_EDITOR>")
+
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets ShaderTools REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets ShaderTools REQUIRED)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY AUTOGEN_SOURCE_GROUP "Generated Files")
+add_definitions(-DVK_NO_PROTOTYPES)
 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+add_subdirectory(Core)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
+add_subdirectory(Editor)
 
 file(GLOB_RECURSE PROJECT_SOURCE FILES Src/*.h Src/*.cpp)
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Src FILES ${PROJECT_SOURCE})
-
-qt6_add_resources(QRC_FILES Resources.qrc)
-
-add_library(QDetailWidget STATIC 
+add_library(QEngine STATIC
     ${PROJECT_SOURCE}
-    ${QRC_FILES}
 )
 
-target_link_libraries(QDetailWidget PUBLIC 
-    Qt${QT_VERSION_MAJOR}::Widgets 
+target_link_libraries(QEngine PUBLIC 
+    QEngineEditor
 )
+target_include_directories(QEngine PUBLIC Src/) 
 
-target_include_directories(QDetailWidget PUBLIC
-    Src 
-) 
+set_target_properties(QEngine PROPERTIES FOLDER "QEngineUtilties")
 
-option(QDETAIL_BUILD_EXAMPLE "Build Qt DetailWidget Example" OFF)
+option(QENGINE_BUILD_EXAMPLES "Build QEngine Examples" ON)
 
-if(QDETAIL_BUILD_EXAMPLE)
-    add_subdirectory(Example)
+if(QENGINE_BUILD_EXAMPLES)
+    add_subdirectory(Examples)
 endif()
 
