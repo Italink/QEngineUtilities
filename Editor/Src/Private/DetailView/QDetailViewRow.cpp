@@ -200,7 +200,6 @@ QDetailViewRow* QDetailViewRow::AddChildRow() {
 	int parentIndex = mView->mLayout->indexOf(mWidget);
 	int childCount = CountChildrenRow(this);
 	mChildren << row;
-	row->mWidget->setUpdatesEnabled(false);
 	mView->mLayout->insertWidget(parentIndex + childCount + 1, row->mWidget, 0, Qt::AlignTop);
 	return row;
 }

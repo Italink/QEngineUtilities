@@ -22,7 +22,6 @@ public:
 	QDetailViewRow* AddTopLevelRow();
 protected:
 	void resizeEvent(QResizeEvent* event) override;
-	void paintEvent(QPaintEvent*) override;
 	void Reset();
 	void RefreshRowsState();
 	void RefreshRowsSplitter();

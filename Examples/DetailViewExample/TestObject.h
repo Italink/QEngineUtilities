@@ -56,12 +56,12 @@ static QDebug operator<<(QDebug debug, const std::shared_ptr<TestInlineGadget>& 
 class TestObject :public QObject {
 	Q_OBJECT
 		Q_META_BEGIN(TestObject)
-		Q_META_CATEGORY_ENABLED()
-		Q_META_CATEGORY_DEFINE(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
-		Q_META_CATEGORY_DEFINE(Color, Color, Colors, ColorList, StdColorList, ColorMap)
-		Q_META_CATEGORY_DEFINE(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
-		Q_META_CATEGORY_DEFINE(Inline, InlineGadget, InlineGadgetPtr, InlineGadgetSPtr, InlineGadgetStdSPtr, InlineObject, InlineObjectSPtr, InlineObjectList, InlineGadgetList, InlineGadgetPtrList, InlineGadgetSPtrList, InlineGadgetStdPtrList, InlineGadgetSPtrMap)
-		Q_META_CATEGORY_DEFINE(Other, Bool)
+		//Q_META_CATEGORY_ENABLED()
+		//Q_META_CATEGORY_DEFINE(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
+		//Q_META_CATEGORY_DEFINE(Color, Color, Colors, ColorList, StdColorList, ColorMap)
+		//Q_META_CATEGORY_DEFINE(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
+		//Q_META_CATEGORY_DEFINE(Inline, InlineGadget, InlineGadgetPtr, InlineGadgetSPtr, InlineGadgetStdSPtr, InlineObject, InlineObjectSPtr, InlineObjectList, InlineGadgetList, InlineGadgetPtrList, InlineGadgetSPtrList, InlineGadgetStdPtrList, InlineGadgetSPtrMap)
+		//Q_META_CATEGORY_DEFINE(Other, Bool)
 		//Q_META_CATEGORY_VISIBLE(Inline, false)
 		Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
 		Q_META_P_STRING_AS_LINE(QtString, "This is QString")

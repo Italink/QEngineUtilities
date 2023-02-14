@@ -66,10 +66,6 @@ void QDetailView::resizeEvent(QResizeEvent* event) {
 	}
 }
 
-void QDetailView::paintEvent(QPaintEvent*) {
-	qDebug() << "Detail View update";
-}
-
 void QDetailView::Reset() {
 	for (auto row : mTopLevelRows) {
 		row->setParent(nullptr);

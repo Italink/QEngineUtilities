@@ -4,7 +4,7 @@ add_executable(DetailViewExample
 )
 
 target_link_libraries(DetailViewExample PRIVATE 
-    QEngine
+    QEngineUtilties
 )
 
 add_executable(RenderExample
@@ -12,7 +12,7 @@ add_executable(RenderExample
 )
 
 target_link_libraries(RenderExample PRIVATE 
-    QEngine
+    QEngineUtilties
 )
 
 set_target_properties(DetailViewExample PROPERTIES FOLDER "QEngineUtilties/Examples")

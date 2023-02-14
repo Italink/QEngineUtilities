@@ -11,7 +11,7 @@ public:
 	struct InitParams {
 		QRhi::Implementation backend = QRhi::Vulkan;
 		QRhi::Flags rhiFlags;
-		QRhiSwapChain::Flags swapChainFlags;
+		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::NoVSync;
 		QRhi::BeginFrameFlags beginFrameFlags;
 		QRhi::EndFrameFlags endFrameFlags;
 		int sampleCount = 1;
