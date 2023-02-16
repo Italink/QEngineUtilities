@@ -259,7 +259,6 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 	io.DisplayFramebufferScale = ImVec2(1, 1);
 	float currentTime = QDateTime::currentMSecsSinceEpoch() / 1000.0f;
 	io.DeltaTime = qMax(1.0f / 60.0f, currentTime - mTime);
-	qDebug() << io.DeltaTime;
 	mTime = currentTime;
 	if (io.WantSetMousePos) {
 		const QPoint globalPos = mWindow->mapToGlobal(QPoint{ (int)io.MousePos.x, (int)io.MousePos.y });
