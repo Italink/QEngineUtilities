@@ -135,7 +135,7 @@ ImGuiPainter::ImGuiPainter()
 	mImGuiContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(mImGuiContext);
 
-	embraceTheDarkness();
+	//embraceTheDarkness();
 	ImGuiIO& io = ImGui::GetIO();
 
 	//io.Fonts->AddFontFromFileTTF(R"(E:\ModernGraphicsEngineGuide\Source\QEngineUtilities\Editor\Resources\DroidSans.ttf)", 16);
@@ -257,13 +257,14 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 	QSize size = mWindow->size() * mWindow->devicePixelRatio();
 	io.DisplaySize = ImVec2(size.width(), size.height());
 	io.DisplayFramebufferScale = ImVec2(1, 1);
-	double current_time = QDateTime::currentMSecsSinceEpoch() / double(1000);
-	io.DeltaTime = mTime > 0.0 ? (float)(current_time - mTime) : (float)(1.0f / 60.0f);
-	mTime = current_time;
+	float currentTime = QDateTime::currentMSecsSinceEpoch() / 1000.0f;
+	io.DeltaTime = qMax(1.0f / 60.0f, currentTime - mTime);
+	qDebug() << io.DeltaTime;
+	mTime = currentTime;
 	if (io.WantSetMousePos) {
-		const QPoint global_pos = mWindow->mapToGlobal(QPoint{ (int)io.MousePos.x, (int)io.MousePos.y });
+		const QPoint globalPos = mWindow->mapToGlobal(QPoint{ (int)io.MousePos.x, (int)io.MousePos.y });
 		QCursor cursor = mWindow->cursor();
-		cursor.setPos(global_pos);
+		cursor.setPos(globalPos);
 		//mWindow->setCursor(cursor);
 	}
 	if (mWindow->isActive()) {
@@ -284,16 +285,16 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 		return;
 	const ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
 	if (io.MouseDrawCursor || (imgui_cursor == ImGuiMouseCursor_None)) {
-		//mWindow->setCursor(Qt::CursorShape::BlankCursor);
+		mWindow->setCursor(Qt::CursorShape::BlankCursor);
 	}
 	else {
 		const auto cursor_it = cursorMap.constFind(imgui_cursor);
 		if (cursor_it != cursorMap.constEnd()) {
 			const Qt::CursorShape qt_cursor_shape = *(cursor_it);
-			//mWindow->setCursor(qt_cursor_shape);
+			mWindow->setCursor(qt_cursor_shape);
 		}
 		else {
-			//mWindow->setCursor(Qt::CursorShape::ArrowCursor);
+			mWindow->setCursor(Qt::CursorShape::ArrowCursor);
 		}
 	}
 	ImGui::SetCurrentContext(mImGuiContext);

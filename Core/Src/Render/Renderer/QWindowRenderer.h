@@ -8,7 +8,7 @@ class QRhiWindow;
 class QWindowRenderer : public IRenderer {
 	Q_OBJECT
 public:
-	friend class QRenderViewport;
+	friend class QRenderWidget;
 	QWindowRenderer(QRhiWindow* inWindow);
 	QWindow* getWindow() const;
 

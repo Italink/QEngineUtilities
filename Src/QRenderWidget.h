@@ -1,5 +1,5 @@
-﻿#ifndef QRenderViewport_h__
-#define QRenderViewport_h__
+﻿#ifndef QRenderWidget_h__
+#define QRenderWidget_h__
 
 #include "QWidget"
 #include "RHI/QRhiWindow.h"
@@ -11,11 +11,11 @@ class QWindowRenderer;
 class QDetailView;
 class QObjectTreeView;
 
-class QRenderViewport :public QWidget {
+class QRenderWidget :public QWidget {
 public:
 	QRhiEx::Signal sigRecompileRenderer;
 public:
-	QRenderViewport(QRhiWindow::InitParams inInitParams);
+	QRenderWidget(QRhiWindow::InitParams inInitParams);
 	QCamera* setupCamera();
 	void setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph);
 	void requestCompileRenderer();
@@ -31,4 +31,4 @@ protected:
 #endif // WITH_EDITOR
 };
 
-#endif // QRenderViewport_h__
+#endif // QRenderWidget_h__

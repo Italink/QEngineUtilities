@@ -1,4 +1,4 @@
-﻿#include "QRenderViewport.h"
+﻿#include "QRenderWidget.h"
 #include "QBoxLayout"
 #include "Render/Renderer/QWindowRenderer.h"
 #include "QSplitter"
@@ -30,7 +30,7 @@ private:
 	std::function<void(const QSize&)> mResizeFunctor = [](const QSize&) {};
 };
 
-QRenderViewport::QRenderViewport(QRhiWindow::InitParams inInitParams)
+QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	: mRhiWindow(new QInnerRhiWindow(inInitParams))
 	, mCamera(new QCamera)
 #ifdef WITH_EDITOR
@@ -85,16 +85,16 @@ QRenderViewport::QRenderViewport(QRhiWindow::InitParams inInitParams)
 #endif
 }
 
-QCamera* QRenderViewport::setupCamera() {
+QCamera* QRenderWidget::setupCamera() {
 	mCamera->setupWindow(mRhiWindow);
 	return mCamera;
 }
 
-void QRenderViewport::setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph) {
+void QRenderWidget::setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph) {
 	mFrameGraph = inFrameGraph;
 	requestCompileRenderer();
 }
 
-void QRenderViewport::requestCompileRenderer() {
+void QRenderWidget::requestCompileRenderer() {
 	sigRecompileRenderer.request();
 }
