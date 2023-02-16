@@ -23,7 +23,7 @@ target_include_directories(QEngineEditor PUBLIC
 target_include_directories(QEngineEditor PRIVATE
     Src/Private
 ) 
-set_target_properties(QEngineEditor PROPERTIES FOLDER "QEngineUtilties")
+set_target_properties(QEngineEditor PROPERTIES FOLDER "QEngineUtilities")
 
 option(QDETAIL_BUILD_EXAMPLE "Build Qt DetailWidget Example" OFF)
 

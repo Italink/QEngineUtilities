@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(QEngineUtilties)
+project(QEngineUtilities)
 
 cmake_minimum_required(VERSION 3.12)
 
@@ -48,16 +48,17 @@ add_subdirectory(Editor)
 
 file(GLOB_RECURSE PROJECT_SOURCE FILES Src/*.h Src/*.cpp)
 
-add_library(QEngineUtilties STATIC
+add_library(QEngineUtilities STATIC
     ${PROJECT_SOURCE}
 )
 
-target_link_libraries(QEngineUtilties PUBLIC 
+target_link_libraries(QEngineUtilities PUBLIC 
+    QEngineCore
     QEngineEditor
 )
-target_include_directories(QEngineUtilties PUBLIC Src/) 
+target_include_directories(QEngineUtilities PUBLIC Src/) 
 
-set_target_properties(QEngineUtilties PROPERTIES FOLDER "QEngineUtilties")
+set_target_properties(QEngineUtilities PROPERTIES FOLDER "QEngineUtilities")
 
 if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(Examples)
