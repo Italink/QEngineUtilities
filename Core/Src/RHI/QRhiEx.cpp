@@ -67,13 +67,9 @@ QVulkanInstance* QRhiEx::getVkInstance() {
 		vkInstance = new QVulkanInstance;
 		vkInstance->setExtensions(QRhiVulkanInitParams::preferredInstanceExtensions());
 		vkInstance->setLayers({ "VK_LAYER_KHRONOS_validation" });
-		const QVersionNumber supportedVersion = vkInstance->supportedApiVersion();
-		if (supportedVersion >= QVersionNumber(1, 2)) {
-			qDebug("Requesting Vulkan API 1.2 on the VkInstance");
-			vkInstance->setApiVersion(QVersionNumber(1, 2));
-		}
 		if (!vkInstance->create())
 			qFatal("Failed to create Vulkan instance");
+
 	}
 	return vkInstance;
 }
