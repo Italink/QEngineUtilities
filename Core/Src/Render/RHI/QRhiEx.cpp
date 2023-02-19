@@ -65,6 +65,7 @@ QVulkanInstance* QRhiEx::getVkInstance() {
 		vkInstance->setLayers({ "VK_LAYER_KHRONOS_validation" });
 		if (!vkInstance->create())
 			qFatal("Failed to create Vulkan instance");
+
 	}
 	return vkInstance;
 }
