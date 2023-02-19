@@ -4,12 +4,16 @@
 #include "QBoxLayout"
 #include "DetailView/QDetailViewManager.h"
 
+QPropertyHandle* IPropertyHandleImpl::FindChildHandle(const QString& inSubName) {
+	return QPropertyHandle::Find(mHandle->parent(), mHandle->GetSubPath(inSubName));
+}
+
 QPropertyHandle* IPropertyHandleImpl::CreateChildHandle(const QString& inSubName) {
 	return nullptr;
 }
 
 QWidget* IPropertyHandleImpl::GenerateNameWidget() {
-	return new QElideLabel(mHandle->objectName());
+	return new QElideLabel(mHandle->GetName());
 }
 
 QWidget* IPropertyHandleImpl::GenerateValueWidget() {

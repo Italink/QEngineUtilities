@@ -2,7 +2,7 @@
 #define QParticleSystem_h__
 
 #include "qvectornd.h"
-#include "RHI\QRhiEx.h"
+#include "Render/RHI/QRhiEx.h"
 
 class QParticleSystem {
 public:

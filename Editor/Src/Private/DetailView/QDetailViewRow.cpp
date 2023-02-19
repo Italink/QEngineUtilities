@@ -170,10 +170,14 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 		mView->mValueWidgetWidth = qMax(1, content->width() - content->handleWidth() - pos);
 		mView->RefreshRowsSplitter();
 	});
-	inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
-	inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
-	content->addWidget(inNameWidget);
-	content->addWidget(inValueWidget);
+	if (inNameWidget) {
+		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
+		content->addWidget(inNameWidget);
+	}
+	if (inValueWidget) {
+		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
+		content->addWidget(inValueWidget);
+	}
 	SetupContentWidget(content);
 }
 

@@ -19,7 +19,7 @@ public:
 	virtual void compile() override;
 	virtual void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override;
 protected:
-	QRhiTexture* mTexture;
+	QRhiTexture* mTexture = nullptr;
 
 	QScopedPointer<QRhiSampler> mSampler;
 	QRhiSampler::Filter mMagFilter = QRhiSampler::Nearest;

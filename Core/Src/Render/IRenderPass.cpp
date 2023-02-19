@@ -10,7 +10,7 @@ QRhiTexture* IRenderPassBase::getOutputTexture(int slot /*= 0*/) {
 	return mOutputTextures.value(slot, nullptr);
 }
 
-const QHash<int, QRhiTexture*>& IRenderPassBase::getOutputTextures() {
+const QMap<int, QRhiTexture*>& IRenderPassBase::getOutputTextures() {
 	return mOutputTextures;
 }
 
@@ -88,7 +88,7 @@ QRhiTexture* TextureLinker::getInputTexture(int slot) const{
 	return linker.cache = mRenderPass->mRenderer->getRenderPassByName(linker.passName)->getOutputTexture(linker.passSlot);
 }
 
-void TextureLinker::setOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const {
+void TextureLinker::registerOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const {
 	if (texture)
 		texture->setName(name);
 	mRenderPass->mOutputTextures[slot] = texture;

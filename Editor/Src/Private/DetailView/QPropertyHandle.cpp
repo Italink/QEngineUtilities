@@ -7,14 +7,13 @@
 #include "DetailView/QDetailViewManager.h"
 #include "DetailView/PropertyHandleImpl/QAssociativePropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QSequentialPropertyHandleImpl.h"
-#include "Undo/QDetailUndoStack.h"
+#include "Undo/QEngineUndoStack.h"
 #include "Widgets/QElideLabel.h"
 #include "DetailView/PropertyHandleImpl/QEnumPropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QObjectPropertyHandleImpl.h"
 
 QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
 	: mType(inType)
-	, mPropertyPath(inPropertyPath)
 	, mGetter(inGetter)
 	, mSetter(inSetter)
 	, mMetaData(inMetaData)
@@ -49,12 +48,12 @@ QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString in
 			mImpl.reset(new IPropertyHandleImpl(this));
 		}
 	}
-	QDetailUndoEntry* UndoEntry = inParent->findChild<QDetailUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
+	QEngineUndoEntry* UndoEntry = inParent->findChild<QEngineUndoEntry*>(QString(), Qt::FindDirectChildrenOnly);
 	if (UndoEntry != nullptr) {
 		mUndoEntry = UndoEntry;
 	}
 	else {
-		mUndoEntry = new QDetailUndoEntry(inParent);
+		mUndoEntry = new QEngineUndoEntry(inParent);
 	}
 }
 
@@ -105,6 +104,20 @@ QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString&
 		}
 	}
 	return handle;
+}
+
+QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData) {
+	QPropertyHandle* handle = Find(inParent, inPropertyPath);
+	if (handle)
+		return handle;
+	return new QPropertyHandle(
+		inParent,
+		inType,
+		inPropertyPath,
+		inGetter,
+		inSetter,
+		inMetaData
+	);
 }
 
 class QPropertyAssignCommand : public QUndoCommand {
@@ -184,12 +197,16 @@ QMetaType QPropertyHandle::GetType() {
 	return mType;
 }
 
-QString QPropertyHandle::GetPath() {
-	return mPropertyPath;
+QString QPropertyHandle::GetName() {
+	return GetPath().split(".").back();
 }
 
-QString QPropertyHandle::GetSubPath(const QString& inSubName) const{
-	return mPropertyPath + "." + inSubName;
+QString QPropertyHandle::GetPath() {
+	return objectName();
+}
+
+QString QPropertyHandle::GetSubPath(const QString& inSubName){
+	return GetPath() + "." + inSubName;
 }
 
 QVariant QPropertyHandle::GetMetaData(const QString& Hash) const {
@@ -201,7 +218,7 @@ const QVariantHash& QPropertyHandle::GetMetaData() const {
 }
 
 QPropertyHandle* QPropertyHandle::FindChildHandle(const QString& inSubName) {
-	return QPropertyHandle::Find(parent(), GetSubPath(inSubName));
+	return mImpl->FindChildHandle(inSubName);
 }
 
 QPropertyHandle* QPropertyHandle::CreateChildHandle(const QString& inSubName) {

@@ -22,10 +22,9 @@ public:
 	}
 	void UnregisterCustomClassLayout(const QMetaObject* InMetaObject);
 
-	template<typename IPropertyTypeCustomizationType>
-	void RegisterCustomPropertyTypeLayout(const QMetaType& InMetaType)
-	{
-		mCustomPropertyTypeLayoutMap.insert(InMetaType, []() {
+	template<typename MetaType, typename IPropertyTypeCustomizationType>
+	void RegisterCustomPropertyTypeLayout(){
+		mCustomPropertyTypeLayoutMap.insert(QMetaType::fromType<MetaType>(), []() {
 			return QSharedPointer<IPropertyTypeCustomizationType>::create();
 		});
 	}

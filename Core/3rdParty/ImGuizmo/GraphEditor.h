@@ -90,17 +90,15 @@ struct Template
     ImU32 mHeaderColor;
     ImU32 mBackgroundColor;
     ImU32 mBackgroundColorOver;
-    ImU8 mInputCount;
-    const char** mInputNames; // can be nullptr. No text displayed.
+    std::vector<std::string> mInputNames; // can be nullptr. No text displayed.
     ImU32* mInputColors; // can be nullptr, default slot color will be used.
-    ImU8 mOutputCount;
-    const char** mOutputNames; // can be nullptr. No text displayed.
+    std::vector<std::string>  mOutputNames; // can be nullptr. No text displayed.
     ImU32* mOutputColors; // can be nullptr, default slot color will be used.
 };
 
 struct Node
 {
-    const char* mName;
+    std::string mName;
     TemplateIndex mTemplateIndex;
     ImRect mRect;
     bool mSelected{ false };

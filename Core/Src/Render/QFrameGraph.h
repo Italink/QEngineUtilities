@@ -1,7 +1,7 @@
 ﻿#ifndef QFrameGraph_h__
 #define QFrameGraph_h__
 
-#include "RHI/QRhiEx.h"
+#include "Render/RHI/QRhiEx.h"
 
 class IRenderer;
 class IRenderPassBase;
@@ -9,23 +9,22 @@ class IRenderPassBase;
 class QFrameGraph {
 	friend class QFrameGraphBuilder;
 public:
-	void compile(IRenderer* renderer);
-	void render(QRhiCommandBuffer* cmdBuffer);
-	void resize(const QSize& size);
-	const QHash<QString, IRenderPassBase*>& getRenderPassMap() const { return mRenderPassMap; }
-protected:
 	void rebuildTopology();
+	QRhiTexture* getOutputTexture();
+	const QList<IRenderPassBase*>& getRenderPassTopology() const { return mRenderPassTopology; }
+	const QHash<QString, IRenderPassBase*>& getRenderPassMap() const { return mRenderPassMap; }
 private:
 	QHash<IRenderPassBase*, QList<IRenderPassBase*>> mDependMap;
 	QHash<QString, IRenderPassBase*> mRenderPassMap;
 	QList<IRenderPassBase*> mRenderPassTopology;
+	QPair<QString, int> mOutput;
 };
 
 class QFrameGraphBuilder {
 public:
 	static QFrameGraphBuilder* begin();
 	QFrameGraphBuilder* addPass(const QString& inName, IRenderPassBase* inRenderPass);
-	QSharedPointer<QFrameGraph> end();
+	QSharedPointer<QFrameGraph> end(const QString& outPass, const int& outPassSlot);
 private:
 	QFrameGraphBuilder();
 	QSharedPointer<QFrameGraph> mFrameGraph;

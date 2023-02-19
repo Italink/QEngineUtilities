@@ -51,6 +51,7 @@ void QDetailView::Redo() {
 
 void QDetailView::ForceRebuild() {
 	Reset();
+	mObjects.removeAll(nullptr);
 	for(auto& object:mObjects){
 		mLayoutBuilder->AddObject(object);
 	}
@@ -87,6 +88,7 @@ void QDetailView::RefreshRowsState() {
 	RefreshRowsSplitter();
 ;	for (auto Row : mTopLevelRows) {
 		Row->Refresh();
+		Row->SetExpanded(true);
 	}
 }
 

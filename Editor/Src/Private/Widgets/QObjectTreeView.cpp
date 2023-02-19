@@ -1,7 +1,7 @@
 #include "Widgets/QObjectTreeView.h"
 #include "QPainter"
 #include "qcoreevent.h"
-#include "Undo\QDetailUndoStack.h"
+#include "Undo\QEngineUndoStack.h"
 #include "QEngineEditorStyleManager.h"
 #include "DetailView/QPropertyHandle.h"
 
@@ -19,6 +19,23 @@ QObjectTreeView::QObjectTreeView() {
 void QObjectTreeView::SetObjects(QObjectList InObjects) {
 	mTopLevelObjects = InObjects;
 	ForceRefresh();
+}
+
+void QObjectTreeView::SelectObjects(QObjectList InObjects) {
+	this->blockSignals(true);
+	this->clearSelection();
+	for (auto object : InObjects) {
+		QTreeWidgetItem* item = mItemMap.key(object,nullptr);
+		if (item) {
+			QTreeWidgetItem* parent = item->parent();
+			while (parent && !parent->isExpanded()) {
+				parent->setExpanded(true);
+				parent = item->parent();
+			}
+			item->setSelected(true);
+		}
+	}
+	this->blockSignals(false);
 }
 
 void QObjectTreeView::drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const {
@@ -116,6 +133,7 @@ QTreeWidgetItem* QObjectTreeView::CreateItemForInstance(QObject* InInstance) {
 
 void QObjectTreeView::ForceRefresh() {
 	clear();
+	mItemMap.clear();
 	if (mTopLevelObjects.isEmpty())
 		return;
 	for (auto& instance : mTopLevelObjects) {
@@ -141,7 +159,7 @@ bool QObjectTreeView::eventFilter(QObject* object, QEvent* event) {
 bool QObjectTreeView::IsIgnoreObject(QObject* inObject) {
 	return inObject == nullptr
 		|| inObject->metaObject()->inherits(&QPropertyHandle::staticMetaObject)
-		|| inObject->metaObject()->inherits(&QDetailUndoEntry::staticMetaObject)
-		|| inObject->metaObject()->inherits(&QDetailUndoStack::staticMetaObject)
+		|| inObject->metaObject()->inherits(&QEngineUndoEntry::staticMetaObject)
+		|| inObject->metaObject()->inherits(&QEngineUndoStack::staticMetaObject)
 		;
 }

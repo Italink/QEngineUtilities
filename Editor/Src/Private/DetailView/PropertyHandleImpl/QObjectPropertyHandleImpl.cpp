@@ -50,6 +50,10 @@ void QObjectPropertyHandleImpl::RefreshObjectPtr() {
 	}
 }
 
+QPropertyHandle* QObjectPropertyHandleImpl::FindChildHandle(const QString& inSubName) {
+	return QPropertyHandle::Find(mHandle->parent(), inSubName);
+}
+
 QWidget* QObjectPropertyHandleImpl::GenerateValueWidget() {
 	return IPropertyHandleImpl::GenerateValueWidget();
 }
@@ -75,7 +79,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 				handle = new QPropertyHandle(
 					mOwnerObject,
 					prop.metaType(),
-					mHandle->GetSubPath(inSubName),
+					inSubName,
 					[this, prop]() {
 						return prop.read(mOwnerObject);
 					},
@@ -89,7 +93,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 				handle = new QPropertyHandle(
 					mOwnerObject,
 					prop.metaType(),
-					mHandle->GetSubPath(inSubName),
+					inSubName,
 					[this, prop]() {
 					return prop.readOnGadget(mObjectPtr);
 				},

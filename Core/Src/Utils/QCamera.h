@@ -4,7 +4,7 @@
 #include <QWindow>
 #include "QQuaternion"
 #include "QMatrix4x4"
-#include "RHI\QRhiEx.h"
+#include "Render/RHI/QRhiEx.h"
 
 class QCamera :public QObject {
 	Q_OBJECT
@@ -20,13 +20,17 @@ public:
 	float getPitch();
 	float getRoll();
 
+	QVector3D getPosition();
 	void setPosition(const QVector3D& newPosition);
+
 	void setRotation(const QVector3D& newRotation);
-	QVector3D getPosition() ;
 	QVector3D getRotation();
+
 	float getRotationSpeed() const { return mRotationSpeed; }
 	void setRotationSpeed(float val) { mRotationSpeed = val; }
-	float getMoveSpeed() const { return mMoveSpeed; }
+
+	float getMoveSpeed() const{ return mMoveSpeed; }
+	float& getMoveSpeedRef() { return mMoveSpeed; }
 	void setMoveSpeed(float val) { mMoveSpeed = val; }
 
 	void setAspectRatio(float val);

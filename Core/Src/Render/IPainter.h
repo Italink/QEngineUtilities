@@ -1,7 +1,7 @@
 #ifndef IPainter_h__
 #define IPainter_h__
 
-#include "RHI/QRhiEx.h"	
+#include "Render/RHI/QRhiEx.h"	
 
 class IPainter {
 public:

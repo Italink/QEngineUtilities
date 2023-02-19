@@ -9,5 +9,7 @@
         <file>Resources/plus.png</file>
         <file>Resources/expand.png</file>
         <file>Resources/unexpand.png</file>
+        <file>Resources/DroidSans.ttf</file>
+        <file>Resources/DroidSans-Bold.ttf</file>
     </qresource>
 </RCC>

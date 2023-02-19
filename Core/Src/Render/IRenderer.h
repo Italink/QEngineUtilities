@@ -2,20 +2,23 @@
 #define IRenderer_h__
 
 #include "QFrameGraph.h"
-#include "RHI/QRhiEx.h"
+#include "Render/RHI/QRhiEx.h"
 #include "Utils/QCamera.h"
 
+class TexturePainter;
+class IRenderComponent;
 
 class IRenderer: public QObject {
 	Q_OBJECT
 	Q_PROPERTY(QCamera* Camera READ getCamera WRITE setCamera)
 public:
 	IRenderer(QSharedPointer<QRhiEx> inRhi,const QSize& inFrameSize);
+	~IRenderer(){}
 	void requestComplie();
+
 	virtual QRhiRenderTarget* renderTaget() = 0;
-	virtual QRhiRenderPassDescriptor* renderPassDescriptor() { return renderTaget()->renderPassDescriptor();}
+	virtual QRhiRenderPassDescriptor* renderPassDescriptor() { return renderTaget()->renderPassDescriptor(); }
 	virtual int sampleCount() = 0;
-	virtual void resize(const QSize& size);
 
 	void setCamera(QCamera* inCamera);
 	void setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph);
@@ -26,16 +29,23 @@ public:
 	IRenderPassBase* getRenderPassByName(const QString& inName);
 	QSharedPointer<QRhiEx> getRhi() { return mRhi; }
 	QObject* getCurrentObject() const { return mCurrentObject; }
+	IRenderComponent* getComponentById(uint32_t inId);
+	QFrameGraph* getFrameGarph() const { return mFrameGraph.get(); }
 Q_SIGNALS:
 	void asCurrentObjectChanged(QObject*);
 protected:
-	void complie();
+	virtual QRhiCommandBuffer* commandBuffer() = 0;
+	virtual void compile();
 	virtual void render();
+	virtual void resize(const QSize& size);
+	virtual void refreshOutputTexture();
 protected:
+	QSize mFrameSize;
 	QSharedPointer<QRhiEx> mRhi;
 	QSharedPointer<QFrameGraph> mFrameGraph;
-	QCamera* mCamera;
-	QSize mFrameSize;
+	QSharedPointer<TexturePainter> mOutputPainter;
+	QRhiTexture* mOverrideOutputTexture = nullptr;
+	QCamera* mCamera = nullptr;
 	bool bRequestCompile = false;
 	QObject* mCurrentObject = nullptr;
 };

@@ -1,7 +1,7 @@
 ﻿#ifndef IRenderPassBase_h__
 #define IRenderPassBase_h__
 
-#include "RHI/QRhiEx.h"
+#include "Render/RHI/QRhiEx.h"
 #include "IRenderer.h"
 #include "IRenderComponent.h"
 #include "Utils/QMetaData.h"
@@ -9,7 +9,7 @@
 struct TextureLinker {
 	TextureLinker(IRenderPassBase* pass) :mRenderPass(pass) {};
 	QRhiTexture* getInputTexture(int slot) const;
-	void setOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const;
+	void registerOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const;
 private:
 	IRenderPassBase* mRenderPass = nullptr;
 };
@@ -22,13 +22,13 @@ struct InputTextureLinkInfo {
 
 class IRenderPassBase: public QObject{
 	friend class QFrameGraph;
-	friend class TextureLinker;
+	friend struct TextureLinker;
 public:
 	virtual void setRenderer(IRenderer* inRenderer);
 
 	IRenderer* getRenderer() const { return mRenderer; }
 
-	virtual void compile() = 0;
+	virtual void compile() {};
 
 	virtual void resizeAndLink(const QSize& size, const TextureLinker& linker) {}
 
@@ -36,24 +36,28 @@ public:
 
 	virtual QRhiTexture* getOutputTexture(int slot = 0);
 
-	const QHash<int, QRhiTexture*>& getOutputTextures();
+	const QMap<int, QRhiTexture*>& getOutputTextures();
 
 	IRenderPassBase* setupInputTexture(int inInputSlot, const QString& inPassName, int inPassSlot);
 
 	QStringList getDependentRenderPassNames();
 
+	const QMap<int, InputTextureLinkInfo>& getInputTextureLinks() { return mInputTextureLinks; }
+
 	void cleanupInputLinkerCache();
 protected:
 	IRenderer* mRenderer = nullptr;
 	QSharedPointer<QRhiEx> mRhi;
-	QHash<int, InputTextureLinkInfo> mInputTextureLinks;
-	QHash<int, QRhiTexture*> mOutputTextures;
+	QMap<int, InputTextureLinkInfo> mInputTextureLinks;
+	QMap<int, QRhiTexture*> mOutputTextures;
 };
 
 class ISceneRenderPass :public IRenderPassBase {
 	Q_OBJECT
 public:
-	virtual int getSampleCount() = 0;
+	void setSampleCount(int inSampleCount) { mSampleCount = inSampleCount;}
+	int getSampleCount() { return mSampleCount; }
+
 	virtual QList<QPair<QRhiTexture::Format, QString>> getRenderTargetSlots() {
 		return { {QRhiTexture::RGBA8,"BaseColor"} };
 	};
@@ -64,6 +68,7 @@ public:
 	ISceneRenderPass* addRenderComponent(IRenderComponent* inRenderComponent);
 protected:
 	QVector<IRenderComponent*> mRenderComponents;
+	int mSampleCount = 1;
 };
 
 #endif // IRenderPassBase_h__

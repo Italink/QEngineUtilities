@@ -48,7 +48,7 @@ static inline float sign(float v)
 static ImVec2 GetInputSlotPos(Delegate& delegate, const Node& node, SlotIndex slotIndex, float factor)
 {
     ImVec2 Size = node.mRect.GetSize() * factor;
-    size_t InputsCount = delegate.GetTemplate(node.mTemplateIndex).mInputCount;
+    size_t InputsCount = delegate.GetTemplate(node.mTemplateIndex).mInputNames.size();
     return ImVec2(node.mRect.Min.x * factor,
                   node.mRect.Min.y * factor + Size.y * ((float)slotIndex + 1) / ((float)InputsCount + 1) + 8.f);
 }
@@ -56,7 +56,7 @@ static ImVec2 GetInputSlotPos(Delegate& delegate, const Node& node, SlotIndex sl
 static ImVec2 GetOutputSlotPos(Delegate& delegate, const Node& node, SlotIndex slotIndex, float factor)
 {
     ImVec2 Size = node.mRect.GetSize() * factor;
-    size_t OutputsCount = delegate.GetTemplate(node.mTemplateIndex).mOutputCount;
+    size_t OutputsCount = delegate.GetTemplate(node.mTemplateIndex).mOutputNames.size();
     return ImVec2(node.mRect.Min.x * factor + Size.x,
                   node.mRect.Min.y * factor + Size.y * ((float)slotIndex + 1) / ((float)OutputsCount + 1) + 8.f);
 }
@@ -364,8 +364,8 @@ static bool HandleConnections(ImDrawList* drawList,
     const auto nodeTemplate = delegate.GetTemplate(node.mTemplateIndex);
     const auto linkCount = delegate.GetLinkCount();
 
-    size_t InputsCount = nodeTemplate.mInputCount;
-    size_t OutputsCount = nodeTemplate.mOutputCount;
+    size_t InputsCount = nodeTemplate.mInputNames.size();
+    size_t OutputsCount = nodeTemplate.mOutputNames.size();
     inputSlotOver = -1;
     outputSlotOver = -1;
 
@@ -381,8 +381,7 @@ static bool HandleConnections(ImDrawList* drawList,
         
         for (SlotIndex slotIndex = 0; slotIndex < slotCount[i]; slotIndex++)
         {
-            const char** con = i ? nodeTemplate.mOutputNames : nodeTemplate.mInputNames;
-            const char* conText = (con && con[slotIndex]) ? con[slotIndex] : "";
+            const char* conText = i ? nodeTemplate.mOutputNames[slotIndex].data() : nodeTemplate.mInputNames[slotIndex].data();
 
             ImVec2 p =
                 offset + (i ? GetOutputSlotPos(delegate, node, slotIndex, factor) : GetInputSlotPos(delegate, node, slotIndex, factor));
@@ -431,8 +430,7 @@ static bool HandleConnections(ImDrawList* drawList,
 
         if (closestConn != -1)
         {
-            const char** con = i ? nodeTemplate.mOutputNames : nodeTemplate.mInputNames;
-            const char* conText = (con && con[closestConn]) ? con[closestConn] : "";
+            const char* conText = i ? nodeTemplate.mOutputNames[closestConn].data() : nodeTemplate.mInputNames[closestConn].data();
             const ImU32* slotColorSource = i ? nodeTemplate.mOutputColors : nodeTemplate.mInputColors;
             const ImU32 slotColor = slotColorSource ? slotColorSource[closestConn] : options.mDefaultSlotColor;
             hoverSlot = true;
@@ -553,8 +551,8 @@ static bool DrawNode(ImDrawList* drawList,
 
     // test nested IO
     drawList->ChannelsSetCurrent(1); // Background
-    const size_t InputsCount = nodeTemplate.mInputCount;
-    const size_t OutputsCount = nodeTemplate.mOutputCount;
+    const size_t InputsCount = nodeTemplate.mInputNames.size();
+    const size_t OutputsCount = nodeTemplate.mOutputNames.size();
 
     /*
     for (int i = 0; i < 2; i++)
@@ -673,7 +671,7 @@ static bool DrawNode(ImDrawList* drawList,
                             nodeTemplate.mHeaderColor, options.mRounding);
 
     drawList->PushClipRect(nodeRectangleMin, ImVec2(nodeRectangleMax.x, nodeRectangleMin.y + 20), true);
-    drawList->AddText(nodeRectangleMin + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName);
+    drawList->AddText(nodeRectangleMin + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName.data());
     drawList->PopClipRect();
 
     ImRect customDrawRect(nodeRectangleMin + ImVec2(options.mRounding, 20 + options.mRounding), nodeRectangleMax - ImVec2(options.mRounding, options.mRounding));
@@ -997,7 +995,7 @@ void Show(Delegate& delegate, const Options& options, ViewState& viewState, bool
         // releasing mouse button means it's done in any operation
         if (nodeOperation == NO_PanView)
         {
-            if (!io.MouseDown[2])
+            if (!io.MouseDown[0])
             {
                 nodeOperation = NO_None;
             }
@@ -1005,6 +1003,7 @@ void Show(Delegate& delegate, const Options& options, ViewState& viewState, bool
         else if (nodeOperation != NO_None && !io.MouseDown[0])
         {
             nodeOperation = NO_None;
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
         }
 
         // right click
@@ -1015,14 +1014,20 @@ void Show(Delegate& delegate, const Options& options, ViewState& viewState, bool
         }
 
         // Scrolling
-        if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && io.MouseClicked[2] && nodeOperation == NO_None)
+        if (ImGui::IsWindowHovered() && io.MouseDown[0])
         {
             nodeOperation = NO_PanView;
+
         }
         if (nodeOperation == NO_PanView)
         {
             viewState.mPosition += io.MouseDelta / viewState.mFactor;
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         }
+        else {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+        }
+        
     }
 
     ImGui::PopClipRect();

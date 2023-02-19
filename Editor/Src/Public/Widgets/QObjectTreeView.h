@@ -8,6 +8,7 @@ class QObjectTreeView : public QTreeWidget {
 public:
 	QObjectTreeView();
 	void SetObjects(QObjectList InObjects);
+	void SelectObjects(QObjectList InObjects);
 protected:
 	void drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const override;
 	void AddItemInternal(QTreeWidgetItem* inParentItem, QObject* inParentInstance);

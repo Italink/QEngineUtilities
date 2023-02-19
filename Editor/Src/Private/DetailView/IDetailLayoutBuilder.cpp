@@ -6,6 +6,20 @@
 #include "QMetaProperty"
 #include "Widgets/QElideLabel.h"
 
+class HeaderRowBuilder: public IHeaderRowBuilder{
+public:
+	HeaderRowBuilder(QDetailViewRow* inRow): mHeaderRow(inRow){}
+	void AsNameValueWidget(QWidget* InName, QWidget* InValue) override {
+		mHeaderRow->SetupNameValueWidget(InName, InValue);
+	}
+	void AsWholeContent(QWidget* InContent) override {
+		mHeaderRow->SetupContentWidget(InContent);
+	}
+protected:
+	QDetailViewRow* mHeaderRow;
+};
+
+
 IDetailLayoutBuilder::IDetailLayoutBuilder(QDetailView* InDetailView)
 	: mDetailView(InDetailView)
 {
@@ -38,7 +52,8 @@ void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
 		customizationInstance = QDetailViewManager::Instance()->GetCustomPropertyType(InPropertyHandle->GetType());
 	}
 	if (!customizationInstance.isNull()) {
-		customizationInstance->CustomizeHeader(InPropertyHandle, nullptr);
+		HeaderRowBuilder headerBuilder(row);
+		customizationInstance->CustomizeHeader(InPropertyHandle, &headerBuilder);
 		customizationInstance->CustomizeChildren(InPropertyHandle, rowBuilder.get());
 		mPropertyTypeCustomizationMap.insert(InPropertyHandle, customizationInstance);
 	}

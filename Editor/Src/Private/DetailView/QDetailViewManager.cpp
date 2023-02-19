@@ -1,5 +1,4 @@
 #include "DetailView/QDetailViewManager.h"
-#include "DetailView/Customization/QDetailCustomization_Object.h"
 #include <QObject>
 #include <QCheckBox>
 #include <QComboBox>
@@ -11,6 +10,13 @@
 #include "Widgets/QVectorBox.h"
 #include "Utils/QColor4D.h"
 #include "Widgets/QColor4DButton.hpp"
+#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Customization/DetailCustomization_QRhiGraphicsPipelineBuilder.h"
+#include "Customization/DetailCustomization_QObject.h"
+#include "Customization/DetailCustomization_QRhiUniformBlock.h"
+#include "Customization/PropertyTypeCustomization_TextureInfo.h"
+#include "Customization/PropertyTypeCustomization_QMatrix4x4.h"
+#include "Widgets/QImageBox.h"
 
 QDetailViewManager* QDetailViewManager::Instance()
 {
@@ -124,7 +130,16 @@ QDetailViewManager::QDetailViewManager()
 		});
 
 void QDetailViewManager::RegisterBuildIn() {
-	RegisterCustomClassLayout<QDetailCustomization_Object>(&QObject::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QRhiGraphicsPipelineBuilder>(&QRhiGraphicsPipelineBuilder::staticMetaObject);
+
+	RegisterCustomPropertyTypeLayout<QRhiGraphicsPipelineBuilder::TextureInfo*, PropertyTypeCustomization_TextureInfo>();
+	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
+
+	qRegisterMetaType<QRhiGraphicsPipelineBuilder::TextureInfo>();
+
+
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;
 		InHandler->Bind(checkBox, &QCheckBox::stateChanged,
@@ -136,6 +151,19 @@ void QDetailViewManager::RegisterBuildIn() {
 		}
 		);
 		return checkBox;
+	});
+
+	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QImage>(), [](QPropertyHandle* InHandler) {
+		QImageBox* imageBox = new QImageBox;
+		InHandler->Bind(imageBox, &QImageBox::AsImageChanged,
+			[imageBox]() {
+			return imageBox->GetImage();
+		},
+			[imageBox](QVariant var) {
+			imageBox->SetImage(var.value<QImage>());
+		}
+		);
+		return imageBox;
 	});
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor>(), [](QPropertyHandle* InHandler) {

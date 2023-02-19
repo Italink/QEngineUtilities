@@ -132,10 +132,11 @@ void embraceTheDarkness() {
 
 ImGuiPainter::ImGuiPainter()
 {
+	ImGui::SetCurrentContext(nullptr);
 	mImGuiContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(mImGuiContext);
 
-	//embraceTheDarkness();
+	embraceTheDarkness();
 	ImGuiIO& io = ImGui::GetIO();
 
 	//io.Fonts->AddFontFromFileTTF(R"(E:\ModernGraphicsEngineGuide\Source\QEngineUtilities\Editor\Resources\DroidSans.ttf)", 16);
@@ -163,9 +164,9 @@ void ImGuiPainter::setupWindow(QWindow* window)
 	mWindow->installEventFilter(this);
 }
 
-
-
 void ImGuiPainter::compile() {
+	if (!mWindow)
+		return;
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::VertexBuffer, sizeof(ImDrawVert) * IMGUI_VERTEX_BUFFER_SIZE));
 	mVertexBuffer->create();
 
@@ -252,6 +253,8 @@ void main(){
 }
 
 void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
+	if (!mWindow)
+		return;
 	ImGui::SetCurrentContext(mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
 	QSize size = mWindow->size() * mWindow->devicePixelRatio();
@@ -289,14 +292,13 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 	else {
 		const auto cursor_it = cursorMap.constFind(imgui_cursor);
 		if (cursor_it != cursorMap.constEnd()) {
-			const Qt::CursorShape qt_cursor_shape = *(cursor_it);
-			mWindow->setCursor(qt_cursor_shape);
+			const Qt::CursorShape shape = *(cursor_it);
+			mWindow->setCursor(shape);
 		}
 		else {
 			mWindow->setCursor(Qt::CursorShape::ArrowCursor);
 		}
 	}
-	ImGui::SetCurrentContext(mImGuiContext);
 	ImGui::NewFrame();
 	if (mPaintFunctor)
 		mPaintFunctor();
@@ -325,6 +327,8 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 }
 
 void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {
+	if (!mWindow)
+		return;
 	ImDrawData* draw_data = ImGui::GetDrawData();
 	if (!draw_data)
 		return;
@@ -378,9 +382,9 @@ bool ImGuiPainter::eventFilter(QObject* watched, QEvent* event)
 		case QEvent::MouseButtonPress:
 		case QEvent::MouseButtonRelease: {
 			QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-			mMousePressed[0] = mouseEvent->buttons() & Qt::LeftButton;
-			mMousePressed[1] = mouseEvent->buttons() & Qt::RightButton;
-			mMousePressed[2] = mouseEvent->buttons() & Qt::MiddleButton;
+			mMousePressed[ImGuiMouseButton_Left] = mouseEvent->buttons() & Qt::LeftButton;
+			mMousePressed[ImGuiMouseButton_Right] = mouseEvent->buttons() & Qt::RightButton;
+			mMousePressed[ImGuiMouseButton_Middle] = mouseEvent->buttons() & Qt::MiddleButton;
 			break;
 		}
 		case QEvent::Wheel: {

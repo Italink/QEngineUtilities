@@ -1,30 +1,14 @@
 ﻿#include "QFrameGraph.h"
 #include "IRenderer.h"
 #include "IRenderPass.h"
-void QFrameGraph::compile(IRenderer* renderer) {
-	rebuildTopology();
-	for (auto& renderPass : mRenderPassTopology) {
-		renderPass->setRenderer(renderer);
-		TextureLinker linker(renderPass);
-		renderPass->resizeAndLink(renderer->renderTaget()->pixelSize(), linker);
-		renderPass->compile();
-	}
-}
 
-void QFrameGraph::render(QRhiCommandBuffer* cmdBuffer) {
-	for (auto& renderPass : mRenderPassTopology) {
-		renderPass->render(cmdBuffer);
+QRhiTexture* QFrameGraph::getOutputTexture() {
+	if (IRenderPassBase* pass = mRenderPassMap.value(mOutput.first)) {
+		if (QRhiTexture* texture = pass->getOutputTexture(mOutput.second)) {
+			return texture;
+		}
 	}
-}
-
-void QFrameGraph::resize(const QSize& size){
-	for (auto& renderPass : mRenderPassTopology) {
-		renderPass->cleanupInputLinkerCache();
-	}
-	for (auto& renderPass : mRenderPassTopology) {
-		TextureLinker linker(renderPass);
-		renderPass->resizeAndLink(size, linker);
-	}
+	return nullptr;
 }
 
 void QFrameGraph::rebuildTopology() {
@@ -65,8 +49,9 @@ QFrameGraphBuilder* QFrameGraphBuilder::addPass(const QString& inName, IRenderPa
 	return this;
 }
 
-QSharedPointer<QFrameGraph> QFrameGraphBuilder::end() {
+QSharedPointer<QFrameGraph> QFrameGraphBuilder::end(const QString& outPass, const int& outPassSlot) {
 	QSharedPointer<QFrameGraph> frameGraph = mFrameGraph;
+	frameGraph->mOutput = { outPass,outPassSlot };
 	delete this;
 	return frameGraph;
 }

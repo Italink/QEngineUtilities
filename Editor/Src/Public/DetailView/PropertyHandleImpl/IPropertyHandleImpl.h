@@ -9,6 +9,7 @@ protected:
 	IPropertyHandleImpl(QPropertyHandle* InHandle){
 		mHandle = InHandle;
 	}
+	virtual QPropertyHandle* FindChildHandle(const QString& inSubName);
 	virtual QPropertyHandle* CreateChildHandle(const QString& inSubName);
 	virtual QWidget* GenerateNameWidget();
 	virtual QWidget* GenerateValueWidget();

@@ -8,7 +8,7 @@
 
 class IPropertyHandleImpl;
 class QRowLayoutBuilder;
-class QDetailUndoEntry;
+class QEngineUndoEntry;
 class QHBoxLayout;
 
 class QPropertyHandle: public QObject{
@@ -22,14 +22,16 @@ public:
 
 	static QPropertyHandle* Find(const QObject* inParent, const QString& inPropertyPath);
 	static QPropertyHandle* FindOrCreate(QObject* inObject, const QString& inPropertyPath, const QVariantHash& InMetaData = QVariantHash());
+	static QPropertyHandle* FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
 
 	void SetValue(QVariant inValue,QString bIsPushUndoStackAndWithDesc = QString());
 	QVariant GetValue();
 	void ResetValue();
 
 	QMetaType GetType();
+	QString GetName();
 	QString GetPath();
-	QString GetSubPath(const QString& inSubName) const;
+	QString GetSubPath(const QString& inSubName);
 	QVariant GetMetaData(const QString& Hash) const;
 	const QVariantHash& GetMetaData() const;
 	bool IsChanged() const { return mIsChanged; }
@@ -57,7 +59,7 @@ public:
 	}
 	void RefreshBinder();
 
-	QDetailUndoEntry* GetUndoEntry() const { return mUndoEntry; }
+	QEngineUndoEntry* GetUndoEntry() const { return mUndoEntry; }
 
 	static QVariant CreateNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
 
@@ -70,13 +72,12 @@ protected:
 	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
 	QScopedPointer<IPropertyHandleImpl> mImpl;
 	QMetaType mType;
-	QString mPropertyPath;
 	Getter mGetter;
 	Setter mSetter;
 	QVariant mInitialValue;
 	bool mIsChanged = false;
 	QVariantHash mMetaData;
-	QDetailUndoEntry* mUndoEntry = nullptr;
+	QEngineUndoEntry* mUndoEntry = nullptr;
 	QMap<QObject*, QPropertyBinder> mBinderMap;
 	std::function<void(QHBoxLayout*)> mAttachButtonWidgetCallback;
 };

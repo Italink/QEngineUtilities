@@ -74,9 +74,11 @@ void main() {
 }
 
 void TexturePainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {
-	cmdBuffer->setGraphicsPipeline(mPipeline.get());
-	cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
-	cmdBuffer->setShaderResources(mBindings.get());
-	cmdBuffer->draw(4);
+	if (mTexture) {
+		cmdBuffer->setGraphicsPipeline(mPipeline.get());
+		cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
+		cmdBuffer->setShaderResources(mBindings.get());
+		cmdBuffer->draw(4);
+	}
 }
 

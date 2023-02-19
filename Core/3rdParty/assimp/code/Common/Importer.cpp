@@ -810,7 +810,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags) {
 
     // In debug builds: run basic flag validation
     ai_assert(_ValidateFlags(pFlags));
-    ASSIMP_LOG_INFO("Entering post processing pipeline");
+    ASSIMP_LOG_INFO("Entering post processing mPipeline");
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
     // The ValidateDS process plays an exceptional role. It isn't contained in the global
@@ -884,7 +884,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags) {
 
     // clear any data allocated by post-process steps
     pimpl->mPPShared->Clean();
-    ASSIMP_LOG_INFO("Leaving post processing pipeline");
+    ASSIMP_LOG_INFO("Leaving post processing mPipeline");
 
     ASSIMP_END_EXCEPTION_REGION(const aiScene*);
 
@@ -908,7 +908,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     }
 
     // In debug builds: run basic flag validation
-    ASSIMP_LOG_INFO( "Entering customized post processing pipeline" );
+    ASSIMP_LOG_INFO( "Entering customized post processing mPipeline" );
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
     // The ValidateDS process plays an exceptional role. It isn't contained in the global
@@ -960,7 +960,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
 
     // clear any data allocated by post-process steps
     pimpl->mPPShared->Clean();
-    ASSIMP_LOG_INFO( "Leaving customized post processing pipeline" );
+    ASSIMP_LOG_INFO( "Leaving customized post processing mPipeline" );
 
     ASSIMP_END_EXCEPTION_REGION( const aiScene* );
 
