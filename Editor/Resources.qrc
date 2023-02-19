@@ -11,5 +11,13 @@
         <file>Resources/unexpand.png</file>
         <file>Resources/DroidSans.ttf</file>
         <file>Resources/DroidSans-Bold.ttf</file>
+        <file>Resources/rotate.png</file>
+        <file>Resources/scale.png</file>
+        <file>Resources/translate.png</file>
+        <file>Resources/camera.png</file>
+        <file>Resources/stats.png</file>
+        <file>Resources/polygon.png</file>
+        <file>Resources/mouse-arrow.png</file>
+        <file>Resources/graph.png</file>
     </qresource>
 </RCC>

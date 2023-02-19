@@ -595,7 +595,7 @@ static bool DrawNode(ImDrawList* drawList,
     {
         nodeHovered = true;
     }
-
+    int currentSlotIndex = -1;
     if (ImGui::IsWindowFocused())
     {
         if ((nodeWidgetsActive || nodeMovingActive) && !inMinimap)
@@ -612,6 +612,12 @@ static bool DrawNode(ImDrawList* drawList,
                 }
                 delegate.SelectNode(nodeIndex, true);
             }
+            if (node.mSelected) {
+				if (io.MouseClicked[0]) {
+                    currentSlotIndex = (io.MousePos - nodeRectangleMin).y / nodeSize.x;
+					delegate.SelectNode(nodeIndex, true, currentSlotIndex);
+				}
+            }
         }
     }
     if (nodeMovingActive && io.MouseDown[0] && nodeHovered && !inMinimap)
@@ -625,7 +631,7 @@ static bool DrawNode(ImDrawList* drawList,
     const bool currentSelectedNode = node.mSelected;
     const ImU32 node_bg_color = nodeHovered ? nodeTemplate.mBackgroundColorOver : nodeTemplate.mBackgroundColor;
 
-    drawList->AddRect(nodeRectangleMin,
+    drawList->AddRect(ImVec2(nodeRectangleMin.x,nodeRectangleMin.y - options.mNodeTitleHeight) ,
                       nodeRectangleMax,
                       currentSelectedNode ? options.mSelectedNodeBorderColor : options.mNodeBorderColor,
                       options.mRounding,
@@ -666,15 +672,17 @@ static bool DrawNode(ImDrawList* drawList,
 
     //delegate->DrawNodeImage(drawList, ImRect(imgPos, imgPosMax), marge, nodeIndex);
 
-    drawList->AddRectFilled(nodeRectangleMin,
-                            ImVec2(nodeRectangleMax.x, nodeRectangleMin.y + 20),
+    ImRect titleRect(ImVec2(nodeRectangleMin.x, nodeRectangleMin.y - options.mNodeTitleHeight), ImVec2(nodeRectangleMax.x, nodeRectangleMin.y));
+
+    drawList->AddRectFilled(titleRect.Min,
+                            titleRect.Max,
                             nodeTemplate.mHeaderColor, options.mRounding);
 
-    drawList->PushClipRect(nodeRectangleMin, ImVec2(nodeRectangleMax.x, nodeRectangleMin.y + 20), true);
-    drawList->AddText(nodeRectangleMin + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName.data());
+    drawList->PushClipRect(titleRect.Min,titleRect.Max, true);
+    drawList->AddText(titleRect.Min + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName.data());
     drawList->PopClipRect();
 
-    ImRect customDrawRect(nodeRectangleMin + ImVec2(options.mRounding, 20 + options.mRounding), nodeRectangleMax - ImVec2(options.mRounding, options.mRounding));
+    ImRect customDrawRect(nodeRectangleMin,nodeRectangleMax);
     if (customDrawRect.Max.y > customDrawRect.Min.y && customDrawRect.Max.x > customDrawRect.Min.x)
     {
         delegate.CustomDraw(drawList, customDrawRect, nodeIndex);
@@ -928,7 +936,7 @@ void Show(Delegate& delegate, const Options& options, ViewState& viewState, bool
                 bool overInput = (!inMinimap) && HandleConnections(drawList, nodeIndex, offset, viewState.mFactor, delegate, options, false, inputSlot, outputSlot, inMinimap);
 
                 // shadow
-                /*
+                
                 ImVec2 shadowOffset = ImVec2(30, 30);
                 ImVec2 shadowPivot = (nodeRect.Min + nodeRect.Max) /2.f;
                 ImVec2 shadowPointMiddle = shadowPivot + shadowOffset;
@@ -948,7 +956,7 @@ void Show(Delegate& delegate, const Options& options, ViewState& viewState, bool
 
                 // bottom right
                 drawList->AddRectFilledMultiColor(shadowPointMiddle, nodeRect.Max + shadowOffset, IM_COL32(0, 0, 0, 255), IM_COL32(0 ,0, 0, 0), IM_COL32(0,0,0,0), IM_COL32(0, 0, 0, 0));
-                */
+                
                 if (DrawNode(drawList, nodeIndex, offset, viewState.mFactor, delegate, overInput, options, inMinimap, regionRect))
                 {
                     hoveredNode = nodeIndex;

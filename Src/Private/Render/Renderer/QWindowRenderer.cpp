@@ -2,7 +2,7 @@
 #include "Render/RHI/QRhiWindow.h"
 
 #ifdef QENGINE_WITH_EDITOR
-#include "DebugDraw/DebugUiPainter.h"
+#include "Render/Painter/DebugUiPainter.h"
 #endif // QENGINE_WITH_EDITOR
 
 QWindowRenderer::QWindowRenderer(QRhiWindow* inWindow)
@@ -14,7 +14,7 @@ QWindowRenderer::QWindowRenderer(QRhiWindow* inWindow)
 {
 }
 
-QWindow* QWindowRenderer::getWindow() const {
+QRhiWindow* QWindowRenderer::getWindow() const {
 	return mWindow;
 }
 
@@ -56,6 +56,24 @@ int QWindowRenderer::sampleCount()
 {
 	return mWindow->mSwapChain->sampleCount();
 }
+
+#ifdef QENGINE_WITH_EDITOR
+bool QWindowRenderer::TryOverrideOutputTexture(QRhiTexture* inTexture) {
+	if (inTexture != mOverrideOutputTexture) {
+		if (inTexture && inTexture->sampleCount() == sampleCount()) {
+			mOverrideOutputTexture = inTexture;
+			mOutputPainter->setupTexture(mOverrideOutputTexture);
+			mOutputPainter->compile();
+			return true;
+		}
+		else {
+			mOutputPainter->setupTexture(mFrameGraph->getOutputTexture());
+			mOutputPainter->compile();
+		}
+	}
+	return false;
+}
+#endif 
 
 void QWindowRenderer::refreshOutputTexture() 
 {

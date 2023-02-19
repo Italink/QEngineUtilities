@@ -43,13 +43,15 @@ void QRhiWindow::initializeInternal() {
 	mSwapChain->setFlags(mInitParams.swapChainFlags);
 	mSwapChainPassDesc.reset( mSwapChain->newCompatibleRenderPassDescriptor());
 	mSwapChain->setRenderPassDescriptor(mSwapChainPassDesc.get());
-	if (mInitParams.printFPS) {
-		mFrameCount = 0;
-		mFPSTimer.restart();
-	}
 	mSwapChain->createOrResize();
 	onInit();
 	mHasSwapChain = true;
+	if (mInitParams.enableStat) {
+		mCpuFrameTimer.start();
+		mRhi->addGpuFrameTimeCallback([this](float elapsedMs) {
+			mGpuFrameTime = elapsedMs;
+		});
+	}
 }
 
 void QRhiWindow::renderInternal() {
@@ -66,18 +68,15 @@ void QRhiWindow::renderInternal() {
 		mNewlyExposed = false;
 	}
 
-	// Start a new frame. This is where we block when too far ahead of
-	// GPU/present, and that's what throttles the thread to the refresh rate.
-	// (except for OpenGL where it happens either in endFrame or somewhere else
-	// depending on the GL implementation)
+	static int CpuFrameCounter = 0;
 	QRhi::FrameOpResult r = mRhi->beginFrame(mSwapChain.get(), mInitParams.beginFrameFlags);
 	if (r == QRhi::FrameOpSwapChainOutOfDate) {
 		resizeInternal();
 		if (!mHasSwapChain)
 			return;
-		if (mInitParams.printFPS) {
-			mFrameCount = 0;
-			mFPSTimer.restart();
+		if (mInitParams.enableStat) {
+			CpuFrameCounter = 0;
+			mCpuFrameTimer.restart();
 		}
 		r = mRhi->beginFrame(mSwapChain.get());
 	}
@@ -86,12 +85,17 @@ void QRhiWindow::renderInternal() {
 		return;
 	}
 
-	if (mInitParams.printFPS) {
-		mFrameCount += 1;
-		if (mFPSTimer.elapsed() > 1000) {
-			qDebug("ca. %d fps", mFrameCount);
-			mFPSTimer.restart();
-			mFrameCount = 0;
+	if (mInitParams.enableStat) {
+		static float TimeCounter = 0;
+		CpuFrameCounter += 1;
+		mCpuFrameTime = mCpuFrameTimer.elapsed();
+		TimeCounter += mCpuFrameTime;
+		mCpuFrameTimer.restart();
+
+		if (TimeCounter > 1000) {
+			mFps = CpuFrameCounter;
+			CpuFrameCounter = 0;
+			TimeCounter = 0;
 		}
 	}
 

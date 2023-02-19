@@ -94,9 +94,14 @@ void QSkyboxRenderComponent::onRebuildResource() {
 		layout(location = 0) in vec3 vPosition;
 		void main(){
 			BaseColor = texture(Skybox,vPosition);
-			DebugId = %1;
+			%1;
 		}
-		)").arg(DebugUtils::convertIdToVec4Code(getID()))
+		)")
+	#ifdef QENGINE_WITH_EDITOR	
+		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
+	#else
+		.arg("")
+	#endif
 		.toLocal8Bit()
 	);
 }

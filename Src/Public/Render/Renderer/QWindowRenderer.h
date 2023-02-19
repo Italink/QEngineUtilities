@@ -11,9 +11,12 @@ class QWindowRenderer : public IRenderer {
 public:
 	friend class QRenderWidget;
 	QWindowRenderer(QRhiWindow* inWindow);
-	QWindow* getWindow() const;
+	QRhiWindow* getWindow() const;
 	QRhiRenderTarget* renderTaget() override;
 	int sampleCount() override;
+#ifdef QENGINE_WITH_EDITOR
+	bool TryOverrideOutputTexture(QRhiTexture* inTexture);
+#endif 
 protected:
 	void render() override;
 	QRhiCommandBuffer* commandBuffer() override;
@@ -22,6 +25,7 @@ private:
 	QRhiWindow* mWindow;
 #ifdef QENGINE_WITH_EDITOR
 	QScopedPointer<QDebugUIPainter> mDebugUiPainter;
+	QRhiTexture* mOverrideOutputTexture = nullptr;
 #endif // QENGINE_WITH_EDITOR
 };
 

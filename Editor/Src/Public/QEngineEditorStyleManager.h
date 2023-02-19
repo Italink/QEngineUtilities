@@ -3,6 +3,7 @@
 
 #include "QObject"
 #include "QColor"
+#include "QFont"
 
 enum class QDetailWidgetStyle {
 	Qt,
@@ -10,15 +11,17 @@ enum class QDetailWidgetStyle {
 };
 
 class QEngineEditorStyleManager {
+	QEngineEditorStyleManager();
 private:
+	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Unreal;
 	QColor mGridLineColor;
 	QColor mShadowColor;
 	QColor mCategoryColor;
 	QColor mHoveredColor;
 	QColor mSelectedColor;
 	QColor mArrowColor;
-	QEngineEditorStyleManager();
-	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Unreal;
+	QString mFontFilePath = ":/Resources/DroidSans.ttf";
+	QFont mFont;
 	QByteArray mStyleSheet;
 public:
 	static QEngineEditorStyleManager* Instance();
@@ -44,6 +47,12 @@ public:
 
 	QColor GetSelectedColor() const { return mSelectedColor; }
 	void SetSelectedColor(QColor val) { mSelectedColor = val; }
+
+	QString GetFontFilePath() const { return mFontFilePath; }
+	void SetFontFilePath(QString val) { mFontFilePath = val; }
+
+	QFont GetFont() const { return mFont; }
+	void SetFont(QFont val) { mFont = val; }
 };
 
 #endif // QDetailWidgetStyleManager_h__

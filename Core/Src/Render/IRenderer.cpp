@@ -71,7 +71,7 @@ void IRenderer::resize(const QSize& size) {
 }
 
 void IRenderer::refreshOutputTexture() {
-	QRhiTexture* texture = mOverrideOutputTexture ? mOverrideOutputTexture : mFrameGraph->getOutputTexture();
+	QRhiTexture* texture = mFrameGraph->getOutputTexture();
 	mOutputPainter->setupSampleCount(sampleCount());
 	mOutputPainter->setupRenderPassDesc(renderTaget()->renderPassDescriptor());
 	mOutputPainter->setupTexture(texture);

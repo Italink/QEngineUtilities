@@ -1,10 +1,18 @@
-#include "DebugUiPainter.h"
+#ifdef QENGINE_WITH_EDITOR
+
+#include "Render/Painter/DebugUiPainter.h"
+#include "FrameGraphView.h"
+#include "Render/RHI/QRhiWindow.h"
+#include "Utils/ImGuiWidgets.h"
 
 void QDebugUIPainter::setupDebugIdTexture(QRhiTexture* texture) {
 	mDebugIdTexture = texture;
 }
 
-QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer) : mRenderer(inRenderer) {
+QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer) 
+	: mRenderer(inRenderer)
+	, mFrameGraphView(new FrameGraphView())
+{
 	mViewportBarFlags = ImGuiWindowFlags_NoTitleBar;
 	mViewportBarFlags |= ImGuiWindowFlags_NoScrollbar;
 	mViewportBarFlags |= ImGuiWindowFlags_NoMove;
@@ -15,52 +23,10 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer) : mRenderer(inRend
 	mViewportBarFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 	mViewportBarFlags |= ImGuiWindowFlags_UnsavedDocument;
 
-	mFrameGraphOption.mRenderGrid = true;
-	mFrameGraphOption.mDisplayLinksAsCurves = true;
-	mFrameGraphOption.mBackgroundColor = ImColor(0, 0, 0, 0);
-	mFrameGraphOption.mGridColor = ImColor(128, 128, 128, 128);
-	mFrameGraphOption.mGridColor2 = ImColor(128, 128, 128, 64);
-	//mFrameGraphOption.mQuadSelection = ImColor(0, 0, 0, 0);
-	//mFrameGraphOption.mQuadSelectionBorder = ImColor(0, 0, 0, 0);
-	//mFrameGraphOption.mFrameFocus = ImColor(0, 0, 0, 0);
-	mFrameGraphOption.mDefaultSlotColor = ImColor(15, 100, 200, 255);
-	mFrameGraphOption.mNodeSlotRadius = 10;
-	mFrameGraphOption.mRounding = 0;
-	mFrameGraphOption.mMinZoom = 0.1f;
-	mFrameGraphOption.mMaxZoom = 10.0f;;
 	setupPaintFunctor([this]() {
 		QCamera* camera = mRenderer->getCamera();
 		if (camera) {
 			auto& io = ImGui::GetIO();
-			const ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y));
-			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 40));
-			ImGui::Begin("ViewportBar", 0, mViewportBarFlags);
-			ImGui::Checkbox("LineMode", &bLineMode);
-			ImGui::SameLine(); ImGui::RadioButton("translate", (int*)&mOperation, ImGuizmo::OPERATION::TRANSLATE);
-			ImGui::SameLine(); ImGui::RadioButton("rotate", (int*)&mOperation, ImGuizmo::OPERATION::ROTATE);
-			ImGui::SameLine(); ImGui::RadioButton("scale", (int*)&mOperation, ImGuizmo::OPERATION::SCALE);
-			ImGui::SameLine(); ImGui::SliderFloat("camera speed", &camera->getMoveSpeedRef(), 0.01, 2);
-			ImGui::SameLine(); ImGui::Checkbox("FrameGraph", &bShowFrameGraph);
-			ImGui::End();
-
-			if (bLineMode) {
-				QRhiGraphicsPipelineBuilder::setPolygonModeOverride(QRhiGraphicsPipeline::Line);
-			}
-			else {
-				QRhiGraphicsPipelineBuilder::clearPolygonModeOverride();
-			}
-			if (bShowFrameGraph) {
-
-				ImGui::GetBackgroundDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(0, viewport->WorkSize.y - ImGui::GetFontSize()), ImColor(0, 255, 0, 255), QString("FPS: %1").arg("").toLocal8Bit().data());
-
-				ImGui::SetNextWindowPos(ImVec2(0, 40));
-				ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 40));
-
-				ImGui::Begin("Frame Graph", NULL, mViewportBarFlags);
-				GraphEditor::Show(mFrameGraphDelegate, mFrameGraphOption, mFrameGraphViewState, true, &mFitOnScreen);
-				ImGui::End();
-			}
 
 			QMatrix4x4 View = camera->getMatrixView();
 			QMatrix4x4 Clip = camera->getMatrixClip();
@@ -80,6 +46,80 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer) : mRenderer(inRend
 				if (QPropertyHandle* scale = QPropertyHandle::Find(currComponent, "Transform.Scale"))
 					scale->RefreshBinder();
 			}
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y));
+			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 60));
+			ImGui::Begin("ViewportBar", 0, mViewportBarFlags);
+			ImGui::SameLine();
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
+			if (ImGui::IconButton(getImageId("polygon"), ImVec2(30, 30), "Polygon", bUseLineMode ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				bUseLineMode = !bUseLineMode;
+			}
+			ImGui::SameLine();
+			QString speed =  QString::number(camera->getMoveSpeed(), 'f', 2);
+			if (ImGui::IconButton(getImageId("camera"), ImVec2(30, 30), speed.toLocal8Bit().data(), ImVec4(1, 1, 1, 1), 5)) {
+				ImGui::OpenPopup("Move Speed Slider");
+				ImGui::SetNextWindowPos(ImVec2(155,60));
+			}
+			if (ImGui::BeginPopup("Move Speed Slider")) {
+				ImGui::VSliderFloat("##", ImVec2(40, 100), &camera->getMoveSpeedRef(), 0.01, 5);
+				ImGui::EndPopup();
+			}
+			ImGui::RenderFrame(ImVec2(viewport->WorkSize.x - 465, viewport->WorkPos.y + 8), ImVec2(viewport->WorkSize.x - 280, viewport->WorkPos.y + 48), ImGui::GetColorU32(ImGuiCol_Button), true, GImGui->Style.FrameRounding);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.f);
+			ImGui::SameLine(viewport->WorkSize.x - 460); 
+			if (ImGui::IconButton(getImageId("select"), ImVec2(30, 30), "", currComponent == nullptr ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				mRenderer->setCurrentObject(nullptr);
+			}
+			ImGui::SameLine(viewport->WorkSize.x - 415); 
+			if (ImGui::IconButton(getImageId("translate"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::TRANSLATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				mOperation = ImGuizmo::OPERATION::TRANSLATE;
+			}
+			ImGui::SameLine(viewport->WorkSize.x - 370); 
+			if (ImGui::IconButton(getImageId("rotate"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::ROTATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				mOperation = ImGuizmo::OPERATION::ROTATE;
+			}
+			ImGui::SameLine(viewport->WorkSize.x - 325); 
+			if (ImGui::IconButton(getImageId("scale"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::SCALE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				mOperation = ImGuizmo::OPERATION::SCALE;
+			}
+			ImGui::PopStyleVar();
+			ImGui::PopStyleColor();
+			ImGui::SameLine(viewport->WorkSize.x - 270);
+			if (ImGui::IconButton(getImageId("graph"), ImVec2(30, 30), "FrameGraph", bShowFrameGraph ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				bShowFrameGraph = !bShowFrameGraph;
+			}
+
+			ImGui::SameLine(viewport->WorkSize.x - 100);
+			if (ImGui::IconButton(getImageId("stats"), ImVec2(30, 30), "Stats", bShowStats ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+				bShowStats = !bShowStats;
+			}
+			ImGui::PopStyleVar();
+			ImGui::End();
+			if (bUseLineMode)
+				QRhiGraphicsPipelineBuilder::setPolygonModeOverride(QRhiGraphicsPipeline::Line);
+			else
+				QRhiGraphicsPipelineBuilder::clearPolygonModeOverride();
+			if (bShowFrameGraph) {
+				ImGui::SetNextWindowPos(ImVec2(0, 50));
+				ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 50));
+				ImGui::Begin("Frame Graph", NULL, mViewportBarFlags);
+				mFrameGraphView->Show();
+				ImGui::End();
+				mOutputTexture = mFrameGraphView->GetCurrentTexture();
+				mRenderer->TryOverrideOutputTexture(mOutputTexture);
+			}
+			if (bShowStats) {
+				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 250, viewport->WorkSize.y - 100));
+				ImGui::SetNextWindowSize(ImVec2(200, 200));
+				ImGui::Begin("Stats", 0, mViewportBarFlags);
+				ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", mRenderer->getWindow()->getFps());
+				ImGui::TextColored(ImColor(0, 255, 0), "CPU Time\t%.2f ms", mRenderer->getWindow()->getCpuFrameTime());
+				ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", mRenderer->getWindow()->getGpuFrameTime());
+				ImGui::End();
+			}
+
 		}
 	});
 	setupRhi(mRenderer->getRhi());
@@ -115,13 +155,12 @@ void QDebugUIPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 }
 
 void QDebugUIPainter::compile() {
-	mFrameGraphDelegate.rebuild(mRenderer->getFrameGarph());
+	mFrameGraphView->Rebuild(mRenderer->getFrameGarph());
 	ImGuiPainter::compile();
 	if (mDebugIdTexture == nullptr)
 		return;
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, sizeof(QVector4D)));
 	mUniformBuffer->create();
-
 
 	mOutlineSampler.reset(mRhi->newSampler(QRhiSampler::Nearest,
 		QRhiSampler::Nearest,
@@ -194,6 +233,25 @@ void QDebugUIPainter::compile() {
 	mOutlinePipeline->setShaderResourceBindings(mOutlineBindings.get());
 	mOutlinePipeline->setRenderPassDescriptor(mRenderPassDesc);
 	mOutlinePipeline->create();
+
+	registerImage("select", QImage(":/Resources/mouse-arrow.png"));
+	registerImage("translate", QImage(":/Resources/translate.png"));
+	registerImage("rotate", QImage(":/Resources/rotate.png"));
+	registerImage("scale", QImage(":/Resources/scale.png"));
+	registerImage("stats", QImage(":/Resources/stats.png"));
+	registerImage("polygon", QImage(":/Resources/polygon.png"));
+	registerImage("camera", QImage(":/Resources/camera.png"));
+	registerImage("graph", QImage(":/Resources/graph.png"));
+}
+
+void QDebugUIPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {
+	if (mDebugIdTexture && bDrawOuterline && !mOutputTexture) {
+		cmdBuffer->setGraphicsPipeline(mOutlinePipeline.get());
+		cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
+		cmdBuffer->setShaderResources(mOutlineBindings.get());
+		cmdBuffer->draw(4);
+	}
+	ImGuiPainter::paint(cmdBuffer, renderTarget);
 }
 
 bool QDebugUIPainter::eventFilter(QObject* watched, QEvent* event) {
@@ -232,7 +290,7 @@ bool QDebugUIPainter::eventFilter(QObject* watched, QEvent* event) {
 				mOperation = ImGuizmo::OPERATION::SCALE;
 			}
 			else if (keyEvent->key() == Qt::Key_F) {
-				mFitOnScreen = GraphEditor::Fit_SelectedNodes;
+				mFrameGraphView->RequestFitScreen();
 			}
 			break;
 		}
@@ -244,3 +302,4 @@ bool QDebugUIPainter::eventFilter(QObject* watched, QEvent* event) {
 	return ImGuiPainter::eventFilter(watched, event);
 }
 
+#endif // QENGINE_WITH_EDITOR

@@ -15,10 +15,13 @@ public:
 		QRhi::BeginFrameFlags beginFrameFlags;
 		QRhi::EndFrameFlags endFrameFlags;
 		int sampleCount = 1;
-		bool printFPS = true;
+		bool enableStat = false;
 	};
 	QRhiWindow(QRhiWindow::InitParams inInitParmas);
 	QSharedPointer<QRhiEx> getRhi() const { return mRhi; }
+	int getFps() { return mFps; }
+	float getCpuFrameTime() const { return mCpuFrameTime; }
+	float getGpuFrameTime() const { return mGpuFrameTime; }
 private:
 	void initializeInternal();
 	void renderInternal();
@@ -38,8 +41,10 @@ private:
 	bool mNewlyExposed = false;
 	bool mHasSwapChain = false;
 
-	QElapsedTimer mFPSTimer;
-	int mFrameCount;
+	int mFps = 0;
+	float mCpuFrameTime;
+	QElapsedTimer mCpuFrameTimer;
+	float mGpuFrameTime;
 protected:
 	QSharedPointer<QRhiEx> mRhi;
 	QScopedPointer<QRhiSwapChain> mSwapChain;

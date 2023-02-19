@@ -1,5 +1,6 @@
 #include "Render/Pass/QImGUIRenderPass.h"
 #include "Render/Renderer/QWindowRenderer.h"
+#include "Render/RHI/QRhiWindow.h"
 
 QImGUIRenderPass::QImGUIRenderPass() 
 	: mPainter(new ImGuiPainter)

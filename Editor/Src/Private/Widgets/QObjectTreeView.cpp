@@ -1,7 +1,7 @@
 #include "Widgets/QObjectTreeView.h"
 #include "QPainter"
 #include "qcoreevent.h"
-#include "Undo\QEngineUndoStack.h"
+#include "Utils/QEngineUndoStack.h"
 #include "QEngineEditorStyleManager.h"
 #include "DetailView/QPropertyHandle.h"
 
@@ -14,6 +14,9 @@ QObjectTreeView::QObjectTreeView() {
 			Q_EMIT AsObjecteSelected(mItemMap[items.first()]);
 		}
 	});
+	QFont font = QEngineEditorStyleManager::Instance()->GetFont();
+	font.setPointSize(14);
+	setFont(font);
 }
 
 void QObjectTreeView::SetObjects(QObjectList InObjects) {
@@ -99,7 +102,6 @@ void QObjectTreeView::drawRow(QPainter* painter, const QStyleOptionViewItem& opt
 
 	QStyleOptionViewItem opt = options;
 	opt.rect.moveLeft((level + 1) * indentation());
-	opt.font.setPointSize(10);
 	painter->restore();
 	itemDelegateForIndex(index)->paint(painter, opt, index);
 }
@@ -126,6 +128,7 @@ QTreeWidgetItem* QObjectTreeView::CreateItemForInstance(QObject* InInstance) {
 		name += InInstance->objectName();
 	}
 	QTreeWidgetItem* item = new QTreeWidgetItem({ name });
+	item->setSizeHint(0, QSize(30, 30));
 	InInstance->removeEventFilter(this);
 	InInstance->installEventFilter(this);
 	return item;

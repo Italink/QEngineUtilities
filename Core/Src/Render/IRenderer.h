@@ -44,7 +44,6 @@ protected:
 	QSharedPointer<QRhiEx> mRhi;
 	QSharedPointer<QFrameGraph> mFrameGraph;
 	QSharedPointer<TexturePainter> mOutputPainter;
-	QRhiTexture* mOverrideOutputTexture = nullptr;
 	QCamera* mCamera = nullptr;
 	bool bRequestCompile = false;
 	QObject* mCurrentObject = nullptr;

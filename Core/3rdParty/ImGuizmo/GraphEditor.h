@@ -60,6 +60,7 @@ struct Options
     ImU32 mQuadSelectionBorder{ IM_COL32(255, 32, 32, 255) }; // quad selection border color
     ImU32 mDefaultSlotColor{ IM_COL32(128, 128, 128, 255) }; // when no color is provided in node template, use this value
     ImU32 mFrameFocus{ IM_COL32(64, 128, 255, 255) }; // rectangle border when graph editor has focus
+
     float mLineThickness{ 5 }; // links width in pixels when zoom value is 1
     float mGridSize{ 64.f }; // background grid size in pixels when zoom value is 1
     float mRounding{ 3.f }; // rounding at node corners
@@ -71,6 +72,8 @@ struct Options
     float mNodeSlotHoverFactor{ 1.2f }; // increase size when hovering
     float mMinZoom{ 0.2f }, mMaxZoom { 1.1f };
     float mSnap{ 5.f };
+    float mNodeTitleHeight = 30.0f;
+    float mNodeSlotSize = 100.0f;
     bool mDisplayLinksAsCurves{ true }; // false is straight and 45deg lines
     bool mAllowQuadSelection{ true }; // multiple selection using drag and drop
     bool mRenderGrid{ true }; // grid or nothing
@@ -116,7 +119,7 @@ struct Delegate
 {
     virtual bool AllowedLink(NodeIndex from, NodeIndex to) = 0;
 
-    virtual void SelectNode(NodeIndex nodeIndex, bool selected) = 0;
+    virtual void SelectNode(NodeIndex nodeIndex, bool selected, int slotIndex = -1) = 0;
     virtual void MoveSelectedNodes(const ImVec2 delta) = 0;
     
     virtual void AddLink(NodeIndex inputNodeIndex, SlotIndex inputSlotIndex, NodeIndex outputNodeIndex, SlotIndex outputSlotIndex) = 0;
@@ -124,7 +127,7 @@ struct Delegate
     
     // user is responsible for clipping
     virtual void CustomDraw(ImDrawList* drawList, ImRect rectangle, NodeIndex nodeIndex) = 0;
-    
+   
     // use mouse position to open context menu
     // if nodeIndex != -1, right click happens on the specified node
     virtual void RightClick(NodeIndex nodeIndex, SlotIndex slotIndexInput, SlotIndex slotIndexOutput) = 0;

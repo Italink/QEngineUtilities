@@ -7,7 +7,7 @@
 #include "DetailView/QDetailViewManager.h"
 #include "DetailView/PropertyHandleImpl/QAssociativePropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QSequentialPropertyHandleImpl.h"
-#include "Undo/QEngineUndoStack.h"
+#include "Utils/QEngineUndoStack.h"
 #include "Widgets/QElideLabel.h"
 #include "DetailView/PropertyHandleImpl/QEnumPropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QObjectPropertyHandleImpl.h"

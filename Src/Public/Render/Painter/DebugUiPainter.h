@@ -1,3 +1,5 @@
+#ifdef QENGINE_WITH_EDITOR
+
 #ifndef DebugUiPainter_h__
 #define DebugUiPainter_h__
 
@@ -14,37 +16,30 @@
 #include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
 #include "GraphEditor.h"
 #include "Render/Renderer/QWindowRenderer.h"
-#include "FrameGraphView.h"
+
+class FrameGraphView;
 
 class QDebugUIPainter :public ImGuiPainter {
 protected:
 	QWindowRenderer* mRenderer;
 	ImGuiWindowFlags mViewportBarFlags;
 	ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
-	bool bShowFrameGraph;
-	bool bLineMode;
-	GraphEditor::FitOnScreen mFitOnScreen = GraphEditor::Fit_AllNodes;
-	FrameGraphDelegate mFrameGraphDelegate;
-	GraphEditor::Options mFrameGraphOption;
-	GraphEditor::ViewState mFrameGraphViewState;
+	bool bUseLineMode = false;
+	bool bShowFrameGraph = false;
+	bool bShowStats = true;
+	bool bDrawOuterline = true;
+	QSharedPointer<FrameGraphView> mFrameGraphView;
 public:
-	void setupDebugIdTexture(QRhiTexture* texture);
 	QDebugUIPainter(QWindowRenderer* inRenderer);
+	void setupDebugIdTexture(QRhiTexture* texture);
 	void resourceUpdate(QRhiResourceUpdateBatch* batch) override;
 	void compile() override;
-	void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override {
-		if (mDebugIdTexture) {
-			cmdBuffer->setGraphicsPipeline(mOutlinePipeline.get());
-			cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
-			cmdBuffer->setShaderResources(mOutlineBindings.get());
-			cmdBuffer->draw(4);
-		}
-		ImGuiPainter::paint(cmdBuffer, renderTarget);
-	}
+	void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override;
 protected:
 	bool eventFilter(QObject* watched, QEvent* event) override;
 private:
 	QRhiTexture* mDebugIdTexture = nullptr;
+	QRhiTexture* mOutputTexture = nullptr;
 	QRhiReadbackResult mReadReult;
 	QRhiReadbackDescription mReadDesc;
 	QPoint mReadPoint;
@@ -52,6 +47,9 @@ private:
 	QScopedPointer<QRhiSampler> mOutlineSampler;
 	QScopedPointer<QRhiShaderResourceBindings> mOutlineBindings;
 	QScopedPointer<QRhiBuffer> mUniformBuffer;
+	ImVec4 mActiveColor = ImColor(38, 187, 255);
 };
 
 #endif // DebugUiPainter_h__
+
+#endif // QENGINE_WITH_EDITOR

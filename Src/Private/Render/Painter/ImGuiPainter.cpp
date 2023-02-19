@@ -1,13 +1,17 @@
-#include "ImGuiPainter.h"
 #include "QApplication"
 #include "qevent.h"
 #include "QGuiApplication"
 #include "QClipboard"
 #include "QDateTime"
+#include "Render/Painter/ImGuiPainter.h"
+#include "QFile"
 
+#ifdef QENGINE_WITH_EDITOR
+#include "QEngineEditorStyleManager.h"
+#endif
 
-const int64_t IMGUI_VERTEX_BUFFER_SIZE = 50000;
-const int64_t IMGUI_INDEX_BUFFER_SIZE = 50000;
+const int64_t IMGUI_VERTEX_BUFFER_SIZE = 100000;
+const int64_t IMGUI_INDEX_BUFFER_SIZE = 100000;
 
 const QHash<int, ImGuiKey> keyMap = {
 	{ Qt::Key_Tab, ImGuiKey_Tab },
@@ -137,10 +141,17 @@ ImGuiPainter::ImGuiPainter()
 	ImGui::SetCurrentContext(mImGuiContext);
 
 	embraceTheDarkness();
+
 	ImGuiIO& io = ImGui::GetIO();
 
-	//io.Fonts->AddFontFromFileTTF(R"(E:\ModernGraphicsEngineGuide\Source\QEngineUtilities\Editor\Resources\DroidSans.ttf)", 16);
-	//io.Fonts->Build();
+#ifdef QENGINE_WITH_EDITOR
+	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
+	if (file.open(QIODevice::ReadOnly)) {
+		QByteArray fontData = file.readAll();
+		io.Fonts->AddFontFromMemoryTTF(fontData.data(),fontData.size(), 16);
+		io.Fonts->Build();
+	}
+#endif
 
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;  // We can honor io.WantSetMousePos requests (optional, rarely used)
@@ -164,6 +175,17 @@ void ImGuiPainter::setupWindow(QWindow* window)
 	mWindow->installEventFilter(this);
 }
 
+void ImGuiPainter::registerImage(const QString& inName, const QImage& inImage) {
+	QSharedPointer<QRhiTexture> texture;
+	texture.reset(mRhi->newTexture(QRhiTexture::RGBA8, inImage.size(), 1));
+	texture->create();
+	mRegisterImages[inName] = LocalImage({inImage, texture});
+}
+
+ImTextureID ImGuiPainter::getImageId(const QString& inName) {
+	return (ImTextureID)mRegisterImages.value(inName).mTexture.get();
+}
+
 void ImGuiPainter::compile() {
 	if (!mWindow)
 		return;
@@ -176,7 +198,7 @@ void ImGuiPainter::compile() {
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, sizeof(QMatrix4x4)));
 	mUniformBuffer->create();
 
-	mSampler.reset(mRhi->newSampler(QRhiSampler::Linear,
+	mSampler.reset(mRhi->newSampler(QRhiSampler::Nearest,
 				   QRhiSampler::Linear,
 				   QRhiSampler::None,
 				   QRhiSampler::ClampToEdge,
@@ -245,7 +267,7 @@ void main(){
 		QRhiVertexInputAttribute{ 0, 0, QRhiVertexInputAttribute::Float2, offsetof(ImDrawVert, pos) },
 		QRhiVertexInputAttribute{ 0, 1, QRhiVertexInputAttribute::Float2, offsetof(ImDrawVert, uv) },
 		QRhiVertexInputAttribute{ 0, 2, QRhiVertexInputAttribute::UNormByte4, offsetof(ImDrawVert, col) },
-							  });
+	});
 	mPipeline->setVertexInputLayout(inputLayout);
 	mPipeline->setShaderResourceBindings(mBindings.get());
 	mPipeline->setRenderPassDescriptor(mRenderPassDesc);
@@ -324,6 +346,12 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 		batch->uploadTexture(mFontTexture.get(), mFontImage);
 		mFontImage = {};
 	}
+	for (auto& image : mRegisterImages) {
+		if (!image.mImage.isNull()) {
+			batch->uploadTexture(image.mTexture.get(), image.mImage);
+			image.mImage = {};
+		}
+	}
 }
 
 void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {
@@ -350,14 +378,14 @@ void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderT
 				mBindings->setBindings({
 					QRhiShaderResourceBinding::uniformBuffer(0,QRhiShaderResourceBinding::VertexStage,mUniformBuffer.get()),
 					QRhiShaderResourceBinding::sampledTexture(1,QRhiShaderResourceBinding::FragmentStage,texPtr,mSampler.get())
-									   });
+				});
 				mBindings->create();
 			}
 			else {
 				mBindings->setBindings({
 					QRhiShaderResourceBinding::uniformBuffer(0,QRhiShaderResourceBinding::VertexStage,mUniformBuffer.get()),
 					QRhiShaderResourceBinding::sampledTexture(1,QRhiShaderResourceBinding::FragmentStage,mFontTexture.get(),mSampler.get())
-									   });
+				});
 				mBindings->create();
 			}
 			cmdBuffer->setShaderResources();

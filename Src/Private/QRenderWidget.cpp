@@ -7,8 +7,8 @@
 #ifdef QENGINE_WITH_EDITOR
 #include "DetailView/QDetailView.h"
 #include "Widgets/QObjectTreeView.h"
+#include "Utils/QEngineUndoStack.h"
 #endif
-#include "../Private/Undo/QEngineUndoStack.h"
 
 
 class QInnerRhiWindow : public QRhiWindow {
@@ -35,16 +35,19 @@ private:
 };
 
 QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
-	: mRhiWindow(new QInnerRhiWindow(inInitParams, this))
-	, mCamera(new QCamera)
+	:  mCamera(new QCamera)
 #ifdef QENGINE_WITH_EDITOR
 	, mDetailView(new QDetailView)
 	, mObjectTreeView(new QObjectTreeView) 
 #endif
 {
+#ifdef QENGINE_WITH_EDITOR
+	inInitParams.enableStat = true;
+#endif
 	QHBoxLayout* hLayout = new QHBoxLayout(this);
 	hLayout->setContentsMargins(0, 0, 0, 0);
 	hLayout->setSpacing(0);
+	mRhiWindow = new QInnerRhiWindow(inInitParams, this);
 	QWidget* viewport = QWidget::createWindowContainer(mRhiWindow);
 #ifdef QENGINE_WITH_EDITOR
 	QSplitter* splitter = new QSplitter;
@@ -115,6 +118,7 @@ void QRenderWidget::onExit() {
 }
 
 void QRenderWidget::keyPressEvent(QKeyEvent* event) {
+#ifdef QENGINE_WITH_EDITOR
 	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier) ) {
 		if (event->key() == Qt::Key_Z) {
 			QEngineUndoStack::Instance()->Undo();
@@ -123,4 +127,5 @@ void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 			QEngineUndoStack::Instance()->Redo();
 		}
 	}
+#endif // QENGINE_WITH_EDITOR
 }

@@ -138,7 +138,7 @@ void QDetailViewManager::RegisterBuildIn() {
 	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
 
 	qRegisterMetaType<QRhiGraphicsPipelineBuilder::TextureInfo>();
-
+	qRegisterMetaType<QRhiGraphicsPipelineBuilder*>();
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;

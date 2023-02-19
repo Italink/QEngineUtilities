@@ -36,7 +36,7 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 
 	mUniformBlock->create(mRhi.get());
 	for (auto& mesh : mSkeletalMesh->mSubmeshes) {
-		QRhiGraphicsPipelineBuilder* mPipeline = new QRhiGraphicsPipelineBuilder(this);
+		QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline(new QRhiGraphicsPipelineBuilder());
 		mPipelines << mPipeline;
 		mPipeline->addUniformBlock(QRhiShaderStage::Vertex, mUniformBlock);
 		mPipeline->setInputBindings({
@@ -119,7 +119,7 @@ void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 
 void QSkeletalMeshRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) {
 	for (int i = 0; i < mPipelines.size(); i++) {
-		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i];
+		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i].get();
 		const QSkeletalMesh::SubMeshInfo& meshInfo = mSkeletalMesh->mSubmeshes[i];
 		cmdBuffer->setGraphicsPipeline(mPipeline->getGraphicsPipeline());
 		cmdBuffer->setViewport(viewport);

@@ -9,21 +9,21 @@ class ImGuiPainter :public QObject ,public IPainter{
 	Q_OBJECT
 public:
 	ImGuiPainter();
-
 	void setupWindow(QWindow* window);
-
 	void setupPaintFunctor(std::function<void()> val) { mPaintFunctor = val; }
-
+	void registerImage(const QString& inName, const QImage& inImage);
+	ImTextureID getImageId(const QString& inName);
 	void compile() override;
-
 	void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override;
-
 	void resourceUpdate(QRhiResourceUpdateBatch* batch) override;
-
 protected:
-	virtual bool eventFilter(QObject* watched, QEvent* event) override;
-
+	bool eventFilter(QObject* watched, QEvent* event) override;
 protected:
+	struct LocalImage {
+		QImage mImage;
+		QSharedPointer<QRhiTexture> mTexture;
+	};
+	QMap<QString, LocalImage> mRegisterImages;
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mIndexBuffer;
@@ -31,7 +31,6 @@ protected:
 	QScopedPointer<QRhiShaderResourceBindings> mBindings;
 	QScopedPointer<QRhiTexture> mFontTexture;
 	QScopedPointer<QRhiSampler> mSampler;
-
 	QWindow* mWindow;
 	QImage mFontImage;
 	ImGuiContext* mImGuiContext = nullptr;

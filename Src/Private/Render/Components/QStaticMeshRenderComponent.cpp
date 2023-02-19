@@ -28,7 +28,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 	mIndexBuffer->create();
 
 	for (auto& subMesh : mStaticMesh->mSubmeshes) {
-		QRhiGraphicsPipelineBuilder* mPipeline = new QRhiGraphicsPipelineBuilder(this);
+		QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline(new QRhiGraphicsPipelineBuilder());
 		mPipelines << mPipeline;
 		mPipeline->addUniformBlock(QRhiShaderStage::Vertex, "Transform")
 			->addParam("MVP", QGenericMatrix<4, 4, float>())
@@ -36,7 +36,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 
 		mPipeline->setInputBindings({
 			QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QStaticMesh::Vertex))
-		});
+			});
 
 		mPipeline->setInputAttribute({
 			QRhiVertexInputAttributeEx("inPosition"	,0, 0, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,position)),
@@ -44,7 +44,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			QRhiVertexInputAttributeEx("inTangent"	,0, 2, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,tangent)),
 			QRhiVertexInputAttributeEx("inBitangent",0, 3, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,bitangent)),
 			QRhiVertexInputAttributeEx("inUV"		,0, 4, QRhiVertexInputAttribute::Float2, offsetof(QStaticMesh::Vertex,texCoord))
-		});
+			});
 
 		mPipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
 			layout(location = 0) out vec2 vUV;
@@ -59,8 +59,8 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			)");
 		bool bHasDiffuse = subMesh.materialInfo.contains("Diffuse");
 		if (bHasDiffuse) {
-			mPipeline->addTexture(QRhiShaderStage::Fragment,QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", subMesh.materialInfo["Diffuse"]);
-	}
+			mPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", subMesh.materialInfo["Diffuse"]);
+		}
 		mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 		layout(location = 0) in vec2 vUV;
 		layout(location = 1) in vec3 vWorldPosition;
@@ -69,11 +69,11 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			BaseColor = %1;
 			%2;
 		})").arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "vec4(vTangentBasis[2],1)")
-#ifdef QENGINE_WITH_EDITOR	
-			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";" )
-#else
+		#ifdef QENGINE_WITH_EDITOR	
+			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
+		#else
 			.arg("")
-#endif
+		#endif
 			.toLocal8Bit()
 		);
 	}
@@ -92,7 +92,7 @@ void QStaticMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 
 void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	for (int i = 0; i < mPipelines.size(); i++) {
-		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i];
+		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i].get();
 		const QStaticMesh::SubMeshInfo& meshInfo = mStaticMesh->mSubmeshes[i];
 		QMatrix4x4 MVP = calculateMatrixMVP() * meshInfo.localTransfrom;
 		QMatrix4x4 M = calculateMatrixModel() * meshInfo.localTransfrom;
@@ -107,12 +107,12 @@ void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 
 void QStaticMeshRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) {
 	for (int i = 0; i < mPipelines.size(); i++) {
-		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i];
+		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i].get();
 		const QStaticMesh::SubMeshInfo& meshInfo = mStaticMesh->mSubmeshes[i];
 		cmdBuffer->setGraphicsPipeline(mPipeline->getGraphicsPipeline());
 		cmdBuffer->setViewport(viewport);
 		cmdBuffer->setShaderResources();
-		const QRhiCommandBuffer::VertexInput vertexBindings(mVertexBuffer.get(), meshInfo.verticesOffset * sizeof (QStaticMesh::Vertex));
+		const QRhiCommandBuffer::VertexInput vertexBindings(mVertexBuffer.get(), meshInfo.verticesOffset * sizeof(QStaticMesh::Vertex));
 		cmdBuffer->setVertexInput(0, 1, &vertexBindings, mIndexBuffer.get(), meshInfo.indicesOffset * sizeof(QStaticMesh::Index), QRhiCommandBuffer::IndexUInt32);
 		cmdBuffer->drawIndexed(meshInfo.indicesRange);
 	}

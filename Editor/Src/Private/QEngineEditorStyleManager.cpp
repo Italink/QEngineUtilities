@@ -1,10 +1,20 @@
 #include "QEngineEditorStyleManager.h"
 #include "QApplication"
 #include "Widgets/QSvgIcon.h"
+#include "QFontDatabase"
 
 QEngineEditorStyleManager* QEngineEditorStyleManager::Instance() {
 	static QEngineEditorStyleManager Ins;
 	return &Ins;
+}
+
+QEngineEditorStyleManager::QEngineEditorStyleManager()
+{
+	int id = QFontDatabase::addApplicationFont(mFontFilePath);
+	QStringList families = QFontDatabase::applicationFontFamilies(id);
+	mFont = QFont(families.first(), 10);
+	qApp->setFont(mFont);
+	SetStyle(mCurrentStyle);
 }
 
 QByteArray QEngineEditorStyleManager::GetStylesheet() {
@@ -49,10 +59,6 @@ QColor QEngineEditorStyleManager::GetIconColor() const {
 
 void QEngineEditorStyleManager::SetIconColor(QColor val) {
 	QSvgIcon::setIconColor(val);
-}
-
-QEngineEditorStyleManager::QEngineEditorStyleManager() {
-	SetStyle(mCurrentStyle);
 }
 
 void QEngineEditorStyleManager::SetStyle(QDetailWidgetStyle inStyle) {

@@ -13,6 +13,7 @@ public:
 	QRhiTexture* getOutputTexture();
 	const QList<IRenderPassBase*>& getRenderPassTopology() const { return mRenderPassTopology; }
 	const QHash<QString, IRenderPassBase*>& getRenderPassMap() const { return mRenderPassMap; }
+	const QPair<QString, int>& getOutputSlot() const { return mOutput; }
 private:
 	QHash<IRenderPassBase*, QList<IRenderPassBase*>> mDependMap;
 	QHash<QString, IRenderPassBase*> mRenderPassMap;

@@ -179,5 +179,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(QRhiGraphicsPipelineBuilder::TextureInfo*);
+Q_DECLARE_METATYPE(QRhiGraphicsPipelineBuilder*);
+Q_DECLARE_METATYPE(QSharedPointer<QRhiGraphicsPipelineBuilder>);
 
 #endif // QRhiGraphicsPipelineBuilder_h__
