@@ -18,6 +18,7 @@ public:
 		bool enableStat = false;
 	};
 	QRhiWindow(QRhiWindow::InitParams inInitParmas);
+	~QRhiWindow();
 	QSharedPointer<QRhiEx> getRhi() const { return mRhi; }
 	int getFps() { return mFps; }
 	float getCpuFrameTime() const { return mCpuFrameTime; }

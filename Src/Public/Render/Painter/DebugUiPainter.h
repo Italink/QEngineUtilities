@@ -47,7 +47,7 @@ private:
 	QScopedPointer<QRhiSampler> mOutlineSampler;
 	QScopedPointer<QRhiShaderResourceBindings> mOutlineBindings;
 	QScopedPointer<QRhiBuffer> mUniformBuffer;
-	ImVec4 mActiveColor = ImColor(38, 187, 255);
+	ImVec4 mActiveColor = ImColor(100, 150, 255);
 };
 
 #endif // DebugUiPainter_h__

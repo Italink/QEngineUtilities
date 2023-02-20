@@ -23,6 +23,12 @@ QRhiWindow::QRhiWindow(QRhiWindow::InitParams inInitParmas)
 	}
 }
 
+QRhiWindow::~QRhiWindow() {
+	mDSBuffer.reset();
+	mSwapChainPassDesc.reset();
+	mRhi.reset();
+}
+
 void QRhiWindow::initializeInternal() {
 	mRhi = QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this);
 	if (!mRhi)
