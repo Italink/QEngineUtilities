@@ -5,7 +5,7 @@
 
 class QPixelFilterRenderPass : public IRenderPassBase {
 	Q_OBJECT
-		Q_PROPERTY(int DownSamplerCount READ getDownSamplerCount WRITE setupDownSamplerCount)
+		Q_PROPERTY(int DownSamplerCount READ getDownSamplerCount WRITE setupDownSample)
 		Q_META_BEGIN(QPixelFilterRenderPass)
 			Q_META_P_NUMBER_LIMITED(DownSamplerCount, 1, 16)
 		Q_META_END()
@@ -17,7 +17,7 @@ public:
 		Result
 	};
 	QPixelFilterRenderPass* setupFilterCode(QByteArray code);
-	QPixelFilterRenderPass* setupDownSamplerCount(int count);
+	QPixelFilterRenderPass* setupDownSample(int count);
 	int getDownSamplerCount() const;
 protected:
 	void resizeAndLink(const QSize& size, const TextureLinker& linker) override;

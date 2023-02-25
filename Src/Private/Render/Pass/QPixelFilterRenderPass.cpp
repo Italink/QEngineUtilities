@@ -5,7 +5,7 @@ QPixelFilterRenderPass* QPixelFilterRenderPass::setupFilterCode(QByteArray code)
 	return this;
 }
 
-QPixelFilterRenderPass* QPixelFilterRenderPass::setupDownSamplerCount(int count) {
+QPixelFilterRenderPass* QPixelFilterRenderPass::setupDownSample(int count) {
 	mDownSamplerCount = count;
 	sigRebuild.request();
 	return this;
