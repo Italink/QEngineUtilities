@@ -524,8 +524,34 @@ QImage QRhiWidget::grabTexture()
  */
 void QRhiWidget::initialize(QRhi *rhi, QRhiTexture *outputTexture)
 {
-    Q_UNUSED(rhi);
-    Q_UNUSED(outputTexture);
+	if (mRhi != rhi) {
+		mRenderTarget.reset();
+		mRenderPassDesc.reset();
+		mDSBuffer.reset();
+	}
+	else if (mOutputTexture != outputTexture) {
+		mRenderTarget.reset();
+		mRenderPassDesc.reset();
+	}
+
+	mRhi = rhi;
+	mOutputTexture = outputTexture;
+
+	if (!mDSBuffer) {
+		mDSBuffer.reset(mRhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil, mOutputTexture->pixelSize()));
+		mDSBuffer->create();
+	}
+	else if (mDSBuffer->pixelSize() != mOutputTexture->pixelSize()) {
+		mDSBuffer->setPixelSize(mOutputTexture->pixelSize());
+		mDSBuffer->create();
+	}
+
+	if (!mRenderTarget) {
+		mRenderTarget.reset(mRhi->newTextureRenderTarget({ { mOutputTexture }, mDSBuffer.data() }));
+		mRenderPassDesc.reset(mRenderTarget->newCompatibleRenderPassDescriptor());
+		mRenderTarget->setRenderPassDescriptor(mRenderPassDesc.data());
+		mRenderTarget->create();
+	}
 }
 
 /*!

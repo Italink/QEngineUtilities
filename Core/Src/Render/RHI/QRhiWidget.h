@@ -50,6 +50,13 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void paintEvent(QPaintEvent *e) override;
     bool event(QEvent *e) override;
+
+protected:
+	QRhi* mRhi = nullptr;
+	QRhiTexture* mOutputTexture = nullptr;
+	QScopedPointer<QRhiRenderBuffer> mDSBuffer;
+	QScopedPointer<QRhiTextureRenderTarget> mRenderTarget;
+	QScopedPointer<QRhiRenderPassDescriptor> mRenderPassDesc;
 };
 
 #endif

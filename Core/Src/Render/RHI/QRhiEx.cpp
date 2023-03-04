@@ -6,7 +6,7 @@
 #include "private/qrhivulkan_p_p.h"
 #ifndef QT_NO_OPENGL
 #include <QOffscreenSurface>
-#include "private\qrhigles2_p.h"
+#include "private/qrhigles2_p.h"
 #endif
 
 #ifdef Q_OS_WIN

@@ -27,6 +27,7 @@ public:
     QSize explicitSize;
     QBackingStoreRhiSupport offscreenRenderer;
     bool textureInvalid = false;
+
 };
 
 #endif

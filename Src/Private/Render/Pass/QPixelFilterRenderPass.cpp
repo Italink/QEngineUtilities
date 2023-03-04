@@ -16,6 +16,7 @@ int QPixelFilterRenderPass::getDownSamplerCount() const {
 }
 
 void QPixelFilterRenderPass::resizeAndLink(const QSize& size, const TextureLinker& linker) {
+
 	mRT.colorAttachment.reset(mRhi->newTexture(QRhiTexture::RGBA32F, linker.getInputTexture(InSlot::Src)->pixelSize() / mDownSamplerCount, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.colorAttachment->create();
 	mRT.renderTarget.reset(mRhi->newTextureRenderTarget({ mRT.colorAttachment.get() }));

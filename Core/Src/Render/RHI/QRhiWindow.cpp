@@ -34,12 +34,9 @@ void QRhiWindow::initializeInternal() {
 	if (!mRhi)
 		qFatal("Failed to create RHI backend");
 
-	// now onto the backend-independent init
-
 	mSwapChain.reset(mRhi->newSwapChain());
-	// allow depth-stencil, although we do not actually enable depth test/write for the triangle
 	mDSBuffer.reset( mRhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil,
-		QSize(), // no need to set the size here, due to UsedWithSwapChainOnly
+		QSize(), 
 		mInitParams.sampleCount,
 		QRhiRenderBuffer::UsedWithSwapChainOnly));
 
