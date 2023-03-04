@@ -177,7 +177,7 @@ QRhiShaderResourceBindings* QRhiGraphicsPipelineBuilder::getShaderResourceBindin
 
 void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mBlendStates.resize(inRenderComponent->sceneRenderPass()->getRenderTargetSlots().size());
-	QRhiEx* rhi = inRenderComponent->sceneRenderPass()->getRenderer()->getRhi().get();
+	QRhiEx* rhi = inRenderComponent->sceneRenderPass()->getRenderer()->getRhi();
 	mPipeline.reset(rhi->newGraphicsPipeline());
 	mPipeline->setTopology(mTopology);
 	mPipeline->setCullMode(mCullMode);

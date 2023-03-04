@@ -2,7 +2,7 @@
 #include "IRenderPass.h"
 #include "Render/Painter/TexturePainter.h"
 
-IRenderer::IRenderer(QSharedPointer<QRhiEx> inRhi, const QSize& inFrameSize)
+IRenderer::IRenderer(QRhiEx* inRhi, const QSize& inFrameSize)
 	: mRhi(inRhi)
 	, mFrameSize(inFrameSize)
 	, mOutputPainter(new TexturePainter)

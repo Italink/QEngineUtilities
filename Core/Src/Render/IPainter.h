@@ -5,7 +5,7 @@
 
 class IPainter {
 public:
-	void setupRhi(QSharedPointer<QRhiEx> inRhi) {
+	void setupRhi(QRhiEx* inRhi) {
 		mRhi = inRhi;
 	}
 	void setupRenderPassDesc(QRhiRenderPassDescriptor* desc) {
@@ -21,7 +21,7 @@ public:
 protected:
 	QRhiRenderPassDescriptor* mRenderPassDesc;
 	int mSampleCount;
-	QSharedPointer<QRhiEx> mRhi;
+	QRhiEx* mRhi;
 };
 
 

@@ -1,7 +1,7 @@
 #include "QRhiEx.h"
 #include <QFile>
-#include "private\qshaderbaker_p.h"
-#include "private\qrhivulkan_p.h"
+#include "private/qshaderbaker_p.h"
+#include "private/qrhivulkan_p.h"
 #include "private/qrhi_p_p.h"
 #include "private/qrhivulkan_p_p.h"
 #ifndef QT_NO_OPENGL
@@ -69,11 +69,10 @@ QVulkanInstance* QRhiEx::getVkInstance() {
 	return vkInstance;
 }
 
-QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
-	QSharedPointer<QRhiEx> mRhi;
+QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
 	if (inBackend == QRhi::Null) {
 		QRhiNullInitParams params;
-		mRhi.reset(static_cast<QRhiEx*>((QRhi::create(QRhi::Null, &params, inFlags))));
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::Null, &params, inFlags));
 	}
 
 #ifndef QT_NO_OPENGL
@@ -81,7 +80,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 		QRhiGles2InitParams params;
 		params.fallbackSurface = QRhiGles2InitParams::newFallbackSurface();
 		params.window = inWindow;
-		mRhi.reset(static_cast<QRhiEx*>((QRhi::create(QRhi::OpenGLES2, &params, inFlags))));
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::OpenGLES2, &params, inFlags));
 	}
 #endif
 
@@ -94,7 +93,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 			params.window = inWindow;
 		}
 		params.inst = vkInstance;
-		mRhi.reset(static_cast<QRhiEx*>((QRhi::create(QRhi::Vulkan, &params, inFlags))));
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::Vulkan, &params, inFlags));
 	}
 #endif
 
@@ -106,17 +105,17 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 		//	params.framesUntilKillingDeviceViaTdr = mInitParams.framesUntilTdr;
 		//	params.repeatDeviceKill = true;
 		//}
-		mRhi.reset(static_cast<QRhiEx*>((QRhi::create(QRhi::D3D11, &params, inFlags))));
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::D3D11, &params, inFlags));
 	}
 #endif
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 	if (inBackend == QRhi::Metal) {
 		QRhiMetalInitParams params;
-		mRhi.reset(static_cast<QRhiEx*>((QRhi::create(QRhi::Metal, &params, inFlags))));
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::Metal, &params, inFlags));
 	}
 #endif
-	return mRhi;
+	return nullptr;
 }
 
 QShader QRhiEx::newShaderFromCode(QShader::Stage stage, const char* code) {

@@ -3,9 +3,8 @@
 #include "private/qrhivulkan_p.h"
 #include "qvulkanfunctions.h"
 
-void QParticleSystem::onInit(QSharedPointer<QRhiEx> inRhi){
+void QParticleSystem::onInit(QRhiEx* inRhi){
 	mRhi = inRhi;
-	Q_ASSERT(!mRhi.isNull());
 	mTransfromBuffer.reset(mRhi->newBuffer(QRhiBuffer::Static, QRhiBuffer::UsageFlag::VertexBuffer | QRhiBuffer::UsageFlag::StorageBuffer, sizeof(float) * 16 * QParticleSystem::PARTICLE_MAX_SIZE));
 	mTransfromBuffer->setName("TransfromBuffer");
 	mTransfromBuffer->create();
@@ -103,7 +102,7 @@ QRhiBuffer* QGPUParticleSystem::getCurrentIndirectBuffer() {
 	return mIndirectDispatchBuffer[mInputSlot].get();
 }
 
-void QGPUParticleSystem::onInit(QSharedPointer<QRhiEx> inRhi) {
+void QGPUParticleSystem::onInit(QRhiEx* inRhi) {
 	QParticleSystem::onInit(inRhi);
 	mParticlesBuffer[0].reset(mRhi->newBuffer(QRhiBuffer::Static, QRhiBuffer::UsageFlag::VertexBuffer | QRhiBuffer::UsageFlag::StorageBuffer, sizeof(QParticleSystem::Particle) * QParticleSystem::PARTICLE_MAX_SIZE));
 	mParticlesBuffer[0]->setName("ParticlesBuffer0");

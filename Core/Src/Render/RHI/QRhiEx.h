@@ -7,10 +7,9 @@
 
 class QRhiEx: public QRhi {
 public:
-
 	static QVulkanInstance* getVkInstance();
 
-	static QSharedPointer<QRhiEx> newRhiEx(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
+	static QRhiEx* newRhiEx(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
 
 	static QShader newShaderFromCode(QShader::Stage stage, const char* code);
 

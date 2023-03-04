@@ -2,7 +2,6 @@
 #define QRhiWindow_h__
 
 #include <QWindow>
-
 #include "QRhiEx.h"
 
 class QRhiWindow :public QWindow {
@@ -19,7 +18,7 @@ public:
 	};
 	QRhiWindow(QRhiWindow::InitParams inInitParmas);
 	~QRhiWindow();
-	QSharedPointer<QRhiEx> getRhi() const { return mRhi; }
+	QRhiEx* getRhi() const { return mRhi.get(); }
 	int getFps() { return mFps; }
 	float getCpuFrameTime() const { return mCpuFrameTime; }
 	float getGpuFrameTime() const { return mGpuFrameTime; }
@@ -47,7 +46,7 @@ private:
 	QElapsedTimer mCpuFrameTimer;
 	float mGpuFrameTime;
 protected:
-	QSharedPointer<QRhiEx> mRhi;
+	QScopedPointer<QRhiEx> mRhi;
 	QScopedPointer<QRhiSwapChain> mSwapChain;
 	QScopedPointer<QRhiRenderBuffer> mDSBuffer  ;
 	QScopedPointer<QRhiRenderPassDescriptor> mSwapChainPassDesc;

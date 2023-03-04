@@ -6,7 +6,7 @@
 #endif // QENGINE_WITH_EDITOR
 
 QWindowRenderer::QWindowRenderer(QRhiWindow* inWindow)
-	: IRenderer(inWindow->mRhi, inWindow->mSwapChain->currentPixelSize())
+	: IRenderer(inWindow->mRhi.get(), inWindow->mSwapChain->currentPixelSize())
 	, mWindow(inWindow)
 #ifdef QENGINE_WITH_EDITOR
 	, mDebugUiPainter(new QDebugUIPainter(this))

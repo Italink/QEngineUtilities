@@ -12,7 +12,7 @@ class IRenderer: public QObject {
 	Q_OBJECT
 	Q_PROPERTY(QCamera* Camera READ getCamera WRITE setCamera)
 public:
-	IRenderer(QSharedPointer<QRhiEx> inRhi,const QSize& inFrameSize);
+	IRenderer(QRhiEx* inRhi,const QSize& inFrameSize);
 	~IRenderer(){}
 	void requestComplie();
 
@@ -27,7 +27,7 @@ public:
 	QSize getFrameSize() const { return mFrameSize; }
 	QCamera* getCamera() const { return mCamera; }
 	IRenderPassBase* getRenderPassByName(const QString& inName);
-	QSharedPointer<QRhiEx> getRhi() { return mRhi; }
+	QRhiEx* getRhi() { return mRhi; }
 	QObject* getCurrentObject() const { return mCurrentObject; }
 	IRenderComponent* getComponentById(uint32_t inId);
 	QFrameGraph* getFrameGarph() const { return mFrameGraph.get(); }
@@ -41,7 +41,7 @@ protected:
 	virtual void refreshOutputTexture();
 protected:
 	QSize mFrameSize;
-	QSharedPointer<QRhiEx> mRhi;
+	QRhiEx* mRhi;
 	QSharedPointer<QFrameGraph> mFrameGraph;
 	QSharedPointer<TexturePainter> mOutputPainter;
 	QCamera* mCamera = nullptr;

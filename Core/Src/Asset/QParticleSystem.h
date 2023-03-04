@@ -12,7 +12,7 @@ public:
 	};
 	virtual ~QParticleSystem() = default;
 	virtual Type type() = 0;
-	virtual void onInit(QSharedPointer<QRhiEx> inRhi);
+	virtual void onInit(QRhiEx* inRhi);
 	virtual void onTick(QRhiCommandBuffer* inCmdBuffer);
 
 	int getNumOfSpawnPerFrame() const { return mNumOfSpawnPerFrame; }
@@ -35,7 +35,7 @@ protected:
 	virtual void onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer) = 0;
 	virtual void onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer) = 0;
 protected:
-	QSharedPointer<QRhiEx> mRhi;
+	QRhiEx* mRhi;
 	QScopedPointer<QRhiBuffer> mTransfromBuffer;
 
 	bool bPrintCurrentNumOfParticle = true;
@@ -55,7 +55,7 @@ public:
 	QRhiEx::Signal sigInitIndirectBuffer;
 protected:
 	virtual Type type() { return QParticleSystem::Type::GPU; }
-	void onInit(QSharedPointer<QRhiEx> inRhi) override;
+	void onInit(QRhiEx* inRhi) override;
 	void onRecreateComputePipeline();
 	void onSpawn(QRhiCommandBuffer* inCmdBuffer) override;
 	void onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer) override;

@@ -47,7 +47,7 @@ public:
 	void cleanupInputLinkerCache();
 protected:
 	IRenderer* mRenderer = nullptr;
-	QSharedPointer<QRhiEx> mRhi;
+	QRhiEx* mRhi;
 	QMap<int, InputTextureLinkInfo> mInputTextureLinks;
 	QMap<int, QRhiTexture*> mOutputTextures;
 };

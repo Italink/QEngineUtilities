@@ -40,15 +40,13 @@ public:
     QSize explicitSize() const;
     void setExplicitSize(const QSize &pixelSize);
 
-    virtual void initialize(QRhi *rhi, QRhiTexture *outputTexture);
-    virtual void render(QRhiCommandBuffer *cb);
-
     QImage grabTexture();
-
 Q_SIGNALS:
     void explicitSizeChanged(const QSize &pixelSize);
-
 protected:
+	virtual void initialize(QRhi* rhi, QRhiTexture* outputTexture);
+	virtual void render(QRhiCommandBuffer* cb);
+
     void resizeEvent(QResizeEvent *e) override;
     void paintEvent(QPaintEvent *e) override;
     bool event(QEvent *e) override;

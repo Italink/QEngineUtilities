@@ -30,7 +30,7 @@ QRhiWindow::~QRhiWindow() {
 }
 
 void QRhiWindow::initializeInternal() {
-	mRhi = QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this);
+	mRhi.reset(QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this));
 	if (!mRhi)
 		qFatal("Failed to create RHI backend");
 

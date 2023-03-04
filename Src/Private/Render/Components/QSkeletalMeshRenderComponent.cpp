@@ -34,7 +34,7 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 		->addParam("M", MathUtils::Mat4())
 		->addParam("Bone", mSkeletalMesh->mCurrentPosesMatrix);
 
-	mUniformBlock->create(mRhi.get());
+	mUniformBlock->create(mRhi);
 	for (auto& mesh : mSkeletalMesh->mSubmeshes) {
 		QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline(new QRhiGraphicsPipelineBuilder());
 		mPipelines << mPipeline;

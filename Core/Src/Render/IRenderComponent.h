@@ -23,7 +23,7 @@ public:
 	virtual void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) = 0;
 	ISceneRenderPass* sceneRenderPass() { return mScreenRenderPass; }
 protected:
-	QSharedPointer<QRhiEx> mRhi;
+	QRhiEx* mRhi;
 	ISceneRenderPass* mScreenRenderPass = nullptr;
 	uint32_t mID;
 	inline static uint32_t IDStack = 0;

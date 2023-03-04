@@ -11,7 +11,7 @@ QMatrix4x4 ISceneRenderComponent::getMatrixView() {
 }
 
 QMatrix4x4 ISceneRenderComponent::getMatrixClipWithCorr() {
-	return sceneRenderPass()->getRenderer()->getCamera()->getMatrixClipWithCorr(mRhi.get());
+	return sceneRenderPass()->getRenderer()->getCamera()->getMatrixClipWithCorr(mRhi);
 }
 
 QMatrix4x4 ISceneRenderComponent::calculateMatrixModel() {
