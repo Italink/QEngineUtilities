@@ -1,4 +1,4 @@
-#include "Render/Components/QParticlesRenderComponent.h"
+#include "Render/Component/QParticlesRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "QVulkanInstance"
 #include "qvulkanfunctions.h"

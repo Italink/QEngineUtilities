@@ -1,4 +1,4 @@
-#include "Render/Components/QStaticMeshRenderComponent.h"
+#include "Render/Component/QStaticMeshRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 

@@ -1,4 +1,4 @@
-#include "Render/Components/QSkyboxRenderComponent.h"
+#include "Render/Component/QSkyboxRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 

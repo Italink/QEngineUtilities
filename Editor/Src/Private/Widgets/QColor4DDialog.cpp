@@ -1,6 +1,6 @@
 #include "QColor4DDialog.hpp"
 #include "QBoxLayout"
-#include "Widgets\Color\Component\QColorPicker.h"
+#include "Widgets/Color/Component/QColorPicker.h"
 
 QColor4DDialog::QColor4DDialog()
 	: mColorWheel(new ColorWheel)

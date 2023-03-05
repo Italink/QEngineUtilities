@@ -4,17 +4,17 @@ add_subdirectory(assimp)
 
 add_library(ImGui
     STATIC
-    Imgui/imconfig.h
-    Imgui/imgui.cpp
-    Imgui/imgui.h
-    Imgui/imgui_demo.cpp
-    Imgui/imgui_draw.cpp
-    Imgui/imgui_internal.h
-    Imgui/imgui_widgets.cpp
-    Imgui/imgui_tables.cpp
-    Imgui/imstb_rectpack.h
-    Imgui/imstb_textedit.h
-    Imgui/imstb_truetype.h
+    ImGui/imconfig.h
+    ImGui/imgui.cpp
+    ImGui/imgui.h
+    ImGui/imgui_demo.cpp
+    ImGui/imgui_draw.cpp
+    ImGui/imgui_internal.h
+    ImGui/imgui_widgets.cpp
+    ImGui/imgui_tables.cpp
+    ImGui/imstb_rectpack.h
+    ImGui/imstb_textedit.h
+    ImGui/imstb_truetype.h
 )
 target_include_directories(ImGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ImGui)
 

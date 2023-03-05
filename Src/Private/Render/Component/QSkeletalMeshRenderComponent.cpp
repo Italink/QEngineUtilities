@@ -1,4 +1,4 @@
-#include "Render/Components/QSkeletalMeshRenderComponent.h"
+#include "Render/Component/QSkeletalMeshRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 

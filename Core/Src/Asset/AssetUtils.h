@@ -2,10 +2,10 @@
 #define AssetUtils_h__
 
 #include "QGenericMatrix"
-#include "assimp\vector3.h"
-#include "assimp\matrix4x4.h"
+#include "assimp/vector3.h"
+#include "assimp/matrix4x4.h"
 #include "QMatrix4x4"
-#include "assimp\scene.h"
+#include "assimp/scene.h"
 #include "QDir"
 
 namespace AssetUtils {
