@@ -10,7 +10,7 @@ class QFilePathBox :public QWidget
 {
 	Q_OBJECT
 public:
-	QFilePathBox(QString inPath);
+	QFilePathBox(QString inPath = QString());
 	void SetFilePath(QString inPath);
 	QString GetFilePath();
 Q_SIGNALS:

@@ -18,6 +18,8 @@ target_link_libraries(QEngineCore PUBLIC
     Qt::Widgets
     Qt::WidgetsPrivate
     Qt::ShaderToolsPrivate
+    Qt::Multimedia
+    Qt::MultimediaPrivate
     assimp::assimp
     ImGui
     ImGuizmo

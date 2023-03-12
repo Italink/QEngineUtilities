@@ -4,6 +4,12 @@
 #include <QtGlobal>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include "qrhivulkan_p_p.h"
+#else
+#include "private/qrhivulkan_p_p.h"
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #include "vk_mem_alloc_6_5_0.h"
 #elif QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 #include "vk_mem_alloc_6_4_0.h"

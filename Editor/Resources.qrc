@@ -19,5 +19,8 @@
         <file>Resources/polygon.png</file>
         <file>Resources/mouse-arrow.png</file>
         <file>Resources/graph.png</file>
+        <file>Resources/pause.png</file>
+        <file>Resources/play.png</file>
+        <file>Resources/stop.png</file>
     </qresource>
 </RCC>

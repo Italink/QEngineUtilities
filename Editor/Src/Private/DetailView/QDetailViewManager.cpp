@@ -1,22 +1,23 @@
 #include "DetailView/QDetailViewManager.h"
-#include <QObject>
+#include "Customization/DetailCustomization_QMediaPlayer.h"
+#include "Customization/DetailCustomization_QObject.h"
+#include "Customization/DetailCustomization_QRhiGraphicsPipelineBuilder.h"
+#include "Customization/DetailCustomization_QRhiUniformBlock.h"
+#include "Customization/PropertyTypeCustomization_QMatrix4x4.h"
+#include "Customization/PropertyTypeCustomization_TextureInfo.h"
+#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Utils/QColor4D.h"
+#include "Widgets/Color/QColorButton.h"
+#include "Widgets/QColor4DButton.hpp"
+#include "Widgets/QFilePathBox.h"
+#include "Widgets/QHoverTextEdit.h"
+#include "Widgets/QImageBox.h"
+#include "Widgets/QNumberBox.h"
+#include "Widgets/QVectorBox.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QMetaMethod>
-#include "Widgets/QFilePathBox.h"
-#include "Widgets/Color/QColorButton.h"
-#include "Widgets/QNumberBox.h"
-#include "Widgets/QHoverTextEdit.h"
-#include "Widgets/QVectorBox.h"
-#include "Utils/QColor4D.h"
-#include "Widgets/QColor4DButton.hpp"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
-#include "Customization/DetailCustomization_QRhiGraphicsPipelineBuilder.h"
-#include "Customization/DetailCustomization_QObject.h"
-#include "Customization/DetailCustomization_QRhiUniformBlock.h"
-#include "Customization/PropertyTypeCustomization_TextureInfo.h"
-#include "Customization/PropertyTypeCustomization_QMatrix4x4.h"
-#include "Widgets/QImageBox.h"
+#include <QObject>
 
 QDetailViewManager* QDetailViewManager::Instance()
 {
@@ -133,6 +134,7 @@ void QDetailViewManager::RegisterBuildIn() {
 	RegisterCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QRhiGraphicsPipelineBuilder>(&QRhiGraphicsPipelineBuilder::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
 
 	RegisterCustomPropertyTypeLayout<QRhiGraphicsPipelineBuilder::TextureInfo*, PropertyTypeCustomization_TextureInfo>();
 	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();

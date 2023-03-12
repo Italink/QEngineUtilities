@@ -3,8 +3,13 @@
 QSvgButton::QSvgButton(QString inPath)
 	:mIcon(inPath)
 {
-	//setFocusPolicy(Qt::NoFocus);
 	mIcon.setUpdateCallBack([this]() {
 		setIcon(mIcon.getIcon());
 	});
+}
+
+void QSvgButton::setIconPath(QString inPath) {
+	if (!inPath.isEmpty()) {
+		mIcon.setPath(inPath);
+	}
 }

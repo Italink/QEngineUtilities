@@ -69,17 +69,7 @@ layout (location = 0) in vec2 vUV;
 layout (location = 0) out vec4 outFragColor;
 )" + mFilterCode);
 
-	mPipeline->setShaderStages({
-		{ QRhiShaderStage::Vertex, vs },
-		{ QRhiShaderStage::Fragment, fs }
-		});
-	QRhiVertexInputLayout inputLayout;
 
-
-	mPipeline->setVertexInputLayout(inputLayout);
-	mPipeline->setShaderResourceBindings(mBindings.get());
-	mPipeline->setRenderPassDescriptor(mRT.renderTarget->renderPassDescriptor());
-	mPipeline->create();
 }
 
 void QPixelFilterRenderPass::render(QRhiCommandBuffer* cmdBuffer) {

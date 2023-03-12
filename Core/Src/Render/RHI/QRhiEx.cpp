@@ -3,7 +3,6 @@
 #include "private/qshaderbaker_p.h"
 #include "private/qrhivulkan_p.h"
 #include "private/qrhi_p_p.h"
-#include "private/qrhivulkan_p_p.h"
 #ifndef QT_NO_OPENGL
 #include <QOffscreenSurface>
 #include "private/qrhigles2_p.h"
@@ -11,6 +10,9 @@
 
 #ifdef Q_OS_WIN
 #include <QtGui/private/qrhid3d11_p.h>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+#include <QtGui/private/qrhid3d12_p.h>
+#endif
 #endif
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
@@ -101,12 +103,16 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 	if (inBackend == QRhi::D3D11) {
 		QRhiD3D11InitParams params;
 		params.enableDebugLayer = true;
-		//if (framesUntilTdr > 0) {
-		//	params.framesUntilKillingDeviceViaTdr = mInitParams.framesUntilTdr;
-		//	params.repeatDeviceKill = true;
-		//}
 		return static_cast<QRhiEx*>(QRhi::create(QRhi::D3D11, &params, inFlags));
 	}
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+	if (inBackend == QRhi::D3D12) {
+		QRhiD3D12InitParams params;
+		params.enableDebugLayer = true;
+		return static_cast<QRhiEx*>(QRhi::create(QRhi::D3D12, &params, inFlags));
+	}
+#endif
+
 #endif
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)

@@ -156,6 +156,14 @@ void QDebugUIPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 
 void QDebugUIPainter::compile() {
 	mFrameGraphView->Rebuild(mRenderer->getFrameGarph());
+	registerImage("select", QImage(":/Resources/mouse-arrow.png"));
+	registerImage("translate", QImage(":/Resources/translate.png"));
+	registerImage("rotate", QImage(":/Resources/rotate.png"));
+	registerImage("scale", QImage(":/Resources/scale.png"));
+	registerImage("stats", QImage(":/Resources/stats.png"));
+	registerImage("polygon", QImage(":/Resources/polygon.png"));
+	registerImage("camera", QImage(":/Resources/camera.png"));
+	registerImage("graph", QImage(":/Resources/graph.png"));
 	ImGuiPainter::compile();
 	if (mDebugIdTexture == nullptr)
 		return;
@@ -233,15 +241,6 @@ void QDebugUIPainter::compile() {
 	mOutlinePipeline->setShaderResourceBindings(mOutlineBindings.get());
 	mOutlinePipeline->setRenderPassDescriptor(mRenderPassDesc);
 	mOutlinePipeline->create();
-
-	registerImage("select", QImage(":/Resources/mouse-arrow.png"));
-	registerImage("translate", QImage(":/Resources/translate.png"));
-	registerImage("rotate", QImage(":/Resources/rotate.png"));
-	registerImage("scale", QImage(":/Resources/scale.png"));
-	registerImage("stats", QImage(":/Resources/stats.png"));
-	registerImage("polygon", QImage(":/Resources/polygon.png"));
-	registerImage("camera", QImage(":/Resources/camera.png"));
-	registerImage("graph", QImage(":/Resources/graph.png"));
 }
 
 void QDebugUIPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {

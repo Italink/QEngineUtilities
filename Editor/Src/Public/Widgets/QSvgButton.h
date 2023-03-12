@@ -6,7 +6,8 @@
 
 class QSvgButton : public QPushButton {
 public:
-	QSvgButton(QString inPath);
+	QSvgButton(QString inPath = QString());
+	void setIconPath(QString inPath);
 private:
 	QSvgIcon mIcon;
 };

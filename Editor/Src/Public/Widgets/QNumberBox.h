@@ -117,11 +117,10 @@ public:
 	}
 	void SetEditEnabled(bool enable);
 	bool GetEditEnabled();
-	QString GetText();
 
+	QString GetText();
 	QVariant GetVar();
 	void SetVar(QVariant var);
-
 Q_SIGNALS:
 	void AsValueChanged(QVariant);
 protected:

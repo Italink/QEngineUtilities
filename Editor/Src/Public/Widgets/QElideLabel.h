@@ -10,9 +10,9 @@ class QElideLabel :public QWidget {
 public:
 	using QWidget = QWidget;
 
-	QElideLabel(const QString& inText);
+	QElideLabel(const QString& inText = QString() );
 	QString GetText() const { return mText; }
-	void SetText(QString val) { mText = val; }
+	void SetText(QString val) { mText = val; update(); }
 	void ShowRenameEditor();
 	Q_SIGNAL void AsNameChanged(QString);
 private:

@@ -9,7 +9,6 @@
 #include "QDir"
 
 namespace AssetUtils {
-
 using Mat4 = QGenericMatrix<4, 4, float>;
 
 QMatrix4x4 converter(const aiMatrix4x4& aiMat4);
