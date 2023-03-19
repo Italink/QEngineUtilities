@@ -21,8 +21,13 @@ target_link_libraries(QEngineCore PUBLIC
     Qt::Multimedia
     Qt::MultimediaPrivate
     assimp::assimp
+    fftw3
     ImGui
     ImGuizmo
+)
+
+target_include_directories(QEngineCore PRIVATE 
+    3rdParty/fftw3/api
 )
 
 set_target_properties(QEngineCore PROPERTIES FOLDER "QEngineUtilities")

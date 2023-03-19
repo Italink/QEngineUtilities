@@ -8,7 +8,7 @@
 class QStaticMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QString StaticMeshPath READ getStaticMeshPath WRITE setupStaticMeshPath)
-	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> Pipelines READ getPipelines WRITE setPipelines)
+	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> Pipelines READ getPipelines)
 		Q_META_BEGIN(QStaticMeshRenderComponent)
 			Q_META_P_STRING_AS_FILE_PATH(StaticMeshPath)
 			Q_META_P_ARRAY_FIXED_SIZE(Pipelines,true)
@@ -18,7 +18,6 @@ public:
 	QString getStaticMeshPath() const;
 	QStaticMeshRenderComponent* setupStaticMeshPath(QString inPath);
 	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
-	void setPipelines(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>) {  }
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
