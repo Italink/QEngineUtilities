@@ -33,14 +33,14 @@ void IRenderPassBase::cleanupInputLinkerCache() {
 	}
 }
 
-void ISceneRenderPass::setRenderer(IRenderer* inRenderer) {
+void IBasePass::setRenderer(IRenderer* inRenderer) {
 	IRenderPassBase::setRenderer(inRenderer);
 	for (auto& comp : mRenderComponents) {
 		comp->mRhi = mRhi;
 	}
 }
 
-void ISceneRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
+void IBasePass::render(QRhiCommandBuffer* cmdBuffer) {
 	QVector<IRenderComponent*> uploadItems;
 	for (auto& item : mRenderComponents) {
 		if (item->sigonRebuildResource.receive()) {
@@ -71,7 +71,7 @@ void ISceneRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	cmdBuffer->endPass();
 }
 
-ISceneRenderPass* ISceneRenderPass::addRenderComponent(IRenderComponent* inRenderComponent) {
+IBasePass* IBasePass::addRenderComponent(IRenderComponent* inRenderComponent) {
 	inRenderComponent->setParent(this);
 	inRenderComponent->mRhi = mRhi;
 	inRenderComponent->mScreenRenderPass = this;

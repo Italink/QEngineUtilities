@@ -80,11 +80,11 @@ void QWindowRenderer::refreshOutputTexture()
 	IRenderer::refreshOutputTexture();
 #ifdef QENGINE_WITH_EDITOR
 	QRhiTexture* debugIdTexture = nullptr;
-	for (const auto& scenePass : findChildren<ISceneRenderPass*>()) {
-		auto texSlots = scenePass->getRenderTargetSlots();
+	for (const auto& basePass :findChildren<IBasePass*>()) {
+		auto texSlots = basePass->getRenderTargetSlots();
 		for (int slotIndex = 0; slotIndex < texSlots.size(); ++slotIndex) {
 			if (texSlots[slotIndex].second == "DebugId") {
-				debugIdTexture = scenePass->getOutputTexture(slotIndex);
+				debugIdTexture = basePass->getOutputTexture(slotIndex);
 				break;
 			}
 		}

@@ -25,7 +25,7 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::loadFromFile(const QString& inFileP
 		return skeletalMesh;
 	}
 	skeletalMesh = QSharedPointer<QSkeletalMesh>::create();
-	const QVector<QMap<QString, QImage>>& matertialInfos = AssetUtils::loadMaterialsInfo(scene, inFilePath);
+	const QVector<QMap<QString, QVariant>>& materialPropertiesList = AssetUtils::loadMaterialPropertiesList(scene, inFilePath);
 	QQueue<QPair<aiNode*, aiMatrix4x4>> qNode;
 	qNode.push_back({ scene->mRootNode ,aiMatrix4x4() });
 	skeletalMesh->mSkeleton = QSharedPointer<QSkeleton>::create();
@@ -91,7 +91,7 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::loadFromFile(const QString& inFileP
 					}
 				}
 			}
-			meshInfo.materialInfo = matertialInfos[mesh->mMaterialIndex];
+			meshInfo.materialProperties = materialPropertiesList[mesh->mMaterialIndex];
 			skeletalMesh->mSubmeshes << meshInfo;
 		}
 		for (unsigned int i = 0; i < node.first->mNumChildren; i++) {

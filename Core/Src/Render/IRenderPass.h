@@ -52,7 +52,7 @@ protected:
 	QMap<int, QRhiTexture*> mOutputTextures;
 };
 
-class ISceneRenderPass :public IRenderPassBase {
+class IBasePass :public IRenderPassBase {
 	Q_OBJECT
 public:
 	void setSampleCount(int inSampleCount) { mSampleCount = inSampleCount;}
@@ -65,7 +65,7 @@ public:
 	virtual QRhiRenderTarget* getRenderTarget() = 0;
 	void setRenderer(IRenderer* inRenderer) override;
 	void render(QRhiCommandBuffer* cmdBuffer) override;
-	ISceneRenderPass* addRenderComponent(IRenderComponent* inRenderComponent);
+	IBasePass* addRenderComponent(IRenderComponent* inRenderComponent);
 protected:
 	QVector<IRenderComponent*> mRenderComponents;
 	int mSampleCount = 1;

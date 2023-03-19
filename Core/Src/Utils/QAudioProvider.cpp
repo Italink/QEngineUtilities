@@ -200,8 +200,8 @@ void QAudioProvider::tryExecuteFft() {
 			const double imag = mFftOutput.data()[fftSize - 1 - (fftSize / 2 + i)];
 			const double magnitude = sqrt(real * real + imag * imag);
 			double freq = DspCurves::freqd(i, fftSize / 2, sampleRate);
-			double weight = DspCurves::myAWeight(freq);
-			mFftResultCache[i] = magnitude * weight;
+			double kernel = DspCurves::myAWeight(freq);
+			mFftResultCache[i] = magnitude * kernel;
 		}
 	}
 }
@@ -235,8 +235,6 @@ const QVector<float>& QSpectrumProvider::calculateSpectrum() {
 		refreshFreq();
 	}
 	const QVector<double>& Fft = mAudioProvider->getFftCache();
-
-
 
 	int sampleRate = mAudioProvider->getAudioFormat().sampleRate();
 	double df = sampleRate / Fft.size() * 2;

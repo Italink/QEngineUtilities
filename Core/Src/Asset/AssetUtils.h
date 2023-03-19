@@ -15,7 +15,7 @@ QMatrix4x4 converter(const aiMatrix4x4& aiMat4);
 
 QVector3D converter(const aiVector3D& aiVec3);
 
-QVector<QMap<QString, QImage>> loadMaterialsInfo(const aiScene* scene, QString modelPath);
+QVector<QMap<QString, QVariant>> loadMaterialPropertiesList(const aiScene* scene, QString modelPath);
 }
 
 

@@ -64,7 +64,7 @@ public:
 		uint32_t verticesRange;
 		uint32_t indicesOffset;
 		uint32_t indicesRange;
-		QMap<QString, QImage> materialInfo;
+		QMap<QString, QVariant> materialProperties;
 	};
 
 	QVector<Vertex> mVertices;

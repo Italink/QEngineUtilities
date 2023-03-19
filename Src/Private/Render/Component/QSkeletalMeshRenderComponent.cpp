@@ -3,7 +3,8 @@
 #include "Utils/DebugUtils.h"
 
 QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent(const QString& inSkeletalMeshPath) {
-	setupSkeletalMeshPath(inSkeletalMeshPath);
+	if(!inSkeletalMeshPath.isEmpty())
+		setupSkeletalMeshPath(inSkeletalMeshPath);
 }
 
 QString QSkeletalMeshRenderComponent::getSkeletalMeshPath() const {
@@ -69,9 +70,9 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 			}
 		)");
 
-		bool bHasDiffuse = mesh.materialInfo.contains("Diffuse");
+		bool bHasDiffuse = mesh.materialProperties.contains("Diffuse");
 		if (bHasDiffuse) {
-			mPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", mesh.materialInfo["Diffuse"]);
+			mPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", mesh.materialProperties["Diffuse"].value<QImage>());
 		}
 		mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec2 vUV;

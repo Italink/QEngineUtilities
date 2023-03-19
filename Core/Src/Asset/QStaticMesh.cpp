@@ -15,7 +15,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::loadFromFile(const QString& inFilePath)
 		return staticMesh;
 	}
 	staticMesh = QSharedPointer<QStaticMesh>::create();
-	const QVector<QMap<QString, QImage>>& matertialInfos = AssetUtils::loadMaterialsInfo(scene, inFilePath);
+	const QVector<QMap<QString, QVariant>>& matertialPropertiesList = AssetUtils::loadMaterialPropertiesList(scene, inFilePath);
 	QQueue<QPair<aiNode*, aiMatrix4x4>> qNode;
 	qNode.push_back({ scene->mRootNode ,aiMatrix4x4() });
 	while (!qNode.isEmpty()) {
@@ -26,7 +26,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::loadFromFile(const QString& inFilePath)
 			meshInfo.verticesOffset = staticMesh->mVertices.size();
 			meshInfo.verticesRange = mesh->mNumVertices;
 			meshInfo.localTransfrom = AssetUtils::converter(node.second);
-			meshInfo.materialInfo = matertialInfos[mesh->mMaterialIndex];
+			meshInfo.materialProperties = matertialPropertiesList[mesh->mMaterialIndex];
 			staticMesh->mVertices.resize(meshInfo.verticesOffset + meshInfo.verticesRange);
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 				QStaticMesh::Vertex& vertex = staticMesh->mVertices[meshInfo.verticesOffset + i];

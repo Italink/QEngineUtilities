@@ -1,10 +1,10 @@
-﻿#include "Render/Pass/QSceneForwardRenderPass.h"
+﻿#include "Render/Pass/QBasePassForward.h"
 
-QSceneForwardRenderPass::QSceneForwardRenderPass() {
+QBasePassForward::QBasePassForward() {
 
 }
 
-QList<QPair<QRhiTexture::Format, QString>> QSceneForwardRenderPass::getRenderTargetSlots() {
+QList<QPair<QRhiTexture::Format, QString>> QBasePassForward::getRenderTargetSlots() {
 	return { 
 	{QRhiTexture::RGBA32F,"BaseColor"}
 #ifdef QENGINE_WITH_EDITOR
@@ -13,15 +13,15 @@ QList<QPair<QRhiTexture::Format, QString>> QSceneForwardRenderPass::getRenderTar
 	};
 }
 
-QRhiRenderPassDescriptor* QSceneForwardRenderPass::getRenderPassDescriptor() {
+QRhiRenderPassDescriptor* QBasePassForward::getRenderPassDescriptor() {
 	return mRT.renderPassDesc.get();
 }
 
-QRhiRenderTarget* QSceneForwardRenderPass::getRenderTarget() {
+QRhiRenderTarget* QBasePassForward::getRenderTarget() {
 	return mRT.renderTarget.get();
 }
 
-void QSceneForwardRenderPass::resizeAndLink(const QSize& size, const TextureLinker& linker) {
+void QBasePassForward::resizeAndLink(const QSize& size, const TextureLinker& linker) {
 	mRT.atBaseColor.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size,getSampleCount() , QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atBaseColor->create();
 #ifdef QENGINE_WITH_EDITOR

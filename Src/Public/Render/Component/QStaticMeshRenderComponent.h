@@ -19,6 +19,7 @@ public:
 	QStaticMeshRenderComponent* setupStaticMeshPath(QString inPath);
 	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
 protected:
+	void setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, const QStaticMesh::SubMeshInfo& info);
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
 	void onUpload(QRhiResourceUpdateBatch* batch) override;

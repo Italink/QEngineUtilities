@@ -15,6 +15,7 @@ void IRenderer::requestComplie() {
 }
 
 void IRenderer::compile() {
+	bRequestCompile = false;
 	if (!mFrameGraph)
 		return;
 	mFrameGraph->rebuildTopology();

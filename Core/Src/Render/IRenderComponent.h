@@ -3,11 +3,11 @@
 
 #include "Render/RHI/QRhiEx.h"
 
-class ISceneRenderPass;
+class IBasePass;
 
 class IRenderComponent: public QObject {
 	Q_OBJECT
-	friend class ISceneRenderPass;
+	friend class IBasePass;
 public:
 	QRhiEx::Signal sigonRebuildResource;
 	QRhiEx::Signal sigonRebuildPipeline;
@@ -21,10 +21,10 @@ public:
 	virtual void onUpload(QRhiResourceUpdateBatch* batch) {}
 	virtual void onUpdate(QRhiResourceUpdateBatch* batch) {}
 	virtual void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) = 0;
-	ISceneRenderPass* sceneRenderPass() { return mScreenRenderPass; }
+	IBasePass* sceneRenderPass() { return mScreenRenderPass; }
 protected:
 	QRhiEx* mRhi;
-	ISceneRenderPass* mScreenRenderPass = nullptr;
+	IBasePass* mScreenRenderPass = nullptr;
 	uint32_t mID;
 	inline static uint32_t IDStack = 0;
 };

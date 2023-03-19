@@ -1,25 +1,37 @@
-﻿#ifndef QSceneForwardRenderPass_h__
-#define QSceneForwardRenderPass_h__
+﻿#ifndef QBasePassDeferred_h__
+#define QBasePassDeferred_h__
+
 
 #include "Render/IRenderPass.h"
 
-class QSceneForwardRenderPass : public ISceneRenderPass {
+class QBasePassDeferred : public IBasePass {
 	Q_OBJECT
 public:
-	enum  OutSlot {
+	enum OutSlot {
 		BaseColor,
-#ifdef QENGINE_WITH_EDITOR
+		Position,
+		Normal,
+		Tangent,
+		Metalness,
+		Roughness,
+		Depth,
+	#ifdef QENGINE_WITH_EDITOR
 		DebugId,
-#endif
+	#endif
 	};
-	QSceneForwardRenderPass();
+	QBasePassDeferred();
 protected:
 	struct RT {
 		QScopedPointer<QRhiTexture> atBaseColor;
-#ifdef QENGINE_WITH_EDITOR
+		QScopedPointer<QRhiTexture> atPosition;
+		QScopedPointer<QRhiTexture> atNormal;
+		QScopedPointer<QRhiTexture> atTangent;
+		QScopedPointer<QRhiTexture> atMetalness;
+		QScopedPointer<QRhiTexture> atRoughness;
+	#ifdef QENGINE_WITH_EDITOR
 		QScopedPointer<QRhiTexture> atDebugId;
-#endif
-		QScopedPointer<QRhiRenderBuffer> atDepthStencil;
+	#endif
+		QScopedPointer<QRhiTexture> atDepthStencil;
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;
 		QScopedPointer<QRhiRenderPassDescriptor> renderPassDesc;
 	};
@@ -31,4 +43,5 @@ protected:
 	RT mRT;
 };
 
-#endif // QSceneForwardRenderPass_h__
+
+#endif // QBasePassDeferred_h__

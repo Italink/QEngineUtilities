@@ -9,9 +9,9 @@ public:
 
 	void setupTexture(QRhiTexture* texture);
 
-	void setupSampler(QRhiSampler::Filter magFilter = QRhiSampler::Nearest,
-		QRhiSampler::Filter minFilter = QRhiSampler::Nearest,
-		QRhiSampler::Filter mipmapMode = QRhiSampler::Nearest,
+	void setupSampler(QRhiSampler::Filter magFilter = QRhiSampler::Linear,
+		QRhiSampler::Filter minFilter = QRhiSampler::Linear,
+		QRhiSampler::Filter mipmapMode = QRhiSampler::Linear,
 		QRhiSampler::AddressMode addressU = QRhiSampler::Repeat,
 		QRhiSampler::AddressMode addressV = QRhiSampler::Repeat,
 		QRhiSampler::AddressMode addressW = QRhiSampler::Repeat);
@@ -22,9 +22,9 @@ protected:
 	QRhiTexture* mTexture = nullptr;
 
 	QScopedPointer<QRhiSampler> mSampler;
-	QRhiSampler::Filter mMagFilter = QRhiSampler::Nearest;
-	QRhiSampler::Filter mMinFilter = QRhiSampler::Nearest;
-	QRhiSampler::Filter mMipmapMode = QRhiSampler::Nearest;
+	QRhiSampler::Filter mMagFilter = QRhiSampler::Linear;
+	QRhiSampler::Filter mMinFilter = QRhiSampler::Linear;
+	QRhiSampler::Filter mMipmapMode = QRhiSampler::Linear;
 	QRhiSampler::AddressMode mAddressU = QRhiSampler::Repeat;
 	QRhiSampler::AddressMode mAddressV = QRhiSampler::Repeat;
 	QRhiSampler::AddressMode mAddressW = QRhiSampler::Repeat;

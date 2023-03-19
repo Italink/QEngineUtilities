@@ -55,17 +55,19 @@ void main() {
 	});
 	QRhiVertexInputLayout inputLayout;
 
-	mSampler.reset(mRhi->newSampler(QRhiSampler::Nearest,
-		QRhiSampler::Nearest,
-		QRhiSampler::None,
-		QRhiSampler::ClampToEdge,
-		QRhiSampler::ClampToEdge));
+	mSampler.reset(mRhi->newSampler(
+		mMagFilter,
+		mMinFilter,
+		mMipmapMode,
+		mAddressU,
+		mAddressV,
+		mAddressW));
 	mSampler->create();
 
 	mBindings.reset(mRhi->newShaderResourceBindings());
 	mBindings->setBindings({
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage,mTexture,mSampler.get())
-						   });
+	});
 	mBindings->create();
 	mPipeline->setVertexInputLayout(inputLayout);
 	mPipeline->setShaderResourceBindings(mBindings.get());

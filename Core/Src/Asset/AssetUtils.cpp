@@ -15,14 +15,14 @@ QVector3D AssetUtils::converter(const aiVector3D& aiVec3) {
 	return QVector3D(aiVec3.x, aiVec3.y, aiVec3.z);
 }
 
-QVector<QMap<QString, QImage>> AssetUtils::loadMaterialsInfo(const aiScene* scene, QString modelPath) {
+QVector<QMap<QString, QVariant>> AssetUtils::loadMaterialPropertiesList(const aiScene* scene, QString modelPath) {
 	QDir modelDir = QFileInfo(modelPath).dir();
-	QVector< QMap<QString, QImage>> matertialInfos;
+	QVector< QMap<QString, QVariant>> materialPropertiesList;
 	static QStringList TextureNameMap = { "None","Diffuse","Specular","Ambient","Emissive","Height","Normals","Shininess","Opacity","Displacement","Lightmap","Reflection",
 		"BaseColor","NormalCamera","EmissionColor","Metalness","DiffuseRoughnes","AmbientOcclusion",
 		"Unknown","Sheen","Clearcoat","Transmission" };
 	for (uint i = 0; i < scene->mNumMaterials; i++) {
-		QMap<QString, QImage> materialInfo;
+		QMap<QString, QVariant> materialProperties;
 		aiMaterial* rawMaterial = scene->mMaterials[i];
 		for (int i = aiTextureType_DIFFUSE; i < AI_TEXTURE_TYPE_MAX; i++) {
 			int count = rawMaterial->GetTextureCount(aiTextureType(i));
@@ -55,10 +55,10 @@ QVector<QMap<QString, QImage>> AssetUtils::loadMaterialsInfo(const aiScene* scen
 				if (j != 0) {
 					textureName += QString::number(j);
 				}
-				materialInfo[textureName] = image;
+				materialProperties[textureName] = image;
 			}
 		}
-		matertialInfos << materialInfo;
+		materialPropertiesList << materialProperties;
 	}
-	return matertialInfos;
+	return materialPropertiesList;
 }
