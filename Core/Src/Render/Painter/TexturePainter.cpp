@@ -30,25 +30,28 @@ void TexturePainter::compile()
 	mPipeline->setTargetBlends({ blendState });
 	mPipeline->setSampleCount(mSampleCount);
 	mPipeline->setDepthTest(false);
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 450
-layout (location = 0) out vec2 vUV;
-out gl_PerVertex{
-	vec4 gl_Position;
-};
-void main() {
-	vUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
-	gl_Position = vec4(vUV * 2.0f - 1.0f, 0.0f, 1.0f);
-}
-)");
+
+	QString vsCode = R"(#version 450
+		layout (location = 0) out vec2 vUV;
+		out gl_PerVertex{
+			vec4 gl_Position;
+		};
+		void main() {
+			vUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
+			gl_Position = vec4(vUV * 2.0f - 1.0f, 0.0f, 1.0f);
+			%1
+		}
+	)";
+	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
 
 	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
-layout (binding = 0) uniform sampler2D uSamplerColor;
-layout (location = 0) in vec2 vUV;
-layout (location = 0) out vec4 outFragColor;
-void main() {
-	outFragColor = vec4(texture(uSamplerColor, vUV).rgb,1.0f);
-}
-)");
+		layout (binding = 0) uniform sampler2D uSamplerColor;
+		layout (location = 0) in vec2 vUV;
+		layout (location = 0) out vec4 outFragColor;
+		void main() {
+			outFragColor = vec4(texture(uSamplerColor, vUV).rgb,1.0f);
+		}
+	)");
 	mPipeline->setShaderStages({
 		{ QRhiShaderStage::Vertex, vs },
 		{ QRhiShaderStage::Fragment, fs }

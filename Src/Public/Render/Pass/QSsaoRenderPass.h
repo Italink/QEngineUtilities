@@ -50,13 +50,13 @@ private:
 	QScopedPointer<QRhiShaderResourceBindings> mBindings;
 
 	struct SsaoState {
+		QGenericMatrix<4, 4, float> projection;
 		float radius = 2.0f;
 		float bias = 0.1f;
 		uint32_t size = 0;
 		uint32_t padding;
 		QVector4D samples[128];
 		QVector4D noise[16];
-		QGenericMatrix<4, 4, float> projection;
 	}mSsaoState;
 	QRhiEx::Signal sigUpdateSsaoState;
 };

@@ -64,8 +64,8 @@ void QSsaoRenderPass::resizeAndLink(const QSize& size, const TextureLinker& link
 	mSampler.reset(mRhi->newSampler(QRhiSampler::Nearest,
 		QRhiSampler::Nearest,
 		QRhiSampler::Nearest,
-		QRhiSampler::Repeat,
-		QRhiSampler::Mirror));
+		QRhiSampler::ClampToEdge,
+		QRhiSampler::ClampToEdge));
 	mSampler->create();
 
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(SsaoState)));
@@ -104,12 +104,12 @@ void QSsaoRenderPass::compile() {
 		layout (binding = 0) uniform sampler2D uPosition;
 		layout (binding = 1) uniform sampler2D uNormal;
 		layout (binding = 2) uniform SsaoState{
+			mat4 projection;
 			float radius;
 			float bias;
 			int size;
 			vec4 samples[128];
 			vec4 noise[16];
-			mat4 projection;
 		}ssaoState;
 		layout (location = 0) in vec2 vUV;
 		layout (location = 0) out vec4 outFragColor;
@@ -129,8 +129,7 @@ void QSsaoRenderPass::compile() {
 				vec3 samplePos = TBN * ssaoState.samples[i].xyz;
 				samplePos = position + samplePos * ssaoState.radius;
 
-				vec4 offset = vec4(samplePos, 1.0);
-				offset      = ssaoState.projection * offset;
+				vec4 offset = ssaoState.projection * vec4(samplePos, 1.0);
 				offset.xyz /= offset.w;
 				offset.xyz  = offset.xyz * 0.5 + 0.5; 
 
@@ -155,14 +154,16 @@ void QSsaoRenderPass::compile() {
 }
 
 void QSsaoRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
+	QMatrix4x4 VP = mRenderer->getCamera()->getMatrixClipWithCorr(mRhi) * mRenderer->getCamera()->getMatrixView();
+	mSsaoState.projection = VP.toGenericMatrix<4, 4>();
+	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	if (sigUpdateSsaoState.receive()) {
-		if (mRenderer) {
-			mSsaoState.projection = mRenderer->getCamera()->getMatrixClipWithCorr(mRhi).toGenericMatrix<4,4>();
-		}
-		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(SsaoState), &mSsaoState);
-		cmdBuffer->resourceUpdate(batch);
 	}
+	else {
+		batch->updateDynamicBuffer(mUniformBuffer.get(), offsetof(SsaoState, projection), sizeof(float) * 16, &mSsaoState);
+	}
+	cmdBuffer->resourceUpdate(batch);
 	cmdBuffer->beginPass(mRT.renderTarget.get(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 });
 	cmdBuffer->setGraphicsPipeline(mPipeline.get());
 	cmdBuffer->setShaderResources(mBindings.get());

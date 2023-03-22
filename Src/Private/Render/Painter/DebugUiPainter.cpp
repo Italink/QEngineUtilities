@@ -133,17 +133,17 @@ void QDebugUIPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 	if (mDebugIdTexture) {
 		if (!mReadPoint.isNull() && !ImGui::GetIO().MouseDownOwned[ImGuiMouseButton_Left]) {
 			mReadDesc.setTexture(mDebugIdTexture);
-			mReadReult.completed = [this]() {
-				if (!mReadPoint.isNull()) {
+			mReadReult.completed = [Pos = mReadPoint,this]() {
+				if (!Pos.isNull()) {
 					const uchar* p = reinterpret_cast<const uchar*>(mReadReult.data.constData());
-					int offset = (mReadReult.pixelSize.width() * mReadPoint.y() + mReadPoint.x()) * 4;
+					int offset = (mReadReult.pixelSize.width() * Pos.y() + Pos.x()) * 4;
 					uint32_t Id = p[offset] + p[offset + 1] * 256 + p[offset + 2] * 256 * 256 + p[offset + 3] * 256 * 256 * 256;
 					mRenderer->setCurrentObject(mRenderer->getComponentById(Id));
-					mReadPoint = { 0,0 };
 				}
 			};
 			batch->readBackTexture(mReadDesc, &mReadReult);
 			mRhi->finish();
+			mReadPoint = { 0,0 };
 		}
 		ISceneRenderComponent* CurrComponent = qobject_cast<ISceneRenderComponent*>(mRenderer->getCurrentObject());
 		QVector4D ID(-1, -1, -1, -1);

@@ -59,7 +59,7 @@ void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuild
 			void main(){
 				vUV = inUV;
 				vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
-				vTangentBasis =  mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
+				vTangentBasis =  mat3(transpose(inverse(Transform.M)))* mat3(inTangent, inBitangent, inNormal);
 				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 			}
 			)");

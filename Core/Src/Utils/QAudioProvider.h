@@ -16,6 +16,7 @@ class QSpectrumProvider;
 struct fftw_plan_s;
 
 class QAudioProvider: public QObject {
+	Q_OBJECT
 public:
 	enum WindowFunction {
 		NoWindow,
@@ -28,6 +29,7 @@ public:
 		NuttallWindow,
 		SinWindow
 	};
+	Q_ENUM(WindowFunction)
 public:
 	QAudioProvider();
 	void setSource(QUrl inUrl);
@@ -35,6 +37,9 @@ public:
 	void setWindowFunction(WindowFunction inType);
 	void setFramesPerBuffer(int size);
 	void play();
+
+	WindowFunction getWindowFunction() const { return mCtx.windowType; }
+	int getFramesPerBuffer() const { return mCtx.framesPerBuffer; }
 	QList<QAudioDevice> getAudioOutputDevices();
 	QAudioFormat getAudioFormat();
 	const QVector<double>& getFftCache();
@@ -77,6 +82,11 @@ public:
 	void setBarSize(int size);
 	void setLowFreq(int low);
 	void setHighFreq(int high);
+
+	int getBarSize() const { return mAmp.size(); }
+	int getLowFreq()const { return mLowFreq; }
+	int getHighFreq()const { return mHighFreq; }
+
 	const QVector<float>& calculateSpectrum();
 protected:
 	QSpectrumProvider(QAudioProvider* inProvider);
@@ -95,7 +105,7 @@ private:
 	float mSmoothRangeLowCache = 0.0f;
 	float mSmoothRangeHighCache = 0.0f;
 	float mSmoothRiseFactor = 1.0f;		//	单个柱子上升时的平滑因子
-	float mSmoothFallFactor = 0.005f;   //  1.0f - no smooth
+	float mSmoothFallFactor = 0.005f;   //  1.0f = no smooth
 };
 
 

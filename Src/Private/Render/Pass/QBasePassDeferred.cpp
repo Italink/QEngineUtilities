@@ -8,7 +8,7 @@ QList<QPair<QRhiTexture::Format, QString>> QBasePassDeferred::getRenderTargetSlo
 	return {
 	{QRhiTexture::RGBA32F,"BaseColor"},
 	{QRhiTexture::RGBA32F,"Position"},
-	{QRhiTexture::RGBA8	,"Normal"},
+	{QRhiTexture::RGBA8,"Normal"},
 	{QRhiTexture::RGBA8,"Tangent"},
 	{QRhiTexture::R8,"Metalness"},
 	{QRhiTexture::R8,"Roughness"}
@@ -31,7 +31,7 @@ void QBasePassDeferred::resizeAndLink(const QSize& size, const TextureLinker& li
 	mRT.atBaseColor->create();
 	mRT.atPosition.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atPosition->create();
-	mRT.atNormal.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+	mRT.atNormal.reset(mRhi->newTexture(QRhiTexture::RGBA8, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atNormal->create();
 	mRT.atTangent.reset(mRhi->newTexture(QRhiTexture::RGBA8, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atTangent->create();
@@ -68,8 +68,7 @@ void QBasePassDeferred::resizeAndLink(const QSize& size, const TextureLinker& li
 	linker.registerOutputTexture(3, "Tangent", mRT.atTangent.get());
 	linker.registerOutputTexture(4, "Metalness", mRT.atMetalness.get());
 	linker.registerOutputTexture(5, "Roughness", mRT.atRoughness.get());
-	linker.registerOutputTexture(6, "Depth", mRT.atDepthStencil.get());
 #ifdef QENGINE_WITH_EDITOR
-	linker.registerOutputTexture(7, "DebugId", mRT.atDebugId.get());
+	linker.registerOutputTexture(6, "DebugId", mRT.atDebugId.get());
 #endif
 }

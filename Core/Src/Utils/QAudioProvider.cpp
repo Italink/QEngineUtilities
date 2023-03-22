@@ -194,13 +194,14 @@ void QAudioProvider::tryExecuteFft() {
 		}
 		memset(mFftInput.data() + maxFrameCount, 0, fftSize - maxFrameCount);
 		fftw_execute(mFftPlan.get());
+
 		mFftResultCache.resize(fftSize / 2);
 		for (int i = 0; i < fftSize / 2; i++) {
-			const double real = mFftOutput.data()[i];
-			const double imag = mFftOutput.data()[fftSize - 1 - (fftSize / 2 + i)];
-			const double magnitude = sqrt(real * real + imag * imag);
-			double freq = DspCurves::freqd(i, fftSize / 2, sampleRate);
-			double kernel = DspCurves::myAWeight(freq);
+			const double& real = mFftOutput.data()[i];
+			const double& imag = mFftOutput.data()[fftSize - 1 - (fftSize / 2 + i)];
+			const double& magnitude = sqrt(real * real + imag * imag);
+			const double& freq = DspCurves::freqd(i, fftSize / 2, sampleRate);
+			const double& kernel = DspCurves::myAWeight(freq);
 			mFftResultCache[i] = magnitude * kernel;
 		}
 	}
@@ -297,12 +298,13 @@ const QVector<float>& QSpectrumProvider::calculateSpectrum() {
 		}
 		mAmp[i] = qBound(0.0, mSmoothCache[i], 1.0);
 	}
-	static int counter = 0;
-	qDebug() << ++counter;
 	return mAmp;
 }
 
 void QSpectrumProvider::refreshFreq() {
+	if (mLowFreq > mHighFreq) {
+		qSwap(mLowFreq, mHighFreq);
+	}
 	float freqScaleOff = 800;
 	float step = (float)((log(mHighFreq / (mLowFreq + (freqScaleOff))) / mFreq.size()) / log(2.0));
 	mFreq[0] = mLowFreq + freqScaleOff;

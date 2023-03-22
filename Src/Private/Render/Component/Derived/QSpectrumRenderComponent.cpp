@@ -10,7 +10,7 @@ QSpectrumRenderComponent::QSpectrumRenderComponent(){
 
 void QSpectrumRenderComponent::onRebuildResource() {
 	QDynamicMeshRenderComponent::onRebuildResource();
-	mAudioProvider->setSource(QUrl::fromLocalFile("C:/Users/Administrator/Music/C.mp3"));
+	mAudioProvider->setSource(QUrl::fromLocalFile("C:/Users/Administrator/Music/D.mp3"));
 	mAudioProvider->play();
 
 	QTimer* timer = new QTimer;
