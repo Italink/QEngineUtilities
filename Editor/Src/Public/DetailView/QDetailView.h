@@ -11,6 +11,7 @@ class QDetailLayoutBuilder;
 class QDetailView: public QScrollArea {
 	Q_OBJECT
 	friend class QDetailViewRow;
+	friend class IDetailLayoutBuilder;
 public:
 	QDetailView();
 	void SetObject(QObject* inObject);
@@ -21,6 +22,7 @@ public:
 	void ForceRebuild();
 	QDetailViewRow* AddTopLevelRow();
 protected:
+	void SetPage(QWidget* inPage);
 	void resizeEvent(QResizeEvent* event) override;
 	void Reset();
 	void RefreshRowsState();

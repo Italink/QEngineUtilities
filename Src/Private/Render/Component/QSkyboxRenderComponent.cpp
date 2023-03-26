@@ -56,11 +56,10 @@ QSkyboxRenderComponent::QSkyboxRenderComponent()
 	setScale3D(QVector3D(2000, 2000, 2000));
 }
 
-QSkyboxRenderComponent* QSkyboxRenderComponent::setupSkyBoxImage(QImage inImage) {
+void QSkyboxRenderComponent::setSkyBoxImage(QImage inImage) {
 	mSkyBoxImage = inImage.convertToFormat(QImage::Format::Format_RGBA8888);
 	sigonRebuildResource.request();
 	sigonRebuildPipeline.request();
-	return this;
 }
 
 void QSkyboxRenderComponent::onRebuildResource() {

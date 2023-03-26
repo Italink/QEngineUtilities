@@ -122,10 +122,9 @@ void QObjectTreeView::AddItemInternal(QTreeWidgetItem* inParentItem, QObject* in
 }
 
 QTreeWidgetItem* QObjectTreeView::CreateItemForInstance(QObject* InInstance) {
-	QString name;
-	name += QString::asprintf("[%s: %p] : ", InInstance->metaObject()->className(), InInstance);
-	if (InInstance->metaObject()->inherits(QObject::metaObject())) {
-		name += InInstance->objectName();
+	QString name = InInstance->objectName();
+	if (name.isEmpty()) {
+		name = InInstance->metaObject()->className();
 	}
 	QTreeWidgetItem* item = new QTreeWidgetItem({ name });
 	item->setSizeHint(0, QSize(30, 30));

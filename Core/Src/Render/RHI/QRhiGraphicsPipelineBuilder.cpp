@@ -176,8 +176,8 @@ QRhiShaderResourceBindings* QRhiGraphicsPipelineBuilder::getShaderResourceBindin
 }
 
 void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
-	mBlendStates.resize(inRenderComponent->sceneRenderPass()->getRenderTargetSlots().size());
-	QRhiEx* rhi = inRenderComponent->sceneRenderPass()->getRenderer()->getRhi();
+	mBlendStates.resize(inRenderComponent->getBasePass()->getRenderTargetColorAttachments().size());
+	QRhiEx* rhi = inRenderComponent->getBasePass()->getRenderer()->getRhi();
 	mPipeline.reset(rhi->newGraphicsPipeline());
 	mPipeline->setTopology(mTopology);
 	mPipeline->setCullMode(mCullMode);
@@ -192,13 +192,13 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mPipeline->setStencilBack(mStencilBackOp);
 	mPipeline->setStencilReadMask(mStencilReadMask);
 	mPipeline->setStencilWriteMask(mStencilWriteMask);
-	mPipeline->setSampleCount(inRenderComponent->sceneRenderPass()->getSampleCount());
+	mPipeline->setSampleCount(inRenderComponent->getBasePass()->getSampleCount());
 	mPipeline->setDepthBias(mDepthBias);
 	mPipeline->setSlopeScaledDepthBias(mSlopeScaledDepthBias);
 	mPipeline->setPatchControlPointCount(mPatchControlPointCount);
 	mPipeline->setPolygonMode(PolygonModeOverride == -1 ? mPolygonMode : (QRhiGraphicsPipeline::PolygonMode)PolygonModeOverride);
 	mPipeline->setVertexInputLayout(mVertexInputLayout);
-	mPipeline->setRenderPassDescriptor(inRenderComponent->sceneRenderPass()->getRenderPassDescriptor());
+	mPipeline->setRenderPassDescriptor(inRenderComponent->getBasePass()->getRenderPassDescriptor());
 
 	recreateShaderBindings(inRenderComponent, rhi);
 
@@ -322,7 +322,7 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 		stage.second.DefineCode += uniformDefineCode.toLocal8Bit();
 	}
 	QString fragOutputCode;
-	auto targetSlots = inRenderComponent->sceneRenderPass()->getRenderTargetSlots();
+	auto targetSlots = inRenderComponent->getBasePass()->getRenderTargetColorAttachments();
 	for (int i = 0; i < targetSlots.size(); i++) {
 		QByteArray slotType = getOutputFormatTypeName(targetSlots[i].first);
 		QByteArray slotName = targetSlots[i].second.toLocal8Bit();

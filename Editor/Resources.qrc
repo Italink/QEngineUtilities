@@ -22,5 +22,14 @@
         <file>Resources/pause.png</file>
         <file>Resources/play.png</file>
         <file>Resources/stop.png</file>
+        <file>Resources/arrow-left-l.png</file>
+        <file>Resources/arrow-right-l.png</file>
+        <file>Resources/case.png</file>
+        <file>Resources/ic_exp.png</file>
+        <file>Resources/image-20220626170121678.png</file>
+        <file>Resources/image-20220626170508988.png</file>
+        <file>Resources/replace.png</file>
+        <file>Resources/text-format.png</file>
+        <file>Resources/close.png</file>
     </qresource>
 </RCC>

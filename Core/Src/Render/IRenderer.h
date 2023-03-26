@@ -19,6 +19,7 @@ public:
 	virtual QRhiRenderTarget* renderTaget() = 0;
 	virtual QRhiRenderPassDescriptor* renderPassDescriptor() { return renderTaget()->renderPassDescriptor(); }
 	virtual int sampleCount() = 0;
+	virtual QWindow* getWindow() { return nullptr; }
 
 	void setCamera(QCamera* inCamera);
 	void setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph);
@@ -26,11 +27,11 @@ public:
 
 	QSize getFrameSize() const { return mFrameSize; }
 	QCamera* getCamera() const { return mCamera; }
-	IRenderPassBase* getRenderPassByName(const QString& inName);
 	QRhiEx* getRhi() { return mRhi; }
 	QObject* getCurrentObject() const { return mCurrentObject; }
 	IRenderComponent* getComponentById(uint32_t inId);
 	QFrameGraph* getFrameGarph() const { return mFrameGraph.get(); }
+	QRhiTexture* getTexture(const QString& inPassName, int inSlot);
 Q_SIGNALS:
 	void asCurrentObjectChanged(QObject*);
 protected:
@@ -38,12 +39,12 @@ protected:
 	virtual void compile();
 	virtual void render();
 	virtual void resize(const QSize& size);
-	virtual void refreshOutputTexture();
 protected:
 	QSize mFrameSize;
 	QRhiEx* mRhi;
 	QSharedPointer<QFrameGraph> mFrameGraph;
 	QSharedPointer<TexturePainter> mOutputPainter;
+	QRhiTexture* mOutputTexture = nullptr;
 	QCamera* mCamera = nullptr;
 	bool bRequestCompile = false;
 	QObject* mCurrentObject = nullptr;

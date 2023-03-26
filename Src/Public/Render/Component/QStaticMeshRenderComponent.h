@@ -7,16 +7,20 @@
 
 class QStaticMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
-	Q_PROPERTY(QString StaticMeshPath READ getStaticMeshPath WRITE setupStaticMeshPath)
+	Q_PROPERTY(QSharedPointer<QStaticMesh> StaticMesh READ getStaticMesh WRITE setStaticMesh)
 	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> Pipelines READ getPipelines)
-		Q_META_BEGIN(QStaticMeshRenderComponent)
-			Q_META_P_STRING_AS_FILE_PATH(StaticMeshPath)
-			Q_META_P_ARRAY_FIXED_SIZE(Pipelines,true)
-		Q_META_END()
+
+	Q_META_BEGIN(QStaticMeshRenderComponent)
+		Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
+	Q_META_END()
+
+	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QStaticMeshRenderComponent)
+		Q_BUILDER_ATTRIBUTE(QSharedPointer<QStaticMesh>, StaticMesh)
+	Q_BUILDER_END()
 public:
-	QStaticMeshRenderComponent(const QString& inStaticMeshPath = QString());
-	QString getStaticMeshPath() const;
-	QStaticMeshRenderComponent* setupStaticMeshPath(QString inPath);
+	QStaticMeshRenderComponent();
+	void setStaticMesh(QSharedPointer<QStaticMesh> val);
+	QSharedPointer<QStaticMesh> getStaticMesh() const { return mStaticMesh; }
 	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
 protected:
 	void setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, const QStaticMesh::SubMeshInfo& info);
@@ -27,7 +31,6 @@ protected:
 	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
 	bool isVaild() override;
 protected:
-	QString mStaticMeshPath;
 	QSharedPointer<QStaticMesh> mStaticMesh;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mIndexBuffer;

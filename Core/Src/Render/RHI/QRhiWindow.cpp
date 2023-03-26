@@ -125,7 +125,6 @@ void QRhiWindow::exposeEvent(QExposeEvent*)
 		if (!mRunning) {
 			mRunning = true;
 			initializeInternal();
-			onResizeEvent(mSwapChain->currentPixelSize());
 		}
 		mNotExposed = false;
 	}

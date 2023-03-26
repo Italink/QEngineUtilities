@@ -4,7 +4,7 @@
 #include <QVariant>
 #include "Render/RHI/QRhiEx.h"
 #include "QList"
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 
 class IRenderComponent;
 

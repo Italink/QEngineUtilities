@@ -1,74 +1,94 @@
-﻿#ifndef IRenderPassBase_h__
-#define IRenderPassBase_h__
+﻿#ifndef IRenderPass_h__
+#define IRenderPass_h__
 
 #include "Render/RHI/QRhiEx.h"
 #include "IRenderer.h"
 #include "IRenderComponent.h"
-#include "Utils/QMetaData.h"
+#include "Utils/QObjectBuilder.h"
 
-struct TextureLinker {
-	TextureLinker(IRenderPassBase* pass) :mRenderPass(pass) {};
-	QRhiTexture* getInputTexture(int slot) const;
-	void registerOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const;
-private:
-	IRenderPassBase* mRenderPass = nullptr;
-};
+#define Q_EXPAND_INPUT_TEXTURE_GETTER(Name) QRhiTexture* getTextureIn_##Name(){ return getInputTexture(#Name); }
+#define Q_EXPAND_INPUT_TEXTURE_SETTER(Name) __Builder& setTextureIn_##Name(const QString& inPassName, int inSlot){ mObject->registerInputTextureLink(#Name,inPassName,inSlot); return *this; }
+#define Q_EXPAND_OUTPUR_TEXTURE_REGISTER(Name) void registerTextureOut_##Name(QRhiTexture* inTexture){ registerOutputTexture(Out::##Name,#Name,inTexture); }
+#define Q_EXPAND_OUTPUR_TEXTURE_SLOT(Name) Name,
 
-struct InputTextureLinkInfo {
-	QString passName;
-	int passSlot;
-	QRhiTexture* cache = nullptr;
-};
+#define Q_BUILDER_BEGIN_RENDER_PASS(ClassType,...) \
+	protected: \
+		Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_INPUT_TEXTURE_GETTER, __VA_ARGS__)) \
+	public: \
+		Q_BUILDER_BEGIN(ClassType) \
+		Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_INPUT_TEXTURE_SETTER, __VA_ARGS__)) 
 
-class IRenderPassBase: public QObject{
-	friend class QFrameGraph;
-	friend struct TextureLinker;
+#define Q_BUILDER_BEGIN_RENDER_PASS_WITHOUT_IN(ClassType) \
+		Q_BUILDER_BEGIN(ClassType) 
+
+#define Q_BUILDER_END_RENDER_PASS(...) \
+		Q_BUILDER_END(ClassType) \
+		enum Out{\
+			Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_SLOT, __VA_ARGS__)) \
+		}; \
+	protected: \
+		Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_REGISTER, __VA_ARGS__))
+
+class IRenderPass: public QObject{
 public:
 	virtual void setRenderer(IRenderer* inRenderer);
-
-	IRenderer* getRenderer() const { return mRenderer; }
-
 	virtual void compile() {};
-
-	virtual void resizeAndLink(const QSize& size, const TextureLinker& linker) {}
-
+	virtual void resizeAndLinkNode(const QSize& size) {}
 	virtual void render(QRhiCommandBuffer* cmdBuffer) = 0;
 
-	virtual QRhiTexture* getOutputTexture(int slot = 0);
+	IRenderer* getRenderer() const { return mRenderer; }
+	const QSet<QString>& getDependentPassNodeNames();
 
-	const QMap<int, QRhiTexture*>& getOutputTextures();
-
-	IRenderPassBase* setupInputTexture(int inInputSlot, const QString& inPassName, int inPassSlot);
-
-	QStringList getDependentRenderPassNames();
-
-	const QMap<int, InputTextureLinkInfo>& getInputTextureLinks() { return mInputTextureLinks; }
-
-	void cleanupInputLinkerCache();
+	int getOutputTextureSize();
+	QRhiTexture* getOutputTexture(const int& inSlot);
+	QRhiTexture* getOutputTexture(const QString& inName);
+	QList<QRhiTexture*> getOutputTextures();
+	QRhiTexture* getFirstOutputTexture();
+	const QMap<QString, QPair<QString, int>>& getInputTextureLinks();
+protected:
+	QRhiTexture* getInputTexture(const QString& inName);
+	void registerOutputTexture(int inSlot, const QString& inName, QRhiTexture* inTexture);
+	void registerInputTextureLink(const QString& inTexName, const QString& inPassName, int inSlot);
 protected:
 	IRenderer* mRenderer = nullptr;
 	QRhiEx* mRhi;
-	QMap<int, InputTextureLinkInfo> mInputTextureLinks;
-	QMap<int, QRhiTexture*> mOutputTextures;
+	QMap<int, QRhiTexture*> mOutputTexutres;
+	QMap<QString, QPair<QString, int>> mInputTextureLinks;
+private:
+	QSet<QString> mDependentPassNodeNames;
 };
 
-class IBasePass :public IRenderPassBase {
+#define Q_BUILDER_BEGIN_BASE_PASS(ClassType) \
+	public: \
+		Q_BUILDER_BEGIN(ClassType) \
+		__Builder& addComponent(IRenderComponent* inRenderComponent) { mObject->addRenderComponent(inRenderComponent); return *this; }
+
+#define Q_BUILDER_END_BASE_PASS(...) \
+		Q_BUILDER_END(ClassType) \
+		enum Out{ \
+			Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_SLOT, __VA_ARGS__)) \
+		}; \
+	protected: \
+		Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_REGISTER, __VA_ARGS__))
+
+
+class IBasePass :public IRenderPass {
 	Q_OBJECT
 public:
 	void setSampleCount(int inSampleCount) { mSampleCount = inSampleCount;}
 	int getSampleCount() { return mSampleCount; }
-
-	virtual QList<QPair<QRhiTexture::Format, QString>> getRenderTargetSlots() {
-		return { {QRhiTexture::RGBA8,"BaseColor"} };
-	};
 	virtual QRhiRenderPassDescriptor* getRenderPassDescriptor() = 0;
 	virtual QRhiRenderTarget* getRenderTarget() = 0;
+
 	void setRenderer(IRenderer* inRenderer) override;
 	void render(QRhiCommandBuffer* cmdBuffer) override;
+
+	QList<QPair<QRhiTexture::Format, QString>> getRenderTargetColorAttachments();
+	bool hasColorAttachment(const QString& inName);
 	IBasePass* addRenderComponent(IRenderComponent* inRenderComponent);
 protected:
 	QVector<IRenderComponent*> mRenderComponents;
 	int mSampleCount = 1;
 };
 
-#endif // IRenderPassBase_h__
+#endif // IRenderPass_h__

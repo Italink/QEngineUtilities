@@ -18,6 +18,7 @@ public:
 	, mRow(InRow){}
 protected:
 	QDetailViewRow* NewChildRow() override;
+	QDetailViewRow* Row() override { return mRow; }
 private:
 	QDetailViewRow* mRow = nullptr;
 };

@@ -32,6 +32,8 @@ public:
 	void Refresh();
 	void MarkIsCategory();
 	bool IsCategory();
+
+	QWidget* GetWidget();
 private:
 	void RefreshSplitter();
 	void FixupSplitter();

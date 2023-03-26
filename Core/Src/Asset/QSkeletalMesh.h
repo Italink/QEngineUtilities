@@ -42,7 +42,7 @@ struct QSkeletalAnimation {
 
 class QSkeletalMesh {
 public:
-	static QSharedPointer<QSkeletalMesh> loadFromFile(const QString& inFilePath);
+	static QSharedPointer<QSkeletalMesh> CreateFromFile(const QString& inFilePath);
 	void resetPoses();
 	void playAnimation(int inAnimIndex);
 protected:

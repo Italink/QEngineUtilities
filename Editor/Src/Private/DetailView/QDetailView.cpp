@@ -52,10 +52,18 @@ void QDetailView::Redo() {
 void QDetailView::ForceRebuild() {
 	Reset();
 	mObjects.removeAll(nullptr);
+	setWidget(mView);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	for(auto& object:mObjects){
 		mLayoutBuilder->AddObject(object);
 	}
 	RefreshRowsState();
+}
+
+void QDetailView::SetPage(QWidget* inPage) {
+	takeWidget();
+	setWidget(inPage);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void QDetailView::resizeEvent(QResizeEvent* event) {
@@ -73,7 +81,7 @@ void QDetailView::Reset() {
 		row->deleteLater();
 	}
 	mTopLevelRows.clear();
-	while (mLayout->count()) {
+	while (mLayout && mLayout->count()) {
 		QLayoutItem* child = mLayout->takeAt(0);
 		if (child && child->widget()) {
 			QWidget* widget = child->widget();

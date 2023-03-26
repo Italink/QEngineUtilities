@@ -137,13 +137,13 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 
 	mPipeline.reset(mRhi->newGraphicsPipeline());
 	mPipeline->setVertexInputLayout(inputLayout);
-	QVector<QRhiGraphicsPipeline::TargetBlend> targetBlends(sceneRenderPass()->getRenderTargetSlots().size());
+	QVector<QRhiGraphicsPipeline::TargetBlend> targetBlends(getBasePass()->getRenderTargetColorAttachments().size());
 	mPipeline->setTargetBlends(targetBlends.begin(), targetBlends.end());
 	mPipeline->setTopology(QRhiGraphicsPipeline::Topology::TriangleStrip);
 	mPipeline->setDepthOp(QRhiGraphicsPipeline::LessOrEqual);
 	mPipeline->setDepthTest(true);
 	mPipeline->setDepthWrite(true);
-	mPipeline->setSampleCount(sceneRenderPass()->getSampleCount());
+	mPipeline->setSampleCount(getBasePass()->getSampleCount());
 
 	mPipeline->setShaderStages({
 		{ QRhiShaderStage::Vertex, vs },
@@ -155,7 +155,7 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	});
 	mBindings->create();
 	mPipeline->setShaderResourceBindings(mBindings.get());
-	mPipeline->setRenderPassDescriptor(sceneRenderPass()->getRenderPassDescriptor());
+	mPipeline->setRenderPassDescriptor(getBasePass()->getRenderPassDescriptor());
 	mPipeline->create();
 }
 

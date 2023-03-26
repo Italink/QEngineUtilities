@@ -1,24 +1,18 @@
 ﻿#ifndef QBasePassDeferred_h__
 #define QBasePassDeferred_h__
 
-
 #include "Render/IRenderPass.h"
 
 class QBasePassDeferred : public IBasePass {
 	Q_OBJECT
 public:
-	enum OutSlot {
-		BaseColor,
-		Position,
-		Normal,
-		Tangent,
-		Metalness,
-		Roughness,
-		Depth,
-	#ifdef QENGINE_WITH_EDITOR
-		DebugId,
-	#endif
-	};
+
+	Q_BUILDER_BEGIN_BASE_PASS(QBasePassDeferred)
+#ifdef QENGINE_WITH_EDITOR
+	Q_BUILDER_END_BASE_PASS(BaseColor, Position, Normal, Tangent, Metalness, Roughness, DebugId, Depth)
+#else
+	Q_BUILDER_END_BASE_PASS(BaseColor, Position, Normal, Tangent, Metalness, Roughness, Depth)
+#endif
 	QBasePassDeferred();
 protected:
 	struct RT {
@@ -35,10 +29,9 @@ protected:
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;
 		QScopedPointer<QRhiRenderPassDescriptor> renderPassDesc;
 	};
-	QList<QPair<QRhiTexture::Format, QString>> getRenderTargetSlots() override;
 	QRhiRenderPassDescriptor* getRenderPassDescriptor() override;
 	QRhiRenderTarget* getRenderTarget() override;
-	void resizeAndLink(const QSize& size, const TextureLinker& linker) override;
+	void resizeAndLinkNode(const QSize& size) override;
 protected:
 	RT mRT;
 };

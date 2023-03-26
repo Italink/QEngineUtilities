@@ -11,16 +11,14 @@ class QWindowRenderer : public IRenderer {
 public:
 	friend class QRenderWidget;
 	QWindowRenderer(QRhiWindow* inWindow);
-	QRhiWindow* getWindow() const;
+	QWindow* getWindow() override;
+	QRhiWindow* getRhiWindow() const;
 	QRhiRenderTarget* renderTaget() override;
 	int sampleCount() override;
-#ifdef QENGINE_WITH_EDITOR
-	bool TryOverrideOutputTexture(QRhiTexture* inTexture);
-#endif 
 protected:
 	void render() override;
+	void resize(const QSize& size) override;
 	QRhiCommandBuffer* commandBuffer() override;
-	void refreshOutputTexture() override;
 private:
 	QRhiWindow* mWindow;
 #ifdef QENGINE_WITH_EDITOR

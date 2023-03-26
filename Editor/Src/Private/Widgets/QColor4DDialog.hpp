@@ -3,7 +3,7 @@
 
 #include "QColor4DChannelSlider.hpp"
 #include "QPushButton"
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 #include "Widgets/Color/Component/ColorLineEdit.hpp"
 #include "Widgets/Color/Component/ColorPreview.hpp"
 #include "Widgets/Color/Component/ColorWheel.hpp"

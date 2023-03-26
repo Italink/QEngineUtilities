@@ -1,57 +1,84 @@
 ﻿#include "QFrameGraph.h"
-#include "IRenderer.h"
-#include "IRenderPass.h"
+#include "Render/IRenderer.h"
+#include "Render/IRenderPass.h"
+
+QFrameGraphBuilder QFrameGraph::Begin() {
+	return QFrameGraphBuilder();
+}
+
+void QFrameGraph::compile(IRenderer* inRenderer) {
+	mRenderPassTopology.clear();
+	QMap<QString, bool> visited;
+	while (mRenderPassTopology.size() != mRenderPassNodeMap.size()) {
+		for (auto& node : mRenderPassNodeMap) {
+			bool bHasDependent = false;
+			for (auto depName : node->getDependentPassNodeNames()) {
+				if (!visited.contains(depName)) {
+					bHasDependent = true;
+					break;
+				}
+			}
+			if (!bHasDependent && !visited[node->objectName()]) {
+				visited[node->objectName()] = true;
+				mRenderPassTopology << node;
+			}
+		}
+	}
+	for (auto renderPass : mRenderPassTopology) {
+		renderPass->setRenderer(inRenderer);
+	}
+}
+
+void QFrameGraph::render(QRhiCommandBuffer* inCmdBuffer) {
+	for (auto& renderPass : mRenderPassTopology) {
+		renderPass->render(inCmdBuffer);
+	}
+}
+
+void QFrameGraph::resize(const QSize& size) {
+	for (auto& renderPass : mRenderPassTopology) {
+		renderPass->resizeAndLinkNode(size);
+		renderPass->compile();
+	}
+}
 
 QRhiTexture* QFrameGraph::getOutputTexture() {
-	if (IRenderPassBase* pass = mRenderPassMap.value(mOutput.first)) {
-		if (QRhiTexture* texture = pass->getOutputTexture(mOutput.second)) {
-			return texture;
-		}
+	if (mRenderPassTopology.isEmpty())
+		return nullptr;
+	if (QRhiTexture* out = getOutputTexture(mOutputSlot.first, mOutputSlot.second))
+		return out;
+	return mRenderPassTopology.last()->getFirstOutputTexture();
+}
+
+QRhiTexture* QFrameGraph::getOutputTexture(const QString& inPassName, const QString& inTexName) {
+	if (const auto& Node = mRenderPassNodeMap.value(inPassName)) {
+		return Node->getOutputTexture(inTexName);
 	}
 	return nullptr;
 }
 
-void QFrameGraph::rebuildTopology() {
-	mDependMap.clear();
-	for (auto& renderPass : mRenderPassMap) {
-		for (auto name : renderPass->getDependentRenderPassNames()) {
-			mDependMap[renderPass] << mRenderPassMap.value(name);
-		}
+QRhiTexture* QFrameGraph::getOutputTexture(const QString& inPassName, int inSlot) {
+	if (const auto& Node = mRenderPassNodeMap.value(inPassName)) {
+		return Node->getOutputTexture(inSlot);
 	}
-	mRenderPassTopology.clear();
-	while (mRenderPassTopology.size() != mRenderPassMap.size()) {
-		for (auto& renderPass : mRenderPassMap) {
-			bool bHasDepend = false;
-			for (auto& depend : mDependMap[renderPass]) {
-				if (!mRenderPassTopology.contains(depend)) {
-					bHasDepend = true;
-				}
-			}
-			if (!bHasDepend && !mRenderPassTopology.contains(renderPass)) {
-				mRenderPassTopology << renderPass;
-				renderPass->cleanupInputLinkerCache();
-			}
-		}
-	}
+	return nullptr;
+}
+
+void QFrameGraph::addPass(IRenderPass* inNode) {
+	mRenderPassNodeMap[inNode->objectName()] = inNode;
 }
 
 QFrameGraphBuilder::QFrameGraphBuilder() {
 	mFrameGraph = QSharedPointer<QFrameGraph>::create();
 }
 
-QFrameGraphBuilder* QFrameGraphBuilder::begin() {
-	return new QFrameGraphBuilder;
+
+QFrameGraphBuilder& QFrameGraphBuilder::addPass(IRenderPass* inNode) {
+	mFrameGraph->addPass(inNode);
+	return *this;
 }
 
-QFrameGraphBuilder* QFrameGraphBuilder::addPass(const QString& inName, IRenderPassBase* inRenderPass) {
-	inRenderPass->setObjectName(inName);
-	mFrameGraph->mRenderPassMap[inRenderPass->objectName()] = inRenderPass;
-	return this;
-}
-
-QSharedPointer<QFrameGraph> QFrameGraphBuilder::end(const QString& outPass, const int& outPassSlot) {
-	QSharedPointer<QFrameGraph> frameGraph = mFrameGraph;
-	frameGraph->mOutput = { outPass,outPassSlot };
-	delete this;
-	return frameGraph;
+QSharedPointer<QFrameGraph> QFrameGraphBuilder::End(const QString& inOutputPass, const int& inSlot) {
+	mFrameGraph->mOutputSlot = { inOutputPass ,inSlot };
+	return mFrameGraph;
 }

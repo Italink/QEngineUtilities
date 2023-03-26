@@ -1,7 +1,7 @@
 #ifndef QColor4DButton_h__
 #define QColor4DButton_h__
 
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 #include "Widgets/QHoverWidget.h"
 
 class QColor4DButton :public QHoverWidget {

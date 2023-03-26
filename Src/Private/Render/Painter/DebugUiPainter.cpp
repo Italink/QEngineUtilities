@@ -4,6 +4,8 @@
 #include "FrameGraphView.h"
 #include "Render/RHI/QRhiWindow.h"
 #include "Utils/ImGuiWidgets.h"
+#include "QEngineEditorStyleManager.h"
+#include "QFile"
 
 void QDebugUIPainter::setupDebugIdTexture(QRhiTexture* texture) {
 	mDebugIdTexture = texture;
@@ -22,6 +24,14 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 	mViewportBarFlags |= ImGuiWindowFlags_NoBackground;
 	mViewportBarFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 	mViewportBarFlags |= ImGuiWindowFlags_UnsavedDocument;
+
+	ImGuiIO& io = ImGui::GetIO();
+	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
+	if (file.open(QIODevice::ReadOnly)) {
+		QByteArray fontData = file.readAll();
+		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(), 16);
+		io.Fonts->Build();
+	}
 
 	setupPaintFunctor([this]() {
 		QCamera* camera = mRenderer->getCamera();
@@ -108,22 +118,21 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 				mFrameGraphView->Show();
 				ImGui::End();
 				mOutputTexture = mFrameGraphView->GetCurrentTexture();
-				mRenderer->TryOverrideOutputTexture(mOutputTexture);
 			}
 			if (bShowStats) {
 				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 250, viewport->WorkSize.y - 100));
 				ImGui::SetNextWindowSize(ImVec2(200, 200));
 				ImGui::Begin("Stats", 0, mViewportBarFlags);
-				ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", mRenderer->getWindow()->getFps());
-				ImGui::TextColored(ImColor(0, 255, 0), "CPU Time\t%.2f ms", mRenderer->getWindow()->getCpuFrameTime());
-				ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", mRenderer->getWindow()->getGpuFrameTime());
+				ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", mRenderer->getRhiWindow()->getFps());
+				ImGui::TextColored(ImColor(0, 255, 0), "CPU Time\t%.2f ms", mRenderer->getRhiWindow()->getCpuFrameTime());
+				ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", mRenderer->getRhiWindow()->getGpuFrameTime());
 				ImGui::End();
 			}
 
 		}
 	});
 	setupRhi(mRenderer->getRhi());
-	setupWindow(mRenderer->getWindow());
+	setupWindow(mRenderer->getRhiWindow());
 	setupSampleCount(mRenderer->sampleCount());
 	setupRenderPassDesc(mRenderer->renderPassDescriptor());
 }

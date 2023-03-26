@@ -3,12 +3,17 @@
 
 #include "Render/ISceneRenderComponent.h"
 #include "Asset/QParticleSystem.h"
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 
 class QParticlesRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 		Q_PROPERTY(QColor4D Color READ getColor WRITE setupColor)
 		Q_PROPERTY(bool FacingCamera READ getFacingCamera WRITE setupFacingCamera)
+
+	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QParticlesRenderComponent)
+		Q_BUILDER_ATTRIBUTE(QColor4D, Color)
+		Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
+	Q_BUILDER_END()
 public:
 	QParticlesRenderComponent();
 	QParticlesRenderComponent* setupType(QParticleSystem::Type inType);

@@ -21,14 +21,18 @@ public:
 		QString PrePath;
 	};
 
+	void SetPage(QWidget* InPage);
 	IDetailLayoutBuilder* AddRowByWholeContent(QWidget* InContent);
 	IDetailLayoutBuilder* AddRowByNameValueWidget(QWidget* InName, QWidget* InValue);
+	IDetailLayoutBuilder* AddRowByNameValueWidget(const QString& inName, QWidget* InValue);
 
 	void AddProperty(QPropertyHandle* InPropertyHandle);
 	void AddObject(QObject* InObject, QString InPrePath = QString(), bool HideHeader = true);
 	void AddObject(IDetailLayoutBuilder::ObjectContext Context, bool HideHeader = true);
 
 	IDetailLayoutBuilder* FindOrAddCategory(const QString& InName);
+
+	virtual QDetailViewRow* Row() { return nullptr; }
 protected:
 	IDetailLayoutBuilder(QDetailView* InDetailView);
 	virtual QDetailViewRow* NewChildRow() = 0;

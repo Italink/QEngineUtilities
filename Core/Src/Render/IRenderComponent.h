@@ -2,6 +2,7 @@
 #define IRenderComponent_h__
 
 #include "Render/RHI/QRhiEx.h"
+#include "Utils/QObjectBuilder.h"
 
 class IBasePass;
 
@@ -21,10 +22,10 @@ public:
 	virtual void onUpload(QRhiResourceUpdateBatch* batch) {}
 	virtual void onUpdate(QRhiResourceUpdateBatch* batch) {}
 	virtual void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) = 0;
-	IBasePass* sceneRenderPass() { return mScreenRenderPass; }
+	IBasePass* getBasePass() { return mBasePass; }
 protected:
 	QRhiEx* mRhi;
-	IBasePass* mScreenRenderPass = nullptr;
+	IBasePass* mBasePass = nullptr;
 	uint32_t mID;
 	inline static uint32_t IDStack = 0;
 };

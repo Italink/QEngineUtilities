@@ -1,40 +1,70 @@
 ﻿#include "IRenderPass.h"
 
-void IRenderPassBase::setRenderer(IRenderer* inRenderer) {
+void IRenderPass::setRenderer(IRenderer* inRenderer) {
 	mRenderer = inRenderer;
 	mRhi = inRenderer->getRhi();
 	setParent(mRenderer);
 }
 
-QRhiTexture* IRenderPassBase::getOutputTexture(int slot /*= 0*/) {
-	return mOutputTextures.value(slot, nullptr);
+const QSet<QString>& IRenderPass::getDependentPassNodeNames() {
+	return mDependentPassNodeNames;
 }
 
-const QMap<int, QRhiTexture*>& IRenderPassBase::getOutputTextures() {
-	return mOutputTextures;
+int IRenderPass::getOutputTextureSize() {
+	return mOutputTexutres.size();
 }
 
-IRenderPassBase* IRenderPassBase::setupInputTexture(int inInputSlot, const QString& inPassName, int inPassSlot) {
-	mInputTextureLinks[inInputSlot] = { inPassName ,inPassSlot,nullptr };
-	return this;
-}
-
-QStringList IRenderPassBase::getDependentRenderPassNames() {
-	QStringList inputRenderPassNames;
-	for (auto& inputLink : mInputTextureLinks) {
-		inputRenderPassNames << inputLink.passName;
+QRhiTexture* IRenderPass::getOutputTexture(const QString& inName) {
+	for (auto out : mOutputTexutres) {
+		if (out->name() == inName) {
+			return out;
+		}
 	}
-	return inputRenderPassNames;
+	return nullptr;
 }
 
-void IRenderPassBase::cleanupInputLinkerCache() {
-	for (auto& inputLinker : mInputTextureLinks) {
-		inputLinker.cache = nullptr;
+QRhiTexture* IRenderPass::getOutputTexture(const int& inSlot) {
+	return mOutputTexutres.value(inSlot);
+}
+
+QList<QRhiTexture*> IRenderPass::getOutputTextures() {
+	return mOutputTexutres.values();
+}
+
+QRhiTexture* IRenderPass::getFirstOutputTexture() {
+	if (mOutputTexutres.isEmpty())
+		return nullptr;
+	return mOutputTexutres.first();
+}
+
+const QMap<QString, QPair<QString, int>>& IRenderPass::getInputTextureLinks() {
+	return mInputTextureLinks;
+}
+
+QRhiTexture* IRenderPass::getInputTexture(const QString& inName) {
+	if (mInputTextureLinks.contains(inName)) {
+		return mRenderer->getTexture(mInputTextureLinks[inName].first, mInputTextureLinks[inName].second);
 	}
+	return nullptr;
+}
+
+void IRenderPass::registerOutputTexture(int slot, const QString& inName, QRhiTexture* inTexture) {
+	if (inTexture) {
+		inTexture->setName(inName.toLocal8Bit());
+		mOutputTexutres[slot] = inTexture;
+	}
+	else {
+		qWarning() << "invalid output texture: " << inName;
+	}
+}
+
+void IRenderPass::registerInputTextureLink(const QString& inTexName, const QString& inPassName, int inSlot) {
+	mInputTextureLinks[inTexName] = { inPassName,inSlot };
+	mDependentPassNodeNames.insert(inPassName);
 }
 
 void IBasePass::setRenderer(IRenderer* inRenderer) {
-	IRenderPassBase::setRenderer(inRenderer);
+	IRenderPass::setRenderer(inRenderer);
 	for (auto& comp : mRenderComponents) {
 		comp->mRhi = mRhi;
 	}
@@ -71,25 +101,29 @@ void IBasePass::render(QRhiCommandBuffer* cmdBuffer) {
 	cmdBuffer->endPass();
 }
 
+QList<QPair<QRhiTexture::Format, QString>> IBasePass::getRenderTargetColorAttachments() {
+	QList<QPair<QRhiTexture::Format, QString>> colorAttachments;
+	for (auto out : mOutputTexutres) {
+		if (out->format() < QRhiTexture::RGB10A2)
+			colorAttachments.append({ out->format(),out->name() });
+	}
+	return colorAttachments;
+}
+
+bool IBasePass::hasColorAttachment(const QString& inName) {
+	for (auto out : mOutputTexutres) {
+		if (out->name() == inName)
+			return true;
+	}
+	return false;
+}
+
 IBasePass* IBasePass::addRenderComponent(IRenderComponent* inRenderComponent) {
 	inRenderComponent->setParent(this);
 	inRenderComponent->mRhi = mRhi;
-	inRenderComponent->mScreenRenderPass = this;
+	inRenderComponent->mBasePass = this;
 	inRenderComponent->sigonRebuildResource.request();
 	inRenderComponent->sigonRebuildPipeline.request();
 	mRenderComponents.push_back(inRenderComponent);
 	return this;
-}
-
-QRhiTexture* TextureLinker::getInputTexture(int slot) const{
-	InputTextureLinkInfo& linker = mRenderPass->mInputTextureLinks[slot];
-	if (linker.cache)
-		return linker.cache;
-	return linker.cache = mRenderPass->mRenderer->getRenderPassByName(linker.passName)->getOutputTexture(linker.passSlot);
-}
-
-void TextureLinker::registerOutputTexture(int slot, const QByteArray& name, QRhiTexture* texture) const {
-	if (texture)
-		texture->setName(name);
-	mRenderPass->mOutputTextures[slot] = texture;
 }

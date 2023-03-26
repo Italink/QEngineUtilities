@@ -11,6 +11,7 @@ add_library(QEngineEditor STATIC
 
 target_link_libraries(QEngineEditor PUBLIC 
     QEngineCore
+    QScintilla
 )
 
 target_include_directories(QEngineEditor PUBLIC

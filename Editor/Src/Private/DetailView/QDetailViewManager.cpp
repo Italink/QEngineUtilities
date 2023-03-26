@@ -6,7 +6,7 @@
 #include "Customization/PropertyTypeCustomization_QMatrix4x4.h"
 #include "Customization/PropertyTypeCustomization_TextureInfo.h"
 #include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 #include "Widgets/Color/QColorButton.h"
 #include "Widgets/QColor4DButton.hpp"
 #include "Widgets/QFilePathBox.h"
@@ -18,6 +18,9 @@
 #include <QComboBox>
 #include <QMetaMethod>
 #include <QObject>
+#include "Customization/PropertyTypeCustomization_QStaticMesh.h"
+#include "Asset/QStaticMesh.h"
+#include "Customization/DetailCustomization_QGlslSandboxRenderPass.h"
 
 QDetailViewManager* QDetailViewManager::Instance()
 {
@@ -135,8 +138,10 @@ void QDetailViewManager::RegisterBuildIn() {
 	RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QRhiGraphicsPipelineBuilder>(&QRhiGraphicsPipelineBuilder::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
 
 	RegisterCustomPropertyTypeLayout<QRhiGraphicsPipelineBuilder::TextureInfo*, PropertyTypeCustomization_TextureInfo>();
+	RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
 	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
 
 	qRegisterMetaType<QRhiGraphicsPipelineBuilder::TextureInfo>();

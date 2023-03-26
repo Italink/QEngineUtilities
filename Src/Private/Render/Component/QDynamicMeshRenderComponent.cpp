@@ -1,7 +1,7 @@
 #include "Render/Component/QDynamicMeshRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
-#include "Utils/QColor4D.h"
+#include "Type/QColor4D.h"
 
 QDynamicMeshRenderComponent::QDynamicMeshRenderComponent() {
 
@@ -43,14 +43,21 @@ void QDynamicMeshRenderComponent::onRebuildResource() {
 		}
 		)");
 
+
 	mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 		layout(location = 0) in vec2 vUV;
 		layout(location = 1) in vec3 vWorldPosition;
 		layout(location = 2) in mat3 vTangentBasis;
 		void main(){
 			BaseColor =  Material.Color;
-			%1;
+			%1
+			%2
+			%3	
+			%4;
 		})")
+		.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
+		.arg(getBasePass()->hasColorAttachment("Normal")   ? "Normal   = vec4(vTangentBasis[2],1);" : "")
+		.arg(getBasePass()->hasColorAttachment("Tangent")  ? "Tangent  = vec4(vTangentBasis[0],1);" : "")
 	#ifdef QENGINE_WITH_EDITOR	
 		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
 	#else

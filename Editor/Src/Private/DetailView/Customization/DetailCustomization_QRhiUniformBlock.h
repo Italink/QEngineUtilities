@@ -2,7 +2,6 @@
 #define DetailCustomization_QRhiUniformBlock_h__
 
 #include "DetailView/IDetailCustomization.h"
-#include <QHash>
 
 class DetailCustomization_QRhiUniformBlock : public IDetailCustomization {
 protected:

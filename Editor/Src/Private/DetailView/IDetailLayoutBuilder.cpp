@@ -5,6 +5,7 @@
 #include "DetailView/QPropertyHandle.h"
 #include "QMetaProperty"
 #include "Widgets/QElideLabel.h"
+#include "DetailView/QDetailView.h"
 
 class HeaderRowBuilder: public IHeaderRowBuilder{
 public:
@@ -25,6 +26,10 @@ IDetailLayoutBuilder::IDetailLayoutBuilder(QDetailView* InDetailView)
 {
 }
 
+void IDetailLayoutBuilder::SetPage(QWidget* InPage) {
+	mDetailView->SetPage(InPage);
+}
+
 IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByWholeContent(QWidget* Wdiget)
 {
 	QDetailViewRow* row = NewChildRow();
@@ -32,13 +37,20 @@ IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByWholeContent(QWidget* Wdiget
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	return rowBuilder.get();
-
 }
 
 IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByNameValueWidget(QWidget* InName, QWidget* InValue)
 {
 	QDetailViewRow* row = NewChildRow();
 	row->SetupNameValueWidget(InName, InValue);
+	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
+	mChildren.append(rowBuilder);
+	return rowBuilder.get();
+}
+
+IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByNameValueWidget(const QString& inName, QWidget* InValue) {
+	QDetailViewRow* row = NewChildRow();
+	row->SetupNameValueWidget(new QElideLabel(inName), InValue);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	return rowBuilder.get();

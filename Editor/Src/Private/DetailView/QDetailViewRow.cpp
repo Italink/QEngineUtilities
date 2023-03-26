@@ -77,7 +77,6 @@ public:
 	QSvgIcon UnexpandIcon = QSvgIcon(":/Resources/unexpand.png");
 };
 
-
 class QDetailViewRowWidget: public QHoverWidget {
 	Q_OBJECT
 	using QHoverWidget::QHoverWidget;
@@ -176,7 +175,6 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 	}
 	if (inValueWidget) {
 		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
-		//inValueWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
 		content->addWidget(inValueWidget);
 	}
 	SetupContentWidget(content);
@@ -268,6 +266,10 @@ void QDetailViewRow::MarkIsCategory() {
 
 bool QDetailViewRow::IsCategory() {
 	return bIsCategory;
+}
+
+QWidget* QDetailViewRow::GetWidget() {
+	return mWidget;
 }
 
 void QDetailViewRow::RefreshSplitter() {

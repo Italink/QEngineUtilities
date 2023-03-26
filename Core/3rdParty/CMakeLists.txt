@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 add_subdirectory(fftw3)
-
+add_subdirectory(QScintilla)
 add_subdirectory(assimp)
 
 add_library(ImGui

@@ -7,11 +7,11 @@ QMatrix4x4 ISceneRenderComponent::calculateMatrixMVP() {
 }
 
 QMatrix4x4 ISceneRenderComponent::getMatrixView() {
-	return sceneRenderPass()->getRenderer()->getCamera()->getMatrixView();
+	return getBasePass()->getRenderer()->getCamera()->getMatrixView();
 }
 
 QMatrix4x4 ISceneRenderComponent::getMatrixClipWithCorr() {
-	return sceneRenderPass()->getRenderer()->getCamera()->getMatrixClipWithCorr(mRhi);
+	return getBasePass()->getRenderer()->getCamera()->getMatrixClipWithCorr(mRhi);
 }
 
 QMatrix4x4 ISceneRenderComponent::calculateMatrixModel() {
@@ -28,24 +28,20 @@ QMatrix4x4 ISceneRenderComponent::calculateMatrixModel() {
 	return mTransform;
 }
 
-ISceneRenderComponent* ISceneRenderComponent::setTranslate(QVector3D translate) {
+void ISceneRenderComponent::setTranslate(QVector3D translate) {
 	MathUtils::setMatTranslate(mTransform, translate);
-	return this;
 }
 
-ISceneRenderComponent* ISceneRenderComponent::setRotation(QVector3D rotation) {
+void ISceneRenderComponent::setRotation(QVector3D rotation) {
 	MathUtils::setMatRotation(mTransform, rotation);
-	return this;
 }
 
-ISceneRenderComponent* ISceneRenderComponent::setScale3D(QVector3D scale3D) {
+void ISceneRenderComponent::setScale3D(QVector3D scale3D) {
 	MathUtils::setMatScale3D(mTransform, scale3D);
-	return this;
 }
 
-ISceneRenderComponent* ISceneRenderComponent::setTransform(QMatrix4x4 transform) {
+void ISceneRenderComponent::setTransform(QMatrix4x4 transform) {
 	mTransform = transform;
-	return this;
 }
 
 QVector3D ISceneRenderComponent::getTranslate() {

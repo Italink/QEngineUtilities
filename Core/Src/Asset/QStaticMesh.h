@@ -8,14 +8,16 @@
 
 class QStaticMesh {
 public:
-	static QSharedPointer<QStaticMesh> loadFromFile(const QString& inFilePath);
+	static QSharedPointer<QStaticMesh> CreateFromFile(const QString& inFilePath);
+
+	static QSharedPointer<QStaticMesh> CreateFromText(const QString& inText, const QFont& inFont, QColor inColor = Qt::white, Qt::Orientation o = Qt::Horizontal, int inSpacing = 2, bool bUseTexture = true);
 
 	struct Vertex {
 		QVector3D position;
 		QVector3D normal;
 		QVector3D tangent;
 		QVector3D bitangent;
-		QVector2D texCoord;
+		QVector2D uv;
 	};
 
 	struct SubMeshInfo {
@@ -32,5 +34,7 @@ public:
 	QVector<Index> mIndices;
 	QVector<SubMeshInfo> mSubmeshes;
 };
+
+Q_DECLARE_METATYPE(QSharedPointer<QStaticMesh>)
 
 #endif // QStaticMesh_h__

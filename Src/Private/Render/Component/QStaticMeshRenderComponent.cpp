@@ -2,21 +2,15 @@
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 
-QStaticMeshRenderComponent::QStaticMeshRenderComponent(const QString& inStaticMeshPath) {
-	if(!inStaticMeshPath.isEmpty())
-		setupStaticMeshPath(inStaticMeshPath);
+QStaticMeshRenderComponent::QStaticMeshRenderComponent() {
 }
 
-QString QStaticMeshRenderComponent::getStaticMeshPath() const {
-	return mStaticMeshPath;
-}
-
-QStaticMeshRenderComponent* QStaticMeshRenderComponent::setupStaticMeshPath(QString inPath) {
-	mStaticMeshPath = inPath;
-	mStaticMesh = QStaticMesh::loadFromFile(inPath);
-	sigonRebuildResource.request();
-	sigonRebuildPipeline.request();
-	return this;
+void QStaticMeshRenderComponent::setStaticMesh(QSharedPointer<QStaticMesh> val) {
+	mStaticMesh = val;
+	if (mStaticMesh) {
+		sigonRebuildResource.request();
+		sigonRebuildPipeline.request();
+	}
 }
 
 void QStaticMeshRenderComponent::onRebuildResource() {
@@ -44,8 +38,8 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			QRhiVertexInputAttributeEx("inNormal"	,0, 1, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,normal)),
 			QRhiVertexInputAttributeEx("inTangent"	,0, 2, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,tangent)),
 			QRhiVertexInputAttributeEx("inBitangent",0, 3, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,bitangent)),
-			QRhiVertexInputAttributeEx("inUV"		,0, 4, QRhiVertexInputAttribute::Float2, offsetof(QStaticMesh::Vertex,texCoord))
-			});
+			QRhiVertexInputAttributeEx("inUV"		,0, 4, QRhiVertexInputAttribute::Float2, offsetof(QStaticMesh::Vertex,uv))
+		});
 
 		setupShaderForSubmesh(pipeline.get(), subMesh);
 	}
@@ -63,26 +57,36 @@ void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuild
 				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 			}
 			)");
+
+	QColor BaseColor = info.materialProperties.value("BaseColor", QColor(255,255,255)).value<QColor>();
 	bool bHasDiffuse = info.materialProperties.contains("Diffuse");
 	if (bHasDiffuse) {
 		inPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", info.materialProperties["Diffuse"].value<QImage>());
 	}
+	else {
+		inPipeline->addUniformBlock(QRhiShaderStage::Fragment, "Material")
+			->addParam<QColor>("BaseColor", BaseColor);
+	}
+	
 	inPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 		layout(location = 0) in vec2 vUV;
 		layout(location = 1) in vec3 vWorldPosition;
 		layout(location = 2) in mat3 vTangentBasis;
 		void main(){
 			BaseColor = %1;
-			Position = vec4(vWorldPosition,1);
-			Normal = vec4(vTangentBasis[2],1);
-			Tangent = vec4(vTangentBasis[0],1);
-			%2;
-		})").arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "vec4(vTangentBasis[2],1)")
-	#ifdef QENGINE_WITH_EDITOR	
+			%2
+			%3
+			%4	
+			%5;
+		})").arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "Material.BaseColor")
+			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1); "  : "")
+			.arg(getBasePass()->hasColorAttachment("Normal")   ? "Normal   = vec4(vTangentBasis[2],1);" : "")
+			.arg(getBasePass()->hasColorAttachment("Tangent") ?  "Tangent  = vec4(vTangentBasis[0],1);" : "")
+#ifdef QENGINE_WITH_EDITOR	
 		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
-	#else
+#else
 		.arg("")
-	#endif
+#endif
 		.toLocal8Bit()
 	);
 }

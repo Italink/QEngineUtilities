@@ -3,11 +3,15 @@
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 #include "assimp/matrix4x4.h"
-#include "QDir"
 #include "AssetUtils.h"
-#include "QQueue"
+#include <QDir>
+#include <QQueue>
+#include <QFontMetrics>
+#include <QPainterPath>
+#include <QPainter>
+#include "Utils/EarCut.h"
 
-QSharedPointer<QStaticMesh> QStaticMesh::loadFromFile(const QString& inFilePath) {
+QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePath) {
 	QSharedPointer<QStaticMesh> staticMesh;
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(inFilePath.toUtf8().constData(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
@@ -34,8 +38,8 @@ QSharedPointer<QStaticMesh> QStaticMesh::loadFromFile(const QString& inFilePath)
 				if (mesh->mNormals)
 					vertex.normal = AssetUtils::converter(mesh->mNormals[i]);
 				if (mesh->mTextureCoords[0]) {
-					vertex.texCoord.setX(mesh->mTextureCoords[0][i].x);
-					vertex.texCoord.setY(mesh->mTextureCoords[0][i].y);
+					vertex.uv.setX(mesh->mTextureCoords[0][i].x);
+					vertex.uv.setY(mesh->mTextureCoords[0][i].y);
 				}
 				if (mesh->mTangents)
 					vertex.tangent = AssetUtils::converter(mesh->mTangents[i]);
@@ -57,6 +61,113 @@ QSharedPointer<QStaticMesh> QStaticMesh::loadFromFile(const QString& inFilePath)
 			qNode.push_back({ node.first->mChildren[i] ,node.second * node.first->mChildren[i]->mTransformation });
 		}
 	}
+	return staticMesh;
+}
+
+QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, const QFont& inFont, QColor inColor /*= Qt::white*/, Qt::Orientation inOrientation /*= Qt::Horizontal*/, int inSpacing /*= 2*/, bool bUseTexture) {
+	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
+	QVector<Vertex>& vertices = staticMesh->mVertices;
+	QVector<Index>& indices = staticMesh->mIndices;
+	QFontMetrics fontMetrics(inFont);
+	QPainterPath fontPath;
+	SubMeshInfo submesh;
+	QSize textSize;
+	if (inOrientation == Qt::Orientation::Horizontal) {
+		textSize = { 0,fontMetrics.height() };
+		for (int i = 0; i < inText.size(); i++) {
+			fontPath.addText(textSize.width(), fontMetrics.ascent(), inFont, inText[i]);
+			textSize.setWidth(textSize.width() + inSpacing + fontMetrics.horizontalAdvance(inText[i]));
+		}
+	}
+	else {
+		textSize = { 0,fontMetrics.ascent() };
+		for (int i = 0; i < inText.size(); i++) {
+			fontPath.addText(0, textSize.height(), inFont, inText[i]);
+			textSize.setWidth(qMax(textSize.width(), fontMetrics.horizontalAdvance(inText[i])));
+			textSize.setHeight(textSize.height() + inSpacing + fontMetrics.height());
+		}
+	}
+	if (bUseTexture) {
+		QImage image(textSize, QImage::Format_RGBA8888);
+		image.fill(Qt::transparent);
+		QPainter painter(&image);
+		painter.fillPath(fontPath, inColor);
+		painter.end();
+		submesh.materialProperties["Diffuse"] = image;
+
+		Vertex vertex;
+
+		float rwidth = textSize.width()/2;
+		float rheight = textSize.height()/2;
+
+		vertex.position = QVector3D(-rwidth, -rheight, 0);
+		vertex.uv = QVector2D(0, 1);
+		vertices << vertex;
+
+		vertex.position = QVector3D(rwidth, -rheight, 0);
+		vertex.uv = QVector2D(1, 1);
+		vertices << vertex;
+
+		vertex.position = QVector3D(rwidth, rheight, 0);
+		vertex.uv = QVector2D(1, 0);
+		vertices << vertex;
+
+		vertex.position = QVector3D(-rwidth, rheight, 0);
+		vertex.uv = QVector2D(0, 0);
+		vertices << vertex;
+
+		indices << 0 << 1 << 2 << 0 << 2 << 3;
+	}
+	else {
+		const QList<QPolygonF>& polygonList = fontPath.toSubpathPolygons();
+		QList<QList<QPolygonF>> polygons;
+		QList<QPolygonF> holes;
+		for (const auto& polygon : polygonList) {
+			if (mapbox::detail::PolygonIsClockwise(polygon))
+				polygons << QList<QPolygonF>{polygon};
+			else
+				holes << polygon;
+		}
+		for (const auto& hole : holes) {
+			for (auto& polygon : polygons) {
+				if (polygon.first().containsPoint(hole.first(), Qt::FillRule::WindingFill)) {
+					polygon << hole;
+				}
+			}
+		}
+		Index offset = 0;
+		for (const auto& polygonSet : polygons) {
+			for (auto& polygon : polygonSet) {
+				for (auto& point : polygon) {
+					Vertex vertex;
+					vertex.position = QVector3D(point.x(), point.y(), 0);
+					vertices.push_back(vertex);
+				}
+			}
+			auto localIndices = mapbox::earcut<Index>(polygonSet);
+			for (auto it : localIndices) {
+				indices << it + offset;
+			}
+			offset = vertices.size();
+		}
+
+		for (auto& vertex : vertices) {
+			vertex.position.setY(textSize.height() - vertex.position.y());
+			vertex.position -= QVector3D(textSize.width() / 2.0f, textSize.height() / 2.0f, 0.0f);
+		}
+	}
+
+	for (auto& vertex : vertices) {
+		vertex.normal = QVector3D(0, 0, 1);
+		vertex.tangent = QVector3D(0, 1, 0);
+		vertex.bitangent = QVector3D(1, 0, 0);
+	}
+	submesh.indicesOffset = 0;
+	submesh.verticesOffset = 0;
+	submesh.indicesRange = indices.size();
+	submesh.verticesRange = vertices.size();
+	submesh.materialProperties["BaseColor"] = inColor;
+	staticMesh->mSubmeshes << submesh;
 	return staticMesh;
 }
 

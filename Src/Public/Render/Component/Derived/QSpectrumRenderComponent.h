@@ -11,12 +11,21 @@ class QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
 	Q_PROPERTY(int BarCount READ getBarCount WRITE setBarCount)
 	Q_PROPERTY(int LowFreq READ getLowFreq WRITE setLowFreq)
 	Q_PROPERTY(int HighFreq READ getHighFreq WRITE setHighFreq)
+
 	Q_META_BEGIN(QSpectrumRenderComponent)
 		Q_META_P_NUMBER_LIMITED(FramesPerBuffer,4,14)
 		Q_META_P_NUMBER_LIMITED(BarCount, 1, 1000)
 		Q_META_P_NUMBER_LIMITED(LowFreq, 0, 48000)
 		Q_META_P_NUMBER_LIMITED(HighFreq, 0, 48000)
 	Q_META_END()
+
+	Q_BUILDER_BEGIN(QSpectrumRenderComponent)
+		Q_BUILDER_ATTRIBUTE(QAudioProvider::WindowFunction,WindowFunction)
+		Q_BUILDER_ATTRIBUTE(int,FramesPerBuffer)
+		Q_BUILDER_ATTRIBUTE(int,BarCount)
+		Q_BUILDER_ATTRIBUTE(int,LowFreq)
+		Q_BUILDER_ATTRIBUTE(int,HighFreq)
+	Q_BUILDER_END()
 public:
 	QSpectrumRenderComponent();
 

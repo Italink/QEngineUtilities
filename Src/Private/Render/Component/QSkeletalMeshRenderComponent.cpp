@@ -2,21 +2,15 @@
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 
-QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent(const QString& inSkeletalMeshPath) {
-	if(!inSkeletalMeshPath.isEmpty())
-		setupSkeletalMeshPath(inSkeletalMeshPath);
+QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent() {
 }
 
-QString QSkeletalMeshRenderComponent::getSkeletalMeshPath() const {
-	return mSkeletalMeshPath;
-}
-
-QSkeletalMeshRenderComponent* QSkeletalMeshRenderComponent::setupSkeletalMeshPath(QString inPath) {
-	mSkeletalMeshPath = inPath;
-	mSkeletalMesh = QSkeletalMesh::loadFromFile(inPath);
-	sigonRebuildResource.request();
-	sigonRebuildPipeline.request();
-	return this;
+void QSkeletalMeshRenderComponent::setSkeletalMesh(QSharedPointer<QSkeletalMesh> val) {
+	mSkeletalMesh = val;
+	if (mSkeletalMesh) {
+		sigonRebuildResource.request();
+		sigonRebuildPipeline.request();
+	}
 }
 
 void QSkeletalMeshRenderComponent::onRebuildResource() {
@@ -74,6 +68,7 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 		if (bHasDiffuse) {
 			mPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", mesh.materialProperties["Diffuse"].value<QImage>());
 		}
+
 		mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec2 vUV;
 			layout(location = 1) in vec3 vWorldPosition;
@@ -81,8 +76,14 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 			void main(){
 				BaseColor = %1;
 				%2
-			}
-		)").arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "vec4(vTangentBasis[2],1)")
+				%3
+				%4	
+				%5;
+		})")
+			.arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "vec4(vTangentBasis[2],1)")
+			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1); " : "")
+			.arg(getBasePass()->hasColorAttachment("Normal") ? "Normal   = vec4(vTangentBasis[2],1);" : "")
+			.arg(getBasePass()->hasColorAttachment("Tangent") ? "Tangent  = vec4(vTangentBasis[0],1);" : "")
 #ifdef QENGINE_WITH_EDITOR	
 			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else

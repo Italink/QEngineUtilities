@@ -6,12 +6,14 @@
 class QBasePassForward : public IBasePass {
 	Q_OBJECT
 public:
-	enum  OutSlot {
-		BaseColor,
+
+	Q_BUILDER_BEGIN_BASE_PASS(QBasePassForward)
 #ifdef QENGINE_WITH_EDITOR
-		DebugId,
+		Q_BUILDER_END_BASE_PASS(BaseColor, DebugId)
+#else
+		Q_BUILDER_END_BASE_PASS(BaseColor)
 #endif
-	};
+
 	QBasePassForward();
 protected:
 	struct RT {
@@ -23,10 +25,9 @@ protected:
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;
 		QScopedPointer<QRhiRenderPassDescriptor> renderPassDesc;
 	};
-	QList<QPair<QRhiTexture::Format, QString>> getRenderTargetSlots() override;
 	QRhiRenderPassDescriptor* getRenderPassDescriptor() override;
 	QRhiRenderTarget* getRenderTarget() override;
-	void resizeAndLink(const QSize& size, const TextureLinker& linker) override;
+	void resizeAndLinkNode(const QSize& size) override;
 protected:
 	RT mRT;
 };

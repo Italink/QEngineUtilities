@@ -4,20 +4,6 @@ QBasePassDeferred::QBasePassDeferred() {
 
 }
 
-QList<QPair<QRhiTexture::Format, QString>> QBasePassDeferred::getRenderTargetSlots() {
-	return {
-	{QRhiTexture::RGBA32F,"BaseColor"},
-	{QRhiTexture::RGBA32F,"Position"},
-	{QRhiTexture::RGBA8,"Normal"},
-	{QRhiTexture::RGBA8,"Tangent"},
-	{QRhiTexture::R8,"Metalness"},
-	{QRhiTexture::R8,"Roughness"}
-#ifdef QENGINE_WITH_EDITOR
-	,{QRhiTexture::RGBA8,"DebugId"}
-#endif
-	};
-}
-
 QRhiRenderPassDescriptor* QBasePassDeferred::getRenderPassDescriptor() {
 	return mRT.renderPassDesc.get();
 }
@@ -26,7 +12,7 @@ QRhiRenderTarget* QBasePassDeferred::getRenderTarget() {
 	return mRT.renderTarget.get();
 }
 
-void QBasePassDeferred::resizeAndLink(const QSize& size, const TextureLinker& linker) {
+void QBasePassDeferred::resizeAndLinkNode(const QSize& size) {
 	mRT.atBaseColor.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atBaseColor->create();
 	mRT.atPosition.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
@@ -62,13 +48,13 @@ void QBasePassDeferred::resizeAndLink(const QSize& size, const TextureLinker& li
 	mRT.renderPassDesc.reset(mRT.renderTarget->newCompatibleRenderPassDescriptor());
 	mRT.renderTarget->setRenderPassDescriptor(mRT.renderPassDesc.get());
 	mRT.renderTarget->create();
-	linker.registerOutputTexture(0, "BaseColor", mRT.atBaseColor.get());
-	linker.registerOutputTexture(1, "Position", mRT.atPosition.get());
-	linker.registerOutputTexture(2, "Normal", mRT.atNormal.get());
-	linker.registerOutputTexture(3, "Tangent", mRT.atTangent.get());
-	linker.registerOutputTexture(4, "Metalness", mRT.atMetalness.get());
-	linker.registerOutputTexture(5, "Roughness", mRT.atRoughness.get());
+	registerTextureOut_BaseColor(mRT.atBaseColor.get());
+	registerTextureOut_Position(mRT.atPosition.get());
+	registerTextureOut_Normal(mRT.atNormal.get());
+	registerTextureOut_Tangent(mRT.atTangent.get());
+	registerTextureOut_Metalness(mRT.atMetalness.get());
+	registerTextureOut_Roughness(mRT.atRoughness.get());
 #ifdef QENGINE_WITH_EDITOR
-	linker.registerOutputTexture(6, "DebugId", mRT.atDebugId.get());
+	registerTextureOut_DebugId(mRT.atDebugId.get());
 #endif
 }

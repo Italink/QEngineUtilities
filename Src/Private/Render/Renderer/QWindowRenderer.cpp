@@ -1,5 +1,6 @@
 #include "Render/Renderer/QWindowRenderer.h"
 #include "Render/RHI/QRhiWindow.h"
+#include "Render/IRenderPass.h"
 
 #ifdef QENGINE_WITH_EDITOR
 #include "Render/Painter/DebugUiPainter.h"
@@ -14,24 +15,20 @@ QWindowRenderer::QWindowRenderer(QRhiWindow* inWindow)
 {
 }
 
-QRhiWindow* QWindowRenderer::getWindow() const {
+QWindow* QWindowRenderer::getWindow() {
 	return mWindow;
 }
 
 void QWindowRenderer::render() {
-#ifdef QENGINE_WITH_EDITOR
 	if (!mFrameGraph)
 		return;
 	if (bRequestCompile) {
 		compile();
 		bRequestCompile = false;
 	}
-
 	QRhiCommandBuffer* cmdBuffer = commandBuffer();
-	for (auto& renderPass : mFrameGraph->getRenderPassTopology()) {
-		renderPass->render(cmdBuffer);
-	}
-
+	mFrameGraph->render(cmdBuffer);
+#ifdef QENGINE_WITH_EDITOR
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	mDebugUiPainter->resourceUpdate(batch);
 	cmdBuffer->beginPass(renderTaget(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 }, batch);
@@ -39,7 +36,22 @@ void QWindowRenderer::render() {
 	mDebugUiPainter->paint(cmdBuffer,renderTaget());
 	cmdBuffer->endPass();
 #else
-	IRenderer::render();
+	cmdBuffer->beginPass(renderTaget(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 });
+	mOutputPainter->paint(cmdBuffer, renderTaget());
+	cmdBuffer->endPass();
+#endif
+}
+
+void QWindowRenderer::resize(const QSize& size) {
+	IRenderer::resize(size);
+#ifdef QENGINE_WITH_EDITOR
+	for (const auto& basePass : findChildren<IBasePass*>()) {
+		if (QRhiTexture* debugIdTexture = basePass->getOutputTexture("DebugId")) {
+			mDebugUiPainter->setupDebugIdTexture(debugIdTexture);
+			break;
+		}
+	}
+	mDebugUiPainter->compile();
 #endif // QENGINE_WITH_EDITOR
 }
 
@@ -57,40 +69,6 @@ int QWindowRenderer::sampleCount()
 	return mWindow->mSwapChain->sampleCount();
 }
 
-#ifdef QENGINE_WITH_EDITOR
-bool QWindowRenderer::TryOverrideOutputTexture(QRhiTexture* inTexture) {
-	if (inTexture != mOverrideOutputTexture) {
-		if (inTexture && inTexture->sampleCount() == sampleCount()) {
-			mOverrideOutputTexture = inTexture;
-			mOutputPainter->setupTexture(mOverrideOutputTexture);
-			mOutputPainter->compile();
-			return true;
-		}
-		else {
-			mOutputPainter->setupTexture(mFrameGraph->getOutputTexture());
-			mOutputPainter->compile();
-		}
-	}
-	return false;
+QRhiWindow* QWindowRenderer::getRhiWindow() const {
+	return mWindow;
 }
-#endif 
-
-void QWindowRenderer::refreshOutputTexture() 
-{
-	IRenderer::refreshOutputTexture();
-#ifdef QENGINE_WITH_EDITOR
-	QRhiTexture* debugIdTexture = nullptr;
-	for (const auto& basePass :findChildren<IBasePass*>()) {
-		auto texSlots = basePass->getRenderTargetSlots();
-		for (int slotIndex = 0; slotIndex < texSlots.size(); ++slotIndex) {
-			if (texSlots[slotIndex].second == "DebugId") {
-				debugIdTexture = basePass->getOutputTexture(slotIndex);
-				break;
-			}
-		}
-	}
-	mDebugUiPainter->setupDebugIdTexture(debugIdTexture);
-	mDebugUiPainter->compile();
-#endif // QENGINE_WITH_EDITOR
-}
-

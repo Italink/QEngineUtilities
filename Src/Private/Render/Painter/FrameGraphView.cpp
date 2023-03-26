@@ -26,7 +26,7 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	mNodeTexutes.clear();
 	mLinks.clear();
 	mTemplates.clear();
-	const QList<IRenderPassBase*>& passes = frameGraph->getRenderPassTopology();
+	const QList<IRenderPass*>& passes = frameGraph->mRenderPassTopology;
 	size_t maxOutSlot = 0;
 
 	/*Create Nodes*/
@@ -34,13 +34,13 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	for (auto& pass : passes) {
 		GraphEditor::Node node;
 		node.mName = pass->objectName().toLocal8Bit();
-		node.mTemplateIndex = pass->getOutputTextures().size();
+		node.mTemplateIndex = pass->getOutputTextureSize();
 		node.mRect = ImRect(0, 0, mOptions.mNodeSlotSize, node.mTemplateIndex *(mOptions.mNodeSlotSize));
 		node.mSelected = false;
 		maxOutSlot = qMax(maxOutSlot, node.mTemplateIndex);
 		passToNodeIndex[pass->objectName()] = mNodes.size();
 		mNodes << std::move(node);
-		mNodeTexutes << std::move(pass->getOutputTextures().values());
+		mNodeTexutes << std::move(pass->getOutputTextures());
 	}
 	/*Create Templates*/
 	std::vector<std::string> slot;
@@ -61,8 +61,8 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	for (auto& pass : passes) {
 		for (auto& inputLink : pass->getInputTextureLinks()) {
 			GraphEditor::Link link;
-			link.mInputNodeIndex = passToNodeIndex[inputLink.passName];
-			link.mInputSlotIndex = inputLink.passSlot;
+			link.mInputNodeIndex = passToNodeIndex[inputLink.first];
+			link.mInputSlotIndex = inputLink.second;
 			link.mOutputNodeIndex = passToNodeIndex[pass->objectName()];
 			link.mOutputSlotIndex = 0;
 			mLinks<<std::move(link);
@@ -78,8 +78,8 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	mNodeTexutes.resize(mNodes.size());
 
 	GraphEditor::Link link;
-	link.mInputNodeIndex = passToNodeIndex[frameGraph->getOutputSlot().first];
-	link.mInputSlotIndex = frameGraph->getOutputSlot().second;
+	link.mInputNodeIndex = passToNodeIndex[frameGraph->mOutputSlot.first];
+	link.mInputSlotIndex = frameGraph->mOutputSlot.second;
 	link.mOutputNodeIndex = mNodes.size() -1;
 	link.mOutputSlotIndex = 0;
 	mLinks << std::move(link);
@@ -87,7 +87,6 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	/*Beautify Layout*/
 	QVector<int> nodeXOffset(mNodes.size());
 	QVector<int> nodeYOffset(mNodes.size());
-
 	for (auto& link : mLinks) {
 		if (nodeYOffset[link.mInputNodeIndex] == nodeYOffset[link.mOutputNodeIndex]) {
 			for (int k = link.mInputNodeIndex + 1; k < link.mOutputNodeIndex; k++) {
@@ -100,7 +99,6 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	for (int i = 0; i < mNodes.size(); i++) {
 		nodeXOffset[i] = i;
 	}
-
 	for (int i = 0; i < mNodes.size(); i++) {
 		GraphEditor::Node& node = mNodes[i];
 		int xOffset = nodeXOffset[i] * (mOptions.mNodeSlotSize + NodeSpacing);

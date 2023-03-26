@@ -17,7 +17,7 @@ QSharedPointer<QSkeleton::MeshNode> processSkeletonMeshNode(aiNode* node) {
 	return boneNode;
 }
 
-QSharedPointer<QSkeletalMesh> QSkeletalMesh::loadFromFile(const QString& inFilePath) {
+QSharedPointer<QSkeletalMesh> QSkeletalMesh::CreateFromFile(const QString& inFilePath) {
 	QSharedPointer<QSkeletalMesh> skeletalMesh;
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(inFilePath.toUtf8().constData(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_CalcTangentSpace);

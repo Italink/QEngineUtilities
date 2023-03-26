@@ -6,15 +6,16 @@
 
 class QSkyboxRenderComponent : public ISceneRenderComponent {
 	Q_OBJECT
-	Q_PROPERTY(QRhiGraphicsPipelineBuilder* Pipeline READ getPipeline WRITE setPipeline);
+	Q_PROPERTY(QImage SkyboxImage READ getSkyBoxImage WRITE setSkyBoxImage);
+
+	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSkyboxRenderComponent)
+		Q_BUILDER_ATTRIBUTE(QImage, SkyboxImage)
+	Q_BUILDER_END()
 public:
 	QSkyboxRenderComponent();
-	QSkyboxRenderComponent* setupSkyBoxImage(QImage inImage);
+	void setSkyBoxImage(QImage inImage);
 	QImage getSkyBoxImage() const;
 protected:
-	QRhiGraphicsPipelineBuilder* getPipeline() { return mPipeline.get(); }
-	void setPipeline(QRhiGraphicsPipelineBuilder*) {}
-
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
 	void onUpload(QRhiResourceUpdateBatch* batch) override;
