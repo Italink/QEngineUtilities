@@ -28,7 +28,7 @@ public:
 	void setDownSample(int val);
 
 	int getBlurIter() const { return mBlurIter; }
-	int getBlurSize() const { return mBlurState.size; }
+	int getBlurSize() const { return mParams.size; }
 	int getDownSamplerCount() const { return mDownSampleCount; }
 	QRhiTextureRenderTarget* getInputRenderTaget() { return mBlurRT[0].renderTarget.get(); }
 
@@ -52,12 +52,12 @@ private:
 	QScopedPointer<QRhiShaderResourceBindings> mBindingsDownSample;
 	QScopedPointer<QRhiShaderResourceBindings> mBindingsH;
 	QScopedPointer<QRhiShaderResourceBindings> mBindingsV;
-	struct BlurState {
+	struct Params {
 		uint32_t size = 0;
 		uint32_t padding[3];
 		float weight[50] = { 0 };
-	}mBlurState;
-	QRhiEx::Signal sigUpdateBlurState;
+	}mParams;
+	QRhiEx::Signal sigUpdateParams;
 
 	int mDownSampleCount = 2;
 	int mBlurIter = 2;

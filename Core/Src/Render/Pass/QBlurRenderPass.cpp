@@ -6,21 +6,21 @@ QBlurRenderPass::QBlurRenderPass() {
 }
 
 void QBlurRenderPass::setBlurSize(int size) {
-	if (size <= 0 || size == mBlurState.size || size >= std::size(mBlurState.weight))
+	if (size <= 0 || size == mParams.size || size >= std::size(mParams.weight))
 		return;
-	mBlurState.size = size;
+	mParams.size = size;
 	float sum = 1, s = 1;
-	mBlurState.weight[size - 1] = 1;
+	mParams.weight[size - 1] = 1;
 	for (int i = size - 2; i >= 0; i--) {
-		mBlurState.weight[i] = (mBlurState.weight[i + 1] + s);
+		mParams.weight[i] = (mParams.weight[i + 1] + s);
 		++s;
-		sum += mBlurState.weight[i] * 2;
+		sum += mParams.weight[i] * 2;
 	}
-	mBlurState.weight[0] /= sum / 2;
+	mParams.weight[0] /= sum / 2;
 	for (int i = 1; i < size; i++) {
-		mBlurState.weight[i] /= sum;
+		mParams.weight[i] /= sum;
 	}
-	sigUpdateBlurState.request();
+	sigUpdateParams.request();
 }
 
 void QBlurRenderPass::setBlurIter(int val) {
@@ -53,7 +53,7 @@ void QBlurRenderPass::resizeAndLinkNode(const QSize& size) {
 		QRhiSampler::ClampToEdge));
 	mSampler->create();
 
-	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(BlurState)));
+	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(Params)));
 	mUniformBuffer->create();
 
 	mBindingsDownSample.reset(mRhi->newShaderResourceBindings());
@@ -79,7 +79,7 @@ void QBlurRenderPass::resizeAndLinkNode(const QSize& size) {
 
 	registerTextureOut_Result(mBlurRT[0].colorAttachment.get());
 
-	sigUpdateBlurState.request();
+	sigUpdateParams.request();
 }
 
 void QBlurRenderPass::compile() {
@@ -133,17 +133,17 @@ void QBlurRenderPass::compile() {
 		layout (location = 0) out vec4 outFragColor;
 		layout (binding = 0) uniform sampler2D uTexture;
 
-		layout (binding = 1 ) uniform BlurState{
+		layout (binding = 1 ) uniform Params{
 			int size;
 			vec4 weight[50];
-		}blurState;
+		}params;
 
 		void main(){
 			vec2 tex_offset = 1.0 / textureSize(uTexture, 0); // gets size of single texel
 			vec4 raw = texture(uTexture, vUV);
-			vec4 result = raw * blurState.weight[0][0]; // current fragment's contribution
-			for(int i = 1; i < blurState.size; ++i){
-				const float weight = blurState.weight[i/4][i%4];
+			vec4 result = raw * params.weight[0][0]; // current fragment's contribution
+			for(int i = 1; i < params.size; ++i){
+				const float weight = params.weight[i/4][i%4];
 				result += texture(uTexture, vUV + vec2(tex_offset.x * i, 0.0)) * weight;
 				result += texture(uTexture, vUV - vec2(tex_offset.x * i, 0.0)) * weight;
 			}
@@ -172,17 +172,17 @@ void QBlurRenderPass::compile() {
 	layout (location = 0) out vec4 outFragColor;
 	layout (binding = 0) uniform sampler2D uTexture;
 
-	layout (binding = 1 ) uniform BlurState{
+	layout (binding = 1 ) uniform Params{
 		int size;
 		vec4 weight[50];
-	}blurState;
+	}params;
 
 	void main(){
 		vec2 tex_offset = 1.0 / textureSize(uTexture, 0); // gets size of single texel
 		vec4 raw = texture(uTexture, vUV);
-		vec4 result = raw * blurState.weight[0][0]; // current fragment's contribution
-		for(int i = 1; i < blurState.size; ++i){
-			const float weight = blurState.weight[i/4][i%4];
+		vec4 result = raw * params.weight[0][0]; // current fragment's contribution
+		for(int i = 1; i < params.size; ++i){
+			const float weight = params.weight[i/4][i%4];
 			result += texture(uTexture, vUV + vec2(0.0,tex_offset.y * i)) * weight;
 			result += texture(uTexture, vUV - vec2(0.0,tex_offset.y * i)) * weight;
 		}
@@ -207,9 +207,9 @@ void QBlurRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	cmdBuffer->draw(4);
 	cmdBuffer->endPass();
 
-	if (sigUpdateBlurState.receive()) {
+	if (sigUpdateParams.receive()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
-		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(BlurState), &mBlurState);
+		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(Params), &mParams);
 		cmdBuffer->resourceUpdate(batch);
 	}
 

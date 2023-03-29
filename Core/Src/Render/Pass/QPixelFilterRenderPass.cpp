@@ -31,7 +31,7 @@ void QPixelFilterRenderPass::resizeAndLinkNode(const QSize& size) {
 	mBindings.reset(mRhi->newShaderResourceBindings());
 	mBindings->setBindings({
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage, src, mSampler.get())
-		});
+	});
 	mBindings->create();
 
 	sigRecompile.receive();
