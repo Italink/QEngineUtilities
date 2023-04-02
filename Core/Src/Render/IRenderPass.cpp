@@ -1,5 +1,4 @@
 ﻿#include "IRenderPass.h"
-#include "..\Src\Public\Render\Component\QSkyboxRenderComponent.h"
 
 void IRenderPass::setRenderer(IRenderer* inRenderer) {
 	mRenderer = inRenderer;
