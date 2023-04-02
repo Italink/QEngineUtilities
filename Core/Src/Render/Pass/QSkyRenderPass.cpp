@@ -19,7 +19,7 @@ void QSkyRenderPass::setSkyBoxImagePath(const QString& inPath) {
 		bIsEquirectangular = true;
 	}
 	else {
-		image = QImage(inPath).convertToFormat(QImage::Format::Format_RGBA8888);
+		image = QImage(inPath).convertToFormat(QImage::Format::Format_RGBA32FPx4);
 		bIsEquirectangular = false;
 	}
 	setSkyBoxImage(image);
@@ -428,7 +428,8 @@ void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 			std::array<QImage, 6> subImages = AssetUtils::resolveCubeSubImages(mSkyBoxImage);
 			QRhiTextureSubresourceUploadDescription subresDesc[6];
 			for (int i = 0; i < 6; i++) {
-				subresDesc[i].setImage(subImages[i].scaled(QSize(kEnvMapSize, kEnvMapSize)));
+				QImage subImage = subImages[i].scaled(QSize(kEnvMapSize, kEnvMapSize)).convertToFormat(QImage::Format::Format_RGBA32FPx4);
+				subresDesc[i].setImage(subImage);
 			}
 			QRhiTextureUploadDescription desc = QRhiTextureUploadDescription({
 				{ 0, 0, subresDesc[0] },  // +X
@@ -489,7 +490,6 @@ void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 			cmdBuffer->setShaderResources(mPrefilteredSpecularCubeBindings.get());
 			cmdBuffer->dispatch(numGroups, numGroups, 6);
 			cmdBuffer->endComputePass();
-
 		}
 
 		cmdBuffer->beginComputePass();
