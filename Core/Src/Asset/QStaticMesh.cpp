@@ -93,7 +93,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 		QPainter painter(&image);
 		painter.fillPath(fontPath, inColor);
 		painter.end();
-		submesh.materialProperties["Diffuse"] = image;
+		submesh.materialProperties["BaseColor"] = image;
 
 		Vertex vertex;
 

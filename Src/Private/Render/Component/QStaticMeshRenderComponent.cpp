@@ -45,7 +45,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 	}
 }
 
-void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, const QStaticMesh::SubMeshInfo& info) {
+void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, QStaticMesh::SubMeshInfo info) {
 	inPipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
 			layout(location = 0) out vec2 vUV;
 			layout(location = 1) out vec3 vWorldPosition;
@@ -53,37 +53,87 @@ void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuild
 			void main(){
 				vUV = inUV;
 				vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
-				vTangentBasis =  mat3(transpose(inverse(Transform.M)))* mat3(inTangent, inBitangent, inNormal);
+				vec3 T = normalize(vec3(Transform.M * vec4(inTangent,   0.0)));
+				vec3 B = normalize(vec3(Transform.M * vec4(inBitangent, 0.0)));
+				vec3 N = normalize(vec3(Transform.M * vec4(inNormal,    0.0)));
+				vTangentBasis = mat3(T, B, N);
 				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 			}
-			)");
+	)");
 
-	QColor BaseColor = info.materialProperties.value("BaseColor", QColor(255,255,255)).value<QColor>();
-	bool bHasDiffuse = info.materialProperties.contains("Diffuse");
-	if (bHasDiffuse) {
-		inPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", info.materialProperties["Diffuse"].value<QImage>());
+	bool bHasBaseColor = info.materialProperties.contains("BaseColor") || info.materialProperties.contains("Diffuse");
+	if (!bHasBaseColor) {
+		info.materialProperties["BaseColor"] = QColor(255, 255, 255, 255);
+	}
+	bool bHasNormal = info.materialProperties.contains("Normal");
+
+	bool bHasMetalness = info.materialProperties.contains("Metalness");
+	if (!bHasMetalness) {
+		info.materialProperties["Metalness"] = 0.5f;;
+	}
+	bool bHasRoughness = info.materialProperties.contains("Roughness");
+	if (!bHasRoughness) {
+		info.materialProperties["Roughness"] = 1.0f;
+	}
+	inPipeline->addMaterialProperty(info.materialProperties);
+
+
+	QByteArray NormalAssign = "vec4(vTangentBasis[2], 1)";
+	if (getBasePass()->hasColorAttachment("Normal")) {
+		if (info.materialProperties["Normal"].metaType() == QMetaType::fromType<QImage>()) 
+			NormalAssign = R"(vec3 n = 2.0 * texture(uNormal, vUV).rgb - 1.0;			
+							 Normal = vec4((normalize( vTangentBasis * n ) + 1.0) * 0.5,1.0f);)";
+		else 
+			NormalAssign = "Normal = vec4((normalize(vTangentBasis[2]) + 1.0) * 0.5,1.0f);";
+	}
+
+	QByteArray BaseColorAssign;
+	if (info.materialProperties["BaseColor"].metaType() == QMetaType::fromType<QImage>()) {
+		BaseColorAssign = "BaseColor = texture(uBaseColor,vUV);";
+	}
+	else if (info.materialProperties["Diffuse"].metaType() == QMetaType::fromType<QImage>()) {
+		BaseColorAssign = "BaseColor = texture(uDiffuse,vUV);";
 	}
 	else {
-		inPipeline->addUniformBlock(QRhiShaderStage::Fragment, "Material")
-			->addParam<QColor>("BaseColor", BaseColor);
+		BaseColorAssign = "BaseColor = Material.BaseColor;";
 	}
-	
+
+	QByteArray MetalnessAssign;
+	if (getBasePass()->hasColorAttachment("Metalness")) {
+		if (info.materialProperties["Metalness"].metaType() == QMetaType::fromType<QImage>()) 
+			MetalnessAssign = "Metalness = texture(uMetalness,vUV).r;";
+		else 
+			MetalnessAssign = "Metalness = Material.Metalness;";
+	}
+
+	QByteArray RoughnessAssign;
+	if (getBasePass()->hasColorAttachment("Metalness")) {
+		if (info.materialProperties["Roughness"].metaType() == QMetaType::fromType<QImage>()) 
+			RoughnessAssign = "Roughness = texture(uRoughness,vUV).r;";
+		else 
+			RoughnessAssign = "Roughness = Material.Roughness;";		
+	}
+
 	inPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 		layout(location = 0) in vec2 vUV;
 		layout(location = 1) in vec3 vWorldPosition;
 		layout(location = 2) in mat3 vTangentBasis;
 		void main(){
-			BaseColor = %1;
+			%1;
 			%2
 			%3
 			%4	
-			%5;
-		})").arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "Material.BaseColor")
-			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1); "  : "")
-			.arg(getBasePass()->hasColorAttachment("Normal")   ? "Normal   = vec4(vTangentBasis[2],1);" : "")
-			.arg(getBasePass()->hasColorAttachment("Tangent") ?  "Tangent  = vec4(vTangentBasis[0],1);" : "")
+			%5
+			%6
+			%7
+		})").arg(BaseColorAssign)
+			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
+			.arg(NormalAssign)
+			.arg(getBasePass()->hasColorAttachment("Tangent") ?  "Tangent  = vec4((normalize(vTangentBasis[0]) + 1.0) * 0.5,1.0f);" : "")
+			.arg(MetalnessAssign)
+			.arg(RoughnessAssign)
 #ifdef QENGINE_WITH_EDITOR	
-		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
+		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else
 		.arg("")
 #endif

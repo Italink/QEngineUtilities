@@ -36,8 +36,6 @@ public:
 	float getMinThreshold() const { return mParams.minThreshold; }
 	float getMaxThreshold() const { return mParams.maxThreshold; }
 
-	QRhiTextureRenderTarget* getInputRenderTaget() { return mDilationRT[0].renderTarget.get(); }
-
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;
 	void render(QRhiCommandBuffer* cmdBuffer) override;

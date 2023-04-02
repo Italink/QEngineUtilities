@@ -1,4 +1,5 @@
 ﻿#include "IRenderPass.h"
+#include "..\Src\Public\Render\Component\QSkyboxRenderComponent.h"
 
 void IRenderPass::setRenderer(IRenderer* inRenderer) {
 	mRenderer = inRenderer;
@@ -91,7 +92,7 @@ void IBasePass::render(QRhiCommandBuffer* cmdBuffer) {
 			continue;
 		item->onUpdate(resUpdateBatch);
 	}
-	cmdBuffer->beginPass(getRenderTarget(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 1.0f), { 1.0f, 0 }, resUpdateBatch, QRhiCommandBuffer::ExternalContent);
+	cmdBuffer->beginPass(getRenderTarget(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 }, resUpdateBatch, QRhiCommandBuffer::ExternalContent);
 	QRhiViewport viewport(0, 0, getRenderTarget()->pixelSize().width(), getRenderTarget()->pixelSize().height());
 	for (auto& item : mRenderComponents) {
 		if (!item->isVaild())
@@ -104,7 +105,7 @@ void IBasePass::render(QRhiCommandBuffer* cmdBuffer) {
 QList<QPair<QRhiTexture::Format, QString>> IBasePass::getRenderTargetColorAttachments() {
 	QList<QPair<QRhiTexture::Format, QString>> colorAttachments;
 	for (auto out : mOutputTexutres) {
-		if (out->format() < QRhiTexture::RGB10A2)
+		if (out->format() < QRhiTexture::D16)
 			colorAttachments.append({ out->format(),out->name() });
 	}
 	return colorAttachments;
@@ -118,12 +119,16 @@ bool IBasePass::hasColorAttachment(const QString& inName) {
 	return false;
 }
 
-IBasePass* IBasePass::addRenderComponent(IRenderComponent* inRenderComponent) {
+void IBasePass::addRenderComponent(IRenderComponent* inRenderComponent,int inIndex) {
 	inRenderComponent->setParent(this);
 	inRenderComponent->mRhi = mRhi;
 	inRenderComponent->mBasePass = this;
 	inRenderComponent->sigonRebuildResource.request();
 	inRenderComponent->sigonRebuildPipeline.request();
-	mRenderComponents.push_back(inRenderComponent);
-	return this;
+	if (inIndex != -1) {
+		mRenderComponents.insert(inIndex, inRenderComponent);
+	}
+	else {
+		mRenderComponents<<inRenderComponent;
+	}
 }

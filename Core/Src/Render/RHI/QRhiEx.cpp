@@ -23,6 +23,7 @@
 #include <QtGui/private/qrhinull_p.h>
 
 #include "private/qrhivulkanext_p.h"
+#include "private/qvulkandefaultinstance_p.h"
 
 #include <qmath.h>
 #include <QVulkanFunctions>
@@ -40,6 +41,7 @@ QT_WARNING_DISABLE_GCC("-Wsuggest-override")
 QT_WARNING_DISABLE_CLANG("-Wdeprecated-copy")
 #endif
 #include "Utils/vk_mem_alloc.h"
+
 QT_WARNING_POP
 
 
@@ -59,18 +61,6 @@ bool QRhiEx::Signal::peek() {
 	return bDirty;
 }
 
-QVulkanInstance* QRhiEx::getVkInstance() {
-	static QVulkanInstance* vkInstance = nullptr;
-	if (!vkInstance) {
-		vkInstance = new QVulkanInstance;
-		vkInstance->setExtensions(QRhiVulkanInitParams::preferredInstanceExtensions());
-		vkInstance->setLayers({ "VK_LAYER_KHRONOS_validation" });
-		if (!vkInstance->create())
-			qFatal("Failed to create Vulkan instance");
-	}
-	return vkInstance;
-}
-
 QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
 	if (inBackend == QRhi::Null) {
 		QRhiNullInitParams params;
@@ -88,8 +78,10 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 
 #if QT_CONFIG(vulkan)
 	if (inBackend == QRhi::Vulkan) {
-		QVulkanInstance* vkInstance = getVkInstance();
+		QVulkanDefaultInstance::setFlag(QVulkanDefaultInstance::EnableValidation);
+		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 		QRhiVulkanInitParams params;
+		params.deviceExtensions = QRhiVulkanInitParams::preferredExtensionsForImportedDevice();
 		if (inWindow) {
 			inWindow->setVulkanInstance(vkInstance);
 			params.window = inWindow;
@@ -124,20 +116,29 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 	return nullptr;
 }
 
-QShader QRhiEx::newShaderFromCode(QShader::Stage stage, const char* code) {
+QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code) {
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
-	baker.setGeneratedShaders({
-		QShaderBaker::GeneratedShader{QShader::Source::SpirvShader,QShaderVersion(100)},
-		QShaderBaker::GeneratedShader{QShader::Source::GlslShader,QShaderVersion(430)},
-		QShaderBaker::GeneratedShader{QShader::Source::MslShader,QShaderVersion(12)},
-		QShaderBaker::GeneratedShader{QShader::Source::HlslShader,QShaderVersion(50)},
-		});
-
+	QList<QShaderBaker::GeneratedShader> generatedShaders;
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
+	if (backend() == QRhi::Vulkan || backend() == QRhi::OpenGLES2) {
+		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
+	}
+	else if (backend() == QRhi::D3D11|| backend() == QRhi::D3D12) {
+		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
+		code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
+	}
+	else if (backend() == QRhi::Metal) {
+		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
+	}
+	baker.setGeneratedShaders(generatedShaders);
 	baker.setSourceString(code, stage);
 	QShader shader = baker.bake();
 	if (!shader.isValid()) {
-		qWarning(code);
+		QStringList codelist = QString(code).split('\n');
+		for (int i = 0; i < codelist.size(); i++) {
+			qWarning() << i+1 << codelist[i].toLocal8Bit().data();
+		}
 		qWarning(baker.errorMessage().toLocal8Bit());
 	}
 	return shader;

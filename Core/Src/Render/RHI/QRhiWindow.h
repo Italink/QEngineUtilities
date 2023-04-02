@@ -9,7 +9,7 @@ class QRhiWindow :public QWindow {
 public:
 	struct InitParams {
 		QRhi::Implementation backend = QRhi::Vulkan;
-		QRhi::Flags rhiFlags;
+		QRhi::Flags rhiFlags = QRhi::Flag();
 		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::NoVSync;
 		QRhi::BeginFrameFlags beginFrameFlags;
 		QRhi::EndFrameFlags endFrameFlags;

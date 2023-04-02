@@ -189,8 +189,8 @@ void ImGuiPainter::compile() {
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, sizeof(QMatrix4x4)));
 	mUniformBuffer->create();
 
-	mSampler.reset(mRhi->newSampler(QRhiSampler::Nearest,
-				   QRhiSampler::Linear,
+	mSampler.reset(mRhi->newSampler(QRhiSampler::Linear,
+				   QRhiSampler::Nearest,
 				   QRhiSampler::None,
 				   QRhiSampler::ClampToEdge,
 				   QRhiSampler::ClampToEdge));
@@ -357,7 +357,6 @@ void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderT
 		const ImDrawList* cmd_list = draw_data->CmdLists[i];
 		cmdBuffer->setGraphicsPipeline(mPipeline.get());
 		cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
-
 		const QRhiCommandBuffer::VertexInput VertexInput(mVertexBuffer.get(), vertexBufferOffset);
 		cmdBuffer->setVertexInput(0, 1, &VertexInput, mIndexBuffer.get(), indexBufferOffset, sizeof(ImDrawIdx) == 2 ? QRhiCommandBuffer::IndexUInt16 : QRhiCommandBuffer::IndexUInt32);
 		vertexBufferOffset += cmd_list->VtxBuffer.size_in_bytes();

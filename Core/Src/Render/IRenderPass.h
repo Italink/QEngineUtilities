@@ -6,6 +6,8 @@
 #include "IRenderComponent.h"
 #include "Utils/QObjectBuilder.h"
 
+class QSkyboxRenderComponent;
+
 #define Q_EXPAND_INPUT_TEXTURE_GETTER(Name) QRhiTexture* getTextureIn_##Name(){ return getInputTexture(#Name); }
 #define Q_EXPAND_INPUT_TEXTURE_SETTER(Name) __Builder& setTextureIn_##Name(const QString& inPassName, int inSlot){ mObject->registerInputTextureLink(#Name,inPassName,inSlot); return *this; }
 #define Q_EXPAND_OUTPUR_TEXTURE_REGISTER(Name) void registerTextureOut_##Name(QRhiTexture* inTexture){ registerOutputTexture(Out::##Name,#Name,inTexture); }
@@ -61,7 +63,7 @@ private:
 #define Q_BUILDER_BEGIN_BASE_PASS(ClassType) \
 	public: \
 		Q_BUILDER_BEGIN(ClassType) \
-		__Builder& addComponent(IRenderComponent* inRenderComponent) { mObject->addRenderComponent(inRenderComponent); return *this; }
+		__Builder& addComponent(IRenderComponent* inRenderComponent) { mObject->addRenderComponent(inRenderComponent); return *this; } \
 
 #define Q_BUILDER_END_BASE_PASS(...) \
 		Q_BUILDER_END(ClassType) \
@@ -85,7 +87,8 @@ public:
 
 	QList<QPair<QRhiTexture::Format, QString>> getRenderTargetColorAttachments();
 	bool hasColorAttachment(const QString& inName);
-	IBasePass* addRenderComponent(IRenderComponent* inRenderComponent);
+
+	void addRenderComponent(IRenderComponent* inRenderComponent,int inIndex = -1);
 protected:
 	QVector<IRenderComponent*> mRenderComponents;
 	int mSampleCount = 1;

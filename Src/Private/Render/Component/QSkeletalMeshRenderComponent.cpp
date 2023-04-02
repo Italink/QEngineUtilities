@@ -66,7 +66,7 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 
 		bool bHasDiffuse = mesh.materialProperties.contains("Diffuse");
 		if (bHasDiffuse) {
-			mPipeline->addTexture(QRhiShaderStage::Fragment, QRhiGraphicsPipelineBuilder::TextureInfo::Texture2D, "Diffuse", mesh.materialProperties["Diffuse"].value<QImage>());
+			mPipeline->addTexture2D(QRhiShaderStage::Fragment,"Diffuse", mesh.materialProperties["Diffuse"].value<QImage>());
 		}
 
 		mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(

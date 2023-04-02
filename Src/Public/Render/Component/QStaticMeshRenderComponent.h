@@ -8,7 +8,7 @@
 class QStaticMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QSharedPointer<QStaticMesh> StaticMesh READ getStaticMesh WRITE setStaticMesh)
-	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> Pipelines READ getPipelines)
+	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> SubMeshes READ getPipelines)
 
 	Q_META_BEGIN(QStaticMeshRenderComponent)
 		Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
@@ -23,7 +23,7 @@ public:
 	QSharedPointer<QStaticMesh> getStaticMesh() const { return mStaticMesh; }
 	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
 protected:
-	void setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, const QStaticMesh::SubMeshInfo& info);
+	void setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, QStaticMesh::SubMeshInfo info);
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
 	void onUpload(QRhiResourceUpdateBatch* batch) override;

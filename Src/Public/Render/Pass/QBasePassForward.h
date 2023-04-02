@@ -25,6 +25,7 @@ protected:
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;
 		QScopedPointer<QRhiRenderPassDescriptor> renderPassDesc;
 	};
+
 	QRhiRenderPassDescriptor* getRenderPassDescriptor() override;
 	QRhiRenderTarget* getRenderTarget() override;
 	void resizeAndLinkNode(const QSize& size) override;

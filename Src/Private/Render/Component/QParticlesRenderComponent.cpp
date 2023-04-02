@@ -3,6 +3,7 @@
 #include "QVulkanInstance"
 #include "qvulkanfunctions.h"
 #include "Utils/DebugUtils.h"
+#include "private/qvulkandefaultinstance_p.h"
 
 static float ParticleShape[] = {
 	//position(xy)	
@@ -167,7 +168,7 @@ void QParticlesRenderComponent::onPreUpdate(QRhiCommandBuffer* cmdBuffer){
 		 QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 		 VkBuffer indirectDispatchBuffer = *(VkBuffer*)gpuSystem->getCurrentIndirectBuffer()->nativeBuffer().objects[0];
 		 VkBuffer indirectDrawBuffer = *(VkBuffer*)mIndirectDrawBuffer->nativeBuffer().objects[0];
-		 QVulkanInstance* vkInstance = mRhi->getVkInstance();
+		 QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 		 VkBufferCopy bufferCopy;
 		 bufferCopy.srcOffset = 0;
 		 bufferCopy.dstOffset = offsetof(IndirectDrawBuffer, instanceCount);
@@ -208,7 +209,7 @@ void QParticlesRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRh
 		QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 		auto buffer = mIndirectDrawBuffer->nativeBuffer();
 		VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-		QVulkanInstance* vkInstance = mRhi->getVkInstance();
+		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDrawIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0, 1, sizeof(IndirectDrawBuffer));
 	}
 	else {

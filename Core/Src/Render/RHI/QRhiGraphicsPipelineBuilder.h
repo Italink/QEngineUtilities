@@ -34,12 +34,13 @@ public:
 	inline static QList<QRhiGraphicsPipelineBuilder*> Instances;
 	QRhiEx::Signal sigRebuild;
 	struct TextureInfo {
-		enum EType {
-			Texture2D,
-			Cube
-		}Type;
 		QString Name;
-		QImage Image;
+		QImage ImageCache;
+		QSize Size;
+		QRhiTexture::Format Format;
+		QRhiTexture::Flags Flags;
+		QString GlslTypeName;
+		QRhiTextureUploadDescription UploadDesc;
 		QRhiSampler::Filter MagFilter;
 		QRhiSampler::Filter MinFilter;
 		QRhiSampler::Filter MipmapMode;
@@ -125,9 +126,10 @@ public:
 	void addUniformBlock(QRhiShaderStage::Type inStage, QSharedPointer<QRhiUniformBlock> inUniformBlock);
 	QRhiUniformBlock* getUniformBlock(const QString& inName);
 
-	void addTexture(QRhiShaderStage::Type inStage,
-		TextureInfo::EType inType,
-		const QString& inName, 
+	void addMaterialProperty(const QMap<QString, QVariant>& inMaterial);
+
+	void addTexture2D(QRhiShaderStage::Type inStage,
+		const QString& inName,
 		const QImage& inImage, 
 		QRhiSampler::Filter magFilter = QRhiSampler::Filter::Linear,
 		QRhiSampler::Filter minFilter = QRhiSampler::Filter::Nearest,
@@ -135,6 +137,31 @@ public:
 		QRhiSampler::AddressMode addressU = QRhiSampler::AddressMode::Repeat,
 		QRhiSampler::AddressMode addressV = QRhiSampler::AddressMode::Repeat,
 		QRhiSampler::AddressMode addressW = QRhiSampler::AddressMode::Repeat);
+
+	void addTexture2D(QRhiShaderStage::Type inStage,
+		const QString& inName,
+		QRhiTexture::Format inFormat,
+		const QSize& inSize,
+		const QByteArray& inData,
+		QRhiSampler::Filter magFilter = QRhiSampler::Filter::Linear,
+		QRhiSampler::Filter minFilter = QRhiSampler::Filter::Nearest,
+		QRhiSampler::Filter mipmapMode = QRhiSampler::Filter::Linear,
+		QRhiSampler::AddressMode addressU = QRhiSampler::AddressMode::Repeat,
+		QRhiSampler::AddressMode addressV = QRhiSampler::AddressMode::Repeat,
+		QRhiSampler::AddressMode addressW = QRhiSampler::AddressMode::Repeat);
+
+	void addCubeMap(QRhiShaderStage::Type inStage,
+		const QString& inName,
+		QRhiTexture::Format inFormat,
+		const QSize& inSize,
+		const QVector<QByteArray>& inData,
+		QRhiSampler::Filter magFilter = QRhiSampler::Filter::Linear,
+		QRhiSampler::Filter minFilter = QRhiSampler::Filter::Nearest,
+		QRhiSampler::Filter mipmapMode = QRhiSampler::Filter::Linear,
+		QRhiSampler::AddressMode addressU = QRhiSampler::AddressMode::Repeat,
+		QRhiSampler::AddressMode addressV = QRhiSampler::AddressMode::Repeat,
+		QRhiSampler::AddressMode addressW = QRhiSampler::AddressMode::Repeat);
+
 	void setTexture(const QString& inName, const QImage& inImage);
 
 	QRhiShaderResourceBindings* getShaderResourceBindings();
@@ -144,8 +171,6 @@ public:
 
 	QByteArray getInputFormatTypeName(QRhiVertexInputAttribute::Format inFormat);
 	QByteArray getOutputFormatTypeName(QRhiTexture::Format inFormat);
-	QSize resolveCubeImageFaceSize(const QImage& inImage);
-	std::array<QImage,6> resolveCubeSubImages(const QImage& inImage);
 protected:
 	void recreateShaderBindings(IRenderComponent* inRenderComponent, QRhiEx *inRhi);
 private:

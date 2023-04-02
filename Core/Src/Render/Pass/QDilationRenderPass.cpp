@@ -119,7 +119,7 @@ void QDilationRenderPass::compile() {
 				maxColor	 = rightGreyScale > maxGreyScale ? rightColor : maxColor;
 				maxGreyScale = rightGreyScale > maxGreyScale ? rightGreyScale : maxGreyScale;
 			}
-			outFragColor = vec4(maxColor.rgb,1.0f);
+			outFragColor = maxColor;
 		}
 	)");
 	mPipelineH->setShaderStages({

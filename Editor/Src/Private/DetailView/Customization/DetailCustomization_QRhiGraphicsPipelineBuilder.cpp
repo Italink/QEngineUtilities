@@ -19,10 +19,10 @@ void DetailCustomization_QRhiGraphicsPipelineBuilder::CustomizeDetails(const IDe
 			QMetaType::fromType<QImage>(),
 			path,
 			[textureInfo = texture.second]() {
-			return textureInfo->Image;
+			return textureInfo->ImageCache;
 		},
 		[textureInfo = texture.second](QVariant var) {
-			textureInfo->Image = var.value<QImage>();
+			textureInfo->ImageCache = var.value<QImage>();
 		}
 		, metaData->mPropertiesMetaData.value(texture.first)
 		);

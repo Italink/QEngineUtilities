@@ -146,12 +146,12 @@ void QObjectTreeView::ForceRefresh() {
 		addTopLevelItem(topItem);
 		AddItemInternal(topItem, instance);
 	}
+	expandAll();
 }
 
 bool QObjectTreeView::eventFilter(QObject* object, QEvent* event) {
 	if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved) {
 		QChildEvent* childEvent = static_cast<QChildEvent*>(event);
-		qDebug() << event->type() << childEvent->child() << childEvent->child()->metaObject() << childEvent->child()->metaObject()->className();
 		if (!IsIgnoreObject(childEvent->child()))
 			ForceRefresh();
 	}

@@ -2,6 +2,7 @@
 #include "QDateTime"
 #include "private/qrhivulkan_p.h"
 #include "qvulkanfunctions.h"
+#include "private/qvulkandefaultinstance_p.h"
 
 void QParticleSystem::onInit(QRhiEx* inRhi){
 	mRhi = inRhi;
@@ -154,7 +155,7 @@ void QGPUParticleSystem::onInit(QRhiEx* inRhi) {
 	mTranformComputeBindings[0]->setBindings({
 		QRhiShaderResourceBinding::bufferLoad(0, QRhiShaderResourceBinding::ComputeStage, mParticlesBuffer[0].get()),
 		QRhiShaderResourceBinding::bufferStore(1, QRhiShaderResourceBinding::ComputeStage,mTransfromBuffer.get()),
-		});
+	});
 	mTranformComputeBindings[0]->create();
 	mTranformComputeBindings[1].reset(mRhi->newShaderResourceBindings());
 	mTranformComputeBindings[1]->setBindings({
@@ -165,7 +166,7 @@ void QGPUParticleSystem::onInit(QRhiEx* inRhi) {
 
 	mTranformComputePipline.reset(mRhi->newComputePipeline());
 	mTranformComputePipline->setShaderResourceBindings(mTranformComputeBindings[0].get());
-	QShader matrixCompute = QRhiEx::newShaderFromCode(QShader::ComputeStage, R"(
+	QShader matrixCompute = mRhi->newShaderFromCode(QShader::ComputeStage, R"(
 		#version 450
 		#define PARTICLE_MAX_SIZE 1000000
 		struct Particle {
@@ -220,13 +221,13 @@ void QGPUParticleSystem::onRecreateComputePipeline()
 {
 	mSpawnPipeline.reset(mRhi->newComputePipeline());
 	mSpawnPipeline->setShaderResourceBindings(mSpawnBindings[mInputSlot].get());
-	QShader spawnShader = QRhiEx::newShaderFromCode(QShader::Stage::ComputeStage, mSpawnShaderCode);
+	QShader spawnShader = mRhi->newShaderFromCode(QShader::Stage::ComputeStage, mSpawnShaderCode);
 	mSpawnPipeline->setShaderStage({ QRhiShaderStage::Compute,spawnShader });
 	mSpawnPipeline->create();
 
 	mUpdatePipeline.reset(mRhi->newComputePipeline());
 	mUpdatePipeline->setShaderResourceBindings(mUpdateBindings[mInputSlot].get());
-	QShader updateShader = QRhiEx::newShaderFromCode(QShader::Stage::ComputeStage, mUpdateShaderCode);
+	QShader updateShader = mRhi->newShaderFromCode(QShader::Stage::ComputeStage, mUpdateShaderCode);
 	mUpdatePipeline->setShaderStage({ QRhiShaderStage::Compute,updateShader });
 	mUpdatePipeline->create();
 
@@ -257,7 +258,7 @@ void QGPUParticleSystem::onSpawn(QRhiCommandBuffer* inCmdBuffer) {
 	QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
 	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-	QVulkanInstance* vkInstance = mRhi->getVkInstance();
+	QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 	vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDispatch(vkCmdBufferHandle->commandBuffer, mNumOfSpawnPerFrame, 1, 1);
 	inCmdBuffer->endComputePass();
 
@@ -283,7 +284,6 @@ void QGPUParticleSystem::onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer) {
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	batch->uploadStaticBuffer(mIndirectDispatchBuffer[mOutputSlot].get(), &dispatch);
 	inCmdBuffer->resourceUpdate(batch);
-
 	inCmdBuffer->beginComputePass(nullptr, QRhiCommandBuffer::ExternalContent);
 	inCmdBuffer->setComputePipeline(mUpdatePipeline.get());
 	inCmdBuffer->setShaderResources(mUpdateBindings[mInputSlot].get());
@@ -291,7 +291,7 @@ void QGPUParticleSystem::onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer) {
 	QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
 	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-	QVulkanInstance* vkInstance = mRhi->getVkInstance();
+	QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 	vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDispatchIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0);
 	inCmdBuffer->endComputePass();
 }
@@ -305,7 +305,7 @@ void QGPUParticleSystem::onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer
 	QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 	auto buffer = mIndirectDispatchBuffer[mOutputSlot]->nativeBuffer();
 	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-	QVulkanInstance* vkInstance = mRhi->getVkInstance();
+	QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 	vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDispatchIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0);
 	inCmdBuffer->endComputePass();
 	qSwap(mInputSlot, mOutputSlot);

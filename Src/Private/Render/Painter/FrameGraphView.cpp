@@ -138,7 +138,9 @@ void FrameGraphView::CustomDraw(ImDrawList* drawList, ImRect rectangle, GraphEdi
 	for (int i = 0; i < mNodeTexutes[nodeIndex].size(); i++) {
 		ImVec2 min(rectangle.Min.x, rectangle.Min.y + (mOptions.mNodeSlotSize) * mViewState.mFactor * i);
 		ImVec2 max(min.x + mOptions.mNodeSlotSize * mViewState.mFactor, min.y + mOptions.mNodeSlotSize * mViewState.mFactor);
-		drawList->AddImage((ImTextureID)mNodeTexutes[nodeIndex][i], min,max);
+		if (mNodeTexutes[nodeIndex][i]->arraySize() == 0 && !mNodeTexutes[nodeIndex][i]->flags().testFlag(QRhiTexture::CubeMap)) {
+			drawList->AddImage((ImTextureID)mNodeTexutes[nodeIndex][i], min, max);
+		}
 		ImVec2 textSize = ImGui::CalcTextSize(mNodeTexutes[nodeIndex][i]->name().data());
 		float offset = (rectangle.GetWidth() - textSize.x * textureNameFontSize / textSize.y) / 2;
 		drawList->AddText(NULL, textureNameFontSize , ImVec2(min.x + offset, min.y), ImGui::GetColorU32(ImGuiCol_Text), mNodeTexutes[nodeIndex][i]->name().data());
