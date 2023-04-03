@@ -17,7 +17,7 @@ void QBasePassDeferred::resizeAndLinkNode(const QSize& size) {
 	mRT.atBaseColor->create();
 	mRT.atPosition.reset(mRhi->newTexture(QRhiTexture::RGBA32F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atPosition->create();
-	mRT.atNormal.reset(mRhi->newTexture(QRhiTexture::RGBA8, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+	mRT.atNormal.reset(mRhi->newTexture(QRhiTexture::RGBA16F, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atNormal->create();
 	mRT.atTangent.reset(mRhi->newTexture(QRhiTexture::RGBA8, size, getSampleCount(), QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.atTangent->create();

@@ -1,6 +1,7 @@
 #include "Render/Component/QStaticMeshRenderComponent.h"
 #include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
+#include "Utils/MathUtils.h"
 
 QStaticMeshRenderComponent::QStaticMeshRenderComponent() {
 }
@@ -51,13 +52,10 @@ void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuild
 			layout(location = 1) out vec3 vWorldPosition;
 			layout(location = 2) out mat3 vTangentBasis;
 			void main(){
+				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 				vUV = inUV;
 				vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
-				vec3 T = normalize(vec3(Transform.M * vec4(inTangent,   0.0)));
-				vec3 B = normalize(vec3(Transform.M * vec4(inBitangent, 0.0)));
-				vec3 N = normalize(vec3(Transform.M * vec4(inNormal,    0.0)));
-				vTangentBasis = mat3(T, B, N);
-				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
+				vTangentBasis = mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
 			}
 	)");
 
@@ -78,13 +76,13 @@ void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuild
 	inPipeline->addMaterialProperty(info.materialProperties);
 
 
-	QByteArray NormalAssign = "vec4(vTangentBasis[2], 1)";
+	QByteArray NormalAssign;
 	if (getBasePass()->hasColorAttachment("Normal")) {
-		if (info.materialProperties["Normal"].metaType() == QMetaType::fromType<QImage>()) 
+		if (info.materialProperties["Normal"].metaType() == QMetaType::fromType<QImage>())
 			NormalAssign = R"(vec3 n = 2.0 * texture(uNormal, vUV).rgb - 1.0;			
-							 Normal = vec4((normalize( vTangentBasis * n ) + 1.0) * 0.5,1.0f);)";
-		else 
-			NormalAssign = "Normal = vec4((normalize(vTangentBasis[2]) + 1.0) * 0.5,1.0f);";
+							 Normal = vec4(normalize(vTangentBasis*n),1.0f);)";
+		else
+			NormalAssign = "Normal = vec4(normalize(vTangentBasis[2]),1.0f);";
 	}
 
 	QByteArray BaseColorAssign;
@@ -156,8 +154,8 @@ void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	for (int i = 0; i < mPipelines.size(); i++) {
 		QRhiGraphicsPipelineBuilder* pipeline = mPipelines[i].get();
 		const QStaticMesh::SubMeshInfo& meshInfo = mStaticMesh->mSubmeshes[i];
-		QMatrix4x4 MVP = calculateMatrixMVP() * meshInfo.localTransfrom;
 		QMatrix4x4 M = calculateMatrixModel() * meshInfo.localTransfrom;
+		QMatrix4x4 MVP = getMatrixClipWithCorr() * getMatrixView() * M;
 		pipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 		pipeline->getUniformBlock("Transform")->setParamValue("M", QVariant::fromValue(M.toGenericMatrix<4, 4>()));
 		pipeline->update(batch);

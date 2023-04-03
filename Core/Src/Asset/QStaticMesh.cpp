@@ -155,6 +155,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 			vertex.position.setY(textSize.height() - vertex.position.y());
 			vertex.position -= QVector3D(textSize.width() / 2.0f, textSize.height() / 2.0f, 0.0f);
 		}
+		submesh.materialProperties["BaseColor"] = inColor;
 	}
 
 	for (auto& vertex : vertices) {
@@ -166,7 +167,6 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 	submesh.verticesOffset = 0;
 	submesh.indicesRange = indices.size();
 	submesh.verticesRange = vertices.size();
-	submesh.materialProperties["BaseColor"] = inColor;
 	staticMesh->mSubmeshes << submesh;
 	return staticMesh;
 }

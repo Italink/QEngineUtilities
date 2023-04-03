@@ -100,9 +100,9 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	if (bFacingCamera) {
 		vsCode = vsCode.arg(R"(
 			void main(){
-				mat4 Transform = UBO.MV * inInstTransform;
+				mat4 Transform    = UBO.MV * inInstTransform;
 				mat3 CorrRotation = inverse(mat3(Transform));
-				vec3 CorrPos        = CorrRotation * vec3(inPosition,0.0f);
+				vec3 CorrPos      = CorrRotation * vec3(inPosition,0.0f);
 				gl_Position = UBO.P * Transform * vec4(CorrPos, 1.0); 
 				vColor = UBO.Color;
 			})");

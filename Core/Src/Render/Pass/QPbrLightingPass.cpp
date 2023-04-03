@@ -200,7 +200,7 @@ void QPbrLightingPass::compile() {
 			float metalness = texture(metalnessTexture, vUV).r;
 			float roughness = texture(roughnessTexture, vUV).r;
 			vec3 Lo = normalize(UBO.eyePosition - position);
-			vec3 N = texture(normalTexture, vUV).rgb * 2.0 - 1.0 ;
+			vec3 N = texture(normalTexture, vUV).rgb;
 			float cosLo = max(0.0, dot(N, Lo));
 			vec3 Lr = 2.0 * cosLo * N - Lo;
 			vec3 F0 = mix(Fdielectric, albedo.rgb, metalness);
