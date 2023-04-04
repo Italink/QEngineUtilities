@@ -33,7 +33,7 @@ QWidget* QSequentialPropertyHandleImpl::GenerateValueWidget() {
 		this->AppendItem(var);
 	});
 	QWidget* valueContent = new QWidget;
-	valueContent->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Preferred);
+	valueContent->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
 	QHBoxLayout* valueContentLayout = new QHBoxLayout(valueContent);
 	valueContentLayout->setAlignment(Qt::AlignLeft);
 	valueContentLayout->setContentsMargins(10, 2, 10, 2);

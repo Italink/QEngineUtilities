@@ -87,13 +87,13 @@ public:
 		, mContentWidget(new QWidget)
 		, mIndentWidget(new QDetailViewRowIndentWidget) {
 		setAttribute(Qt::WA_TranslucentBackground);
+		setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 		mContentWidget->setAttribute(Qt::WA_TranslucentBackground);
 		mLayout->setContentsMargins(0, 0, 0, 0);
 		mLayout->setSpacing(0);
 		mLayout->addWidget(mIndentWidget);
 		mLayout->addSpacing(5);
 		mLayout->addWidget(mContentWidget);
-		setMinimumHeight(25);
 		connect(mIndentWidget, &QDetailViewRowIndentWidget::AsToggledExpand, this, &QDetailViewRowWidget::AsToggledExpand);
 	}
 	void SetContentWidget(QWidget* inWidget) {
@@ -104,7 +104,7 @@ public:
 		if (mContentWidget)
 			mContentWidget->deleteLater();
 		mContentWidget = inWidget;
-		mContentWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred));
+		mContentWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	}
 Q_SIGNALS:
 	void AsToggledExpand();
@@ -171,10 +171,12 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 	});
 	if (inNameWidget) {
 		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
+		inNameWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 		content->addWidget(inNameWidget);
 	}
 	if (inValueWidget) {
 		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
+		inNameWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 		content->addWidget(inValueWidget);
 	}
 	SetupContentWidget(content);
