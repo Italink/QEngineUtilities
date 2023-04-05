@@ -92,11 +92,21 @@ QLineEdit,QTextEdit{
 	color: rgb(220,220,220);
 	border: 1px solid transparent;
 }
-QPushButton,QComboBox{
+QPushButton,QComboBox {
 	background-color:rgb(5,5,5);
 	color: rgb(220,220,220);
 	padding: 2px 5px 2px 5px; 
-	border: 1px outset rgb(50,50,50);
+	border: 1px solid rgb(50,50,50); 
+	border-radius: 3px; 
+	font-family: "Microsoft YaHei";
+	font-size: 10pt;
+}
+QPushButton:hover,QComboBox:hover,QPushButton:checked {
+	background-color: rgb(79, 110, 242);
+	color: #F2F2F2;
+}
+QPushButton:pressed,QComboBox:pressed { 
+	background-color: #257FE6;
 }
 QComboBox QAbstractItemView {
 	padding: 0px 0px 4px 0px;
@@ -165,11 +175,22 @@ QLineEdit,QTextEdit{
 QLineEdit#NameEditor{
 	background-color:transparent;
 }
-QPushButton,QComboBox{
+QPushButton,QComboBox {
 	background-color:rgb(240,240,240);
 	color: rgb(50,50,50);
 	padding: 2px 5px 2px 5px; 
-	border: 2px outset rgb(200,200,200);
+	border: 1px solid rgb(180,180,180); 
+	border-radius: 3px; 
+	font-family: "Microsoft YaHei";
+	font-size: 10pt;
+}
+QPushButton:hover,QComboBox:hover,QPushButton:checked  {
+	background-color: rgb(80, 205, 130);
+	color: rgb(20,20,20);
+	color: rgb(20,20,20);
+}
+QPushButton:pressed,QComboBox:pressed { 
+	background-color: #257FE6;
 }
 QComboBox QAbstractItemView {
 	padding: 0px 0px 4px 0px;
