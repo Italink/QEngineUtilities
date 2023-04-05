@@ -63,13 +63,14 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			layout(location = 1) in vec3 vWorldPosition;
 			layout(location = 2) in mat3 vTangentBasis;
 			void main(){
-				%1;
+				%1
 				%2
 				%3
 				%4	
 				%5
 				%6
-			})").arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
+			})")
+			.arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
 			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
 			.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
 			.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")

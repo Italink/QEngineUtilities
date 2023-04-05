@@ -50,7 +50,8 @@ void QBlurRenderPass::resizeAndLinkNode(const QSize& size) {
 		QRhiSampler::Linear,
 		QRhiSampler::None,
 		QRhiSampler::ClampToEdge,
-		QRhiSampler::ClampToEdge));
+		QRhiSampler::ClampToEdge)
+	);
 	mSampler->create();
 
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(Params)));
@@ -66,14 +67,14 @@ void QBlurRenderPass::resizeAndLinkNode(const QSize& size) {
 	mBindingsH->setBindings({
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage,mBlurRT[0].colorAttachment.get(),mSampler.get()),
 		QRhiShaderResourceBinding::uniformBuffer(1,QRhiShaderResourceBinding::FragmentStage,mUniformBuffer.get())
-		});
+	});
 	mBindingsH->create();
 
 	mBindingsV.reset(mRhi->newShaderResourceBindings());
 	mBindingsV->setBindings({
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage,mBlurRT[1].colorAttachment.get(),mSampler.get()),
 		QRhiShaderResourceBinding::uniformBuffer(1,QRhiShaderResourceBinding::FragmentStage,mUniformBuffer.get())
-		});
+	});
 
 	mBindingsV->create();
 

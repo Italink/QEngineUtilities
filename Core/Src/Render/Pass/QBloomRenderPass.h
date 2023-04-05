@@ -1,16 +1,15 @@
-#ifndef QBloomMerageRenderPass_h__
-#define QBloomMerageRenderPass_h__
+#ifndef QBloomRenderPass_h__
+#define QBloomRenderPass_h__
 
 #include "Render/IRenderPass.h"
 
-class QBloomMerageRenderPass :public IRenderPass {
+class QBloomRenderPass :public IRenderPass {
 	Q_OBJECT
 
-	Q_BUILDER_BEGIN_RENDER_PASS(QBloomMerageRenderPass, Raw, Blur)
+	Q_BUILDER_BEGIN_RENDER_PASS(QBloomRenderPass, Raw, Blur)
 	Q_BUILDER_END_RENDER_PASS(Result)
 public:
-	QBloomMerageRenderPass();
-
+	QBloomRenderPass();
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;
 	void render(QRhiCommandBuffer* cmdBuffer) override;
@@ -26,4 +25,4 @@ private:
 	QScopedPointer<QRhiShaderResourceBindings> mBindings;
 };
 
-#endif // QBloomMerageRenderPass_h__
+#endif // QBloomRenderPass_h__
