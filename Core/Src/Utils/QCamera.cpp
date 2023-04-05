@@ -27,6 +27,21 @@ float QCamera::getRoll()
 	return 	mRotation.z();
 }
 
+void QCamera::setYaw(float inVar) {
+	mRotation.setY(inVar);
+	calculateViewMatrix();
+}
+
+void QCamera::setPitch(float inVar) {
+	mRotation.setX(inVar);
+	calculateViewMatrix();
+}
+
+void QCamera::setRoll(float inVar) {
+	mRotation.setZ(inVar);
+	calculateViewMatrix();
+}
+
 void QCamera::setPosition(const QVector3D& newPosition)
 {
 	mPosition = newPosition;
@@ -110,17 +125,17 @@ bool QCamera::eventFilter(QObject* watched, QEvent* event)
 				float yoffset = currentPos.y() - pressedPos.y();	// 注意这里是相反的，因为y坐标是从底部往顶部依次增大的
 				xoffset *= mRotationSpeed;
 				yoffset *= mRotationSpeed;
-				float yaw = getYaw() + xoffset;
-				float pitch = getPitch() - yoffset;
+				float rYaw = getYaw() * M_PI / 180 + xoffset;
+				float rPitch = getPitch() * M_PI / 180 - yoffset;
 
-				if (pitch > 1.55f)         //将俯视角限制到[-89°,89°]，89°约等于1.55
-					pitch = 1.55f;
-				if (pitch < -1.55f)
-					pitch = -1.55f;
+				if (rPitch > 1.55f)         //将俯视角限制到[-89°,89°]，89°约等于1.55
+					rPitch = 1.55f;
+				if (rPitch < -1.55f)
+					rPitch = -1.55f;
 
 				QVector3D rotation = mRotation;
-				rotation.setY(yaw);
-				rotation.setX(pitch);
+				rotation.setY(rYaw / M_PI * 180);
+				rotation.setX(rPitch / M_PI * 180);
 				setRotation(rotation);
 				QCursor::setPos(pressedPos);   //将鼠标移动窗口中央
 			}
@@ -196,10 +211,10 @@ void QCamera::calculateClipMatrix()
 
 void QCamera::calculateCameraDirection()
 {
-	float xzLen = cos(getPitch());
-	mCameraDirection.setX(xzLen * cos(getYaw()));
-	mCameraDirection.setY(sin(getPitch()));
-	mCameraDirection.setZ(xzLen * sin(-getYaw()));
+	float xzLen = cos(getPitch() * M_PI / 180);
+	mCameraDirection.setX(xzLen * cos(getYaw() * M_PI / 180));
+	mCameraDirection.setY(sin(getPitch() * M_PI / 180));
+	mCameraDirection.setZ(xzLen * sin(-getYaw() * M_PI / 180));
 	mCameraRight = QVector3D::crossProduct({ 0.0f,-1.0f,0.0f }, mCameraDirection);
 	mCameraUp = QVector3D::crossProduct(mCameraRight, mCameraDirection);         //摄像机上向量
 }

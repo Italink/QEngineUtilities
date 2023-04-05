@@ -4,6 +4,7 @@
 #include "Render/RHI/QRhiUniformBlock.h"
 #include "QObject"
 #include "Utils/QMetaData.h"
+#include "QRhiMaterialGroup.h"
 
 class QRhiVertexInputAttributeEx : public QRhiVertexInputAttribute {
 public:
@@ -29,35 +30,17 @@ public:
 class QRhiGraphicsPipelineBuilder: public QObject{
 	Q_OBJECT
 		Q_PROPERTY(QMap<QString, QRhiUniformBlock*> UniformBlocks READ getUniformBlocks WRITE setUniformBlocks)
-		Q_PROPERTY(QMap<QString, TextureInfo*> Textures READ getTextures WRITE setTextures)
+		Q_PROPERTY(QMap<QString, QRhiTextureDesc*> Textures READ getTextures WRITE setTextures)
 public:
 	inline static QList<QRhiGraphicsPipelineBuilder*> Instances;
 	QRhiEx::Signal sigRebuild;
-	struct TextureInfo {
-		QString Name;
-		QImage ImageCache;
-		QSize Size;
-		QRhiTexture::Format Format;
-		QRhiTexture::Flags Flags;
-		QString GlslTypeName;
-		QRhiTextureUploadDescription UploadDesc;
-		QRhiSampler::Filter MagFilter;
-		QRhiSampler::Filter MinFilter;
-		QRhiSampler::Filter MipmapMode;
-		QRhiSampler::AddressMode AddressU;
-		QRhiSampler::AddressMode AddressV;
-		QRhiSampler::AddressMode AddressW;
 
-		QRhiEx::Signal sigUpdate;
-		QScopedPointer<QRhiTexture> Texture;
-		QSharedPointer<QRhiSampler> Sampler;
-	};
 	struct StageInfo {
-		QVector<QSharedPointer<QRhiUniformBlock>> mUniformBlocks;
-		QVector<QSharedPointer<TextureInfo>> mTextureInfos;
-		QByteArray VersionCode = "#version 440\n";
-		QByteArray DefineCode;
-		QByteArray MainCode;
+		QList<QSharedPointer<QRhiUniformBlock>> uniformBlocks;
+		QList<QSharedPointer<QRhiTextureDesc>> textureDescs;
+		QByteArray versionCode = "#version 440\n";
+		QByteArray defineCode;
+		QByteArray mainCode;
 	};
 
 	QRhiGraphicsPipelineBuilder(QObject* parent = nullptr) {
@@ -110,8 +93,8 @@ public:
 	QMap<QString, QRhiUniformBlock*> getUniformBlocks() { return mUniformMap; }
 	void setUniformBlocks(QMap<QString, QRhiUniformBlock*>) {}
 
-	QMap<QString, TextureInfo*> getTextures() { return mTextureMap; }
-	void setTextures(QMap<QString, TextureInfo*>) {}
+	QMap<QString, QRhiTextureDesc*> getTextures() { return mTextureMap; }
+	void setTextures(QMap<QString, QRhiTextureDesc*>) {}
 
 	static void setPolygonModeOverride(QRhiGraphicsPipeline::PolygonMode inMode);
 	static void clearPolygonModeOverride();
@@ -126,7 +109,7 @@ public:
 	void addUniformBlock(QRhiShaderStage::Type inStage, QSharedPointer<QRhiUniformBlock> inUniformBlock);
 	QRhiUniformBlock* getUniformBlock(const QString& inName);
 
-	void addMaterialProperty(const QMap<QString, QVariant>& inMaterial);
+	void addMaterial(QSharedPointer<QRhiMaterialDesc> inDesc);
 
 	void addTexture2D(QRhiShaderStage::Type inStage,
 		const QString& inName,
@@ -162,10 +145,13 @@ public:
 		QRhiSampler::AddressMode addressV = QRhiSampler::AddressMode::Repeat,
 		QRhiSampler::AddressMode addressW = QRhiSampler::AddressMode::Repeat);
 
+	void addTextureDesc(QRhiShaderStage::Type inStage, QSharedPointer<QRhiTextureDesc> inTexture);
+
 	void setTexture(const QString& inName, const QImage& inImage);
 
 	QRhiShaderResourceBindings* getShaderResourceBindings();
 	QRhiGraphicsPipeline* getGraphicsPipeline() { return mPipeline.get(); }
+
 	void create(IRenderComponent* inRenderComponent);
 	void update(QRhiResourceUpdateBatch* batch);
 
@@ -198,12 +184,11 @@ private:
 	QScopedPointer<QRhiShaderResourceBindings> mShaderBindings;
 	QHash<QRhiShaderStage::Type, StageInfo> mStageInfos;
 	QMap<QString, QRhiUniformBlock*> mUniformMap;
-	QMap<QString, TextureInfo*> mTextureMap;
+	QMap<QString, QRhiTextureDesc*> mTextureMap;
 	QList<QSharedPointer<QRhiSampler>> mSamplerList;
 	inline static int PolygonModeOverride = -1;
 };
 
-Q_DECLARE_METATYPE(QRhiGraphicsPipelineBuilder::TextureInfo*);
 Q_DECLARE_METATYPE(QRhiGraphicsPipelineBuilder*);
 Q_DECLARE_METATYPE(QSharedPointer<QRhiGraphicsPipelineBuilder>);
 

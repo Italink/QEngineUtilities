@@ -172,6 +172,7 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 	if (inNameWidget) {
 		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
 		inNameWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+		inNameWidget->setMinimumHeight(20);
 		content->addWidget(inNameWidget);
 	}
 	if (inValueWidget) {

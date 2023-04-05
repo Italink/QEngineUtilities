@@ -37,14 +37,12 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 		QCamera* camera = mRenderer->getCamera();
 		if (camera) {
 			auto& io = ImGui::GetIO();
-
 			QMatrix4x4 View = camera->getMatrixView();
 			QMatrix4x4 Clip = camera->getMatrixClip();
 			ISceneRenderComponent* currComponent = qobject_cast<ISceneRenderComponent*>(mRenderer->getCurrentObject());
 			if (currComponent) {
 				QMatrix4x4 MAT;
 				QMatrix4x4 Model = currComponent->calculateMatrixModel();
-
 				ImGuizmo::BeginFrame();
 				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 				ImGuizmo::Manipulate(View.constData(), Clip.constData(), mOperation, ImGuizmo::LOCAL, Model.data(), NULL, NULL, NULL, NULL);
@@ -56,6 +54,10 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 				if (QPropertyHandle* scale = QPropertyHandle::Find(currComponent, "Transform.Scale"))
 					scale->RefreshBinder();
 			}
+			if (QPropertyHandle* position = QPropertyHandle::Find(camera, "Position"))
+				position->RefreshBinder();
+			if (QPropertyHandle* rotation = QPropertyHandle::Find(camera, "Rotation"))
+				rotation->RefreshBinder();
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y));
 			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 60));
@@ -72,7 +74,7 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 				ImGui::SetNextWindowPos(ImVec2(155,60));
 			}
 			if (ImGui::BeginPopup("Move Speed Slider")) {
-				ImGui::VSliderFloat("##", ImVec2(40, 100), &camera->getMoveSpeedRef(), 0.01, 5);
+				ImGui::VSliderFloat("##", ImVec2(40, 100), &camera->getMoveSpeedRef(), 0.01, 2);
 				ImGui::EndPopup();
 			}
 			ImGui::RenderFrame(ImVec2(viewport->WorkSize.x - 465, viewport->WorkPos.y + 8), ImVec2(viewport->WorkSize.x - 280, viewport->WorkPos.y + 48), ImGui::GetColorU32(ImGuiCol_Button), true, GImGui->Style.FrameRounding);

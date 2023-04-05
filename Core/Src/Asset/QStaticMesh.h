@@ -5,11 +5,10 @@
 #include "QImage"
 #include "QMap"
 #include "QMatrix4x4"
+#include "QMaterial.h"
 
-class QStaticMesh {
-public:
+struct QStaticMesh {
 	static QSharedPointer<QStaticMesh> CreateFromFile(const QString& inFilePath);
-
 	static QSharedPointer<QStaticMesh> CreateFromText(const QString& inText, const QFont& inFont, QColor inColor = Qt::white, Qt::Orientation o = Qt::Horizontal, int inSpacing = 2, bool bUseTexture = true);
 
 	struct Vertex {
@@ -20,19 +19,20 @@ public:
 		QVector2D uv;
 	};
 
-	struct SubMeshInfo {
+	struct SubMeshData {
 		uint32_t verticesOffset;
 		uint32_t verticesRange;
 		uint32_t indicesOffset;
 		uint32_t indicesRange;
-		QMap<QString, QVariant> materialProperties;
+		uint32_t materialIndex;
 		QMatrix4x4 localTransfrom;
 	};
 	using Index = uint32_t;
 
 	QVector<Vertex> mVertices;
 	QVector<Index> mIndices;
-	QVector<SubMeshInfo> mSubmeshes;
+	QVector<SubMeshData> mSubmeshes;
+	QVector<QSharedPointer<QMaterial>> mMaterials;
 };
 
 Q_DECLARE_METATYPE(QSharedPointer<QStaticMesh>)

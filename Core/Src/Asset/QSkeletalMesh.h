@@ -9,6 +9,7 @@
 #include "AssetUtils.h"
 #include "Utils/MathUtils.h"
 #include "QVariantAnimation"
+#include "QMaterial.h"
 
 struct QSkeleton {
 	struct MeshNode {
@@ -59,17 +60,18 @@ public:
 		QVector4D boneWeight;
 	};
 
-	struct SubMeshInfo {
+	struct SubMeshData {
 		uint32_t verticesOffset;
 		uint32_t verticesRange;
 		uint32_t indicesOffset;
 		uint32_t indicesRange;
-		QMap<QString, QVariant> materialProperties;
+		uint32_t materialIndex;
 	};
 
 	QVector<Vertex> mVertices;
 	QVector<Index> mIndices;
-	QVector<SubMeshInfo> mSubmeshes;
+	QVector<SubMeshData> mSubmeshes;
+	QVector<QSharedPointer<QMaterial>> mMaterials;
 	QSharedPointer<QVariantAnimation> mAnimPlayer;
 	QSharedPointer<QSkeleton> mSkeleton;
 	QVector<MathUtils::Mat4> mCurrentPosesMatrix;

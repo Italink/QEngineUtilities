@@ -7,8 +7,7 @@
 
 class QSkeletalMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
-	Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
-	Q_PROPERTY(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> Pipelines READ getPipelines WRITE setPipelines)
+		Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
 	
 	Q_META_BEGIN(QSkeletalMeshRenderComponent)
 		Q_META_P_STRING_AS_FILE_PATH(SkeletalMeshPath)
@@ -16,7 +15,7 @@ class QSkeletalMeshRenderComponent :public ISceneRenderComponent {
 	Q_META_END()
 
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSkeletalMeshRenderComponent)
-		Q_BUILDER_ATTRIBUTE(QString,SkeletalMeshPath)
+		Q_BUILDER_ATTRIBUTE(QSharedPointer<QSkeletalMesh>, SkeletalMesh)
 	Q_BUILDER_END()
 public:
 	QSkeletalMeshRenderComponent();
@@ -24,7 +23,6 @@ public:
 	QSharedPointer<QSkeletalMesh> getSkeletalMesh() const { return mSkeletalMesh; }
 	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
 	void setPipelines(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>) {}
-
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
@@ -38,6 +36,7 @@ protected:
 	QScopedPointer<QRhiBuffer> mIndexBuffer;
 	QSharedPointer<QRhiUniformBlock> mUniformBlock;
 	QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> mPipelines;
+	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 };
 
 #endif // QSkeletalMeshRenderComponent_h__

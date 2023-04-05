@@ -20,6 +20,10 @@ public:
 	float getPitch();
 	float getRoll();
 
+	void setYaw(float inVar);
+	void setPitch(float inVar);
+	void setRoll(float inVar);
+
 	QVector3D getPosition();
 	void setPosition(const QVector3D& newPosition);
 

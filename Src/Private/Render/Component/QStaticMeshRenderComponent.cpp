@@ -17,6 +17,7 @@ void QStaticMeshRenderComponent::setStaticMesh(QSharedPointer<QStaticMesh> val) 
 void QStaticMeshRenderComponent::onRebuildResource() {
 	if (mStaticMesh.isNull())
 		return;
+	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(QStaticMesh::Vertex) * mStaticMesh->mVertices.size()));
 	mVertexBuffer->create();
@@ -42,101 +43,45 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			QRhiVertexInputAttributeEx("inUV"		,0, 4, QRhiVertexInputAttribute::Float2, offsetof(QStaticMesh::Vertex,uv))
 		});
 
-		setupShaderForSubmesh(pipeline.get(), subMesh);
-	}
-}
+		pipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
+				layout(location = 0) out vec2 vUV;
+				layout(location = 1) out vec3 vWorldPosition;
+				layout(location = 2) out mat3 vTangentBasis;
+				void main(){
+					gl_Position = Transform.MVP * vec4(inPosition,1.0f);
+					vUV = inUV;
+					vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
+					vTangentBasis = mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
+				}
+		)");
 
-void QStaticMeshRenderComponent::setupShaderForSubmesh(QRhiGraphicsPipelineBuilder* inPipeline, QStaticMesh::SubMeshInfo info) {
-	inPipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
-			layout(location = 0) out vec2 vUV;
-			layout(location = 1) out vec3 vWorldPosition;
-			layout(location = 2) out mat3 vTangentBasis;
+		auto materialDesc = mMaterialGroup->getMaterialDesc(subMesh.materialIndex);
+		pipeline->addMaterial(materialDesc);
+
+		pipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
+			layout(location = 0) in vec2 vUV;
+			layout(location = 1) in vec3 vWorldPosition;
+			layout(location = 2) in mat3 vTangentBasis;
 			void main(){
-				gl_Position = Transform.MVP * vec4(inPosition,1.0f);
-				vUV = inUV;
-				vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
-				vTangentBasis = mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
-			}
-	)");
-
-	bool bHasBaseColor = info.materialProperties.contains("BaseColor") || info.materialProperties.contains("Diffuse");
-	if (!bHasBaseColor) {
-		info.materialProperties["BaseColor"] = QColor(255, 255, 255, 255);
-	}
-	bool bHasNormal = info.materialProperties.contains("Normal");
-
-	bool bHasMetalness = info.materialProperties.contains("Metalness");
-	if (!bHasMetalness) {
-		info.materialProperties["Metalness"] = 0.5f;;
-	}
-	bool bHasRoughness = info.materialProperties.contains("Roughness");
-	if (!bHasRoughness) {
-		info.materialProperties["Roughness"] = 1.0f;
-	}
-	inPipeline->addMaterialProperty(info.materialProperties);
-
-
-	QByteArray NormalAssign;
-	if (getBasePass()->hasColorAttachment("Normal")) {
-		if (info.materialProperties["Normal"].metaType() == QMetaType::fromType<QImage>())
-			NormalAssign = R"(vec3 n = 2.0 * texture(uNormal, vUV).rgb - 1.0;			
-							 Normal = vec4(normalize(vTangentBasis*n),1.0f);)";
-		else
-			NormalAssign = "Normal = vec4(normalize(vTangentBasis[2]),1.0f);";
-	}
-
-	QByteArray BaseColorAssign;
-	if (info.materialProperties["BaseColor"].metaType() == QMetaType::fromType<QImage>()) {
-		BaseColorAssign = "BaseColor = texture(uBaseColor,vUV);";
-	}
-	else if (info.materialProperties["Diffuse"].metaType() == QMetaType::fromType<QImage>()) {
-		BaseColorAssign = "BaseColor = texture(uDiffuse,vUV);";
-	}
-	else {
-		BaseColorAssign = "BaseColor = Material.BaseColor;";
-	}
-
-	QByteArray MetalnessAssign;
-	if (getBasePass()->hasColorAttachment("Metalness")) {
-		if (info.materialProperties["Metalness"].metaType() == QMetaType::fromType<QImage>()) 
-			MetalnessAssign = "Metalness = texture(uMetalness,vUV).r;";
-		else 
-			MetalnessAssign = "Metalness = Material.Metalness;";
-	}
-
-	QByteArray RoughnessAssign;
-	if (getBasePass()->hasColorAttachment("Metalness")) {
-		if (info.materialProperties["Roughness"].metaType() == QMetaType::fromType<QImage>()) 
-			RoughnessAssign = "Roughness = texture(uRoughness,vUV).r;";
-		else 
-			RoughnessAssign = "Roughness = Material.Roughness;";		
-	}
-
-	inPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
-		layout(location = 0) in vec2 vUV;
-		layout(location = 1) in vec3 vWorldPosition;
-		layout(location = 2) in mat3 vTangentBasis;
-		void main(){
-			%1;
-			%2
-			%3
-			%4	
-			%5
-			%6
-			%7
-		})").arg(BaseColorAssign)
+				%1;
+				%2
+				%3
+				%4	
+				%5
+				%6
+			})").arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
 			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
-			.arg(NormalAssign)
-			.arg(getBasePass()->hasColorAttachment("Tangent") ?  "Tangent  = vec4((normalize(vTangentBasis[0]) + 1.0) * 0.5,1.0f);" : "")
-			.arg(MetalnessAssign)
-			.arg(RoughnessAssign)
+			.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+			.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+			.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
 #ifdef QENGINE_WITH_EDITOR	
-		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
+			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else
-		.arg("")
+			.arg("")
 #endif
-		.toLocal8Bit()
-	);
+			.toLocal8Bit()
+		);
+	}
 }
 
 void QStaticMeshRenderComponent::onRebuildPipeline() {
@@ -146,14 +91,16 @@ void QStaticMeshRenderComponent::onRebuildPipeline() {
 }
 
 void QStaticMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
-	batch->uploadStaticBuffer(mVertexBuffer.get(), mStaticMesh->mVertices.constData());
-	batch->uploadStaticBuffer(mIndexBuffer.get(), mStaticMesh->mIndices.constData());
+	if (mVertexBuffer) {
+		batch->uploadStaticBuffer(mVertexBuffer.get(), mStaticMesh->mVertices.constData());
+		batch->uploadStaticBuffer(mIndexBuffer.get(), mStaticMesh->mIndices.constData());
+	}
 }
 
 void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	for (int i = 0; i < mPipelines.size(); i++) {
 		QRhiGraphicsPipelineBuilder* pipeline = mPipelines[i].get();
-		const QStaticMesh::SubMeshInfo& meshInfo = mStaticMesh->mSubmeshes[i];
+		const QStaticMesh::SubMeshData& meshInfo = mStaticMesh->mSubmeshes[i];
 		QMatrix4x4 M = calculateMatrixModel() * meshInfo.localTransfrom;
 		QMatrix4x4 MVP = getMatrixClipWithCorr() * getMatrixView() * M;
 		pipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
@@ -168,7 +115,7 @@ void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 void QStaticMeshRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) {
 	for (int i = 0; i < mPipelines.size(); i++) {
 		QRhiGraphicsPipelineBuilder* pipeline = mPipelines[i].get();
-		const QStaticMesh::SubMeshInfo& meshInfo = mStaticMesh->mSubmeshes[i];
+		const QStaticMesh::SubMeshData& meshInfo = mStaticMesh->mSubmeshes[i];
 		cmdBuffer->setGraphicsPipeline(pipeline->getGraphicsPipeline());
 		cmdBuffer->setViewport(viewport);
 		cmdBuffer->setShaderResources();

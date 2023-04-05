@@ -20,7 +20,7 @@ void QRhiGraphicsPipelineBuilder::clearPolygonModeOverride() {
 }
 
 void QRhiGraphicsPipelineBuilder::setShaderMainCode(QRhiShaderStage::Type inStage, QByteArray inCode) {
-	mStageInfos[inStage].MainCode = inCode;
+	mStageInfos[inStage].mainCode = inCode;
 }
 
 QByteArray QRhiGraphicsPipelineBuilder::getInputFormatTypeName(QRhiVertexInputAttribute::Format inFormat) {
@@ -93,14 +93,14 @@ void QRhiGraphicsPipelineBuilder::setInputBindings(QVector<QRhiVertexInputBindin
 }
 
 QRhiUniformBlock* QRhiGraphicsPipelineBuilder::addUniformBlock(QRhiShaderStage::Type inStage, const QString& inName) {
-	QSharedPointer<QRhiUniformBlock> unifromBlock = QSharedPointer<QRhiUniformBlock>::create(inStage);
+	QSharedPointer<QRhiUniformBlock> unifromBlock = QSharedPointer<QRhiUniformBlock>::create();
 	unifromBlock->setObjectName(inName);
 	addUniformBlock(inStage, unifromBlock);
 	return unifromBlock.get();
 }
 
 void QRhiGraphicsPipelineBuilder::addUniformBlock(QRhiShaderStage::Type inStage, QSharedPointer<QRhiUniformBlock> inUniformBlock) {
-	mStageInfos[inStage].mUniformBlocks << inUniformBlock;
+	mStageInfos[inStage].uniformBlocks << inUniformBlock;
 	mUniformMap[inUniformBlock->objectName()] = inUniformBlock.get();
 }
 
@@ -108,35 +108,17 @@ QRhiUniformBlock* QRhiGraphicsPipelineBuilder::getUniformBlock(const QString& in
 	return mUniformMap.value(inName);
 }
 
-void QRhiGraphicsPipelineBuilder::addMaterialProperty(const QMap<QString, QVariant>& inMaterial) {
-	auto Mateiral = addUniformBlock(QRhiShaderStage::Fragment, "Material");
-	for (const auto& pair : inMaterial.asKeyValueRange()) {
-		if (pair.second.metaType() == QMetaType::fromType<float>()) {
-			Mateiral->addParam(pair.first, pair.second.value<float>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QVector2D>()) {
-			Mateiral->addParam(pair.first, pair.second.value<QVector2D>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QVector3D>()) {
-			Mateiral->addParam(pair.first, pair.second.value<QVector3D>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QVector3D>()) {
-			Mateiral->addParam(pair.first, pair.second.value<QVector3D>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QVector4D>()) {
-			Mateiral->addParam(pair.first, pair.second.value<QVector4D>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QColor>()) {
-			Mateiral->addParam(pair.first, pair.second.value<QColor>());
-		}
-		else if (pair.second.metaType() == QMetaType::fromType<QImage>()) {
-			addTexture2D(QRhiShaderStage::Fragment, "u"+ pair.first, pair.second.value<QImage>());
+void QRhiGraphicsPipelineBuilder::addMaterial(QSharedPointer<QRhiMaterialDesc> inDesc) {
+	if (inDesc) {
+		addUniformBlock(QRhiShaderStage::Type::Fragment, inDesc->uniformBlock);
+		for (auto desc : inDesc->textureDescs) {
+			addTextureDesc(QRhiShaderStage::Type::Fragment, desc);
 		}
 	}
 }
 
 void QRhiGraphicsPipelineBuilder::addTexture2D(QRhiShaderStage::Type inStage, const QString& inName, const QImage& inImage, QRhiSampler::Filter magFilter, QRhiSampler::Filter minFilter, QRhiSampler::Filter mipmapMode, QRhiSampler::AddressMode addressU, QRhiSampler::AddressMode addressV, QRhiSampler::AddressMode addressW) {
-	QSharedPointer<TextureInfo> textureInfo = QSharedPointer<TextureInfo>::create();
+	QSharedPointer<QRhiTextureDesc> textureInfo = QSharedPointer<QRhiTextureDesc>::create();
 	textureInfo->Name = inName;
 	textureInfo->ImageCache = inImage.convertedTo(QImage::Format_RGBA8888);
 	textureInfo->Size = inImage.size();
@@ -151,12 +133,11 @@ void QRhiGraphicsPipelineBuilder::addTexture2D(QRhiShaderStage::Type inStage, co
 	textureInfo->UploadDesc = QRhiTextureUploadDescription({
 		QRhiTextureUploadEntry(0,0,QRhiTextureSubresourceUploadDescription(textureInfo->ImageCache))
 	});
-	mStageInfos[inStage].mTextureInfos << textureInfo;
-	mTextureMap[inName] = textureInfo.get();
+	addTextureDesc(inStage, textureInfo);
 }
 
 void QRhiGraphicsPipelineBuilder::addTexture2D(QRhiShaderStage::Type inStage, const QString& inName, QRhiTexture::Format inFormat, const QSize& inSize, const QByteArray& inData, QRhiSampler::Filter magFilter, QRhiSampler::Filter minFilter, QRhiSampler::Filter mipmapMode, QRhiSampler::AddressMode addressU, QRhiSampler::AddressMode addressV, QRhiSampler::AddressMode addressW) {
-	QSharedPointer<TextureInfo> textureInfo = QSharedPointer<TextureInfo>::create();
+	QSharedPointer<QRhiTextureDesc> textureInfo = QSharedPointer<QRhiTextureDesc>::create();
 	textureInfo->Name = inName;
 	textureInfo->Size = inSize;
 	textureInfo->Format = inFormat;
@@ -170,13 +151,11 @@ void QRhiGraphicsPipelineBuilder::addTexture2D(QRhiShaderStage::Type inStage, co
 	textureInfo->UploadDesc = QRhiTextureUploadDescription({
 		QRhiTextureUploadEntry(0,0,QRhiTextureSubresourceUploadDescription(inData))
 	});
-	mStageInfos[inStage].mTextureInfos << textureInfo;
-	mTextureMap[inName] = textureInfo.get();
+	addTextureDesc(inStage, textureInfo);
 }
 
-
 void QRhiGraphicsPipelineBuilder::addCubeMap(QRhiShaderStage::Type inStage, const QString& inName, QRhiTexture::Format inFormat, const QSize& inSize, const QVector<QByteArray>& inData, QRhiSampler::Filter magFilter /*= QRhiSampler::Filter::Linear*/, QRhiSampler::Filter minFilter /*= QRhiSampler::Filter::Nearest*/, QRhiSampler::Filter mipmapMode /*= QRhiSampler::Filter::Linear*/, QRhiSampler::AddressMode addressU /*= QRhiSampler::AddressMode::Repeat*/, QRhiSampler::AddressMode addressV /*= QRhiSampler::AddressMode::Repeat*/, QRhiSampler::AddressMode addressW /*= QRhiSampler::AddressMode::Repeat*/) {
-	QSharedPointer<TextureInfo> textureInfo = QSharedPointer<TextureInfo>::create();
+	QSharedPointer<QRhiTextureDesc> textureInfo = QSharedPointer<QRhiTextureDesc>::create();
 	textureInfo->Name = inName;
 	textureInfo->Size = inSize;
 	textureInfo->Format = inFormat;
@@ -202,13 +181,17 @@ void QRhiGraphicsPipelineBuilder::addCubeMap(QRhiShaderStage::Type inStage, cons
 			{ 5, 0, subresDesc[5] }   // -Z
 		});
 	}
-	mStageInfos[inStage].mTextureInfos << textureInfo;
-	mTextureMap[inName] = textureInfo.get();
+	addTextureDesc(inStage, textureInfo);
+}
+
+void QRhiGraphicsPipelineBuilder::addTextureDesc(QRhiShaderStage::Type inStage, QSharedPointer<QRhiTextureDesc> inTexture) {
+	mStageInfos[inStage].textureDescs << inTexture;
+	mTextureMap[inTexture->Name] = inTexture.get();
 }
 
 void QRhiGraphicsPipelineBuilder::setTexture(const QString& inName, const QImage& inImage) {
 	for (auto& stageInfo : mStageInfos) {
-		for (auto& textureInfo : stageInfo.mTextureInfos) {
+		for (auto& textureInfo : stageInfo.textureDescs) {
 			if (textureInfo->Name == inName) {
 				textureInfo->UploadDesc.setEntries({
 					QRhiTextureUploadEntry(0,0,QRhiTextureSubresourceUploadDescription(inImage))
@@ -262,14 +245,14 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 
 	QVector<QRhiShaderStage> stages;
 	for (const auto& stage : mStageInfos.asKeyValueRange()) {
-		QShader shader = rhi->newShaderFromCode((QShader::Stage)stage.first, stage.second.VersionCode + stage.second.DefineCode + stage.second.MainCode);
+		QShader shader = rhi->newShaderFromCode((QShader::Stage)stage.first, stage.second.versionCode + stage.second.defineCode + stage.second.mainCode);
 		stages << QRhiShaderStage(stage.first, shader);
 	}
 	mPipeline->setShaderStages(stages.begin(), stages.end());
 	mPipeline->setShaderResourceBindings(mShaderBindings.get());
 	mPipeline->create();
 	for (const auto& stage : mStageInfos) {
-		for (const auto& uniformBlock : stage.mUniformBlocks) {
+		for (const auto& uniformBlock : stage.uniformBlocks) {
 			uniformBlock->sigRecreateBuffer.receive();
 		}
 	}
@@ -278,14 +261,14 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 
 void QRhiGraphicsPipelineBuilder::update(QRhiResourceUpdateBatch* batch) {
 	for (const auto& stage : mStageInfos) {
-		for (const auto& textureInfo : stage.mTextureInfos) {
+		for (const auto& textureInfo : stage.textureDescs) {
 			if (textureInfo->sigUpdate.receive()) {
 				if (textureInfo->UploadDesc.entryCount() > 0) {
 					batch->uploadTexture(textureInfo->Texture.get(), textureInfo->UploadDesc);
 				}
 			}
 		}
-		for (const auto& uniformBlock : stage.mUniformBlocks) {
+		for (const auto& uniformBlock : stage.uniformBlocks) {
 			if (uniformBlock->sigRecreateBuffer.receive()) {
 				sigRebuild.request();
 				break;
@@ -297,49 +280,53 @@ void QRhiGraphicsPipelineBuilder::update(QRhiResourceUpdateBatch* batch) {
 
 void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRenderComponent, QRhiEx* inRhi) {
 	for (auto& stage : mStageInfos) {
-		stage.DefineCode = QByteArray();
+		stage.defineCode = QByteArray();
 	}
 	QString vertexInputCode;
 	for (auto& input : mInputAttributes) {
 		vertexInputCode += QString::asprintf("layout(location = %d) in %s %s;\n", input.location(), getInputFormatTypeName(input.format()).data(), input.mName.toLocal8Bit().data());
 	}
 	vertexInputCode += "out gl_PerVertex { vec4 gl_Position;}; \n";
-	mStageInfos[QRhiShaderStage::Vertex].DefineCode = vertexInputCode.toLocal8Bit();
+	mStageInfos[QRhiShaderStage::Vertex].defineCode = vertexInputCode.toLocal8Bit();
 
 	QVector<QRhiShaderResourceBinding> bindings;
 	int bindingOffset = 0;
 	for (const auto& stage : mStageInfos.asKeyValueRange()) {
 		QString uniformDefineCode;
-		for (auto& textureInfo : stage.second.mTextureInfos) {
+		for (auto& textureDesc : stage.second.textureDescs) {
 			for (const auto& sampler : mSamplerList) {
-				if (sampler->magFilter() == textureInfo->MagFilter
-					&& sampler->minFilter() == textureInfo->MinFilter
-					&& sampler->mipmapMode() == textureInfo->MipmapMode
-					&& sampler->addressU() == textureInfo->AddressU
-					&& sampler->addressV() == textureInfo->AddressV
-					&& sampler->addressW() == textureInfo->AddressW
+				if (sampler->magFilter() == textureDesc->MagFilter
+					&& sampler->minFilter() == textureDesc->MinFilter
+					&& sampler->mipmapMode() == textureDesc->MipmapMode
+					&& sampler->addressU() == textureDesc->AddressU
+					&& sampler->addressV() == textureDesc->AddressV
+					&& sampler->addressW() == textureDesc->AddressW
 					) {
-					textureInfo->Sampler = sampler;
+					textureDesc->Sampler = sampler;
 					break;
 				}
 			}
-			if (textureInfo->Sampler.isNull()) {
-				textureInfo->Sampler.reset(inRhi->newSampler(textureInfo->MagFilter, textureInfo->MinFilter, textureInfo->MipmapMode, textureInfo->AddressU, textureInfo->AddressV, textureInfo->AddressW));
-				mSamplerList << textureInfo->Sampler;
-				textureInfo->Sampler->create();
+			if (textureDesc->Sampler.isNull()) {
+				textureDesc->Sampler.reset(inRhi->newSampler(textureDesc->MagFilter, textureDesc->MinFilter, textureDesc->MipmapMode, textureDesc->AddressU, textureDesc->AddressV, textureDesc->AddressW));
+				mSamplerList << textureDesc->Sampler;
+				textureDesc->Sampler->create();
 			}
-			textureInfo->Texture.reset(inRhi->newTexture(textureInfo->Format, textureInfo->Size, 1,textureInfo->Flags));
-			textureInfo->Texture->create();
-			bindings << QRhiShaderResourceBinding::sampledTexture(bindingOffset, (QRhiShaderResourceBinding::StageFlag)(1 << (int)stage.first), textureInfo->Texture.get(), textureInfo->Sampler.get());
-			uniformDefineCode += QString("layout(binding =  %1) uniform %2 %3;\n")
+			if (textureDesc->Texture.isNull()
+				|| textureDesc->Texture->format() != textureDesc->Format 
+				|| textureDesc->Texture->sampleCount() != 1 
+				|| textureDesc->Texture->flags() != textureDesc->Flags) {
+				textureDesc->Texture.reset(inRhi->newTexture(textureDesc->Format, textureDesc->Size, 1, textureDesc->Flags));
+				textureDesc->Texture->create();
+			}
+			bindings << QRhiShaderResourceBinding::sampledTexture(bindingOffset, (QRhiShaderResourceBinding::StageFlag)(1 << (int)stage.first), textureDesc->Texture.get(), textureDesc->Sampler.get());
+			uniformDefineCode += QString("layout(binding =  %1) uniform %2 u%3;\n")
 				.arg(bindingOffset)
-				.arg(textureInfo->GlslTypeName)
-				.arg(textureInfo->Name);
+				.arg(textureDesc->GlslTypeName)
+				.arg(textureDesc->Name);
 			bindingOffset++;
-			textureInfo->sigUpdate.request();
+			textureDesc->sigUpdate.request();
 		}
-
-		for (const auto& uniformBlock : stage.second.mUniformBlocks) {
+		for (const auto& uniformBlock : stage.second.uniformBlocks) {
 			if (!uniformBlock->isEmpty()) {
 				uniformBlock->create(inRhi);
 				bindings << QRhiShaderResourceBinding::uniformBuffer(bindingOffset, (QRhiShaderResourceBinding::StageFlag)(1 << (int)stage.first), uniformBlock->getUniformBlock());
@@ -351,7 +338,7 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 				bindingOffset++;
 			}
 		}
-		stage.second.DefineCode += uniformDefineCode.toLocal8Bit();
+		stage.second.defineCode += uniformDefineCode.toLocal8Bit();
 	}
 	QString fragOutputCode;
 	auto targetSlots = inRenderComponent->getBasePass()->getRenderTargetColorAttachments();
@@ -360,7 +347,7 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 		QByteArray slotName = targetSlots[i].second.toLocal8Bit();
 		fragOutputCode += QString::asprintf("layout(location = %d) out %s %s;\n", i, slotType.data(), slotName.data());
 	}
-	mStageInfos[QRhiShaderStage::Fragment].DefineCode += fragOutputCode.toLocal8Bit();
+	mStageInfos[QRhiShaderStage::Fragment].defineCode += fragOutputCode.toLocal8Bit();
 	mShaderBindings.reset(inRhi->newShaderResourceBindings());
 	mShaderBindings->setBindings(bindings.begin(), bindings.end());
 	mShaderBindings->create();

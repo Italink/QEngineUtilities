@@ -78,7 +78,7 @@ QFrameGraphBuilder& QFrameGraphBuilder::addPass(IRenderPass* inNode) {
 	return *this;
 }
 
-QSharedPointer<QFrameGraph> QFrameGraphBuilder::End(const QString& inOutputPass, const int& inSlot) {
+QSharedPointer<QFrameGraph> QFrameGraphBuilder::end(const QString& inOutputPass, const int& inSlot) {
 	mFrameGraph->mOutputSlot = { inOutputPass ,inSlot };
 	return mFrameGraph;
 }

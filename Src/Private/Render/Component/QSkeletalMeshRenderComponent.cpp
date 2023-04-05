@@ -17,13 +17,15 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 	if (mSkeletalMesh.isNull())
 		return;
 
+	mMaterialGroup.reset(new QRhiMaterialGroup(mSkeletalMesh->mMaterials));
+
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(QSkeletalMesh::Vertex) * mSkeletalMesh->mVertices.size()));
 	mVertexBuffer->create();
 
 	mIndexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::IndexBuffer, sizeof(QSkeletalMesh::Index) * mSkeletalMesh->mIndices.size()));
 	mIndexBuffer->create();
 
-	mUniformBlock = QSharedPointer<QRhiUniformBlock>::create(QRhiShaderStage::Vertex);
+	mUniformBlock = QSharedPointer<QRhiUniformBlock>::create();
 	mUniformBlock->setObjectName("Transform");
 	mUniformBlock->addParam("MVP", MathUtils::Mat4())
 		->addParam("M", MathUtils::Mat4())
@@ -31,13 +33,13 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 
 	mUniformBlock->create(mRhi);
 	for (auto& mesh : mSkeletalMesh->mSubmeshes) {
-		QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline(new QRhiGraphicsPipelineBuilder());
-		mPipelines << mPipeline;
-		mPipeline->addUniformBlock(QRhiShaderStage::Vertex, mUniformBlock);
-		mPipeline->setInputBindings({
+		QSharedPointer<QRhiGraphicsPipelineBuilder> pipeline(new QRhiGraphicsPipelineBuilder());
+		mPipelines << pipeline;
+		pipeline->addUniformBlock(QRhiShaderStage::Vertex, mUniformBlock);
+		pipeline->setInputBindings({
 			QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QSkeletalMesh::Vertex))
 		});
-		mPipeline->setInputAttribute({
+		pipeline->setInputAttribute({
 			QRhiVertexInputAttributeEx("inPosition"	,0, 0, QRhiVertexInputAttribute::Float3, offsetof(QSkeletalMesh::Vertex,position)),
 			QRhiVertexInputAttributeEx("inNormal"	,0, 1, QRhiVertexInputAttribute::Float3, offsetof(QSkeletalMesh::Vertex,normal)),
 			QRhiVertexInputAttributeEx("inTangent"	,0, 2, QRhiVertexInputAttribute::Float3, offsetof(QSkeletalMesh::Vertex,tangent)),
@@ -45,9 +47,8 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 			QRhiVertexInputAttributeEx("inUV"		,0, 4, QRhiVertexInputAttribute::Float2, offsetof(QSkeletalMesh::Vertex,texCoord)),
 			QRhiVertexInputAttributeEx("inBoneIndex",0, 5, QRhiVertexInputAttribute::UInt4, offsetof(QSkeletalMesh::Vertex,boneIndex)),
 			QRhiVertexInputAttributeEx("inBoneWeight",0, 6, QRhiVertexInputAttribute::Float4, offsetof(QSkeletalMesh::Vertex,boneWeight))
-			});
-
-		mPipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
+		});
+		pipeline->setShaderMainCode(QRhiShaderStage::Vertex, R"(
 			layout(location = 0) out vec2 vUV;
 			layout(location = 1) out vec3 vWorldPosition;
 			layout(location = 2) out mat3 vTangentBasis;
@@ -64,39 +65,38 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 			}
 		)");
 
-		bool bHasDiffuse = mesh.materialProperties.contains("Diffuse");
-		if (bHasDiffuse) {
-			mPipeline->addTexture2D(QRhiShaderStage::Fragment,"Diffuse", mesh.materialProperties["Diffuse"].value<QImage>());
-		}
+		auto materialDesc = mMaterialGroup->getMaterialDesc(mesh.materialIndex);
+		pipeline->addMaterial(materialDesc);
 
-		mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
+		pipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec2 vUV;
 			layout(location = 1) in vec3 vWorldPosition;
 			layout(location = 2) in mat3 vTangentBasis;
 			void main(){
-				BaseColor = %1;
+				%1;
 				%2
 				%3
 				%4	
-				%5;
-		})")
-			.arg(bHasDiffuse ? "texture(Diffuse,vUV)" : "vec4(vTangentBasis[2],1)")
-			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1); " : "")
-			.arg(getBasePass()->hasColorAttachment("Normal") ? "Normal   = vec4(vTangentBasis[2],1);" : "")
-			.arg(getBasePass()->hasColorAttachment("Tangent") ? "Tangent  = vec4(vTangentBasis[0],1);" : "")
+				%5
+				%6
+			})").arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
+				.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
+				.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+				.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+				.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
 #ifdef QENGINE_WITH_EDITOR	
-			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
+				.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else
-			.arg("")
+				.arg("")
 #endif
-			.toLocal8Bit()
-		);
+				.toLocal8Bit()
+			);
 	}
 }
 
 void QSkeletalMeshRenderComponent::onRebuildPipeline() {
-	for (auto mPipeline : mPipelines) {
-		mPipeline->create(this);
+	for (auto pipeline : mPipelines) {
+		pipeline->create(this);
 	}
 }
 
@@ -106,14 +106,14 @@ void QSkeletalMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 }
 
 void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
-	for (auto mPipeline : mPipelines) {
+	for (auto pipeline : mPipelines) {
 		QMatrix4x4 MVP = calculateMatrixMVP();
 		QMatrix4x4 M = calculateMatrixModel();
-		mPipeline->getUniformBlock("Transform")->setParamValue("MVP", MVP.toGenericMatrix<4,4>());
-		mPipeline->getUniformBlock("Transform")->setParamValue("M", M.toGenericMatrix<4, 4>());
-		mPipeline->getUniformBlock("Transform")->setParamValue("Bone", mSkeletalMesh->mCurrentPosesMatrix);
-		mPipeline->update(batch);
-		if (mPipeline->sigRebuild.receive()) {
+		pipeline->getUniformBlock("Transform")->setParamValue("MVP", MVP.toGenericMatrix<4,4>());
+		pipeline->getUniformBlock("Transform")->setParamValue("M", M.toGenericMatrix<4, 4>());
+		pipeline->getUniformBlock("Transform")->setParamValue("Bone", mSkeletalMesh->mCurrentPosesMatrix);
+		pipeline->update(batch);
+		if (pipeline->sigRebuild.receive()) {
 			sigonRebuildPipeline.request();
 		}
 	}
@@ -121,9 +121,9 @@ void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 
 void QSkeletalMeshRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) {
 	for (int i = 0; i < mPipelines.size(); i++) {
-		QRhiGraphicsPipelineBuilder* mPipeline = mPipelines[i].get();
-		const QSkeletalMesh::SubMeshInfo& meshInfo = mSkeletalMesh->mSubmeshes[i];
-		cmdBuffer->setGraphicsPipeline(mPipeline->getGraphicsPipeline());
+		QRhiGraphicsPipelineBuilder* pipeline = mPipelines[i].get();
+		const QSkeletalMesh::SubMeshData& meshInfo = mSkeletalMesh->mSubmeshes[i];
+		cmdBuffer->setGraphicsPipeline(pipeline->getGraphicsPipeline());
 		cmdBuffer->setViewport(viewport);
 		cmdBuffer->setShaderResources();
 		const QRhiCommandBuffer::VertexInput vertexBindings(mVertexBuffer.get(), meshInfo.verticesOffset * sizeof(QSkeletalMesh::Vertex));

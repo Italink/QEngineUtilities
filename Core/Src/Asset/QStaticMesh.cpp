@@ -19,18 +19,18 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePat
 		return staticMesh;
 	}
 	staticMesh = QSharedPointer<QStaticMesh>::create();
-	const QVector<QMap<QString, QVariant>>& matertialPropertiesList = AssetUtils::loadMaterialPropertiesList(scene, inFilePath);
+	staticMesh->mMaterials = QMaterial::CreateFromScene(scene, inFilePath);
 	QQueue<QPair<aiNode*, aiMatrix4x4>> qNode;
 	qNode.push_back({ scene->mRootNode ,aiMatrix4x4() });
 	while (!qNode.isEmpty()) {
 		QPair<aiNode*, aiMatrix4x4> node = qNode.takeFirst();
 		for (unsigned int i = 0; i < node.first->mNumMeshes; i++) {
 			aiMesh* mesh = scene->mMeshes[node.first->mMeshes[i]];
-			SubMeshInfo meshInfo;
+			SubMeshData meshInfo;
 			meshInfo.verticesOffset = staticMesh->mVertices.size();
 			meshInfo.verticesRange = mesh->mNumVertices;
 			meshInfo.localTransfrom = AssetUtils::converter(node.second);
-			meshInfo.materialProperties = matertialPropertiesList[mesh->mMaterialIndex];
+			meshInfo.materialIndex = mesh->mMaterialIndex;
 			staticMesh->mVertices.resize(meshInfo.verticesOffset + meshInfo.verticesRange);
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 				QStaticMesh::Vertex& vertex = staticMesh->mVertices[meshInfo.verticesOffset + i];
@@ -70,7 +70,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 	QVector<Index>& indices = staticMesh->mIndices;
 	QFontMetrics fontMetrics(inFont);
 	QPainterPath fontPath;
-	SubMeshInfo submesh;
+	SubMeshData submesh;
 	QSize textSize;
 	if (inOrientation == Qt::Orientation::Horizontal) {
 		textSize = { 0,fontMetrics.height() };
@@ -93,7 +93,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 		QPainter painter(&image);
 		painter.fillPath(fontPath, inColor);
 		painter.end();
-		submesh.materialProperties["BaseColor"] = image;
+		//submesh.materialProperties["BaseColor"] = image;
 
 		Vertex vertex;
 
@@ -155,7 +155,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 			vertex.position.setY(textSize.height() - vertex.position.y());
 			vertex.position -= QVector3D(textSize.width() / 2.0f, textSize.height() / 2.0f, 0.0f);
 		}
-		submesh.materialProperties["BaseColor"] = inColor;
+		//submesh.materialProperties["BaseColor"] = inColor;
 	}
 
 	for (auto& vertex : vertices) {

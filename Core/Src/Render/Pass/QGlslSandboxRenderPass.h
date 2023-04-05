@@ -18,7 +18,7 @@ private:
 	};
 	RTResource mRT;
 public:
-	QString getShaderCode() const { return mShaderCode; }
+	QString getShaderCode() const { return mRawShaderCode; }
 	void setShaderCode(QString val);
 protected:
 	void resizeAndLinkNode(const QSize& size) override;
@@ -26,6 +26,7 @@ protected:
 	void render(QRhiCommandBuffer* cmdBuffer) override;
 
 	QString mShaderCode;
+	QString mRawShaderCode;
 	QRhiEx::Signal sigRecompile;
 
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;

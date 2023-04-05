@@ -25,7 +25,8 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::CreateFromFile(const QString& inFil
 		return skeletalMesh;
 	}
 	skeletalMesh = QSharedPointer<QSkeletalMesh>::create();
-	const QVector<QMap<QString, QVariant>>& materialPropertiesList = AssetUtils::loadMaterialPropertiesList(scene, inFilePath);
+
+	skeletalMesh->mMaterials = QMaterial::CreateFromScene(scene, inFilePath);
 	QQueue<QPair<aiNode*, aiMatrix4x4>> qNode;
 	qNode.push_back({ scene->mRootNode ,aiMatrix4x4() });
 	skeletalMesh->mSkeleton = QSharedPointer<QSkeleton>::create();
@@ -34,7 +35,7 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::CreateFromFile(const QString& inFil
 		QPair<aiNode*, aiMatrix4x4> node = qNode.takeFirst();
 		for (unsigned int i = 0; i < node.first->mNumMeshes; i++) {
 			aiMesh* mesh = scene->mMeshes[node.first->mMeshes[i]];
-			SubMeshInfo meshInfo;
+			SubMeshData meshInfo;
 			meshInfo.verticesOffset = skeletalMesh->mVertices.size();
 			meshInfo.verticesRange = mesh->mNumVertices;
 			skeletalMesh->mVertices.resize(meshInfo.verticesOffset + meshInfo.verticesRange);
@@ -91,7 +92,7 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::CreateFromFile(const QString& inFil
 					}
 				}
 			}
-			meshInfo.materialProperties = materialPropertiesList[mesh->mMaterialIndex];
+			meshInfo.materialIndex = mesh->mMaterialIndex;
 			skeletalMesh->mSubmeshes << meshInfo;
 		}
 		for (unsigned int i = 0; i < node.first->mNumChildren; i++) {

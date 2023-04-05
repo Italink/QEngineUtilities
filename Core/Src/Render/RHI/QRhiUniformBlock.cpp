@@ -2,9 +2,8 @@
 #include "Render/IRenderComponent.h"
 #include "Render/IRenderPass.h"
 
-QRhiUniformBlock::QRhiUniformBlock( QRhiShaderStage::Type inStage, QObject* inParent)
+QRhiUniformBlock::QRhiUniformBlock(QObject* inParent)
 	: QObject(inParent)
-	, mStage(inStage)
 {
 }
 
@@ -68,10 +67,12 @@ void QRhiUniformBlock::updateLayout() {
 
 void QRhiUniformBlock::create(QRhiEx* inRhi) {
 	updateLayout();
-	mUniformBlock.reset(inRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, mDataByteSize));
-	mUniformBlock->create();
-	for (auto& dataParam : mParamList) {
-		dataParam->sigUpdate.request();
+	if (mUniformBlock.isNull() || mUniformBlock->size() != mDataByteSize) {
+		mUniformBlock.reset(inRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, mDataByteSize));
+		mUniformBlock->create();
+		for (auto& dataParam : mParamList) {
+			dataParam->sigUpdate.request();
+		}
 	}
 }
 
@@ -81,4 +82,8 @@ void QRhiUniformBlock::updateResource(QRhiResourceUpdateBatch* batch) {
 			batch->updateDynamicBuffer(mUniformBlock.get(), dataParam->mOffsetInByte, dataParam->mSizeInByte, dataParam->dataPtr());
 		}
 	}
+}
+
+QSharedPointer<UniformParamDescBase> QRhiUniformBlock::getParamDesc(const QString& inName) {
+	return mParamNameMap.value(inName);
 }

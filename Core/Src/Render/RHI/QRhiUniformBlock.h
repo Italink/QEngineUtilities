@@ -31,7 +31,7 @@ struct UniformParamDesc : public UniformParamDescBase {
 class QRhiUniformBlock : public QObject{
 	Q_OBJECT
 public:
-	QRhiUniformBlock(QRhiShaderStage::Type inStage, QObject* inParent = nullptr);
+	QRhiUniformBlock(QObject* inParent = nullptr);
 	template<typename _Ty>
 	QRhiUniformBlock* addParam(const QString& name, _Ty value) {
 		QSharedPointer<UniformParamDesc<_Ty>> paramDesc = QSharedPointer<UniformParamDesc<_Ty>>::create();
@@ -54,6 +54,7 @@ public:
 	QRhiBuffer* getUniformBlock() const { return mUniformBlock.get(); }
 	bool isEmpty()const { return mParamList.isEmpty(); }
 	const QList<QSharedPointer<UniformParamDescBase>>& getParamList() const { return mParamList; }
+	QSharedPointer<UniformParamDescBase> getParamDesc(const QString& inName);
 protected:
 	QString getVaildName(QString mName);
 	void updateLayout();
@@ -62,7 +63,6 @@ protected:
 	QHash<QString, QSharedPointer<UniformParamDescBase>> mParamNameMap;
 	uint32_t mDataByteSize;
 	QScopedPointer<QRhiBuffer> mUniformBlock;
-	QRhiShaderStage::Type mStage;
 public:
 	QRhiEx::Signal sigRecreateBuffer;
 };

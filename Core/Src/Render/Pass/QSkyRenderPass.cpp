@@ -26,8 +26,10 @@ void QSkyRenderPass::setSkyBoxImagePath(const QString& inPath) {
 }
 
 void QSkyRenderPass::setSkyBoxImage(QImage inImage) {
-	mSkyBoxImage = inImage;
-	sigUploadEquirectTexture.request();
+	if (!inImage.isNull()) {
+		mSkyBoxImage = inImage;
+		sigUploadEquirectTexture.request();
+	}
 }
 
 QImage QSkyRenderPass::getSkyBoxImage() const {

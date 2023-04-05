@@ -70,7 +70,7 @@ void QPbrLightingPass::resizeAndLinkNode(const QSize& size) {
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Albedo(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(1,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Position(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(2,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Normal(), mSampler.get()),
-		QRhiShaderResourceBinding::sampledTexture(3,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Metalness(), mSampler.get()),
+		QRhiShaderResourceBinding::sampledTexture(3,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Metallic(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(4,QRhiShaderResourceBinding::FragmentStage, getTextureIn_Roughness(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(5,QRhiShaderResourceBinding::FragmentStage, getTextureIn_SpecularCube(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(6,QRhiShaderResourceBinding::FragmentStage, getTextureIn_IrradianceCube(), mSampler.get()),

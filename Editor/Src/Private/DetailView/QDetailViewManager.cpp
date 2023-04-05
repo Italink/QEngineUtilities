@@ -140,11 +140,11 @@ void QDetailViewManager::RegisterBuildIn() {
 	RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
 
-	RegisterCustomPropertyTypeLayout<QRhiGraphicsPipelineBuilder::TextureInfo*, PropertyTypeCustomization_TextureInfo>();
+	RegisterCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
 	RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
 	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
 
-	qRegisterMetaType<QRhiGraphicsPipelineBuilder::TextureInfo>();
+	qRegisterMetaType<QRhiTextureDesc>();
 	qRegisterMetaType<QRhiGraphicsPipelineBuilder*>();
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {

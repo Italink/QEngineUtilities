@@ -5,7 +5,7 @@
 
 class QPbrLightingPass : public IRenderPass {
 	Q_OBJECT
-	Q_BUILDER_BEGIN_RENDER_PASS(QPbrLightingPass, Albedo, Position, Normal, Metalness, Roughness, SkyCube, SpecularCube, IrradianceCube, BrdfLut)
+	Q_BUILDER_BEGIN_RENDER_PASS(QPbrLightingPass, Albedo, Position, Normal, Metallic, Roughness, SkyCube, SpecularCube, IrradianceCube, BrdfLut)
 	Q_BUILDER_END_RENDER_PASS(FragColor)
 protected:
 	void resizeAndLinkNode(const QSize& size) override;

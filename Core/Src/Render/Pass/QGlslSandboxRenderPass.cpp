@@ -3,7 +3,7 @@
 #include "QDateTime"
 
 void QGlslSandboxRenderPass::setShaderCode(QString val) {
-	mShaderCode = val;
+	mShaderCode = mRawShaderCode = val;
 	mShaderCode.remove(QRegularExpression("uniform +float +time *;"));
 	mShaderCode.remove(QRegularExpression("uniform +vec2 +resolution *;"));
 	mShaderCode.remove(QRegularExpression("uniform +vec2 +mouse; *"));

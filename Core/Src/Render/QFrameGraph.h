@@ -31,7 +31,7 @@ class QFrameGraphBuilder {
 	friend class QFrameGraph;
 public:
 	QFrameGraphBuilder& addPass(IRenderPass* inNode);
-	QSharedPointer<QFrameGraph> End(const QString& inOutputPass = QString(),const int & inSlot= 0);
+	QSharedPointer<QFrameGraph> end(const QString& inOutputPass = QString(),const int & inSlot= 0);
 private:
 	QFrameGraphBuilder();
 	QSharedPointer<QFrameGraph> mFrameGraph;
