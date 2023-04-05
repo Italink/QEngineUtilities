@@ -40,7 +40,7 @@ public:
 	QMetaData* GetClassMetaData(const IDetailLayoutBuilder::ObjectContext& Context);
 protected:
 	QDetailViewManager();
-	void RegisterBuildIn();
+	void RegisterBuiltIn();
 private:
 	QHash<const QMetaObject*, CustomClassLayoutCreator> mCustomClassLayoutMap;
 	QHash<QMetaType, CustomPropertyTypeLayoutCreator  > mCustomPropertyTypeLayoutMap;

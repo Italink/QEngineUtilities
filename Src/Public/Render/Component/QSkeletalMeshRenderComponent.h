@@ -8,7 +8,7 @@
 class QSkeletalMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 		Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
-	
+		Q_PROPERTY(QRhiMaterialGroup* MaterialGroup READ getMaterialGroup)
 	Q_META_BEGIN(QSkeletalMeshRenderComponent)
 		Q_META_P_STRING_AS_FILE_PATH(SkeletalMeshPath)
 		Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
@@ -21,8 +21,7 @@ public:
 	QSkeletalMeshRenderComponent();
 	void setSkeletalMesh(QSharedPointer<QSkeletalMesh> val);
 	QSharedPointer<QSkeletalMesh> getSkeletalMesh() const { return mSkeletalMesh; }
-	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
-	void setPipelines(QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>) {}
+	QRhiMaterialGroup* getMaterialGroup() { return mMaterialGroup.get(); }
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;

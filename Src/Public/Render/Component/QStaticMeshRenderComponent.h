@@ -9,7 +9,7 @@
 class QStaticMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QSharedPointer<QStaticMesh> StaticMesh READ getStaticMesh WRITE setStaticMesh)
-
+	Q_PROPERTY(QRhiMaterialGroup* MaterialGroup READ getMaterialGroup)
 	Q_META_BEGIN(QStaticMeshRenderComponent)
 		Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
 	Q_META_END()
@@ -21,7 +21,7 @@ public:
 	QStaticMeshRenderComponent();
 	void setStaticMesh(QSharedPointer<QStaticMesh> val);
 	QSharedPointer<QStaticMesh> getStaticMesh() const { return mStaticMesh; }
-	const QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>>& getPipelines() const { return mPipelines; }
+	QRhiMaterialGroup* getMaterialGroup() { return mMaterialGroup.get(); }
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;

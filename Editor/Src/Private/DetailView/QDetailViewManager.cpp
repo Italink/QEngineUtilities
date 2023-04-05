@@ -21,6 +21,7 @@
 #include "Customization/PropertyTypeCustomization_QStaticMesh.h"
 #include "Asset/QStaticMesh.h"
 #include "Customization/DetailCustomization_QGlslSandboxRenderPass.h"
+#include "Customization/DetailCustomization_QRhiMaterialGroup.h"
 
 QDetailViewManager* QDetailViewManager::Instance()
 {
@@ -115,7 +116,7 @@ QMetaData* QDetailViewManager::GetClassMetaData(const IDetailLayoutBuilder::Obje
 
 QDetailViewManager::QDetailViewManager()
 {
-	RegisterBuildIn();
+	RegisterBuiltIn();
 }
 
 #define  REGISTER_NUMERIC_TYPE(TypeName) \
@@ -133,13 +134,14 @@ QDetailViewManager::QDetailViewManager()
 			return numberBox;\
 		});
 
-void QDetailViewManager::RegisterBuildIn() {
+void QDetailViewManager::RegisterBuiltIn() {
 	RegisterCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
-	RegisterCustomClassLayout<DetailCustomization_QRhiGraphicsPipelineBuilder>(&QRhiGraphicsPipelineBuilder::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QRhiMaterialGroup>(&QRhiMaterialGroup::staticMetaObject);
+	RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
 	RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
-
+	
 	RegisterCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
 	RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
 	RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();

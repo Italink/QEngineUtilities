@@ -41,11 +41,15 @@ class QRhiMaterialGroup : public QObject {
 public:
 	QRhiMaterialGroup(QList<QSharedPointer<QMaterial>> inMaterials);
 	QSharedPointer<QRhiMaterialDesc> getMaterialDesc(int inIndex);
+	const QList<QSharedPointer<QRhiMaterialDesc>>& getDescList() { return mDescList; }
 protected:
 	void addMaterial(QSharedPointer<QMaterial> inMaterial);
 private:
 	QMap<QSharedPointer<QMaterial>, QSharedPointer<QRhiMaterialDesc>> mInfoMap;
 	QList<QSharedPointer<QRhiMaterialDesc>> mDescList;
 };
+
+Q_DECLARE_METATYPE(QRhiMaterialGroup*);
+Q_DECLARE_METATYPE(QSharedPointer<QRhiMaterialGroup>);
 
 #endif // QRhiMaterialGroup_h__
