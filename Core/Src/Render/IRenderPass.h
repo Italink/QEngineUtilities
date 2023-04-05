@@ -24,7 +24,7 @@ class QSkyboxRenderComponent;
 		Q_BUILDER_BEGIN(ClassType) 
 
 #define Q_BUILDER_END_RENDER_PASS(...) \
-		Q_BUILDER_END(ClassType) \
+		Q_BUILDER_END() \
 		enum Out{\
 			Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_SLOT, __VA_ARGS__)) \
 		}; \
@@ -66,7 +66,7 @@ private:
 		__Builder& addComponent(IRenderComponent* inRenderComponent) { mObject->addRenderComponent(inRenderComponent); return *this; } \
 
 #define Q_BUILDER_END_BASE_PASS(...) \
-		Q_BUILDER_END(ClassType) \
+		Q_BUILDER_END() \
 		enum Out{ \
 			Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_SLOT, __VA_ARGS__)) \
 		}; \
