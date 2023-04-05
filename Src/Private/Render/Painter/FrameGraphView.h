@@ -13,6 +13,7 @@ struct FrameGraphView : public GraphEditor::Delegate {
 	void RequestFitScreen();
 	QRhiTexture* GetCurrentTexture();
 protected:
+	void ShowFrameComparer(float thickness, float leftMinWidth, float rightMinWidth, float splitterLongAxisSize = -1.0f);
 	bool AllowedLink(GraphEditor::NodeIndex from, GraphEditor::NodeIndex to) override { return false; }
 	void SelectNode(GraphEditor::NodeIndex nodeIndex, bool selected, int slotIndex = -1) override;
 	void MoveSelectedNodes(const ImVec2 delta) override {}
@@ -38,7 +39,12 @@ public:
 	GraphEditor::FitOnScreen mFitOnScreen = GraphEditor::Fit_AllNodes;
 	int mCurrentNodeIndex = -1;
 	int mCurrentNodeSlotIndex = -1;
-	const int NodeSpacing = 100;
+	int NodeSpacing = 100;
+
+	bool bShowFrameComparer = false;
+	float mCompSplitFactor = 0.5;
+	QRhiTexture* mCompLeft = nullptr;
+	QRhiTexture* mCompRight = nullptr;
 };
 
 #endif

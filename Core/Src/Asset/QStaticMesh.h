@@ -24,7 +24,7 @@ struct QStaticMesh {
 		uint32_t verticesRange;
 		uint32_t indicesOffset;
 		uint32_t indicesRange;
-		uint32_t materialIndex;
+		uint32_t materialIndex = 0;
 		QMatrix4x4 localTransfrom;
 	};
 	using Index = uint32_t;

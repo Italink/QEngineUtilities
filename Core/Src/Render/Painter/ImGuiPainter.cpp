@@ -141,12 +141,10 @@ ImGuiPainter::ImGuiPainter()
 	ImGui::SetCurrentContext(mImGuiContext);
 
 	embraceTheDarkness();
-
 	ImGuiIO& io = ImGui::GetIO();
-
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;  // We can honor io.WantSetMousePos requests (optional, rarely used)
-	io.FontGlobalScale = qApp->devicePixelRatio();
+	//io.FontGlobalScale = qApp->devicePixelRatio();
 	io.BackendPlatformName = "Qt ImGUI";
 	io.SetClipboardTextFn = [](void* user_data, const char* text) {
 		Q_UNUSED(user_data);
@@ -202,6 +200,7 @@ void ImGuiPainter::compile() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 	mFontImage = QImage(pixels, width, height, QImage::Format::Format_RGBA8888);
+	mFontImage.save("font.png");
 	mFontTexture.reset(mRhi->newTexture(QRhiTexture::RGBA8, QSize(width, height), 1));
 	mFontTexture->create();
 	mPipeline.reset(mRhi->newGraphicsPipeline());
@@ -212,34 +211,34 @@ void ImGuiPainter::compile() {
 	mPipeline->setFlags(QRhiGraphicsPipeline::UsesScissor);
 	mPipeline->setSampleCount(mSampleCount);
 	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 440
-layout(location = 0) in vec2 inPosition;
-layout(location = 1) in vec2 inUV;
-layout(location = 2) in vec4 inColor;
+		layout(location = 0) in vec2 inPosition;
+		layout(location = 1) in vec2 inUV;
+		layout(location = 2) in vec4 inColor;
 
-layout(location = 0)out vec2 vUV;
-layout(location = 1)out vec4 vColor;
-layout(std140,binding = 0) uniform buf{
-	mat4 mvp;
-}ubuf;
+		layout(location = 0)out vec2 vUV;
+		layout(location = 1)out vec4 vColor;
+		layout(std140,binding = 0) uniform buf{
+			mat4 mvp;
+		}ubuf;
 
-out gl_PerVertex { vec4 gl_Position; };
+		out gl_PerVertex { vec4 gl_Position; };
 
-void main(){
-	vUV = inUV;
-	vColor = inColor;
-	gl_Position = ubuf.mvp*vec4(inPosition,0,1);
-}
-)");
+		void main(){
+			vUV = inUV;
+			vColor = inColor;
+			gl_Position = ubuf.mvp*vec4(inPosition,0,1);
+		}
+	)");
 
 	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 440
-layout(location = 0) in vec2 vUV;
-layout(location = 1) in vec4 vColor;
-layout(binding = 1) uniform sampler2D uTexture;
-layout(location = 0) out vec4 OutColor;
-void main(){
-	OutColor = vColor * texture(uTexture,vUV);
-}
-)");
+		layout(location = 0) in vec2 vUV;
+		layout(location = 1) in vec4 vColor;
+		layout(binding = 1) uniform sampler2D uTexture;
+		layout(location = 0) out vec4 OutColor;
+		void main(){
+			OutColor = vColor * texture(uTexture,vUV);
+		}
+	)");
 
 	mPipeline->setShaderStages({
 		{ QRhiShaderStage::Vertex, vs },

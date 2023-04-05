@@ -29,7 +29,7 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
 	if (file.open(QIODevice::ReadOnly)) {
 		QByteArray fontData = file.readAll();
-		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(), 16);
+		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(),23);
 		io.Fonts->Build();
 	}
 
@@ -120,6 +120,7 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 				mFrameGraphView->Show();
 				ImGui::End();
 				mOutputTexture = mFrameGraphView->GetCurrentTexture();
+				mRenderer->setOverrideOutput(mOutputTexture);
 			}
 			if (bShowStats) {
 				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 250, viewport->WorkSize.y - 100));

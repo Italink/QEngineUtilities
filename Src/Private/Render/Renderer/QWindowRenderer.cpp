@@ -59,8 +59,7 @@ QRhiCommandBuffer* QWindowRenderer::commandBuffer() {
 	return mWindow->mSwapChain->currentFrameCommandBuffer();
 }
 
-QRhiRenderTarget* QWindowRenderer::renderTaget()
-{
+QRhiRenderTarget* QWindowRenderer::renderTaget(){
 	return mWindow->mSwapChain->currentFrameRenderTarget();
 }
 
@@ -68,6 +67,18 @@ int QWindowRenderer::sampleCount()
 {
 	return mWindow->mSwapChain->sampleCount();
 }
+
+#ifdef QENGINE_WITH_EDITOR
+void QWindowRenderer::setOverrideOutput(QRhiTexture* inTexture) {
+	if (!inTexture) {
+		inTexture = mFrameGraph->getOutputTexture();
+	}
+	if (inTexture != mOutputPainter->getTexture()) {
+		mOutputPainter->setupTexture(inTexture);
+		mOutputPainter->compile();
+	}
+}
+#endif
 
 QRhiWindow* QWindowRenderer::getRhiWindow() const {
 	return mWindow;

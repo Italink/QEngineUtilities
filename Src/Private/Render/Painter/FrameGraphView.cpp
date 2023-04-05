@@ -22,6 +22,10 @@ FrameGraphView::FrameGraphView() {
 }
 
 void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
+	bShowFrameComparer = false;
+	mCompLeft = nullptr;
+	mCompRight = nullptr;
+	mCompSplitFactor = 0.5f;
 	mNodes.clear();
 	mNodeTexutes.clear();
 	mLinks.clear();
@@ -107,8 +111,48 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 	}
 }
 
+void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, float rightMinWidth, float splitterLongAxisSize) {
+	auto width = ImGui::GetWindowWidth();
+	float left = width * mCompSplitFactor;
+	float right = width - left - thickness;
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+	ImGui::SameLine(ImGui::GetWindowWidth() - 150);
+	if (ImGui::Button("Exit Compare")) {
+		bShowFrameComparer = false;
+		mCompLeft = nullptr;
+		mCompRight = nullptr;
+	}
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(thickness, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
+	ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0, 0.3, 1, 1));
+	ImGui::PushStyleColor(ImGuiCol_SeparatorHovered, ImVec4(0.3, 0.1, 1, 1));
+	ImGui::PushStyleColor(ImGuiCol_SeparatorActive, ImVec4(0.3, 0, 1, 1));
+	ImGuiID id = window->GetID("##FrameComparer");
+	ImRect bb;
+	bb.Min = window->DC.CursorPos + (ImVec2(left - 1, 0));
+	bb.Max = bb.Min + ImGui::CalcItemSize(ImVec2(thickness + 1, splitterLongAxisSize), 0.0f, 0.0f);
+	ImGui::SplitterBehavior(bb, id, ImGuiAxis_X, &left, &right, leftMinWidth, rightMinWidth, 5.0f);
+	mCompSplitFactor = left / width;
+	ImGui::BeginChild("Left", ImVec2(left , -1), true);
+	ImGui::Image(mCompLeft, ImVec2(ImGui::GetWindowWidth() , ImGui::GetWindowHeight()), ImVec2(0, 0), ImVec2(1 * mCompSplitFactor, 1));
+	ImGui::EndChild();
+	ImGui::SameLine();
+	ImGui::BeginChild("Right", ImVec2(right, -1), true);
+	ImGui::Image(mCompRight, ImVec2(ImGui::GetWindowWidth() , ImGui::GetWindowHeight()), ImVec2(1 * mCompSplitFactor, 0), ImVec2(1, 1));
+	ImGui::EndChild();
+	ImGui::PopStyleColor(4);
+	ImGui::PopStyleVar(2);
+}
+
 void FrameGraphView::Show() {
-	GraphEditor::Show(*this, mOptions, mViewState, true, &mFitOnScreen);
+	if (bShowFrameComparer) {
+		ShowFrameComparer(4, 2, 10);
+	}
+	else {
+		GraphEditor::Show(*this, mOptions, mViewState, true, &mFitOnScreen);
+	}
 }
 
 void FrameGraphView::RequestFitScreen() {
@@ -128,6 +172,12 @@ void FrameGraphView::SelectNode(GraphEditor::NodeIndex nodeIndex, bool selected 
 	}
 	if (selected) {
 		mNodes[nodeIndex].mSelected = selected;
+		if (ImGui::GetIO().KeyCtrl && mCurrentNodeIndex >= 0 && mCurrentNodeSlotIndex >= 0  && nodeIndex >=0 && slotIndex>=0) {
+			bShowFrameComparer = true;
+			mCompSplitFactor = 0.5f;
+			mCompLeft = mNodeTexutes[mCurrentNodeIndex][mCurrentNodeSlotIndex];
+			mCompRight = mNodeTexutes[nodeIndex][slotIndex];
+		}
 		mCurrentNodeIndex = nodeIndex;
 		mCurrentNodeSlotIndex = slotIndex;
 	}

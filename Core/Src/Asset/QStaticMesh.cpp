@@ -66,6 +66,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePat
 
 QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, const QFont& inFont, QColor inColor /*= Qt::white*/, Qt::Orientation inOrientation /*= Qt::Horizontal*/, int inSpacing /*= 2*/, bool bUseTexture) {
 	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
+	QSharedPointer<QMaterial> material = QSharedPointer<QMaterial>::create();
 	QVector<Vertex>& vertices = staticMesh->mVertices;
 	QVector<Index>& indices = staticMesh->mIndices;
 	QFontMetrics fontMetrics(inFont);
@@ -93,7 +94,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 		QPainter painter(&image);
 		painter.fillPath(fontPath, inColor);
 		painter.end();
-		//submesh.materialProperties["BaseColor"] = image;
+		material->mProperties["BaseColor"] = image;
 
 		Vertex vertex;
 
@@ -155,7 +156,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 			vertex.position.setY(textSize.height() - vertex.position.y());
 			vertex.position -= QVector3D(textSize.width() / 2.0f, textSize.height() / 2.0f, 0.0f);
 		}
-		//submesh.materialProperties["BaseColor"] = inColor;
+		material->mProperties["BaseColor"] = inColor;
 	}
 
 	for (auto& vertex : vertices) {
@@ -167,6 +168,8 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 	submesh.verticesOffset = 0;
 	submesh.indicesRange = indices.size();
 	submesh.verticesRange = vertices.size();
+	submesh.materialIndex = 0;
+	staticMesh->mMaterials << material;
 	staticMesh->mSubmeshes << submesh;
 	return staticMesh;
 }

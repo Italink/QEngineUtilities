@@ -610,12 +610,17 @@ static bool DrawNode(ImDrawList* drawList,
                         delegate.SelectNode(i, false);
                     }
                 }
-                delegate.SelectNode(nodeIndex, true);
+				if (io.MouseClicked[0]) {
+					currentSlotIndex = (io.MousePos - nodeRectangleMin).y / nodeSize.x;
+					delegate.SelectNode(nodeIndex, true, currentSlotIndex);
+                    io.MouseClicked[0] = false;
+				}
             }
-            if (node.mSelected) {
+            else{
 				if (io.MouseClicked[0]) {
                     currentSlotIndex = (io.MousePos - nodeRectangleMin).y / nodeSize.x;
 					delegate.SelectNode(nodeIndex, true, currentSlotIndex);
+                    io.MouseClicked[0] = false;
 				}
             }
         }

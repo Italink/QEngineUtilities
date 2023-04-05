@@ -15,6 +15,9 @@ public:
 	QRhiWindow* getRhiWindow() const;
 	QRhiRenderTarget* renderTaget() override;
 	int sampleCount() override;
+#ifdef QENGINE_WITH_EDITOR
+	void setOverrideOutput(QRhiTexture* inTexture);
+#endif
 protected:
 	void render() override;
 	void resize(const QSize& size) override;
@@ -23,7 +26,6 @@ private:
 	QRhiWindow* mWindow;
 #ifdef QENGINE_WITH_EDITOR
 	QScopedPointer<QDebugUIPainter> mDebugUiPainter;
-	QRhiTexture* mOverrideOutputTexture = nullptr;
 #endif // QENGINE_WITH_EDITOR
 };
 

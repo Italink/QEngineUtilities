@@ -8,6 +8,7 @@ public:
 	TexturePainter();
 
 	void setupTexture(QRhiTexture* texture);
+	QRhiTexture* getTexture() { return mTexture; }
 
 	void setupSampler(QRhiSampler::Filter magFilter = QRhiSampler::Linear,
 		QRhiSampler::Filter minFilter = QRhiSampler::Linear,
