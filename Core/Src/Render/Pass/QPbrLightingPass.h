@@ -2,17 +2,18 @@
 #define QPbrLightingPass_h__
 
 #include "Render/IRenderPass.h"
+#include "Render/Painter/TexturePainter.h"
 
 class QPbrLightingPass : public IRenderPass {
 	Q_OBJECT
-	Q_BUILDER_BEGIN_RENDER_PASS(QPbrLightingPass, Albedo, Position, Normal, Metallic, Roughness, SkyCube, SpecularCube, IrradianceCube, BrdfLut)
+	Q_BUILDER_BEGIN_RENDER_PASS(QPbrLightingPass, Albedo, Position, Normal, Metallic, Roughness, SkyTexture, SkyCube)
 	Q_BUILDER_END_RENDER_PASS(FragColor)
 protected:
+	QRhiEx::Signal sigInit;
+
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;
 	void render(QRhiCommandBuffer* cmdBuffer) override;
-
-	QRhiEx::Signal sigUploadSkyboxVertics;
 
 	struct RTResource {
 		QScopedPointer<QRhiTexture> colorAttachment;
@@ -21,17 +22,25 @@ protected:
 	};
 	RTResource mRT;
 
-	struct SkyboxUniformBlock {
-		QGenericMatrix<4,4,float> MVP;
-	};
-	QScopedPointer<QRhiBuffer> mSkyboxUniformBlock;
-	QScopedPointer<QRhiBuffer> mSkyboxVertexBuffer;
-	QScopedPointer<QRhiGraphicsPipeline> mSkyboxPipeline;
-	QScopedPointer<QRhiShaderResourceBindings> mSkyboxBindings;
+	QScopedPointer<QRhiTexture> mPrefilteredSpecularCube;
+	QScopedPointer<QRhiBuffer> mPrefilteredSpecularCubeUniformBuffer;
+	QScopedPointer<QRhiComputePipeline> mPrefilteredSpecularCubePipeline;
+	QScopedPointer<QRhiShaderResourceBindings> mPrefilteredSpecularCubeBindings;
+
+	QScopedPointer<QRhiTexture> mDiffuseIrradianceCube;
+	QScopedPointer<QRhiComputePipeline> mDiffuseIrradiancePipeline;
+	QScopedPointer<QRhiShaderResourceBindings> mDiffuseIrradianceBindings;
+
+	QScopedPointer<QRhiTexture> mBrdfLut;
+	QScopedPointer<QRhiComputePipeline> mBrdfLutPipeline;
+	QScopedPointer<QRhiShaderResourceBindings> mBrdfLutBindings;
 
 	struct PbrUniformBlock {
 		QVector3D eyePosition;
 	};
+
+	QScopedPointer<TexturePainter> mSkyTexturePainter;
+
 	QScopedPointer<QRhiBuffer> mPbrUniformBlock;
 	QScopedPointer<QRhiGraphicsPipeline> mPbrPipeline;
 	QScopedPointer<QRhiSampler> mSampler;

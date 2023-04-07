@@ -30,5 +30,4 @@ protected:
 	inline static uint32_t IDStack = 0;
 };
 
-
 #endif // IRenderComponent_h__

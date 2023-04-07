@@ -11,12 +11,12 @@ class QSkyRenderPass : public IRenderPass {
 		Q_BUILDER_FUNCTION_BEGIN(setSkyBoxImagePath, const QString& inPath)
 			Q_BUILDER_OBJECT_PTR->setSkyBoxImagePath(inPath);
 		Q_BUILDER_FUNCTION_END()
-	Q_BUILDER_END_RENDER_PASS(Preview, SkyCube, SpecularCube, IrradianceCube, BrdfLut)
+	Q_BUILDER_END_RENDER_PASS(Equirect, SkyTexture, SkyCube)
 private:
+	QRhiEx::Signal sigUploadSkyboxVertics;
 	QRhiEx::Signal sigInitResource;
 	QRhiEx::Signal sigUploadEquirectTexture;
 	QRhiEx::Signal sigComputeSkyCube;
-	QRhiEx::Signal sigComputeIBLCube;
 	struct RTResource {
 		QScopedPointer<QRhiTexture> colorAttachment;
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;
@@ -38,18 +38,13 @@ private:
 	QScopedPointer<QRhiComputePipeline> mSkyCubePipeline;
 	QScopedPointer<QRhiShaderResourceBindings> mSkyCubeBindings;
 
-	QScopedPointer<QRhiTexture> mPrefilteredSpecularCube;
-	QScopedPointer<QRhiBuffer> mPrefilteredSpecularCubeUniformBuffer;
-	QScopedPointer<QRhiComputePipeline> mPrefilteredSpecularCubePipeline;
-	QScopedPointer<QRhiShaderResourceBindings> mPrefilteredSpecularCubeBindings;
-
-	QScopedPointer<QRhiTexture> mDiffuseIrradianceCube;
-	QScopedPointer<QRhiComputePipeline> mDiffuseIrradiancePipeline;
-	QScopedPointer<QRhiShaderResourceBindings> mDiffuseIrradianceBindings;
-
-	QScopedPointer<QRhiTexture> mBrdfLut;
-	QScopedPointer<QRhiComputePipeline> mBrdfLutPipeline;
-	QScopedPointer<QRhiShaderResourceBindings> mBrdfLutBindings;
+	struct SkyboxUniformBlock {
+		QGenericMatrix<4, 4, float> MVP;
+	};
+	QScopedPointer<QRhiBuffer> mSkyboxUniformBlock;
+	QScopedPointer<QRhiBuffer> mSkyboxVertexBuffer;
+	QScopedPointer<QRhiGraphicsPipeline> mSkyboxPipeline;
+	QScopedPointer<QRhiShaderResourceBindings> mSkyboxBindings;
 public:
 	QSkyRenderPass();
 
