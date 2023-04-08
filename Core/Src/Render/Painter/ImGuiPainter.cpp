@@ -200,7 +200,6 @@ void ImGuiPainter::compile() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 	mFontImage = QImage(pixels, width, height, QImage::Format::Format_RGBA8888);
-	mFontImage.save("font.png");
 	mFontTexture.reset(mRhi->newTexture(QRhiTexture::RGBA8, QSize(width, height), 1));
 	mFontTexture->create();
 	mPipeline.reset(mRhi->newGraphicsPipeline());

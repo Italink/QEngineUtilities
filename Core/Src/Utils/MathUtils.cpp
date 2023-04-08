@@ -54,6 +54,10 @@ QVector3D MathUtils::getMatRotation(const QMatrix4x4& mat4) {
 }
 
 QVector3D MathUtils::getMatScale3D(const QMatrix4x4& mat4) {
-	return QVector3D(mat4.row(0).toVector3D().length(), mat4.row(1).toVector3D().length(), mat4.row(2).toVector3D().length());
+	QVector3D translate;
+	QVector3D rotation;
+	QVector3D scale3D;
+	ImGuizmo::DecomposeMatrixToComponents(mat4.constData(), (float*)&translate, (float*)&rotation, (float*)&scale3D);
+	return scale3D;
 }
 

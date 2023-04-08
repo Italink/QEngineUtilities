@@ -97,8 +97,8 @@ void QDetailView::Reset() {
 void QDetailView::RefreshRowsState() {
 	RefreshRowsSplitter();
 ;	for (auto Row : mTopLevelRows) {
+		Row->SetExpanded(true, true);
 		Row->Refresh();
-		Row->SetExpanded(true);
 	}
 }
 

@@ -58,6 +58,8 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	panel->setSizes({ 1, 10 });
 	splitter->addWidget(viewport);
 	splitter->addWidget(panel);
+	mObjectTreeView->setFocusProxy(this);
+	mRhiWindow->installEventFilter(this);
 	connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, mDetailView, &QDetailView::SetObject);
 	hLayout->addWidget(splitter);
 #else
@@ -117,15 +119,26 @@ void QRenderWidget::onExit() {
 	mRenderer.reset();
 }
 
-void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 #ifdef QENGINE_WITH_EDITOR
+void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier) ) {
 		if (event->key() == Qt::Key_Z) {
 			QEngineUndoStack::Instance()->Undo();
 		}
-		else if (event->key() == Qt::Key_Z) {
+		else if (event->key() == Qt::Key_Y) {
 			QEngineUndoStack::Instance()->Redo();
 		}
 	}
-#endif // QENGINE_WITH_EDITOR
 }
+
+bool QRenderWidget::eventFilter(QObject* obj, QEvent* event) {
+	if (obj != nullptr) {
+		switch (event->type()) {
+		case QEvent::KeyPress:
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+			QRenderWidget::keyPressEvent(keyEvent);
+		}
+	}
+	return false;
+}
+#endif // QENGINE_WITH_EDITOR

@@ -26,7 +26,10 @@ protected:
 	void onRenderTick();
 	void onResizeEvent(const QSize& inSize);
 	void onExit();
+#ifdef QENGINE_WITH_EDITOR
 	void keyPressEvent(QKeyEvent* event) override;
+	bool eventFilter(QObject* obj, QEvent* event) override;
+#endif 
 protected:
 	QRhiWindow::InitParams mInitParams;
 	QInnerRhiWindow* mRhiWindow = nullptr;
@@ -36,7 +39,7 @@ protected:
 #ifdef QENGINE_WITH_EDITOR
 	QObjectTreeView* mObjectTreeView;
 	QDetailView* mDetailView;
-#endif // QENGINE_WITH_EDITOR
+#endif 
 };
 
 #endif // QRenderWidget_h__

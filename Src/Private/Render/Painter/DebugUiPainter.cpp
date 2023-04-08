@@ -43,13 +43,14 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 			QMatrix4x4 View = camera->getMatrixView();
 			QMatrix4x4 Clip = camera->getMatrixClip();
 			ISceneRenderComponent* currComponent = qobject_cast<ISceneRenderComponent*>(mRenderer->getCurrentObject());
-			if (currComponent) {
+			if (currComponent && !bShowFrameGraph) {
 				QMatrix4x4 MAT;
 				QMatrix4x4 Model = currComponent->calculateMatrixModel();
 				ImGuizmo::BeginFrame();
 				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 				ImGuizmo::Manipulate(View.constData(), Clip.constData(), mOperation, ImGuizmo::LOCAL, Model.data(), NULL, NULL, NULL, NULL);
-				currComponent->setTransform(Model);
+				auto handler = QPropertyHandle::Find(currComponent, "Transform");
+				handler->SetValue(Model, "Move");
 				if (QPropertyHandle* position = QPropertyHandle::Find(currComponent, "Transform.Position"))
 					position->RefreshBinder();
 				if (QPropertyHandle* rotation = QPropertyHandle::Find(currComponent, "Transform.Rotation"))

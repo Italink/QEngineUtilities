@@ -26,7 +26,7 @@ public:
 	void SetVisible(bool inVisiable);
 	bool IsVisible() const;
 
-	void SetExpanded(bool inExpanded);
+	void SetExpanded(bool inExpanded, bool bRecursive = false);
 	bool IsExpanded() const;
 
 	void Refresh();

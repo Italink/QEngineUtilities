@@ -240,18 +240,20 @@ bool QDetailViewRow::IsVisible() const {
 	return mWidget->isVisible();
 }
 
-void QDetailViewRow::SetExpanded(bool inExpanded) {
+void QDetailViewRow::SetExpanded(bool inExpanded, bool bRecursive) {
 	bExpanded = inExpanded;
 	mWidget->mIndentWidget->RefreshState(mChildren.count(), bExpanded);
 	for (auto Child : mChildren) {
 		Child->SetVisible(inExpanded);
+		if (bRecursive) {
+			Child->SetExpanded(inExpanded, bRecursive);
+		}
 	}
 }
 
 bool QDetailViewRow::IsExpanded() const {
 	return bExpanded;
 }
-
 
 void QDetailViewRow::Refresh() {
 	mWidget->mIndentWidget->FixupWidth();
