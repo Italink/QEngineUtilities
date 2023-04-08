@@ -14,7 +14,6 @@ public:
 	static QShader newShaderFromQSBFile(const char* filename);
 
 	QRhiBuffer* newVkBuffer(QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
-
 public:
 	class Signal {
 	public:

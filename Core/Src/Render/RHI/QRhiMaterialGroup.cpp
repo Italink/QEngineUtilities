@@ -76,6 +76,18 @@ QString QRhiMaterialDesc::getOrCreateBaseColorExpression() {
 	return "Material.BaseColor";
 }
 
+QString QRhiMaterialDesc::getOrCreateSpecularExpression() {
+	if (auto param = getTexture("Specular")) {
+		return "texture(uSpecular,vUV).r";
+	}
+	if (auto param = uniformBlock->getParamDesc("Specular")) {
+		if (param->mValue.metaType() == QMetaType::fromType<float>())
+			return "Material.Specular";
+	}
+	uniformBlock->addParam("Specular", 0.5f);
+	return "Material.Specular";
+}
+
 QString QRhiMaterialDesc::getOrCreateMetallicExpression() {
 	if (auto param = getTexture("Metallic")) {
 		return "texture(uMetallic,vUV).r";

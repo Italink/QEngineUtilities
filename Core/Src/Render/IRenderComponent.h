@@ -13,7 +13,7 @@ public:
 	QRhiEx::Signal sigonRebuildResource;
 	QRhiEx::Signal sigonRebuildPipeline;
 public:
-	IRenderComponent():mID(IDStack++){ }
+	IRenderComponent(): mID(IDStack++){ }
 	uint32_t getID() const { return mID; }
 	virtual bool isVaild() { return true; }
 	virtual void onRebuildResource() {}
@@ -24,7 +24,7 @@ public:
 	virtual void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) = 0;
 	IBasePass* getBasePass() { return mBasePass; }
 protected:
-	QRhiEx* mRhi;
+	QRhiEx* mRhi = nullptr;
 	IBasePass* mBasePass = nullptr;
 	uint32_t mID;
 	inline static uint32_t IDStack = 0;

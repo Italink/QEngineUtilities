@@ -28,6 +28,7 @@ Q_DECLARE_METATYPE(QRhiTextureDesc*);
 
 struct QRhiMaterialDesc {
 	QString getOrCreateBaseColorExpression();
+	QString getOrCreateSpecularExpression();
 	QString getOrCreateMetallicExpression();
 	QString getOrCreateRoughnessExpression();
 	QString getNormalExpression();
