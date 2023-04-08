@@ -41,7 +41,7 @@ void QDynamicMeshRenderComponent::onRebuildResource() {
 			vTangentBasis =  mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
 			gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 		}
-		)");
+	)");
 
 
 	mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(

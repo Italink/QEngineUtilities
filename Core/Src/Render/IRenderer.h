@@ -13,7 +13,7 @@ class IRenderer: public QObject {
 	Q_PROPERTY(QCamera* Camera READ getCamera WRITE setCamera)
 public:
 	IRenderer(QRhiEx* inRhi,const QSize& inFrameSize);
-	~IRenderer(){}
+	virtual ~IRenderer();
 	void requestComplie();
 
 	virtual QRhiRenderTarget* renderTaget() = 0;

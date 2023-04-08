@@ -22,10 +22,8 @@ FrameGraphView::FrameGraphView() {
 }
 
 void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
-	bShowFrameComparer = false;
 	mCompLeft = nullptr;
 	mCompRight = nullptr;
-	mCompSplitFactor = 0.5f;
 	mNodes.clear();
 	mNodeTexutes.clear();
 	mLinks.clear();
@@ -109,6 +107,16 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 		int yOffset = nodeYOffset[i] * (mOptions.mNodeSlotSize + mOptions.mNodeSlotSize);
 		node.mRect = ImRect(xOffset, yOffset, xOffset + mOptions.mNodeSlotSize, yOffset  + node.mTemplateIndex * (mOptions.mNodeSlotSize));
 	}
+
+	if (bShowFrameComparer) {
+		if (mCurrentNodeIndex >= 0 && mCurrentNodeSlotIndex >= 0 && mLastNodeIndex >= 0 && mLastNodeSlotIndex >= 0) {
+			mCompLeft = mNodeTexutes[mLastNodeIndex][mLastNodeSlotIndex];
+			mCompRight = mNodeTexutes[mCurrentNodeIndex][mCurrentNodeSlotIndex];
+		}
+		else {
+			bShowFrameComparer = false;
+		}
+	}
 }
 
 void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, float rightMinWidth, float splitterLongAxisSize) {
@@ -120,6 +128,8 @@ void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, floa
 	ImGui::SameLine(ImGui::GetWindowWidth() - 150);
 	if (ImGui::Button("Exit Compare")) {
 		bShowFrameComparer = false;
+		mLastNodeIndex = -1;
+		mLastNodeSlotIndex = -1;
 		mCompLeft = nullptr;
 		mCompRight = nullptr;
 	}
@@ -175,6 +185,8 @@ void FrameGraphView::SelectNode(GraphEditor::NodeIndex nodeIndex, bool selected 
 		if (ImGui::GetIO().KeyCtrl && mCurrentNodeIndex >= 0 && mCurrentNodeSlotIndex >= 0  && nodeIndex >=0 && slotIndex>=0) {
 			bShowFrameComparer = true;
 			mCompSplitFactor = 0.5f;
+			mLastNodeIndex = mCurrentNodeIndex;
+			mLastNodeSlotIndex = mCurrentNodeSlotIndex;
 			mCompLeft = mNodeTexutes[mCurrentNodeIndex][mCurrentNodeSlotIndex];
 			mCompRight = mNodeTexutes[nodeIndex][slotIndex];
 		}

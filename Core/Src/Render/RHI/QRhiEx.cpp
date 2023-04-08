@@ -46,10 +46,11 @@ bool QRhiEx::Signal::peek() {
 	return bDirty;
 }
 
-QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
+QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
+	QSharedPointer<QRhiEx> rhi;
 	if (inBackend == QRhi::Null) {
 		QRhiNullInitParams params;
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::Null, &params, inFlags));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Null, &params, inFlags)));
 	}
 
 #ifndef QT_NO_OPENGL
@@ -57,7 +58,7 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 		QRhiGles2InitParams params;
 		params.fallbackSurface = QRhiGles2InitParams::newFallbackSurface();
 		params.window = inWindow;
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::OpenGLES2, &params, inFlags));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::OpenGLES2, &params, inFlags)));
 	}
 #endif
 
@@ -72,7 +73,10 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 		}
 		params.inst = vkInstance;
 		auto importedHandles = QRhiVulkanExHelper::createVulkanNativeHandles(params);
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::Vulkan, &params, inFlags, &importedHandles));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Vulkan, &params, inFlags, &importedHandles)), [importedHandles](QRhiEx* rhi) {
+			delete rhi;
+			QRhiVulkanExHelper::destroyVulkanNativeHandles(importedHandles);
+		});
 	}
 #endif
 
@@ -80,13 +84,13 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 	if (inBackend == QRhi::D3D11) {
 		QRhiD3D11InitParams params;
 		params.enableDebugLayer = true;
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::D3D11, &params, inFlags));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::D3D11, &params, inFlags)));
 	}
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 	if (inBackend == QRhi::D3D12) {
 		QRhiD3D12InitParams params;
 		params.enableDebugLayer = true;
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::D3D12, &params, inFlags));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::D3D12, &params, inFlags)));
 	}
 #endif
 
@@ -95,10 +99,10 @@ QRhiEx* QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 	if (inBackend == QRhi::Metal) {
 		QRhiMetalInitParams params;
-		return static_cast<QRhiEx*>(QRhi::create(QRhi::Metal, &params, inFlags));
+		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Metal, &params, inFlags)));
 	}
 #endif
-	return nullptr;
+	return rhi;
 }
 
 QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code) {

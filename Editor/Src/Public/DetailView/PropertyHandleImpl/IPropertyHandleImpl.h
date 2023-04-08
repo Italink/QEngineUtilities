@@ -18,5 +18,4 @@ protected:
 	QPropertyHandle* mHandle;
 };
 
-
 #endif // IPropertyHandleImpl_h__

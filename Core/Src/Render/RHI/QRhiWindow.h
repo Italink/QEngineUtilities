@@ -46,7 +46,7 @@ private:
 	QElapsedTimer mCpuFrameTimer;
 	float mGpuFrameTime;
 protected:
-	QScopedPointer<QRhiEx> mRhi;
+	QSharedPointer<QRhiEx> mRhi;
 	QScopedPointer<QRhiSwapChain> mSwapChain;
 	QScopedPointer<QRhiRenderBuffer> mDSBuffer  ;
 	QScopedPointer<QRhiRenderPassDescriptor> mSwapChainPassDesc;

@@ -10,6 +10,10 @@ IRenderer::IRenderer(QRhiEx* inRhi, const QSize& inFrameSize)
 	mOutputPainter->setupRhi(mRhi);
 }
 
+IRenderer::~IRenderer() {
+
+}
+
 void IRenderer::requestComplie() {
 	bRequestCompile = true;
 }

@@ -33,6 +33,7 @@ class QSkyboxRenderComponent;
 
 class IRenderPass: public QObject{
 public:
+	virtual ~IRenderPass(){}
 	virtual void setRenderer(IRenderer* inRenderer);
 	virtual void compile() {};
 	virtual void resizeAndLinkNode(const QSize& size) {}

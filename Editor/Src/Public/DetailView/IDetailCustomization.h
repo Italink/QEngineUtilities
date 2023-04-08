@@ -10,4 +10,5 @@ public:
 
 	virtual void CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) = 0;
 };
+
 #endif // IDETAILCUSTOMIZATION_H

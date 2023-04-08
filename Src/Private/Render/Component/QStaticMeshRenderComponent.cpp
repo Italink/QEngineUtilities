@@ -69,11 +69,13 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 				%4	
 				%5
 				%6
+				%7
 			})")
 			.arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
-			.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
-			.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
-			.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+			.arg(getBasePass()->hasColorAttachment("Position")	? "Position = vec4(vWorldPosition  ,1);" : "")
+			.arg(getBasePass()->hasColorAttachment("Normal")	? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+			.arg(getBasePass()->hasColorAttachment("Specular")	? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
+			.arg(getBasePass()->hasColorAttachment("Metallic")	? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
 			.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
 #ifdef QENGINE_WITH_EDITOR	
 			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")

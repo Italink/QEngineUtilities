@@ -1,6 +1,7 @@
 #include "QGuiApplication"
 #include "QRhiWindow.h"
 #include <QPlatformSurfaceEvent>
+#include "Vulkan\QRhiVulkanExHelper.h"
 
 QRhiWindow::QRhiWindow(QRhiWindow::InitParams inInitParmas)
 	: mInitParams(inInitParmas)
@@ -30,7 +31,7 @@ QRhiWindow::~QRhiWindow() {
 }
 
 void QRhiWindow::initializeInternal() {
-	mRhi.reset(QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this));
+	mRhi = QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this);
 	if (!mRhi)
 		qFatal("Failed to create RHI backend");
 

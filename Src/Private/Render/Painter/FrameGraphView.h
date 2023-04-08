@@ -37,10 +37,11 @@ public:
 	GraphEditor::Options mOptions;
 	GraphEditor::ViewState mViewState;
 	GraphEditor::FitOnScreen mFitOnScreen = GraphEditor::Fit_AllNodes;
+	int mLastNodeIndex = -1;
+	int mLastNodeSlotIndex = -1;
 	int mCurrentNodeIndex = -1;
 	int mCurrentNodeSlotIndex = -1;
 	int NodeSpacing = 100;
-
 	bool bShowFrameComparer = false;
 	float mCompSplitFactor = 0.5;
 	QRhiTexture* mCompLeft = nullptr;

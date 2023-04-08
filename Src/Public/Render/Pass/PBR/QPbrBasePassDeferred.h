@@ -1,19 +1,19 @@
-﻿#ifndef QBasePassDeferred_h__
-#define QBasePassDeferred_h__
+﻿#ifndef QPbrBasePassDeferred_h__
+#define QPbrBasePassDeferred_h__
 
 #include "Render/IRenderPass.h"
 
-class QBasePassDeferred : public IBasePass {
+class QPbrBasePassDeferred : public IBasePass {
 	Q_OBJECT
 public:
 
-	Q_BUILDER_BEGIN_BASE_PASS(QBasePassDeferred)
+	Q_BUILDER_BEGIN_BASE_PASS(QPbrBasePassDeferred)
 #ifdef QENGINE_WITH_EDITOR
 	Q_BUILDER_END_BASE_PASS(BaseColor, Position, Normal, Metallic, Roughness, DebugId, Depth)
 #else
 	Q_BUILDER_END_BASE_PASS(BaseColor, Position, Normal, Metallic, Roughness, Depth)
 #endif
-	QBasePassDeferred();
+	QPbrBasePassDeferred();
 protected:
 	struct RT {
 		QScopedPointer<QRhiTexture> atBaseColor;
@@ -36,4 +36,4 @@ protected:
 };
 
 
-#endif // QBasePassDeferred_h__
+#endif // QPbrBasePassDeferred_h__

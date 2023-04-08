@@ -19,6 +19,7 @@
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_RECORDING_ENABLED 0
 #define VMA_DEDICATED_ALLOCATION 0
+#define VMA_DEBUG_LOG qDebug
 #ifdef QT_DEBUG
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 #endif
@@ -269,7 +270,7 @@ QRhiBuffer* QRhiVulkanExHelper::newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, 
 	return new QVkBufferEx(ptr, type, flags, size);
 }
 
-QRhiVulkanNativeHandles QRhiVulkanExHelper::createVulkanNativeHandles(const QRhiVulkanInitParams& params) {
+QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRhiVulkanInitParams& params) {
 	QRhiVulkanNativeHandles handles;
 	auto& physDev = handles.physDev;
 	auto& dev = handles.dev;
@@ -492,3 +493,15 @@ QRhiVulkanNativeHandles QRhiVulkanExHelper::createVulkanNativeHandles(const QRhi
 	handles.vmemAllocator = vmaallocator;
 	return handles;
 }
+
+void QRhiVulkanExHelper::destroyVulkanNativeHandles(const QRhiVulkanNativeHandles& handles) {
+	if (handles.vmemAllocator) {
+		vmaDestroyAllocator(toVmaAllocator(handles.vmemAllocator));
+	}
+	if (handles.dev) {
+		auto df = globalVulkanInstance->deviceFunctions(handles.dev);
+		df->vkDestroyDevice(handles.dev, nullptr);
+		globalVulkanInstance->resetDeviceFunctions(handles.dev);
+	}
+}
+
