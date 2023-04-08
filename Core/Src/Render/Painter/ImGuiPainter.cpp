@@ -144,7 +144,7 @@ ImGuiPainter::ImGuiPainter()
 	ImGuiIO& io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;  // We can honor io.WantSetMousePos requests (optional, rarely used)
-	//io.FontGlobalScale = qApp->devicePixelRatio();
+	io.FontGlobalScale = qApp->devicePixelRatio();
 	io.BackendPlatformName = "Qt ImGUI";
 	io.SetClipboardTextFn = [](void* user_data, const char* text) {
 		Q_UNUSED(user_data);

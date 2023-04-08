@@ -8,6 +8,7 @@ QDynamicMeshRenderComponent::QDynamicMeshRenderComponent() {
 }
 
 void QDynamicMeshRenderComponent::onRebuildResource() {
+	mMaterialGroup.reset(new QRhiMaterialGroup(QSharedPointer<QMaterial>::create()));
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::VertexBuffer, sizeof(Vertex) * 1));
 	mVertexBuffer->create();
 
@@ -15,9 +16,6 @@ void QDynamicMeshRenderComponent::onRebuildResource() {
 	mPipeline->addUniformBlock(QRhiShaderStage::Vertex, "Transform")
 		->addParam("MVP", QGenericMatrix<4, 4, float>())
 		->addParam("M", QGenericMatrix<4, 4, float>());
-
-	mPipeline->addUniformBlock(QRhiShaderStage::Fragment, "Material")
-		->addParam("Color", QColor(10,100,200));
 
 	mPipeline->setInputBindings({
 		QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(Vertex))
@@ -36,36 +34,40 @@ void QDynamicMeshRenderComponent::onRebuildResource() {
 		layout(location = 1) out vec3 vWorldPosition;
 		layout(location = 2) out mat3 vTangentBasis;
 		void main(){
+			gl_Position = Transform.MVP * vec4(inPosition,1.0f);
 			vUV = inUV;
 			vWorldPosition = vec3(Transform.M * vec4(inPosition,1.0f));
-			vTangentBasis =  mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
-			gl_Position = Transform.MVP * vec4(inPosition,1.0f);
+			vTangentBasis = mat3(Transform.M) * mat3(inTangent, inBitangent, inNormal);
 		}
 	)");
-
-
+	auto materialDesc = mMaterialGroup->getMaterialDesc(0);
+	mPipeline->addMaterial(materialDesc);
 	mPipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
-		layout(location = 0) in vec2 vUV;
-		layout(location = 1) in vec3 vWorldPosition;
-		layout(location = 2) in mat3 vTangentBasis;
-		void main(){
-			BaseColor =  Material.Color;
-			%1
-			%2
-			%3	
-			%4;
-		})")
+			layout(location = 0) in vec2 vUV;
+			layout(location = 1) in vec3 vWorldPosition;
+			layout(location = 2) in mat3 vTangentBasis;
+			void main(){
+				%1
+				%2
+				%3
+				%4	
+				%5
+				%6
+				%7
+			})")
+		.arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
 		.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
-		.arg(getBasePass()->hasColorAttachment("Normal")   ? "Normal   = vec4(vTangentBasis[2],1);" : "")
-		.arg(getBasePass()->hasColorAttachment("Tangent")  ? "Tangent  = vec4(vTangentBasis[0],1);" : "")
-	#ifdef QENGINE_WITH_EDITOR	
-		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()))
-	#else
+		.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+		.arg(getBasePass()->hasColorAttachment("Specular") ? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
+		.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+		.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
+#ifdef QENGINE_WITH_EDITOR	
+		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
+#else
 		.arg("")
-	#endif
+#endif
 		.toLocal8Bit()
 	);
-	
 }
 
 void QDynamicMeshRenderComponent::onRebuildPipeline() {

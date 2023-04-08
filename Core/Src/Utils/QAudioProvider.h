@@ -38,6 +38,7 @@ public:
 	void setFramesPerBuffer(int size);
 	void play();
 
+	QUrl getSource() const { return mUrl; }
 	WindowFunction getWindowFunction() const { return mCtx.windowType; }
 	int getFramesPerBuffer() const { return mCtx.framesPerBuffer; }
 	QList<QAudioDevice> getAudioOutputDevices();

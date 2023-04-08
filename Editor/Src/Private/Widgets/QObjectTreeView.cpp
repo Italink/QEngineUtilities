@@ -160,6 +160,7 @@ bool QObjectTreeView::eventFilter(QObject* object, QEvent* event) {
 
 bool QObjectTreeView::IsIgnoreObject(QObject* inObject) {
 	return inObject == nullptr
+		|| inObject->metaObject() == &QObject::staticMetaObject
 		|| inObject->metaObject()->inherits(&QPropertyHandle::staticMetaObject)
 		|| inObject->metaObject()->inherits(&QEngineUndoEntry::staticMetaObject)
 		|| inObject->metaObject()->inherits(&QEngineUndoStack::staticMetaObject)

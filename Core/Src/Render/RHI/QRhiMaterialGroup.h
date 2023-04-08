@@ -40,6 +40,7 @@ struct QRhiMaterialDesc {
 class QRhiMaterialGroup : public QObject {
 	Q_OBJECT
 public:
+	QRhiMaterialGroup(QSharedPointer<QMaterial> inMaterial);
 	QRhiMaterialGroup(QList<QSharedPointer<QMaterial>> inMaterials);
 	QSharedPointer<QRhiMaterialDesc> getMaterialDesc(int inIndex);
 	const QList<QSharedPointer<QRhiMaterialDesc>>& getDescList() { return mDescList; }

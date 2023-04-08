@@ -52,7 +52,7 @@ private:
 protected:
 	QWindow* mWindow;
 	QVector3D mPosition = QVector3D(0, 0, 2);
-	QVector3D mRotation = QVector3D(0, M_PI / 2, 0);
+	QVector3D mRotation = QVector3D(0, 90 , 0);
 private:
 	QMatrix4x4 mViewMatrix;
 	QMatrix4x4 mClipMatrix;

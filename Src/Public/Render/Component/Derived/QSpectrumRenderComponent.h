@@ -6,6 +6,7 @@
 
 class QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
 	Q_OBJECT
+	Q_PROPERTY(QString Audio READ getAudio WRITE setAudio)
 	Q_PROPERTY(QAudioProvider::WindowFunction WindowFunction READ getWindowFunction WRITE setWindowFunction)
 	Q_PROPERTY(int FramesPerBuffer READ getFramesPerBuffer WRITE setFramesPerBuffer)
 	Q_PROPERTY(int BarCount READ getBarCount WRITE setBarCount)
@@ -19,7 +20,8 @@ class QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
 		Q_META_P_NUMBER_LIMITED(HighFreq, 0, 48000)
 	Q_META_END()
 
-	Q_BUILDER_BEGIN(QSpectrumRenderComponent)
+	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSpectrumRenderComponent)
+		Q_BUILDER_ATTRIBUTE(QString, Audio)
 		Q_BUILDER_ATTRIBUTE(QAudioProvider::WindowFunction,WindowFunction)
 		Q_BUILDER_ATTRIBUTE(int,FramesPerBuffer)
 		Q_BUILDER_ATTRIBUTE(int,BarCount)
@@ -28,6 +30,9 @@ class QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
 	Q_BUILDER_END()
 public:
 	QSpectrumRenderComponent();
+
+	QString getAudio();
+	void setAudio(QString inAudio);
 
 	QAudioProvider::WindowFunction getWindowFunction() { return mAudioProvider->getWindowFunction(); }
 	void setWindowFunction(QAudioProvider::WindowFunction inVar) { mAudioProvider->setWindowFunction(inVar); }

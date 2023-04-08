@@ -101,8 +101,10 @@ void QSkeletalMeshRenderComponent::onRebuildPipeline() {
 }
 
 void QSkeletalMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
-	batch->uploadStaticBuffer(mVertexBuffer.get(), mSkeletalMesh->mVertices.constData());
-	batch->uploadStaticBuffer(mIndexBuffer.get(), mSkeletalMesh->mIndices.constData());
+	if (mVertexBuffer) {
+		batch->uploadStaticBuffer(mVertexBuffer.get(), mSkeletalMesh->mVertices.constData());
+		batch->uploadStaticBuffer(mIndexBuffer.get(), mSkeletalMesh->mIndices.constData());
+	}
 }
 
 void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {

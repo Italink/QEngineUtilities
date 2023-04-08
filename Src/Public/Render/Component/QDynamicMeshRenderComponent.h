@@ -6,10 +6,11 @@
 
 class QDynamicMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
-	Q_PROPERTY(QSharedPointer<QRhiGraphicsPipelineBuilder> Pipeline READ getPipeline)
+	Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)
 public:
 	QDynamicMeshRenderComponent();
-	QSharedPointer<QRhiGraphicsPipelineBuilder> getPipeline() const { return mPipeline; }
+
+	QRhiMaterialGroup* getMaterialGroup() { return mMaterialGroup.get(); }
 protected:
 	struct Vertex {
 		QVector3D position;
@@ -29,6 +30,8 @@ protected:
 	QVector<Vertex> mVertices;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline;
+	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
+
 };
 
 #endif // QDynamicMeshRenderComponent_h__

@@ -3,6 +3,7 @@
 #include "FrameGraphView.h"
 #include "Render/IRenderPass.h"
 #include "QEngineEditorStyleManager.h"
+#include <QApplication>
 
 FrameGraphView::FrameGraphView() {
 	mOptions.mRenderGrid = true;
@@ -120,19 +121,27 @@ void FrameGraphView::Rebuild(QFrameGraph* frameGraph) {
 }
 
 void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, float rightMinWidth, float splitterLongAxisSize) {
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y));
+
+	ImGui::Begin("FrameComparer", NULL, 
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoCollapse
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_UnsavedDocument);
+
 	auto width = ImGui::GetWindowWidth();
 	float left = width * mCompSplitFactor;
 	float right = width - left - thickness;
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
-	ImGui::SameLine(ImGui::GetWindowWidth() - 150);
-	if (ImGui::Button("Exit Compare")) {
-		bShowFrameComparer = false;
-		mLastNodeIndex = -1;
-		mLastNodeSlotIndex = -1;
-		mCompLeft = nullptr;
-		mCompRight = nullptr;
-	}
+
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(thickness, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
@@ -154,6 +163,27 @@ void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, floa
 	ImGui::EndChild();
 	ImGui::PopStyleColor(4);
 	ImGui::PopStyleVar(2);
+	ImGui::End();
+
+	auto dpr = qApp->devicePixelRatio();
+	ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 60 * dpr , viewport->WorkSize.y - 40 * dpr));
+	ImGui::SetNextWindowSize(ImVec2(100 * dpr, 40 * dpr));
+	ImGui::Begin("ExitButton", NULL,
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoCollapse
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground);
+	if (ImGui::Button("Exit")) {
+		bShowFrameComparer = false;
+		mLastNodeIndex = -1;
+		mLastNodeSlotIndex = -1;
+		mCompLeft = nullptr;
+		mCompRight = nullptr;
+	}
+	ImGui::End();
 }
 
 void FrameGraphView::Show() {
@@ -161,8 +191,23 @@ void FrameGraphView::Show() {
 		ShowFrameComparer(4, 2, 10);
 	}
 	else {
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y));
+		ImGui::Begin("Frame Graph", NULL, 
+			ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoNav
+			| ImGuiWindowFlags_NoBackground
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_UnsavedDocument);
 		GraphEditor::Show(*this, mOptions, mViewState, true, &mFitOnScreen);
+		ImGui::End();
 	}
+
 }
 
 void FrameGraphView::RequestFitScreen() {

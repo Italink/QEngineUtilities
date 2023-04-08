@@ -17,7 +17,6 @@ QCodeEditor::QCodeEditor(QsciLexer* lexer, QWidget* parent)
 	mSearchEditor->setParent(this);
 	lexer->setAPIs(mApis);
 	setFrameStyle(QFrame::NoFrame);
-
 	setLexer(lexer);
 	setMargins(1);
 	setMarginsFont(QFont("������", 11));

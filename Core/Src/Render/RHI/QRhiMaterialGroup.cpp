@@ -6,6 +6,10 @@ QRhiMaterialGroup::QRhiMaterialGroup(QList<QSharedPointer<QMaterial>> inMaterial
 	}
 }
 
+QRhiMaterialGroup::QRhiMaterialGroup(QSharedPointer<QMaterial> inMaterial) {
+	addMaterial(inMaterial);
+}
+
 void QRhiMaterialGroup::addMaterial(QSharedPointer<QMaterial> inMaterial) {
 	QSharedPointer<QRhiMaterialDesc> desc = QSharedPointer<QRhiMaterialDesc>::create();
 	desc->uniformBlock = QSharedPointer<QRhiUniformBlock>::create();

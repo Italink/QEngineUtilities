@@ -29,7 +29,10 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
 	if (file.open(QIODevice::ReadOnly)) {
 		QByteArray fontData = file.readAll();
-		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(),23);
+		ImFontConfig config;
+		config.OversampleH = 5;
+		config.OversampleV = 5;
+		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(), 23, &config);
 		io.Fonts->Build();
 	}
 
@@ -59,52 +62,62 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 			if (QPropertyHandle* rotation = QPropertyHandle::Find(camera, "Rotation"))
 				rotation->RefreshBinder();
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
+			auto dpr = qApp->devicePixelRatio();
+			ImVec2 ButtonSize = ImVec2(20 * dpr, 20 * dpr);
 			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y));
-			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 60));
+			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 60 * dpr));
 			ImGui::Begin("ViewportBar", 0, mViewportBarFlags);
 			ImGui::SameLine();
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
-			if (ImGui::IconButton(getImageId("polygon"), ImVec2(30, 30), "Polygon", bUseLineMode ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			if (ImGui::IconButton(getImageId("polygon"), ButtonSize, "Polygon", bUseLineMode ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				bUseLineMode = !bUseLineMode;
 			}
 			ImGui::SameLine();
 			QString speed =  QString::number(camera->getMoveSpeed(), 'f', 2);
-			if (ImGui::IconButton(getImageId("camera"), ImVec2(30, 30), speed.toLocal8Bit().data(), ImVec4(1, 1, 1, 1), 5)) {
+			if (ImGui::IconButton(getImageId("camera"), ButtonSize, speed.toLocal8Bit().data(), ImVec4(1, 1, 1, 1), 5)) {
 				ImGui::OpenPopup("Move Speed Slider");
-				ImGui::SetNextWindowPos(ImVec2(155,60));
+				ImGui::SetNextWindowPos(ImVec2(120 * dpr, 40 * dpr));
 			}
+			auto it = ImGui::GetWindowSize();
 			if (ImGui::BeginPopup("Move Speed Slider")) {
-				ImGui::VSliderFloat("##", ImVec2(40, 100), &camera->getMoveSpeedRef(), 0.01, 2);
+				ImGui::VSliderFloat("##", ImVec2(40 * dpr, 100 * dpr), &camera->getMoveSpeedRef(), 0.01, 2 , "%.2f");
 				ImGui::EndPopup();
 			}
-			ImGui::RenderFrame(ImVec2(viewport->WorkSize.x - 465, viewport->WorkPos.y + 8), ImVec2(viewport->WorkSize.x - 280, viewport->WorkPos.y + 48), ImGui::GetColorU32(ImGuiCol_Button), true, GImGui->Style.FrameRounding);
+			auto ij = ImGui::GetWindowSize();
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.f);
-			ImGui::SameLine(viewport->WorkSize.x - 460); 
-			if (ImGui::IconButton(getImageId("select"), ImVec2(30, 30), "", currComponent == nullptr ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			int right = 350 * dpr;
+			int offset = 30 * dpr;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("select"), ButtonSize, "", currComponent == nullptr ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				mRenderer->setCurrentObject(nullptr);
 			}
-			ImGui::SameLine(viewport->WorkSize.x - 415); 
-			if (ImGui::IconButton(getImageId("translate"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::TRANSLATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			right -= offset;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("translate"), ButtonSize, "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::TRANSLATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				mOperation = ImGuizmo::OPERATION::TRANSLATE;
 			}
-			ImGui::SameLine(viewport->WorkSize.x - 370); 
-			if (ImGui::IconButton(getImageId("rotate"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::ROTATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			right -= offset;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("rotate"), ButtonSize, "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::ROTATE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				mOperation = ImGuizmo::OPERATION::ROTATE;
 			}
-			ImGui::SameLine(viewport->WorkSize.x - 325); 
-			if (ImGui::IconButton(getImageId("scale"), ImVec2(30, 30), "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::SCALE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			right -= offset;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("scale"), ButtonSize, "", currComponent != nullptr && mOperation == ImGuizmo::OPERATION::SCALE ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				mOperation = ImGuizmo::OPERATION::SCALE;
 			}
 			ImGui::PopStyleVar();
 			ImGui::PopStyleColor();
-			ImGui::SameLine(viewport->WorkSize.x - 270);
-			if (ImGui::IconButton(getImageId("graph"), ImVec2(30, 30), "FrameGraph", bShowFrameGraph ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			right -= offset;
+			right -= 5 * dpr;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("graph"), ButtonSize, "FrameGraph", bShowFrameGraph ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				bShowFrameGraph = !bShowFrameGraph;
 			}
-
-			ImGui::SameLine(viewport->WorkSize.x - 100);
-			if (ImGui::IconButton(getImageId("stats"), ImVec2(30, 30), "Stats", bShowStats ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
+			right -= 150 * dpr;
+			ImGui::SameLine(viewport->WorkSize.x - right);
+			if (ImGui::IconButton(getImageId("stats"), ButtonSize, "Stats", bShowStats ? mActiveColor : ImVec4(1, 1, 1, 1), 5)) {
 				bShowStats = !bShowStats;
 			}
 			ImGui::PopStyleVar();
@@ -114,16 +127,12 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 			else
 				QRhiGraphicsPipelineBuilder::clearPolygonModeOverride();
 			if (bShowFrameGraph) {
-				ImGui::SetNextWindowPos(ImVec2(0, 50));
-				ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 50));
-				ImGui::Begin("Frame Graph", NULL, mViewportBarFlags);
 				mFrameGraphView->Show();
-				ImGui::End();
 				mOutputTexture = mFrameGraphView->GetCurrentTexture();
 				mRenderer->setOverrideOutput(mOutputTexture);
 			}
 			if (bShowStats) {
-				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 250, viewport->WorkSize.y - 100));
+				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 180 * dpr, viewport->WorkSize.y - 100*dpr));
 				ImGui::SetNextWindowSize(ImVec2(200, 200));
 				ImGui::Begin("Stats", 0, mViewportBarFlags);
 				ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", mRenderer->getRhiWindow()->getFps());

@@ -11,7 +11,7 @@ if (POLICY CMP0042)
 endif ()
 
 option (BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option (BUILD_TESTS "Build tests" ON)
+option (BUILD_TESTS "Build tests" OFF)
 
 option (ENABLE_OPENMP "Use OpenMP for multithreading" OFF)
 option (ENABLE_THREADS "Use pthread for multithreading" OFF)
