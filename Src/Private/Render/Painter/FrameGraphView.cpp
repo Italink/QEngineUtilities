@@ -152,7 +152,7 @@ void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, floa
 	ImRect bb;
 	bb.Min = window->DC.CursorPos + (ImVec2(left - 1, 0));
 	bb.Max = bb.Min + ImGui::CalcItemSize(ImVec2(thickness + 1, splitterLongAxisSize), 0.0f, 0.0f);
-	ImGui::SplitterBehavior(bb, id, ImGuiAxis_X, &left, &right, leftMinWidth, rightMinWidth, 5.0f);
+	ImGui::SplitterBehavior(bb, id, ImGuiAxis_X, &left, &right, leftMinWidth, rightMinWidth, 8.0f);
 	mCompSplitFactor = left / width;
 	ImGui::BeginChild("Left", ImVec2(left , -1), true);
 	ImGui::Image(mCompLeft, ImVec2(ImGui::GetWindowWidth() , ImGui::GetWindowHeight()), ImVec2(0, 0), ImVec2(1 * mCompSplitFactor, 1));
@@ -187,8 +187,9 @@ void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, floa
 }
 
 void FrameGraphView::Show() {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (bShowFrameComparer) {
-		ShowFrameComparer(4, 2, 10);
+		ShowFrameComparer(1, 2, 2);
 	}
 	else {
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -207,7 +208,7 @@ void FrameGraphView::Show() {
 		GraphEditor::Show(*this, mOptions, mViewState, true, &mFitOnScreen);
 		ImGui::End();
 	}
-
+	ImGui::PopStyleVar();
 }
 
 void FrameGraphView::RequestFitScreen() {
