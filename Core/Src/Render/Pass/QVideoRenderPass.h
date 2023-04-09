@@ -32,7 +32,7 @@ private:
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;
 
 	QUrl mVideoPath;
-	Qt::AspectRatioMode mAspectRatioMode = Qt::KeepAspectRatio;
+	Qt::AspectRatioMode mAspectRatioMode = Qt::AspectRatioMode::KeepAspectRatioByExpanding;
 	QScopedPointer<QMediaPlayer> mPlayer;
 	QScopedPointer<QVideoSink> mSink;
 	QVideoFrame mCurrentFrame;

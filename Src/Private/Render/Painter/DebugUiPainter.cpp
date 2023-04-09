@@ -248,7 +248,7 @@ void QDebugUIPainter::compile() {
 	mOutlinePipeline->setShaderStages({
 		{ QRhiShaderStage::Vertex, vs },
 		{ QRhiShaderStage::Fragment, fs }
-		});
+	});
 	QRhiVertexInputLayout inputLayout;
 
 	mOutlineBindings.reset(mRhi->newShaderResourceBindings());
@@ -256,7 +256,7 @@ void QDebugUIPainter::compile() {
 	mOutlineBindings->setBindings({
 		QRhiShaderResourceBinding::sampledTexture(0,QRhiShaderResourceBinding::FragmentStage,mDebugIdTexture,mOutlineSampler.get()),
 		QRhiShaderResourceBinding::uniformBuffer(1,QRhiShaderResourceBinding::FragmentStage,mUniformBuffer.get())
-		});
+	});
 
 	mOutlineBindings->create();
 	mOutlinePipeline->setVertexInputLayout(inputLayout);

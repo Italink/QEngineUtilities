@@ -14,6 +14,7 @@ QAudioProvider::QAudioProvider()
 	: mDecoder(new QAudioDecoder)
 {
 	mAudioBuffer.setBuffer(&mAudioData);
+	setWindowFunction(HannWindow);
 	setAudioDevice(QMediaDevices::defaultAudioOutput());
 	setFramesPerBuffer(12);
 }
@@ -83,6 +84,7 @@ void QAudioProvider::rebuildAudioData() {
 		mAudioBuffer.write(frame.constData<char>(), frame.byteCount());		//向IO设备中写入音频数据
 	});
 	mDecoder->start();				//开始解码音频
+	qDebug() << mDecoder->errorString();
 	loop.exec();					//等待事件循环结束
 	mAudioBuffer.close();			//关闭IO设备
 	mDesiredCtx.pos = 0;
