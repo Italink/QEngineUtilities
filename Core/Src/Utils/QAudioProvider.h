@@ -56,8 +56,8 @@ private:
 	QUrl mUrl;
 	QByteArray mAudioData;
 	QBuffer mAudioBuffer;
-	QScopedPointer<QAudioDecoder> mDecoder;			//音频解码器
-	QScopedPointer<QAudioSink> mSink;				//音频输出设备
+	QSharedPointer<QAudioDecoder> mDecoder;			//音频解码器
+	QSharedPointer<QAudioSink> mSink;				//音频输出设备
 
 	QVector<double> mWindow;
 	QSharedPointer<fftw_plan_s> mFftPlan;

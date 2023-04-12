@@ -10,7 +10,7 @@ class QSkyboxRenderComponent;
 
 #define Q_EXPAND_INPUT_TEXTURE_GETTER(Name) QRhiTexture* getTextureIn_##Name(){ return getInputTexture(#Name); }
 #define Q_EXPAND_INPUT_TEXTURE_SETTER(Name) __Builder& setTextureIn_##Name(const QString& inPassName, int inSlot){ mObject->registerInputTextureLink(#Name,inPassName,inSlot); return *this; }
-#define Q_EXPAND_OUTPUR_TEXTURE_REGISTER(Name) void registerTextureOut_##Name(QRhiTexture* inTexture){ registerOutputTexture(Out::##Name,#Name,inTexture); }
+#define Q_EXPAND_OUTPUR_TEXTURE_REGISTER(Name) void registerTextureOut_##Name(QRhiTexture* inTexture){ registerOutputTexture(Out::Name,#Name,inTexture); }
 #define Q_EXPAND_OUTPUR_TEXTURE_SLOT(Name) Name,
 
 #define Q_BUILDER_BEGIN_RENDER_PASS(ClassType,...) \
