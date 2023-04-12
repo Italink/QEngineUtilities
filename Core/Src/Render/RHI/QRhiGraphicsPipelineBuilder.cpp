@@ -263,9 +263,7 @@ void QRhiGraphicsPipelineBuilder::update(QRhiResourceUpdateBatch* batch) {
 	for (const auto& stage : mStageInfos) {
 		for (const auto& textureInfo : stage.textureDescs) {
 			if (textureInfo->sigUpdate.receive()) {
-				if (textureInfo->UploadDesc.entryCount() > 0) {
-					batch->uploadTexture(textureInfo->Texture.get(), textureInfo->UploadDesc);
-				}
+				batch->uploadTexture(textureInfo->Texture.get(), textureInfo->UploadDesc);
 			}
 		}
 		for (const auto& uniformBlock : stage.uniformBlocks) {

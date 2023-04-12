@@ -113,10 +113,12 @@ QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code) {
 	if (backend() == QRhi::Vulkan || backend() == QRhi::OpenGLES2) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
 	}
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 	else if (backend() == QRhi::D3D11|| backend() == QRhi::D3D12) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
 		code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
 	}
+#endif
 	else if (backend() == QRhi::Metal) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
 	}
