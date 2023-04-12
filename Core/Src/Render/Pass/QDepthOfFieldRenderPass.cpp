@@ -92,7 +92,7 @@ void QDepthOfFieldRenderPass::compile() {
 			vec4 focusColor     = texture(uFocus,   vUV);
 			vec4 LoseFocusColor = texture(uLoseFocus, vUV);
 			vec4 focusPoint		= texture(uPosition, params.screenFocusPoint);
-			float blur			= smoothstep(params.near, params.far, length(position - focusPoint));
+			float blur			= smoothstep(params.near, params.far, length(position.xyz - focusPoint.xyz));
 			outFragColor		= mix(focusColor, LoseFocusColor, blur);
 		}
 		)");
