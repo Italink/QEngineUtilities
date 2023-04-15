@@ -50,21 +50,21 @@ QPropertyHandle* QSequentialPropertyHandleImpl::CreateChildHandle(const QString&
 		mMetaSequence.valueMetaType(),
 		mHandle->GetSubPath(inSubName),
 		[this, index]() {
-		QVariant varList = mHandle->GetValue();
-		QSequentialIterable iterable = varList.value<QSequentialIterable>();
-		return iterable.at(index);
+			QVariant varList = mHandle->GetValue();
+			QSequentialIterable iterable = varList.value<QSequentialIterable>();
+			return iterable.at(index);
 		},
 		[this, index](QVariant var) {
-		QVariant varList = mHandle->GetValue();
-		QSequentialIterable iterable = varList.value<QSequentialIterable>();
-		const QMetaSequence metaSequence = iterable.metaContainer();
-		void* containterPtr = const_cast<void*>(iterable.constIterable());
-		QtPrivate::QVariantTypeCoercer coercer;
-		const void* dataPtr = coercer.coerce(var, var.metaType());
-		metaSequence.setValueAtIndex(containterPtr, index, dataPtr);
-		mHandle->SetValue(varList);
-	},
-	mHandle->GetMetaData()
+			QVariant varList = mHandle->GetValue();
+			QSequentialIterable iterable = varList.value<QSequentialIterable>();
+			const QMetaSequence metaSequence = iterable.metaContainer();
+			void* containterPtr = const_cast<void*>(iterable.constIterable());
+			QtPrivate::QVariantTypeCoercer coercer;
+			const void* dataPtr = coercer.coerce(var, var.metaType());
+			metaSequence.setValueAtIndex(containterPtr, index, dataPtr);
+			mHandle->SetValue(varList);
+		},
+		mHandle->GetMetaData()
 	);
 	handle->SetAttachButtonWidgetCallback([this,index](QHBoxLayout* Layout) {
 		int count = ItemCount();

@@ -13,14 +13,21 @@ struct UniformParamDescBase {
 	virtual int dataByteSize() = 0;
 	virtual int dataAlignSize() = 0;
 	virtual void* dataPtr() { return mValue.data(); }
-	virtual void setValue(QVariant inValue) {mValue = inValue;}
+	virtual void setValue(QVariant inValue) { 
+		if (inValue != mValue) {
+			mValue = inValue;
+			sigUpdate.request();
+		}
+	}
 	virtual QString valueName() { return mName; }
 	QString mName;
 	QVariant mValue;
 	uint32_t mOffsetInByte;
 	uint32_t mSizeInByte;
 	uint32_t mSizeInByteAligned;
-	QRhiEx::Signal sigUpdate;
+	bool bVisible;
+	QRhiEx::Signal sigUpdate; 
+	QRhiEx::Signal sigRecreate;
 };
 
 template<typename _Ty>
@@ -33,9 +40,10 @@ class QRhiUniformBlock : public QObject{
 public:
 	QRhiUniformBlock(QObject* inParent = nullptr);
 	template<typename _Ty>
-	QRhiUniformBlock* addParam(const QString& name, _Ty value) {
+	QRhiUniformBlock* addParam(const QString& name, _Ty value,bool visible = true) {
 		QSharedPointer<UniformParamDesc<_Ty>> paramDesc = QSharedPointer<UniformParamDesc<_Ty>>::create();
 		paramDesc->mName = name;
+		paramDesc->bVisible = visible;
 		paramDesc->setValue(QVariant::fromValue<>(value));
 		mParamList << paramDesc;
 		mParamNameMap[name] = paramDesc;
@@ -46,6 +54,7 @@ public:
 	void setParamValue(const QString& name, _Ty value) {
 		setParamValue(name, QVariant::fromValue(value));
 	}
+
 	void setParamValue(const QString& mName, QVariant mValue);
 	bool renameParma(const QString& src, const QString& dst);
 	void removeParam(const QString& mName);
@@ -55,6 +64,7 @@ public:
 	bool isEmpty()const { return mParamList.isEmpty(); }
 	const QList<QSharedPointer<UniformParamDescBase>>& getParamList() const { return mParamList; }
 	QSharedPointer<UniformParamDescBase> getParamDesc(const QString& inName);
+	QByteArray createDefineCode(int inBindingOffset);
 protected:
 	QString getVaildName(QString mName);
 	void updateLayout();
@@ -128,8 +138,13 @@ template<typename _Ty>
 struct UniformParamDesc<QVector<_Ty>> : public UniformParamDescBase {
 	const char* typeName() override { return mInnerDesc.typeName(); }
 	void setValue(QVariant inValue) override {
-		mVector = inValue.value<QVector<_Ty>>();
+		QVector<_Ty> vector = inValue.value<QVector<_Ty>>();
+		if (mVector.size() != vector.size()) {
+			sigRecreate.request();
+		}
+		mVector = vector;
 		mValue = inValue;
+		sigUpdate.request();
 	}
 	void* dataPtr() override { return mVector.data(); }
 	int dataByteSize() override { return mVector.size() * mInnerDesc.dataByteSize(); }

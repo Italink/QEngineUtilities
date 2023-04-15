@@ -2,26 +2,25 @@
 #define QParticlesRenderComponent_h__
 
 #include "Render/ISceneRenderComponent.h"
-#include "Asset/QParticleSystem.h"
+#include "Asset/QParticleEmitter.h"
 #include "Type/QColor4D.h"
 
 class QParticlesRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
-		Q_PROPERTY(QColor4D Color READ getColor WRITE setupColor)
-		Q_PROPERTY(bool FacingCamera READ getFacingCamera WRITE setupFacingCamera)
+		Q_PROPERTY(IParticleEmitter* Emitter READ getEmitter WRITE setEmitter)
+		Q_PROPERTY(bool FacingCamera READ getFacingCamera WRITE setFacingCamera)
 
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QParticlesRenderComponent)
-		Q_BUILDER_ATTRIBUTE(QColor4D, Color)
+		Q_BUILDER_ATTRIBUTE(IParticleEmitter*, Emitter)
 		Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
 	Q_BUILDER_END()
 public:
 	QParticlesRenderComponent();
-	QParticlesRenderComponent* setupType(QParticleSystem::Type inType);
-	QParticlesRenderComponent* setupColor(QColor4D val);
-	QParticlesRenderComponent* setupFacingCamera(bool val);
 
-	QParticleSystem::Type getType();
-	QColor4D getColor() const;
+	void setEmitter(IParticleEmitter* inEmitter);
+	IParticleEmitter* getEmitter() const { return mEmitter.get(); }
+
+	void setFacingCamera(bool val);
 	bool getFacingCamera() const;
 protected:
 	void onRebuildResource() override;
@@ -32,7 +31,7 @@ protected:
 	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
 	bool isVaild() override;
 protected:
-	QSharedPointer<QParticleSystem> mParticleSystem;
+	QSharedPointer<IParticleEmitter> mEmitter;
 	QScopedPointer<QRhiBuffer> mIndirectDrawBuffer;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mUniformBuffer;
@@ -46,9 +45,10 @@ protected:
 		quint32 firstInstance = 0;
 	};
 	struct UniformBlock {
-		QGenericMatrix<4, 4, float> MV;
+		QGenericMatrix<4, 4, float> M;
+		QGenericMatrix<4, 4, float> V;
 		QGenericMatrix<4, 4, float> P;
-		QColor4D Color = QColor4D(0.2f,1.0f,1.8f);
+		QColor4D Color = QColor4D(1.0f,1.0f,1.0f);
 	}mUniform;
 	bool bFacingCamera = true;
 };

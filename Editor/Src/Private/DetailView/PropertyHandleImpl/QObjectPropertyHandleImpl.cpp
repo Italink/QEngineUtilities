@@ -38,6 +38,9 @@ void QObjectPropertyHandleImpl::RefreshObjectPtr() {
 	if (mObjectHolder.isValid()) {
 		if (mMetaObject->inherits(&QObject::staticMetaObject)) {
 			QObject* objectPtr = mObjectHolder.value<QObject*>();
+			if (objectPtr) {
+				mMetaObject = objectPtr->metaObject();
+			}
 			mObjectPtr = objectPtr;
 			mOwnerObject = objectPtr;
 		}

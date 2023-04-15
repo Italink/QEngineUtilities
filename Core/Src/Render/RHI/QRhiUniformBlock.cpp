@@ -71,6 +71,7 @@ void QRhiUniformBlock::create(QRhiEx* inRhi) {
 		mUniformBlock.reset(inRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, mDataByteSize));
 		mUniformBlock->create();
 		for (auto& dataParam : mParamList) {
+			dataParam->sigRecreate.receive();
 			dataParam->sigUpdate.request();
 		}
 	}
@@ -78,6 +79,10 @@ void QRhiUniformBlock::create(QRhiEx* inRhi) {
 
 void QRhiUniformBlock::updateResource(QRhiResourceUpdateBatch* batch) {
 	for (auto& dataParam : mParamList) {
+		if (dataParam->sigRecreate.receive()) {
+			sigRecreateBuffer.request();
+			return;
+		}
 		if (dataParam->sigUpdate.receive()) {
 			batch->updateDynamicBuffer(mUniformBlock.get(), dataParam->mOffsetInByte, dataParam->mSizeInByte, dataParam->dataPtr());
 		}
@@ -86,4 +91,15 @@ void QRhiUniformBlock::updateResource(QRhiResourceUpdateBatch* batch) {
 
 QSharedPointer<UniformParamDescBase> QRhiUniformBlock::getParamDesc(const QString& inName) {
 	return mParamNameMap.value(inName);
+}
+
+QByteArray QRhiUniformBlock::createDefineCode(int inBindingOffset) {
+	if (mParamList.isEmpty())
+		return "";
+	QString defineCode = QString("layout(binding =  %1) uniform %2Block{\n").arg(inBindingOffset).arg(objectName());
+	for (auto& param : mParamList) {
+		defineCode += QString("    %1 %2;\n").arg(param->typeName()).arg(param->valueName());
+	}
+	defineCode += QString::asprintf("}%s;\n", objectName().toLocal8Bit().data());
+	return defineCode.toLocal8Bit();
 }

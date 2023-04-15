@@ -7,6 +7,8 @@ void DetailCustomization_QRhiUniformBlock::CustomizeDetails(const IDetailLayoutB
 	QRhiUniformBlock* uniformBlock = (QRhiUniformBlock*)Context.ObjectPtr;
 	QMetaData* metaData = QDetailViewManager::Instance()->GetClassMetaData(Context);
 	for (const QSharedPointer<UniformParamDescBase>& param : uniformBlock->getParamList()) {
+		if(!param->bVisible)
+			continue;
 		QPropertyHandle* handler = QPropertyHandle::FindOrCreate(
 			uniformBlock,
 			param->mValue.metaType(),
@@ -15,8 +17,7 @@ void DetailCustomization_QRhiUniformBlock::CustomizeDetails(const IDetailLayoutB
 				return weakParam.lock()->mValue;
 			},
 			[weakParam = param.toWeakRef()](QVariant var) {
-				weakParam.lock()->mValue = var;
-				weakParam.lock()->sigUpdate.request();
+				weakParam.lock()->setValue(var);
 			}
 			, metaData->mPropertiesMetaData.value(param->mName)
 		);

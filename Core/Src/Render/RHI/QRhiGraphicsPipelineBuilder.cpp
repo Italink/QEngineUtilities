@@ -328,11 +328,7 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 			if (!uniformBlock->isEmpty()) {
 				uniformBlock->create(inRhi);
 				bindings << QRhiShaderResourceBinding::uniformBuffer(bindingOffset, (QRhiShaderResourceBinding::StageFlag)(1 << (int)stage.first), uniformBlock->getUniformBlock());
-				uniformDefineCode += QString("layout(binding =  %1) uniform %2Block{\n").arg(bindingOffset).arg(uniformBlock->objectName());
-				for (auto& param : uniformBlock->getParamList()) {
-					uniformDefineCode += QString("    %1 %2;\n").arg(param->typeName()).arg(param->valueName());
-				}
-				uniformDefineCode += QString::asprintf("}%s;\n", uniformBlock->objectName().toLocal8Bit().data());
+				uniformDefineCode += uniformBlock->createDefineCode(bindingOffset);
 				bindingOffset++;
 			}
 		}

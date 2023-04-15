@@ -6,7 +6,6 @@
 #include "private/qvulkandefaultinstance_p.h"
 
 static float ParticleShape[] = {
-	//position(xy)	
 	 0.01f,   0.01f,
 	-0.01f,   0.01f,
 	 0.01f,  -0.01f,
@@ -14,37 +13,17 @@ static float ParticleShape[] = {
 };
 
 QParticlesRenderComponent::QParticlesRenderComponent() {
-	setupType(QParticleSystem::Type::GPU);
 }
 
-QParticlesRenderComponent* QParticlesRenderComponent::setupColor(QColor4D val) {
-	mUniform.Color = val;
-	return this;
-}
-
-QParticlesRenderComponent* QParticlesRenderComponent::setupFacingCamera(bool val) {
-	bFacingCamera = val;
-	this->sigonRebuildPipeline.request();
-	return this;
-}
-
-QParticlesRenderComponent* QParticlesRenderComponent::setupType(QParticleSystem::Type inType) {
-	if (inType == QParticleSystem::Type::CPU){
-	}
-	else {
-		mParticleSystem.reset(new QGPUParticleSystem);
-	}
+void QParticlesRenderComponent::setEmitter(IParticleEmitter* inEmitter) {
+	mEmitter.reset(inEmitter);
 	sigonRebuildResource.request();
 	sigonRebuildPipeline.request();
-	return this;
 }
 
-QParticleSystem::Type QParticlesRenderComponent::getType() {
-	return mParticleSystem->type();
-}
-
-QColor4D QParticlesRenderComponent::getColor() const {
-	return mUniform.Color;
+void QParticlesRenderComponent::setFacingCamera(bool val) {
+	bFacingCamera = val;
+	sigonRebuildPipeline.request();
 }
 
 bool QParticlesRenderComponent::getFacingCamera() const {
@@ -52,7 +31,7 @@ bool QParticlesRenderComponent::getFacingCamera() const {
 }
 
 void QParticlesRenderComponent::onRebuildResource() {
-	mParticleSystem->onInit(mRhi);
+	mEmitter->setupRhi(mRhi);
 
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Static, QRhiBuffer::UsageFlag::VertexBuffer, sizeof(ParticleShape)));
 	mVertexBuffer->create();
@@ -60,7 +39,7 @@ void QParticlesRenderComponent::onRebuildResource() {
 	mUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UsageFlag::UniformBuffer, sizeof(UniformBlock)));
 	mUniformBuffer->create();
 
-	if (mParticleSystem && mParticleSystem->type() == QParticleSystem::Type::GPU) {
+	if (mEmitter && mEmitter->metaObject()->inherits(&QGpuParticleEmitter::staticMetaObject)) {
 		mIndirectDrawBuffer.reset(mRhi->newVkBuffer(QRhiBuffer::Static, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, sizeof(IndirectDrawBuffer)));
 		mIndirectDrawBuffer->create();
 		mIndirectDrawBuffer->setName("IndirectDrawBuffer");
@@ -74,20 +53,21 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	inputLayout.setBindings({
 		QRhiVertexInputBinding(sizeof(float) * 2),
 		QRhiVertexInputBinding(sizeof(float) * 16, QRhiVertexInputBinding::Classification::PerInstance),
-	});
+		});
 	inputLayout.setAttributes({
-		QRhiVertexInputAttribute( 0, 0, QRhiVertexInputAttribute::Float2, 0 ),
-		QRhiVertexInputAttribute( 1, 1, QRhiVertexInputAttribute::Float4, 0,0 ),
-		QRhiVertexInputAttribute( 1, 2, QRhiVertexInputAttribute::Float4, 4 * sizeof(float),1 ),
-		QRhiVertexInputAttribute( 1, 3, QRhiVertexInputAttribute::Float4, 8 * sizeof(float),2 ),
-		QRhiVertexInputAttribute( 1, 4, QRhiVertexInputAttribute::Float4, 12 * sizeof(float),3 ),
-	});
+		QRhiVertexInputAttribute(0, 0, QRhiVertexInputAttribute::Float2, 0),
+		QRhiVertexInputAttribute(1, 1, QRhiVertexInputAttribute::Float4, 0,0),
+		QRhiVertexInputAttribute(1, 2, QRhiVertexInputAttribute::Float4, 4 * sizeof(float),1),
+		QRhiVertexInputAttribute(1, 3, QRhiVertexInputAttribute::Float4, 8 * sizeof(float),2),
+		QRhiVertexInputAttribute(1, 4, QRhiVertexInputAttribute::Float4, 12 * sizeof(float),3),
+		});
 	QString vsCode = R"(#version 440
 		layout(location = 0) in vec2 inPosition;
 		layout(location = 1) in mat4 inInstTransform;
 		layout(location = 0) out vec4 vColor;
 		layout(std140,binding = 0) uniform UniformBuffer{
-			mat4 MV;
+			mat4 M;
+			mat4 V;
 			mat4 P;
 			vec4 Color;
 		}UBO;
@@ -100,17 +80,17 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	if (bFacingCamera) {
 		vsCode = vsCode.arg(R"(
 			void main(){
-				mat4 Transform    = UBO.MV * inInstTransform;
-				mat3 CorrRotation = inverse(mat3(Transform));
+				mat4 Transform    = UBO.M * inInstTransform;
+				mat3 CorrRotation = inverse(mat3(UBO.V));
 				vec3 CorrPos      = CorrRotation * vec3(inPosition,0.0f);
-				gl_Position = UBO.P * Transform * vec4(CorrPos, 1.0); 
+				gl_Position = UBO.P * UBO.V * Transform * vec4(CorrPos, 1.0); 
 				vColor = UBO.Color;
 			})");
 	}
 	else {
 		vsCode = vsCode.arg(R"(
 			void main(){
-				mat4 Transform = UBO.MV * inInstTransform;
+				mat4 Transform = UBO.V * UBO.M * inInstTransform;
 				gl_Position =  UBO.P * Transform * vec4(inPosition,0.0f,1.0f);
 				vColor = UBO.Color;
 			})");
@@ -145,11 +125,10 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	mPipeline->setDepthTest(true);
 	mPipeline->setDepthWrite(true);
 	mPipeline->setSampleCount(getBasePass()->getSampleCount());
-
 	mPipeline->setShaderStages({
 		{ QRhiShaderStage::Vertex, vs },
 		{ QRhiShaderStage::Fragment, fs }
-		});
+	});
 	mBindings.reset(mRhi->newShaderResourceBindings());
 	mBindings->setBindings({
 		 QRhiShaderResourceBinding::uniformBuffer(0, QRhiShaderResourceBinding::VertexStage, mUniformBuffer.get())
@@ -160,21 +139,20 @@ void QParticlesRenderComponent::onRebuildPipeline() {
 	mPipeline->create();
 }
 
-void QParticlesRenderComponent::onPreUpdate(QRhiCommandBuffer* cmdBuffer){
-	 mParticleSystem->onTick(cmdBuffer);
-	 if (mParticleSystem->type() == QParticleSystem::Type::GPU) {
-		 QGPUParticleSystem* gpuSystem = static_cast<QGPUParticleSystem*>(mParticleSystem.get());
-		 QRhiVulkanCommandBufferNativeHandles* vkCmdBufferHandle = (QRhiVulkanCommandBufferNativeHandles*)cmdBuffer->nativeHandles();
-		 QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
-		 VkBuffer indirectDispatchBuffer = *(VkBuffer*)gpuSystem->getCurrentIndirectBuffer()->nativeBuffer().objects[0];
-		 VkBuffer indirectDrawBuffer = *(VkBuffer*)mIndirectDrawBuffer->nativeBuffer().objects[0];
-		 QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
-		 VkBufferCopy bufferCopy;
-		 bufferCopy.srcOffset = 0;
-		 bufferCopy.dstOffset = offsetof(IndirectDrawBuffer, instanceCount);
-		 bufferCopy.size = sizeof(int);
-		 vkInstance->deviceFunctions(vkHandles->dev)->vkCmdCopyBuffer(vkCmdBufferHandle->commandBuffer, indirectDispatchBuffer, indirectDrawBuffer, 1, &bufferCopy);
-	 }
+void QParticlesRenderComponent::onPreUpdate(QRhiCommandBuffer* cmdBuffer) {
+	mEmitter->onTick(cmdBuffer);
+	if (auto gpuEmitter = qobject_cast<QGpuParticleEmitter*>(mEmitter)) {
+		QRhiVulkanCommandBufferNativeHandles* vkCmdBufferHandle = (QRhiVulkanCommandBufferNativeHandles*)cmdBuffer->nativeHandles();
+		QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
+		VkBuffer indirectDispatchBuffer = *(VkBuffer*)gpuEmitter->getCurrentIndirectDispatchBuffer()->nativeBuffer().objects[0];
+		VkBuffer indirectDrawBuffer = *(VkBuffer*)mIndirectDrawBuffer->nativeBuffer().objects[0];
+		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
+		VkBufferCopy bufferCopy;
+		bufferCopy.srcOffset = 0;
+		bufferCopy.dstOffset = offsetof(IndirectDrawBuffer, instanceCount);
+		bufferCopy.size = sizeof(int);
+		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdCopyBuffer(vkCmdBufferHandle->commandBuffer, indirectDispatchBuffer, indirectDrawBuffer, 1, &bufferCopy);
+	}
 }
 
 void QParticlesRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
@@ -190,19 +168,31 @@ void QParticlesRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 }
 
 void QParticlesRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
-	mUniform.MV = (getMatrixView() * calculateMatrixModel()).toGenericMatrix<4, 4>();
+	mUniform.M = calculateMatrixModel().toGenericMatrix<4, 4>();
+	mUniform.V = getMatrixView().toGenericMatrix<4, 4>();
 	mUniform.P = getMatrixClipWithCorr().toGenericMatrix<4, 4>();
 	batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(UniformBlock), &mUniform);
 }
 
 void QParticlesRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) {
-	if (mParticleSystem->type() == QParticleSystem::Type::GPU) {
+	if (auto cpuEmitter = qobject_cast<QCpuParticleEmitter*>(mEmitter)) {
 		cmdBuffer->setGraphicsPipeline(mPipeline.get());
 		cmdBuffer->setViewport(viewport);
 		cmdBuffer->setShaderResources();
 		QRhiCommandBuffer::VertexInput VertexInputs[] = {
 			{mVertexBuffer.get(), 0},
-			{mParticleSystem->getTransformBuffer(),0 }
+			{mEmitter->getTransformBuffer(),0 }
+		};
+		cmdBuffer->setVertexInput(0, 2, VertexInputs);
+		cmdBuffer->draw(4, cpuEmitter->getNumOfParticle());
+	}
+	else{
+		cmdBuffer->setGraphicsPipeline(mPipeline.get());
+		cmdBuffer->setViewport(viewport);
+		cmdBuffer->setShaderResources();
+		QRhiCommandBuffer::VertexInput VertexInputs[] = {
+			{mVertexBuffer.get(), 0},
+			{mEmitter->getTransformBuffer(),0 }
 		};
 		cmdBuffer->setVertexInput(0, 2, VertexInputs);
 		QRhiVulkanCommandBufferNativeHandles* vkCmdBufferHandle = (QRhiVulkanCommandBufferNativeHandles*)cmdBuffer->nativeHandles();
@@ -212,20 +202,8 @@ void QParticlesRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRh
 		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDrawIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0, 1, sizeof(IndirectDrawBuffer));
 	}
-	else {
-		cmdBuffer->setGraphicsPipeline(mPipeline.get());
-		cmdBuffer->setViewport(viewport);
-		cmdBuffer->setShaderResources();
-		QRhiCommandBuffer::VertexInput VertexInputs[] = {
-			{mVertexBuffer.get(), 0},
-			{mParticleSystem->getTransformBuffer(),0 }
-		};
-		cmdBuffer->setVertexInput(0, 2, VertexInputs);
-		cmdBuffer->beginExternal();
-		cmdBuffer->draw(4);
-	}
 }
 
 bool QParticlesRenderComponent::isVaild() {
-	return !mParticleSystem.isNull();
+	return true;
 }
