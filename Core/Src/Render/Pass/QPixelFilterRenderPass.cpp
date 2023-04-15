@@ -34,7 +34,7 @@ void QPixelFilterRenderPass::resizeAndLinkNode(const QSize& size) {
 	});
 	mBindings->create();
 
-	sigRecompile.receive();
+	sigRecompile.ensure();
 }
 
 void QPixelFilterRenderPass::compile() {
@@ -75,7 +75,7 @@ void QPixelFilterRenderPass::compile() {
 }
 
 void QPixelFilterRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigRecompile.receive()) {
+	if (sigRecompile.ensure()) {
 		compile();
 	}
 	cmdBuffer->beginPass(mRT.renderTarget.get(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 });

@@ -34,7 +34,7 @@ protected:
 	QRhiEx* mRhi;
 	QScopedPointer<QRhiBuffer> mTransfromBuffer;
 
-	int mNumOfSpawnPerFrame = 1000;
+	int mNumOfSpawnPerFrame = 100;
 	float mDeltaSec = 0.0f;
 	float mLastTimeSec = 0.0f;
 };

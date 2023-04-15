@@ -17,13 +17,13 @@ QParticlesRenderComponent::QParticlesRenderComponent() {
 
 void QParticlesRenderComponent::setEmitter(IParticleEmitter* inEmitter) {
 	mEmitter.reset(inEmitter);
-	sigonRebuildResource.request();
-	sigonRebuildPipeline.request();
+	mSigRebuildResource.request();
+	mSigRebuildPipeline.request();
 }
 
 void QParticlesRenderComponent::setFacingCamera(bool val) {
 	bFacingCamera = val;
-	sigonRebuildPipeline.request();
+	mSigRebuildPipeline.request();
 }
 
 bool QParticlesRenderComponent::getFacingCamera() const {
@@ -47,7 +47,7 @@ void QParticlesRenderComponent::onRebuildResource() {
 }
 
 void QParticlesRenderComponent::onRebuildPipeline() {
-	sigonRebuildPipeline.receive();
+	mSigRebuildPipeline.ensure();
 
 	QRhiVertexInputLayout inputLayout;
 	inputLayout.setBindings({

@@ -71,7 +71,7 @@ void QRhiUniformBlock::create(QRhiEx* inRhi) {
 		mUniformBlock.reset(inRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, mDataByteSize));
 		mUniformBlock->create();
 		for (auto& dataParam : mParamList) {
-			dataParam->sigRecreate.receive();
+			dataParam->sigRecreate.ensure();
 			dataParam->sigUpdate.request();
 		}
 	}
@@ -79,11 +79,11 @@ void QRhiUniformBlock::create(QRhiEx* inRhi) {
 
 void QRhiUniformBlock::updateResource(QRhiResourceUpdateBatch* batch) {
 	for (auto& dataParam : mParamList) {
-		if (dataParam->sigRecreate.receive()) {
+		if (dataParam->sigRecreate.ensure()) {
 			sigRecreateBuffer.request();
 			return;
 		}
-		if (dataParam->sigUpdate.receive()) {
+		if (dataParam->sigUpdate.ensure()) {
 			batch->updateDynamicBuffer(mUniformBlock.get(), dataParam->mOffsetInByte, dataParam->mSizeInByte, dataParam->dataPtr());
 		}
 	}

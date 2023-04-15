@@ -108,7 +108,7 @@ void QBlinnPhongLightingPass::compile() {
 }
 
 void QBlinnPhongLightingPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigUpdateParams.receive()) {
+	if (sigUpdateParams.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->updateDynamicBuffer(mUniformBlock.get(), 0, sizeof(Params), &mParams);
 		cmdBuffer->resourceUpdate(batch);

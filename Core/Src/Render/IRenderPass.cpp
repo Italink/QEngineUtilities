@@ -73,11 +73,11 @@ void IBasePass::setRenderer(IRenderer* inRenderer) {
 void IBasePass::render(QRhiCommandBuffer* cmdBuffer) {
 	QVector<IRenderComponent*> uploadItems;
 	for (auto& item : mRenderComponents) {
-		if (item->sigonRebuildResource.receive()) {
+		if (item->mSigRebuildResource.ensure()) {
 			item->onRebuildResource();
 			uploadItems << item;
 		}
-		if (item->sigonRebuildPipeline.receive()) {
+		if (item->mSigRebuildPipeline.ensure()) {
 			item->onRebuildPipeline();
 		}
 		item->onPreUpdate(cmdBuffer);
@@ -122,8 +122,8 @@ void IBasePass::addRenderComponent(IRenderComponent* inRenderComponent,int inInd
 	inRenderComponent->setParent(this);
 	inRenderComponent->mRhi = mRhi;
 	inRenderComponent->mBasePass = this;
-	inRenderComponent->sigonRebuildResource.request();
-	inRenderComponent->sigonRebuildPipeline.request();
+	inRenderComponent->mSigRebuildResource.request();
+	inRenderComponent->mSigRebuildPipeline.request();
 	if (inIndex != -1) {
 		mRenderComponents.insert(inIndex, inRenderComponent);
 	}

@@ -335,10 +335,10 @@ void QGpuParticleEmitter::recompile() {
 
 void QGpuParticleEmitter::onTick(QRhiCommandBuffer* inCmdBuffer) {
 	IParticleEmitter::onTick(inCmdBuffer);
-	if (mSigCompile.receive()) {
+	if (mSigCompile.ensure()) {
 		recompile();
 	}
-	if (mSigInitIndirectBuffer.receive()) {
+	if (mSigInitIndirectBuffer.ensure()) {
 		IndirectDispatchBuffer dispatch = { 0,1,1 };
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->uploadStaticBuffer(mIndirectDispatchBuffer[0].get(), &dispatch);
@@ -360,10 +360,10 @@ void QGpuParticleEmitter::onSpawn(QRhiCommandBuffer* inCmdBuffer) {
 	updateCtx.deltaSec = mDeltaSec;
 	updateCtx.timestamp = QTime::currentTime().msecsSinceStartOfDay() / 1000000.0f;
 	batch->updateDynamicBuffer(mUpdateContextBuffer.get(), 0, sizeof(UpdateContextBuffer), &updateCtx);
-	if (mParams.spawnParams->sigRecreateBuffer.receive()) {
+	if (mParams.spawnParams->sigRecreateBuffer.ensure()) {
 		mSigCompile.request();
 	}
-	if (mParams.updateParams->sigRecreateBuffer.receive()) {
+	if (mParams.updateParams->sigRecreateBuffer.ensure()) {
 		mSigCompile.request();
 	}
 	mParams.spawnParams->updateResource(batch);

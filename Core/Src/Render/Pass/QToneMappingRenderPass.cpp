@@ -106,7 +106,7 @@ void QToneMappingRenderPass::compile() {
 }
 
 void QToneMappingRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigUpdateParams.receive()) {
+	if (sigUpdateParams.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(Params), &mParams);
 		cmdBuffer->resourceUpdate(batch);

@@ -104,7 +104,7 @@ void QRenderWidget::onInit() {
 }
 
 void QRenderWidget::onRenderTick() {
-	if (sigRecompileRenderer.receive()) {
+	if (sigRecompileRenderer.ensure()) {
 		mRenderer->setFrameGraph(mFrameGraph);
 		mRenderer->compile();
 	}

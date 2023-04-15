@@ -19,7 +19,7 @@ public:
 	public:
 		Signal() {};
 		void request();
-		bool receive();
+		bool ensure();
 		bool peek();
 	private:
 		bool bDirty = false;

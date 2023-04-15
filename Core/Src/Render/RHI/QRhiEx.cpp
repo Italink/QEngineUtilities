@@ -35,7 +35,7 @@ void QRhiEx::Signal::request() {
 }
 
 
-bool QRhiEx::Signal::receive()
+bool QRhiEx::Signal::ensure()
 {
 	bool var = bDirty;
 	bDirty = false;

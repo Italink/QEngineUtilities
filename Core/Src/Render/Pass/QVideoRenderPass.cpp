@@ -86,10 +86,10 @@ void QVideoRenderPass::compile() {
 
 void QVideoRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
-	if (sigUploadVertextBuffer.receive()) {
+	if (sigUploadVertextBuffer.ensure()) {
 		batch->uploadStaticBuffer(mVertexBuffer.get(), g_quad);
 	}
-	if (sigUpdateFrameTextures.receive()) {
+	if (sigUpdateFrameTextures.ensure()) {
 		updateTextures(batch);
 	}
 	QRect rect(0, 0, mRT.renderTarget->pixelSize().width(), mRT.renderTarget->pixelSize().height());

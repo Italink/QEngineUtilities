@@ -92,7 +92,7 @@ void QSkyRenderPass::resizeAndLinkNode(const QSize& size) {
 }
 
 void QSkyRenderPass::compile() {
-	if (!sigInitResource.receive()) {
+	if (!sigInitResource.ensure()) {
 		return;
 	}
 	mSkyCube.reset(mRhi->newTexture(QRhiTexture::RGBA32F,  QSize(kEnvMapSize, kEnvMapSize), 1, QRhiTexture::CubeMap | QRhiTexture::MipMapped | QRhiTexture::UsedWithGenerateMips | QRhiTexture::UsedWithLoadStore));
@@ -208,7 +208,7 @@ void QSkyRenderPass::compile() {
 
 void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
-	if (sigUploadSkyboxVertics.receive()) {
+	if (sigUploadSkyboxVertics.ensure()) {
 		batch->uploadStaticBuffer(mSkyboxVertexBuffer.get(), CubeData);
 	}
 	SkyboxUniformBlock skyUb;
@@ -226,7 +226,7 @@ void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	cmdBuffer->draw(36);
 	cmdBuffer->endPass();
 
-	if (sigUploadEquirectTexture.receive()) {
+	if (sigUploadEquirectTexture.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->uploadTexture(mEquirectTexture.get(), mSkyBoxImage);
 		if (!bIsEquirectangular) {
@@ -249,7 +249,7 @@ void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 		}
 		cmdBuffer->resourceUpdate(batch);
 	}
-	if (sigComputeSkyCube.receive()) {
+	if (sigComputeSkyCube.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->uploadTexture(mEquirectTexture.get(), mSkyBoxImage);
 		cmdBuffer->beginComputePass(batch);

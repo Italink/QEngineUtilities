@@ -8,8 +8,8 @@ QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent() {
 void QSkeletalMeshRenderComponent::setSkeletalMesh(QSharedPointer<QSkeletalMesh> val) {
 	mSkeletalMesh = val;
 	if (mSkeletalMesh) {
-		sigonRebuildResource.request();
-		sigonRebuildPipeline.request();
+		mSigRebuildResource.request();
+		mSigRebuildPipeline.request();
 	}
 }
 
@@ -115,8 +115,8 @@ void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 		pipeline->getUniformBlock("Transform")->setParamValue("M", M.toGenericMatrix<4, 4>());
 		pipeline->getUniformBlock("Transform")->setParamValue("Bone", mSkeletalMesh->mCurrentPosesMatrix);
 		pipeline->update(batch);
-		if (pipeline->sigRebuild.receive()) {
-			sigonRebuildPipeline.request();
+		if (pipeline->sigRebuild.ensure()) {
+			mSigRebuildPipeline.request();
 		}
 	}
 }

@@ -9,8 +9,8 @@ QStaticMeshRenderComponent::QStaticMeshRenderComponent() {
 void QStaticMeshRenderComponent::setStaticMesh(QSharedPointer<QStaticMesh> val) {
 	mStaticMesh = val;
 	if (mStaticMesh) {
-		sigonRebuildResource.request();
-		sigonRebuildPipeline.request();
+		mSigRebuildResource.request();
+		mSigRebuildPipeline.request();
 	}
 }
 
@@ -109,8 +109,8 @@ void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 		pipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 		pipeline->getUniformBlock("Transform")->setParamValue("M", QVariant::fromValue(M.toGenericMatrix<4, 4>()));
 		pipeline->update(batch);
-		if (pipeline->sigRebuild.receive()) {
-			sigonRebuildPipeline.request();
+		if (pipeline->sigRebuild.ensure()) {
+			mSigRebuildPipeline.request();
 		}
 	}
 }

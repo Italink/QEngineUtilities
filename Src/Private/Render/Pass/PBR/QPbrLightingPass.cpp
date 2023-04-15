@@ -473,7 +473,7 @@ void QPbrLightingPass::compile() {
 }
 
 void QPbrLightingPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigInit.receive()) {
+	if (sigInit.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		QRhiTextureCopyDescription desc;
 		for (int i = 0; i < 6; i++) {

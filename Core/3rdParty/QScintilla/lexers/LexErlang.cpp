@@ -511,7 +511,7 @@ static int ClassifyErlangFoldPoint(
 			)
 		|| styler.Match(keyword_start,"if")
 		|| styler.Match(keyword_start,"query")
-		|| styler.Match(keyword_start,"receive")
+		|| styler.Match(keyword_start,"ensure")
 	) {
 		++lev;
 	} else if (styler.Match(keyword_start,"end")) {

@@ -92,8 +92,8 @@ void QDynamicMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	mPipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 	mPipeline->getUniformBlock("Transform")->setParamValue("M", QVariant::fromValue(M.toGenericMatrix<4, 4>()));
 	mPipeline->update(batch);
-	if (mPipeline->sigRebuild.receive()) {
-		sigonRebuildPipeline.request();
+	if (mPipeline->sigRebuild.ensure()) {
+		mSigRebuildPipeline.request();
 	}
 }
 

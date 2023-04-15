@@ -19,7 +19,7 @@ void QGlslSandboxRenderPass::resizeAndLinkNode(const QSize& size) {
 	mRT.renderTarget->setRenderPassDescriptor(mRT.renderPassDesc.get());
 	mRT.renderTarget->create();
 	registerTextureOut_Output(mRT.colorAttachment.get());
-	sigRecompile.receive();
+	sigRecompile.ensure();
 }
 
 void QGlslSandboxRenderPass::compile() {
@@ -81,7 +81,7 @@ void QGlslSandboxRenderPass::compile() {
 }
 
 void QGlslSandboxRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigRecompile.receive()) {
+	if (sigRecompile.ensure()) {
 		compile();
 	}
 	if (mPipeline) {

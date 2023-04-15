@@ -208,7 +208,7 @@ void QBlurRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	cmdBuffer->draw(4);
 	cmdBuffer->endPass();
 
-	if (sigUpdateParams.receive()) {
+	if (sigUpdateParams.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(Params), &mParams);
 		cmdBuffer->resourceUpdate(batch);

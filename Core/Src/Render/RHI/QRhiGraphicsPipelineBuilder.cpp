@@ -253,21 +253,21 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mPipeline->create();
 	for (const auto& stage : mStageInfos) {
 		for (const auto& uniformBlock : stage.uniformBlocks) {
-			uniformBlock->sigRecreateBuffer.receive();
+			uniformBlock->sigRecreateBuffer.ensure();
 		}
 	}
-	sigRebuild.receive();
+	sigRebuild.ensure();
 }
 
 void QRhiGraphicsPipelineBuilder::update(QRhiResourceUpdateBatch* batch) {
 	for (const auto& stage : mStageInfos) {
 		for (const auto& textureInfo : stage.textureDescs) {
-			if (textureInfo->sigUpdate.receive()) {
+			if (textureInfo->sigUpdate.ensure()) {
 				batch->uploadTexture(textureInfo->Texture.get(), textureInfo->UploadDesc);
 			}
 		}
 		for (const auto& uniformBlock : stage.uniformBlocks) {
-			if (uniformBlock->sigRecreateBuffer.receive()) {
+			if (uniformBlock->sigRecreateBuffer.ensure()) {
 				sigRebuild.request();
 				break;
 			}

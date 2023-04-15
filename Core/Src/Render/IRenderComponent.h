@@ -10,10 +10,10 @@ class IRenderComponent: public QObject {
 	Q_OBJECT
 	friend class IBasePass;
 public:
-	QRhiEx::Signal sigonRebuildResource;
-	QRhiEx::Signal sigonRebuildPipeline;
+	QRhiEx::Signal mSigRebuildResource;
+	QRhiEx::Signal mSigRebuildPipeline;
 public:
-	IRenderComponent(): mID(IDStack++){ }
+	IRenderComponent(): mID(++IDStack){ }
 	uint32_t getID() const { return mID; }
 	virtual bool isVaild() { return true; }
 	virtual void onRebuildResource() {}

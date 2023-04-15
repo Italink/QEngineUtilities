@@ -183,7 +183,7 @@ void QDilationRenderPass::compile() {
 void QDilationRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	batch->copyTexture(mDilationRT[0].colorAttachment.get(), getTextureIn_Src());
-	if (sigUpdateParams.receive()) {
+	if (sigUpdateParams.ensure()) {
 		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(Params), &mParams);
 	}
 	cmdBuffer->beginPass(mDilationRT[1].renderTarget.get(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 }, batch);
