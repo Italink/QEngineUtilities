@@ -93,7 +93,7 @@ QGpuParticleEmitter::InitParams::InitParams() {
 		outParticle.lifetime = 2.0f;
 		outParticle.scaling = vec3(1,1,1);
 		outParticle.position =  vec3(0,0,0);
-		outParticle.velocity = vec3(rand(0.151,-0.1,0.1),rand(0.1451,-0.1,0.1),0.2);
+		outParticle.velocity = vec3(rand(0.72131231,-0.1,0.1),rand(0.07891,-0.1,0.1),0.2);
 	)";	
 
 	updateParams.reset(new QRhiUniformBlock);
@@ -122,6 +122,8 @@ void QGpuParticleEmitter::setupRhi(QRhiEx* inRhi) {
 	mVkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 	mVkInstance = QVulkanDefaultInstance::instance();
 	mVkDevFunc = mVkInstance->deviceFunctions(mVkHandles->dev);
+
+	mSigCompile.request();
 }
 
 void QGpuParticleEmitter::recompile() {

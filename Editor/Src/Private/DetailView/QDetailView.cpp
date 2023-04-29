@@ -70,6 +70,11 @@ void QDetailView::SetPage(QWidget* inPage) {
 
 void QDetailView::resizeEvent(QResizeEvent* event) {
 	QScrollArea::resizeEvent(event);
+	if (mValueWidgetWidth == 0) {
+		mValueWidgetWidth = event->size().width() / 2;
+		RefreshRowsSplitter();
+		return;
+	}
 	float factor = event->size().width() / (float)event->oldSize().width();
 	if (factor > 0) {
 		mValueWidgetWidth *= factor;

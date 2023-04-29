@@ -47,6 +47,7 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	QHBoxLayout* hLayout = new QHBoxLayout(this);
 	hLayout->setContentsMargins(0, 0, 0, 0);
 	hLayout->setSpacing(0);
+	setMinimumSize(800, 600);
 	mRhiWindow = new QInnerRhiWindow(inInitParams, this);
 	QWidget* viewport = QWidget::createWindowContainer(mRhiWindow);
 #ifdef QENGINE_WITH_EDITOR

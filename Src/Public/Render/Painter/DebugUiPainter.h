@@ -26,7 +26,7 @@ protected:
 	ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
 	bool bUseLineMode = false;
 	bool bShowFrameGraph = false;
-	bool bShowStats = true;
+	bool bShowStats = false;
 	bool bDrawOuterline = true;
 	QSharedPointer<FrameGraphView> mFrameGraphView;
 public:

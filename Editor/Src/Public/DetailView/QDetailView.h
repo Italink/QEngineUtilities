@@ -32,7 +32,7 @@ private:
 	QObjectList mObjects;
 	QList<QDetailViewRow*> mTopLevelRows;
 	QVBoxLayout* mLayout;
-	int mValueWidgetWidth = 100;
+	int mValueWidgetWidth = 0;
 	QSharedPointer<QDetailLayoutBuilder> mLayoutBuilder;
 };
 
