@@ -75,6 +75,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 	QPropertyHandle* handle = nullptr;
 	if (mObjectPtr == nullptr)
 		return handle;
+	QString propertyPath = mMetaObject->inherits(&QObject::staticMetaObject) ? inSubName : mHandle->GetSubPath(inSubName);
 	for(int i = 0;i< mMetaObject->propertyCount();i++){
 		QMetaProperty prop = mMetaObject->property(i);
 		if(prop.name() == inSubName){
@@ -82,7 +83,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 				handle = new QPropertyHandle(
 					mOwnerObject,
 					prop.metaType(),
-					inSubName,
+					propertyPath,
 					[this, prop]() {
 						return prop.read(mOwnerObject);
 					},
@@ -96,15 +97,15 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 				handle = new QPropertyHandle(
 					mOwnerObject,
 					prop.metaType(),
-					inSubName,
+					propertyPath,
 					[this, prop]() {
-					return prop.readOnGadget(mObjectPtr);
-				},
+						return prop.readOnGadget(mObjectPtr);
+					},
 					[this, prop](QVariant var) {
-					prop.writeOnGadget(mObjectPtr, var);
-					mHandle->SetValue(mObjectHolder);
-					RefreshObjectPtr();
-				},
+						prop.writeOnGadget(mObjectPtr, var);
+						mHandle->SetValue(mObjectHolder);
+						RefreshObjectPtr();
+					},
 					mHandle->GetMetaData()
 					);
 			}

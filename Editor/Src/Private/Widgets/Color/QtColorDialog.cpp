@@ -298,7 +298,6 @@ void QtColorDialog::RefleshChannelGradiant()
 }
 
 void QtColorDialog::focusOutEvent(QFocusEvent* event) {
-	qDebug() << event->reason() << this->focusWidget();
 	if (bCloseWhenLoseFocus&& event->reason()==Qt::FocusReason::ActiveWindowFocusReason) {
 		close();
 	}

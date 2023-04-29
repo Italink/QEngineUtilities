@@ -351,6 +351,7 @@ void QGpuParticleEmitter::onTick(QRhiCommandBuffer* inCmdBuffer) {
 	onUpdateAndRecyle(inCmdBuffer);
 	mRhi->finish();
 	onCalcAndSubmitTransform(inCmdBuffer);
+	mRhi->finish();
 	qSwap(mInputSlot, mOutputSlot);
 }
 

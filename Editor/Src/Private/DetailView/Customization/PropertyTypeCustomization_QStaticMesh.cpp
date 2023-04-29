@@ -16,7 +16,7 @@ void PropertyTypeCustomization_QStaticMesh::CustomizeHeader(QPropertyHandle* Pro
 void PropertyTypeCustomization_QStaticMesh::CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {
 	QFilePathBox* FilePathBox = new QFilePathBox;
 	auto FilePathRow = Builder->AddRowByNameValueWidget("Path", FilePathBox)->Row();
-	FilePathBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	FilePathBox->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Expanding);
 	FilePathRow->GetWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QObject::connect(CurrComboBox, &QComboBox::currentTextChanged, [FilePathRow](const QString& mode) {
 		FilePathRow->SetVisible(mode == "File");

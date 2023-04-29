@@ -5,7 +5,6 @@
 #include "QVariant"
 #include "QUndoStack"
 
-
 class IPropertyHandleImpl;
 class QRowLayoutBuilder;
 class QEngineUndoEntry;
@@ -70,7 +69,7 @@ Q_SIGNALS:
 	void AsRequestRebuildRow();
 protected:
 	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
-	QScopedPointer<IPropertyHandleImpl> mImpl;
+	QSharedPointer<IPropertyHandleImpl> mImpl;
 	QMetaType mType;
 	Getter mGetter;
 	Setter mSetter;

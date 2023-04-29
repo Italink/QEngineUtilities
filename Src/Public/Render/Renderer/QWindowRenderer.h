@@ -25,7 +25,7 @@ protected:
 private:
 	QRhiWindow* mWindow;
 #ifdef QENGINE_WITH_EDITOR
-	QScopedPointer<QDebugUIPainter> mDebugUiPainter;
+	QSharedPointer<QDebugUIPainter> mDebugUiPainter;
 #endif // QENGINE_WITH_EDITOR
 };
 

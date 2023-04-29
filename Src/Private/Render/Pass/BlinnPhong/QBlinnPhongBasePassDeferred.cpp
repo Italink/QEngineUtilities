@@ -5,7 +5,6 @@ QBlinnPhongBasePassDeferred::QBlinnPhongBasePassDeferred() {
 }
 
 QBlinnPhongBasePassDeferred::~QBlinnPhongBasePassDeferred() {
-	qDebug() << "s";
 }
 
 QRhiRenderPassDescriptor* QBlinnPhongBasePassDeferred::getRenderPassDescriptor() {

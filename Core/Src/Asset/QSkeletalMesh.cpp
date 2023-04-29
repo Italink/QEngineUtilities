@@ -88,7 +88,7 @@ QSharedPointer<QSkeletalMesh> QSkeletalMesh::CreateFromFile(const QString& inFil
 						vertex.boneWeight[slot] = mesh->mBones[i]->mWeights[j].mWeight;;
 					}
 					else {
-						qWarning("Lack of slot");
+						qWarning("Insufficient bone index slot");
 					}
 				}
 			}
