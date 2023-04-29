@@ -109,8 +109,15 @@ template<>
 struct UniformParamDesc<QColor> : public UniformParamDescBase {
 	const char* typeName() override { return "vec4"; }
 	void setValue(QVariant inValue) override {
-		QColor color = inValue.value<QColor>();
-		mValue = QVariant::fromValue<>(QColor4D(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
+		if (inValue.metaType() == QMetaType::fromType<QColor>()) {
+			QColor color = inValue.value<QColor>();
+			mValue = QVariant::fromValue<>(QColor4D(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
+			sigUpdate.request();
+		}
+		else if(inValue.metaType() == QMetaType::fromType<QColor4D>()) {
+			mValue = inValue;
+			sigUpdate.request();
+		}
 	}
 	int dataByteSize() override { return sizeof(float) * 4; }
 	int dataAlignSize() override { return sizeof(float) * 4; }

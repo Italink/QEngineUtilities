@@ -179,11 +179,11 @@ void QDetailViewManager::RegisterBuiltIn() {
 		QColorButton* colorButton = new QColorButton();
 		InHandler->Bind(colorButton, &QColorButton::AsColorChanged,
 			[colorButton]() {
-			return colorButton->GetColor();
-		},
+				return colorButton->GetColor();
+			},
 			[colorButton](QVariant var) {
-			colorButton->SetColor(var.value<QColor>());
-		}
+				colorButton->SetColor(var.value<QColor>());
+			}
 		);
 		return colorButton;
 	});
