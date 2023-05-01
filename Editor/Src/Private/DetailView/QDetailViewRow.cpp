@@ -173,17 +173,16 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 		mView->RefreshRowsSplitter();
 	});
 	if (inNameWidget) {
-		inNameWidget->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Expanding);
 		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
 		inNameWidget->setMinimumHeight(20);
-
 		content->addWidget(inNameWidget);
 	}
 	if (inValueWidget) {
-		inValueWidget->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Expanding);
+		QSizePolicy policy = inValueWidget->sizePolicy();
+		policy.setHorizontalPolicy(QSizePolicy::Ignored);
+		inValueWidget->setSizePolicy(policy);
 		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
 		content->addWidget(inValueWidget);
-
 	}
 	SetupContentWidget(content);
 }

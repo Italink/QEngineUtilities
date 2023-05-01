@@ -140,6 +140,13 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
+
+QScrollBar::handle:vertical {
+	background: Gainsboro;
+	min-height: 20px;
+	border-radius: 2px;
+	border: none;
+}
 )";
 	}
 	else if (inStyle == QDetailWidgetStyle::Qt) {
