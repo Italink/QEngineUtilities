@@ -24,7 +24,7 @@ public:
 protected:
 	void onInit();
 	void onRenderTick();
-	void onResizeEvent(const QSize& inSize);
+	void onResize(const QSize& inSize);
 	void onExit();
 #ifdef QENGINE_WITH_EDITOR
 	void keyPressEvent(QKeyEvent* event) override;

@@ -116,7 +116,7 @@ void QRhiWindow::renderInternal() {
 void QRhiWindow::resizeInternal() {
 
 	mHasSwapChain = mSwapChain->createOrResize();
-	onResizeEvent(mSwapChain->currentPixelSize());
+	onResize(mSwapChain->currentPixelSize());
 }
 
 void QRhiWindow::exposeEvent(QExposeEvent*)

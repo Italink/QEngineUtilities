@@ -29,7 +29,7 @@ private:
 protected:
 	virtual void onInit(){}
 	virtual void onRenderTick() {}
-	virtual void onResizeEvent(const QSize& inSize) {}
+	virtual void onResize(const QSize& inSize) {}
 	virtual void onExit() {}
 	void exposeEvent(QExposeEvent*) override;
 	bool event(QEvent*) override;

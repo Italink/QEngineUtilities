@@ -24,8 +24,8 @@ public:
 	void onRenderTick() override {
 		mWidget->onRenderTick();
 	}
-	void onResizeEvent(const QSize& inSize) {
-		mWidget->onResizeEvent(inSize);
+	void onResize(const QSize& inSize) {
+		mWidget->onResize(inSize);
 	}
 	void onExit() override {
 		mWidget->onExit();
@@ -112,7 +112,7 @@ void QRenderWidget::onRenderTick() {
 	mRenderer->render();
 }
 
-void QRenderWidget::onResizeEvent(const QSize& inSize) {
+void QRenderWidget::onResize(const QSize& inSize) {
 	mRenderer->resize(inSize);
 }
 
