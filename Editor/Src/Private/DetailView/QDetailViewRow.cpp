@@ -125,6 +125,12 @@ protected:
 		else
 			painter.setBrush(Qt::NoBrush);
 		painter.drawRect(rect());
+
+		if (mRow->bNeedRefreshSplitter) {
+			mRow->RefreshSplitter();
+			mRow->bNeedRefreshSplitter = false;
+			update();
+		}
 	}
 	void showEvent(QShowEvent *event) override{
 		Q_EMIT AsShowEvent();
@@ -147,7 +153,7 @@ QDetailViewRow::QDetailViewRow(QDetailView* inView)
 		SetExpanded(!bExpanded);
 	});
 	connect(mWidget, &QDetailViewRowWidget::AsShowEvent, this, [this]() {
-		RefreshSplitter();
+		RequestRefreshSplitter();
 	});
 }
 
@@ -155,7 +161,6 @@ void QDetailViewRow::SetupContentWidget(QWidget* inContent) {
 	mWidget->SetContentWidget(inContent);
 	if (mView->isVisible()) {
 		inContent->show();
-		RefreshSplitter();
 	}
 }
 
@@ -168,13 +173,17 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 		mView->RefreshRowsSplitter();
 	});
 	if (inNameWidget) {
+		inNameWidget->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Expanding);
 		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
 		inNameWidget->setMinimumHeight(20);
+
 		content->addWidget(inNameWidget);
 	}
 	if (inValueWidget) {
+		inValueWidget->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Policy::Expanding);
 		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
 		content->addWidget(inValueWidget);
+
 	}
 	SetupContentWidget(content);
 }
@@ -224,7 +233,7 @@ void QDetailViewRow::DeleteChildren() {
 
 void QDetailViewRow::SetVisible(bool inVisiable) {
 	mWidget->setVisible(inVisiable);
-	RefreshSplitter();
+	RequestRefreshSplitter();
 	if (IsExpanded()) {
 		for (auto Child : mChildren) {
 			Child->SetVisible(inVisiable);
@@ -273,16 +282,19 @@ QWidget* QDetailViewRow::GetWidget() {
 	return mWidget;
 }
 
+void QDetailViewRow::RequestRefreshSplitter() {
+	bNeedRefreshSplitter = true;
+}
+
 void QDetailViewRow::RefreshSplitter() {
 	if (QSplitter* splitter = qobject_cast<QSplitter*>(mWidget->mContentWidget)) {
 		int nameWidgetWidth = splitter->width() - mView->mValueWidgetWidth - splitter->handleWidth();
 		splitter->setSizes({ nameWidgetWidth ,mView->mValueWidgetWidth });
 	}
 	for (auto Child : mChildren) {
-		Child->RefreshSplitter();
+		Child->RequestRefreshSplitter();
 	}
 }
-
 
 void QDetailViewRow::FixupSplitter() {
 	if (!IsVisible())
@@ -297,5 +309,6 @@ void QDetailViewRow::FixupSplitter() {
 		Child->FixupSplitter();
 	}
 }
+
 
 #include "QDetailViewRow.moc"

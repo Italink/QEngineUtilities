@@ -24,6 +24,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 	mIndexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::IndexBuffer, sizeof(QStaticMesh::Index) * mStaticMesh->mIndices.size()));
 	mIndexBuffer->create();
 
+	mPipelines.clear();
 	for (auto& subMesh : mStaticMesh->mSubmeshes) {
 		QSharedPointer<QRhiGraphicsPipelineBuilder> pipeline(new QRhiGraphicsPipelineBuilder());
 		mPipelines << pipeline;

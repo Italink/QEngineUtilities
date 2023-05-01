@@ -19,5 +19,4 @@ private:
 	QImage mImage;
 };
 
-
 #endif // QImageBox_h__

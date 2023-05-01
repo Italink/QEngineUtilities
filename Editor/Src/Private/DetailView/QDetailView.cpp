@@ -112,8 +112,9 @@ void QDetailView::RefreshRowsSplitter() {
 		Row->FixupSplitter();
 	}
 	for (auto Row : mTopLevelRows) {
-		Row->RefreshSplitter();
+		Row->RequestRefreshSplitter();
 	}
+	update();
 }
 
 QDetailViewRow* QDetailView::AddTopLevelRow() {

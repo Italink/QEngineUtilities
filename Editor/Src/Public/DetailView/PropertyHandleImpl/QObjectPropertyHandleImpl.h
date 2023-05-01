@@ -22,5 +22,4 @@ private:
 	bool bIsPointer = false;
 };
 
-
 #endif // QObjectPropertyHandleImpl_h__

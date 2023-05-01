@@ -22,6 +22,7 @@
 #include "Asset/QStaticMesh.h"
 #include "Customization/DetailCustomization_QGlslSandboxRenderPass.h"
 #include "Customization/DetailCustomization_QRhiMaterialGroup.h"
+#include "Widgets/QFontBox.h"
 
 QDetailViewManager* QDetailViewManager::Instance()
 {
@@ -148,6 +149,7 @@ void QDetailViewManager::RegisterBuiltIn() {
 
 	qRegisterMetaType<QRhiTextureDesc>();
 	qRegisterMetaType<QRhiGraphicsPipelineBuilder*>();
+	qRegisterMetaType<IStaticMeshCreator*>();
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;
@@ -174,6 +176,20 @@ void QDetailViewManager::RegisterBuiltIn() {
 		);
 		return imageBox;
 	});
+
+	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QFont>(), [](QPropertyHandle* InHandler) {
+		QFontBox* fontBox = new QFontBox;
+		InHandler->Bind(fontBox, &QFontBox::AsFontChanged,
+			[fontBox]() {
+				return fontBox->GetFont();
+			},
+			[fontBox](QVariant var) {
+				fontBox->SetFont(var.value<QFont>());
+			}
+		);
+		return fontBox;
+	});
+
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor>(), [](QPropertyHandle* InHandler) {
 		QColorButton* colorButton = new QColorButton();

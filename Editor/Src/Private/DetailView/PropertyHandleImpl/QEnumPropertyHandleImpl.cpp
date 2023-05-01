@@ -9,7 +9,7 @@ QEnumPropertyHandleImpl::QEnumPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
 	const QMetaObject* metaObj = mHandle->GetType().metaObject();
 	if (metaObj){
-		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->enumeratorOffset());
+		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->indexOfEnumerator(QString(mHandle->GetType().name()).split("::").last().toLocal8Bit()));
 		for (int i = 0; i < metaEnum.keyCount(); i++) {
 			mNameToValueMap[metaEnum.key(i)] = metaEnum.value(i);
 		}

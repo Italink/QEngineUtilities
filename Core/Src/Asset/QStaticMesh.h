@@ -6,6 +6,8 @@
 #include "QMap"
 #include "QMatrix4x4"
 #include "QMaterial.h"
+#include "Utils/QMetaData.h"
+#include "QFont"
 
 struct QStaticMesh {
 	static QSharedPointer<QStaticMesh> CreateFromFile(const QString& inFilePath);

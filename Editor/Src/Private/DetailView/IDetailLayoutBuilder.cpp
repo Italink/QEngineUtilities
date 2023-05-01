@@ -75,20 +75,39 @@ void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
 	}
 	QObject::connect(InPropertyHandle, &QPropertyHandle::AsRequestRebuildRow, row, [this, row, InPropertyHandle]() {
 		row->DeleteChildren();
-		row->SetupNameValueWidget(InPropertyHandle->GenerateNameWidget(), InPropertyHandle->GenerateValueWidget());
+
+		QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 		const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
-		InPropertyHandle->GenerateChildrenRow(rowBuilder.get());
+		if (customizationInstance.isNull()) {
+			customizationInstance = QDetailViewManager::Instance()->GetCustomPropertyType(InPropertyHandle->GetType());
+		}
+		if (!customizationInstance.isNull()) {
+			HeaderRowBuilder headerBuilder(row);
+			customizationInstance->CustomizeHeader(InPropertyHandle, &headerBuilder);
+			customizationInstance->CustomizeChildren(InPropertyHandle, rowBuilder.get());
+			mPropertyTypeCustomizationMap.insert(InPropertyHandle, customizationInstance);
+		}
+		else {
+			row->SetupNameValueWidget(InPropertyHandle->GenerateNameWidget(), InPropertyHandle->GenerateValueWidget());
+			InPropertyHandle->GenerateChildrenRow(rowBuilder.get());
+		}
 		row->Refresh();
+		row->RequestRefreshSplitter();
 	});
 }
 
 void IDetailLayoutBuilder::AddObject(QObject* InObject, QString InPrePath /*= QString()*/, bool HideHeader /*= true*/) {
-	IDetailLayoutBuilder::ObjectContext Context;
-	Context.MetaObject = InObject->metaObject();
-	Context.ObjectPtr = InObject;
-	Context.OwnerObject = InObject;
-	Context.PrePath = InPrePath;
-	AddObject(Context, HideHeader);
+	if (InObject) {
+		IDetailLayoutBuilder::ObjectContext Context;
+		Context.MetaObject = InObject->metaObject();
+		Context.ObjectPtr = InObject;
+		Context.OwnerObject = InObject;
+		Context.PrePath = InPrePath;
+		AddObject(Context, HideHeader);
+	}
+	else {
+		qWarning() << "IDetailLayoutBuilder::AddObject: QObject is nullptr";
+	}
 }
 
 

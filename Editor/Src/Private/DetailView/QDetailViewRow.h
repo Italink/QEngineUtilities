@@ -9,7 +9,9 @@ class QDetailViewRowWidget;
 
 class QDetailViewRow : public QObject{
 	Q_OBJECT
-		friend class QDetailView;
+	friend class QDetailView;
+	friend class IDetailLayoutBuilder;
+	friend class QDetailViewRowWidget;
 public:
 	QDetailViewRow(QDetailView* inView);
 
@@ -32,20 +34,21 @@ public:
 	void Refresh();
 	void MarkIsCategory();
 	bool IsCategory();
+	void RequestRefreshSplitter();
 
 	QWidget* GetWidget();
 private:
-	void RefreshSplitter();
 	void FixupSplitter();
+	void RefreshSplitter();
 Q_SIGNALS:
-	void AsRequestRebuildView();
-	void AsRequestRebuildParent();
+	void RequestRebuildView();
 protected:
 	QDetailView* mView = nullptr;
 	QDetailViewRowWidget* mWidget = nullptr;
 	QList<QDetailViewRow*> mChildren;
 	bool bExpanded = false;
 	bool bIsCategory = false;
+	bool bNeedRefreshSplitter = false;
 };
 
 #endif // QDetailViewRow_h__
