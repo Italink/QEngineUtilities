@@ -3,9 +3,10 @@
 
 QMatrix4x4 AssetUtils::converter(const aiMatrix4x4& aiMat4) {
 	QMatrix4x4 mat4;
+	ai_real* data = (ai_real*)&aiMat4;
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			mat4(i, j) = aiMat4[i][j];
+			mat4(i, j) = *(data + (4 * i) + j);
 		}
 	}
 	return mat4;
