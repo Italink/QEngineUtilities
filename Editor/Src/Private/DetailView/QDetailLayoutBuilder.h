@@ -23,5 +23,4 @@ private:
 	QDetailViewRow* mRow = nullptr;
 };
 
-
 #endif // QDETAILAYOUTBUILDER_H

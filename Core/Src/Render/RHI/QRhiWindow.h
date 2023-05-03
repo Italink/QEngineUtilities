@@ -40,6 +40,7 @@ private:
 	bool mNotExposed = false;
 	bool mNewlyExposed = false;
 	bool mHasSwapChain = false;
+	bool mNeedResize = false;
 
 	int mFps = 0;
 	float mCpuFrameTime;

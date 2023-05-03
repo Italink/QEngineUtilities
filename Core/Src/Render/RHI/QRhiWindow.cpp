@@ -72,6 +72,10 @@ void QRhiWindow::renderInternal() {
 		mNewlyExposed = false;
 	}
 
+	if (mNeedResize && !(QGuiApplication::mouseButtons() & Qt::LeftButton) ) {
+		onResize(mSwapChain->currentPixelSize());
+	}
+
 	static int CpuFrameCounter = 0;
 	QRhi::FrameOpResult r = mRhi->beginFrame(mSwapChain.get(), mInitParams.beginFrameFlags);
 	if (r == QRhi::FrameOpSwapChainOutOfDate) {
@@ -114,9 +118,8 @@ void QRhiWindow::renderInternal() {
 }
 
 void QRhiWindow::resizeInternal() {
-
 	mHasSwapChain = mSwapChain->createOrResize();
-	onResize(mSwapChain->currentPixelSize());
+	mNeedResize = true;
 }
 
 void QRhiWindow::exposeEvent(QExposeEvent*)
