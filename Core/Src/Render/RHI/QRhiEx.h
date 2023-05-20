@@ -5,11 +5,20 @@
 #include "private/qrhivulkan_p.h"
 #include <QWindow>
 
+class QShaderDefinitions {
+public:
+	QShaderDefinitions& addDefinition(const QByteArray def);
+	QShaderDefinitions& addDefinition(const QByteArray def, int value);
+	operator QByteArray() { return mDefinitions; }
+private:
+	QByteArray mDefinitions;
+};
+
 class QRhiEx: public QRhi {
 public:
 	static QSharedPointer<QRhiEx> newRhiEx(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
 
-	QShader newShaderFromCode(QShader::Stage stage, QByteArray code);
+	QShader newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble = QByteArray());
 
 	static QShader newShaderFromQSBFile(const char* filename);
 

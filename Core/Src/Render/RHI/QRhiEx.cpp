@@ -30,10 +30,19 @@
 
 #include "Vulkan/QRhiVulkanExHelper.h"
 
+QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def) {
+	mDefinitions.append("#define " + def + "\n");
+	return *this;
+}
+
+QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def, int value) {
+	mDefinitions.append("#define " + def +" " + QString::number(value).toLocal8Bit() + "\n");
+	return *this;
+}
+
 void QRhiEx::Signal::request() {
 	bDirty = true;
 }
-
 
 bool QRhiEx::Signal::ensure()
 {
@@ -105,7 +114,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 	return rhi;
 }
 
-QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code) {
+QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble) {
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
 	QList<QShaderBaker::GeneratedShader> generatedShaders;
@@ -124,6 +133,8 @@ QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code) {
 	}
 	baker.setGeneratedShaders(generatedShaders);
 	baker.setSourceString(code, stage);
+
+	baker.setPreamble(preamble);
 	QShader shader = baker.bake();
 	if (!shader.isValid()) {
 		QStringList codelist = QString(code).split('\n');

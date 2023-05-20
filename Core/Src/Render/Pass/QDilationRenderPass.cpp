@@ -77,7 +77,7 @@ void QDilationRenderPass::compile() {
 	mPipelineH->setDepthTest(false);
 	mPipelineH->setDepthWrite(false);
 
-	QString vsCode = R"(#version 450
+	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 450
 		layout (location = 0) out vec2 vUV;
 		out gl_PerVertex{
 			vec4 gl_Position;
@@ -85,10 +85,15 @@ void QDilationRenderPass::compile() {
 		void main() {
 			vUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
 			gl_Position = vec4(vUV * 2.0f - 1.0f, 0.0f, 1.0f);
-			%1
-		}
-	)";
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+
+#if Y_UP_IN_NDC
+			vUV.y = 1 - vUV.y;
+#endif 
+		})"
+		,QShaderDefinitions()
+		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC())
+	);
+
 	QShader fsH = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
 		layout (location = 0) in vec2 vUV;
 		layout (location = 0) out vec4 outFragColor;
