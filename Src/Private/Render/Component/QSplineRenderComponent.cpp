@@ -157,7 +157,7 @@ void QSplineRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 }
 
 void QSplineRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
-	mPipelineBuilder->getUniformBlock("UBO")->setParamValue("MVP", QVariant::fromValue(calculateMatrixMVP().toGenericMatrix<4, 4>()));
+	mPipelineBuilder->getUniformBlock("UBO")->setParamValue("MVP", QVariant::fromValue(getMvpMatrix().toGenericMatrix<4, 4>()));
 	auto size = getBasePass()->getRenderTarget()->pixelSize();
 	mPipelineBuilder->getUniformBlock("UBO")->setParamValue("ScreenResolution", QVector2D(size.width(), size.height()));
 	mPipelineBuilder->update(batch);

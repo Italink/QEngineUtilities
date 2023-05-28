@@ -105,8 +105,8 @@ void QStaticMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	for (int i = 0; i < mPipelines.size(); i++) {
 		QRhiGraphicsPipelineBuilder* pipeline = mPipelines[i].get();
 		const QStaticMesh::SubMeshData& meshInfo = mStaticMesh->mSubmeshes[i];
-		QMatrix4x4 M = calculateMatrixModel() * meshInfo.localTransfrom;
-		QMatrix4x4 MVP = getMatrixClipWithCorr() * getMatrixView() * M;
+		QMatrix4x4 M = getModelMatrix() * meshInfo.localTransfrom;
+		QMatrix4x4 MVP = getProjectionMatrixWithCorr() * getViewMatrix() * M;
 		pipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 		pipeline->getUniformBlock("Transform")->setParamValue("M", QVariant::fromValue(M.toGenericMatrix<4, 4>()));
 		pipeline->update(batch);

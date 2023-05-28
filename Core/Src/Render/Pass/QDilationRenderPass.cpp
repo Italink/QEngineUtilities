@@ -85,9 +85,8 @@ void QDilationRenderPass::compile() {
 		void main() {
 			vUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
 			gl_Position = vec4(vUV * 2.0f - 1.0f, 0.0f, 1.0f);
-
 #if Y_UP_IN_NDC
-			vUV.y = 1 - vUV.y;
+			gl_Position.y = - gl_Position.y;
 #endif 
 		})"
 		,QShaderDefinitions()

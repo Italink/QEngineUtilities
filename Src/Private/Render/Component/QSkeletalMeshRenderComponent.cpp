@@ -109,8 +109,8 @@ void QSkeletalMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 
 void QSkeletalMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	for (auto pipeline : mPipelines) {
-		QMatrix4x4 MVP = calculateMatrixMVP();
-		QMatrix4x4 M = calculateMatrixModel();
+		QMatrix4x4 MVP = getMvpMatrix();
+		QMatrix4x4 M = getModelMatrix();
 		pipeline->getUniformBlock("Transform")->setParamValue("MVP", MVP.toGenericMatrix<4,4>());
 		pipeline->getUniformBlock("Transform")->setParamValue("M", M.toGenericMatrix<4, 4>());
 		pipeline->getUniformBlock("Transform")->setParamValue("Bone", mSkeletalMesh->mCurrentPosesMatrix);

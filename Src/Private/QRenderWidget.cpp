@@ -63,6 +63,8 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	mRhiWindow->installEventFilter(this);
 	connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, mDetailView, &QDetailView::SetObject);
 	hLayout->addWidget(splitter);
+	setWindowFlag(Qt::FramelessWindowHint);
+	setAttribute(Qt::WA_TranslucentBackground);
 #else
 	hLayout->addWidget(viewport);
 #endif

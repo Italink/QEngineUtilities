@@ -40,12 +40,12 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 		QCamera* camera = mRenderer->getCamera();
 		if (camera) {
 			auto& io = ImGui::GetIO();
-			QMatrix4x4 View = camera->getMatrixView();
-			QMatrix4x4 Clip = camera->getMatrixClip();
+			QMatrix4x4 View = camera->getViewMatrix();
+			QMatrix4x4 Clip = camera->getProjectionMatrix();
 			ISceneRenderComponent* currComponent = qobject_cast<ISceneRenderComponent*>(mRenderer->getCurrentObject());
 			if (currComponent && !bShowFrameGraph) {
 				QMatrix4x4 MAT;
-				QMatrix4x4 Model = currComponent->calculateMatrixModel();
+				QMatrix4x4 Model = currComponent->getModelMatrix();
 				ImGuizmo::BeginFrame();
 				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 				ImGuizmo::Manipulate(View.constData(), Clip.constData(), mOperation, ImGuizmo::LOCAL, Model.data(), NULL, NULL, NULL, NULL);

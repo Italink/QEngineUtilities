@@ -168,9 +168,9 @@ void QParticlesRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 }
 
 void QParticlesRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
-	mUniform.M = calculateMatrixModel().toGenericMatrix<4, 4>();
-	mUniform.V = getMatrixView().toGenericMatrix<4, 4>();
-	mUniform.P = getMatrixClipWithCorr().toGenericMatrix<4, 4>();
+	mUniform.M = getModelMatrix().toGenericMatrix<4, 4>();
+	mUniform.V = getViewMatrix().toGenericMatrix<4, 4>();
+	mUniform.P = getProjectionMatrixWithCorr().toGenericMatrix<4, 4>();
 	batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(UniformBlock), &mUniform);
 }
 

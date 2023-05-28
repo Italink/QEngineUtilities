@@ -7,9 +7,14 @@ QCamera::QCamera(){
 
 }
 
-QMatrix4x4 QCamera::getViewMatrix()
-{
-	return mViewMatrix;
+void QCamera::setupWindow(QWindow* window) {
+	mWindow = window;
+	if (mWindow) {
+		mWindow->installEventFilter(this);
+		setAspectRatio(mWindow->width() / (float)mWindow->height());
+		calculateCameraDirection();
+		calculateViewMatrix();
+	}
 }
 
 float QCamera::getYaw()
@@ -63,41 +68,44 @@ QVector3D QCamera::getRotation() {
 	return mRotation;
 }
 
+void QCamera::setFov(float val) {
+	mFov = val;
+	calculateProjectionMatrix();
+}
+
 void QCamera::setAspectRatio(float val)
 {
 	mAspectRatio = val;
-	calculateClipMatrix();
+	calculateProjectionMatrix();
 }
 
-QMatrix4x4 QCamera::getMatrixClipWithCorr(QRhiEx* inRhi) {
-	return inRhi->clipSpaceCorrMatrix() * getMatrixClip();
+void QCamera::setNearPlane(float val) {
+	mNearPlane = val;
+	calculateProjectionMatrix();
 }
 
-QMatrix4x4 QCamera::getMatrixClip()
+void QCamera::setFarPlane(float val) {
+	mFarPlane = val;
+	calculateProjectionMatrix();
+}
+
+QMatrix4x4 QCamera::getProjectionMatrixWithCorr(QRhiEx* inRhi) {
+	return inRhi->clipSpaceCorrMatrix() * getProjectionMatrix();
+}
+
+QMatrix4x4 QCamera::getProjectionMatrix()
 {
 	return  mClipMatrix;
 }
 
-QMatrix4x4 QCamera::getMatrixView()
+QMatrix4x4 QCamera::getViewMatrix()
 {
 	return mViewMatrix;
-}
-
-void QCamera::setupWindow(QWindow* window)
-{
-	mWindow = window;
-	if (mWindow) {
-		mWindow->installEventFilter(this);
-		setAspectRatio(mWindow->width() / (float)mWindow->height());
-		calculateCameraDirection();
-		calculateViewMatrix();
-	}
 }
 
 bool QCamera::eventFilter(QObject* watched, QEvent* event)
 {
 	static QPoint pressedPos;
-
 	if (watched != nullptr && watched == mWindow) {
 		switch (event->type())
 		{
@@ -203,7 +211,7 @@ void QCamera::calculateViewMatrix()
 	mViewMatrix.lookAt(mPosition, mPosition + mCameraDirection, mCameraUp);
 }
 
-void QCamera::calculateClipMatrix()
+void QCamera::calculateProjectionMatrix()
 {
 	mClipMatrix.setToIdentity();
 	mClipMatrix.perspective(mFov, mAspectRatio, mNearPlane, mFarPlane);

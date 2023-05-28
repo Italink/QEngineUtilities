@@ -87,8 +87,8 @@ void QDynamicMeshRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 		}
 		batch->updateDynamicBuffer(mVertexBuffer.get(), 0, sizeof(Vertex) * mVertices.size(), mVertices.data());
 	}
-	QMatrix4x4 MVP = calculateMatrixMVP();
-	QMatrix4x4 M = calculateMatrixModel();
+	QMatrix4x4 MVP = getMvpMatrix();
+	QMatrix4x4 M = getModelMatrix();
 	mPipeline->getUniformBlock("Transform")->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 	mPipeline->getUniformBlock("Transform")->setParamValue("M", QVariant::fromValue(M.toGenericMatrix<4, 4>()));
 	mPipeline->update(batch);

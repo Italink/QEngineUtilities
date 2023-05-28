@@ -212,7 +212,7 @@ void QSkyRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 		batch->uploadStaticBuffer(mSkyboxVertexBuffer.get(), CubeData);
 	}
 	SkyboxUniformBlock skyUb;
-	QMatrix4x4 MVP = mRenderer->getCamera()->getMatrixClipWithCorr(mRhi) * mRenderer->getCamera()->getMatrixView();
+	QMatrix4x4 MVP = mRenderer->getCamera()->getProjectionMatrixWithCorr(mRhi) * mRenderer->getCamera()->getViewMatrix();
 	MVP.scale(2000);
 	skyUb.MVP = MVP.toGenericMatrix<4, 4>();
 	batch->updateDynamicBuffer(mSkyboxUniformBlock.get(), 0, sizeof(SkyboxUniformBlock), &skyUb);

@@ -2,29 +2,19 @@
 #include "Render/IRenderPass.h"
 #include "Utils/MathUtils.h"
 
-QMatrix4x4 ISceneRenderComponent::calculateMatrixMVP() {
-	return  getMatrixClipWithCorr() * getMatrixView () * calculateMatrixModel();
+QMatrix4x4 ISceneRenderComponent::getMvpMatrix() {
+	return  getProjectionMatrixWithCorr() * getViewMatrix () * getModelMatrix();
 }
 
-QMatrix4x4 ISceneRenderComponent::getMatrixView() {
-	return getBasePass()->getRenderer()->getCamera()->getMatrixView();
+QMatrix4x4 ISceneRenderComponent::getViewMatrix() {
+	return getBasePass()->getRenderer()->getCamera()->getViewMatrix();
 }
 
-QMatrix4x4 ISceneRenderComponent::getMatrixClipWithCorr() {
-	return getBasePass()->getRenderer()->getCamera()->getMatrixClipWithCorr(mRhi);
+QMatrix4x4 ISceneRenderComponent::getProjectionMatrixWithCorr() {
+	return getBasePass()->getRenderer()->getCamera()->getProjectionMatrixWithCorr(mRhi);
 }
 
-QMatrix4x4 ISceneRenderComponent::calculateMatrixModel() {
-	QMatrix4x4 S;
-	S.translate(QVector3D(7, 8, 9));
-	S.scale(QVector3D(4, 5, 6));
-	S.rotate(10, QVector3D(1.f, 0.f, 0.f));
-	S.rotate(12, QVector3D(0.f, 1.f, 0.f));
-	S.rotate(33, QVector3D(0.f, 0.f, 1.f));
-
-	QVector3D trans = MathUtils::getMatTranslate(S);
-	QVector3D rotation = MathUtils::getMatRotation(S);
-	QVector3D scale = MathUtils::getMatScale3D(S);
+QMatrix4x4 ISceneRenderComponent::getModelMatrix() {
 	return mTransform;
 }
 

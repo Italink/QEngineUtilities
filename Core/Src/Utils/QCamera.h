@@ -10,11 +10,15 @@ class QCamera :public QObject {
 	Q_OBJECT
 		Q_PROPERTY(QVector3D Position READ getPosition WRITE setPosition)
 		Q_PROPERTY(QVector3D Rotation READ getRotation WRITE setRotation)
+		Q_PROPERTY(float FOV READ getFov WRITE setFov)
+		Q_PROPERTY(float NearPlane READ getNearPlane WRITE setNearPlane)
+		Q_PROPERTY(float FarPlane READ getFarPlane WRITE setFarPlane)
 		Q_PROPERTY(float MoveSpeed READ getMoveSpeed WRITE setMoveSpeed)
 		Q_PROPERTY(float RotationSpeed READ getRotationSpeed WRITE setRotationSpeed)
 public:
 	QCamera();
-	QMatrix4x4 getViewMatrix();
+
+	void setupWindow(QWindow* window);
 
 	float getYaw();
 	float getPitch();
@@ -34,21 +38,29 @@ public:
 	void setRotationSpeed(float val) { mRotationSpeed = val; }
 
 	float getMoveSpeed() const{ return mMoveSpeed; }
-	float& getMoveSpeedRef() { return mMoveSpeed; }
 	void setMoveSpeed(float val) { mMoveSpeed = val; }
+	float& getMoveSpeedRef() { return mMoveSpeed; }
+
+	void setFov(float val);
+	float getFov() { return mFov; }
 
 	void setAspectRatio(float val);
+	float getAspectRatio() { return mAspectRatio; }
 
-	QMatrix4x4 getMatrixClipWithCorr(QRhiEx* inRhi);
-	QMatrix4x4 getMatrixClip();
-	QMatrix4x4 getMatrixView();
-	void setupWindow(QWindow* window);
+	void setNearPlane(float val);
+	float getNearPlane() { return mNearPlane; }
+
+	void setFarPlane(float val);
+	float getFarPlane() { return mFarPlane; }
+
+	QMatrix4x4 getProjectionMatrixWithCorr(QRhiEx* inRhi);
+	QMatrix4x4 getProjectionMatrix();
+	QMatrix4x4 getViewMatrix();
 private:
 	void calculateViewMatrix();
-	void calculateClipMatrix();
+	void calculateProjectionMatrix();
 	void calculateCameraDirection();
 	bool eventFilter(QObject* watched, QEvent* event) override;
-
 protected:
 	QWindow* mWindow;
 	QVector3D mPosition = QVector3D(0, 0, 2);

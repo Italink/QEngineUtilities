@@ -154,7 +154,7 @@ void QSsaoRenderPass::compile() {
 }
 
 void QSsaoRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
-	QMatrix4x4 VP = mRenderer->getCamera()->getMatrixClipWithCorr(mRhi) * mRenderer->getCamera()->getMatrixView();
+	QMatrix4x4 VP = mRenderer->getCamera()->getProjectionMatrixWithCorr(mRhi) * mRenderer->getCamera()->getViewMatrix();
 	mSsaoState.projection = VP.toGenericMatrix<4, 4>();
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	if (sigUpdateSsaoState.ensure()) {

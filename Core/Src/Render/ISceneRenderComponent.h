@@ -15,12 +15,12 @@
 
 class ISceneRenderComponent: public IRenderComponent {
 	Q_OBJECT
-		Q_PROPERTY(QMatrix4x4 Transform READ calculateMatrixModel WRITE setTransform)
+		Q_PROPERTY(QMatrix4x4 Transform READ getModelMatrix WRITE setTransform)
 public:
-	QMatrix4x4 calculateMatrixMVP();
-	QMatrix4x4 getMatrixView();
-	QMatrix4x4 getMatrixClipWithCorr();
-	QMatrix4x4 calculateMatrixModel();
+	QMatrix4x4 getMvpMatrix();
+	QMatrix4x4 getViewMatrix();
+	QMatrix4x4 getProjectionMatrixWithCorr();
+	QMatrix4x4 getModelMatrix();
 
 	void setTranslate(QVector3D translate);
 	void setRotation(QVector3D rotation);
