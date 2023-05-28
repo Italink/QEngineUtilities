@@ -43,7 +43,6 @@ static VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL wrap_vkGetDeviceProcAddr(VkDevic
     return globalVulkanInstance->functions()->vkGetDeviceProcAddr(device, pName);
 }
 
-
 struct QVkBufferEx : public QRhiBuffer {
 	QVkBufferEx(QRhiImplementation* rhi, Type type, VkBufferUsageFlags usage, int size);
 	~QVkBufferEx();
@@ -490,7 +489,7 @@ QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRh
 	if (err != VK_SUCCESS) {
 		qWarning("Failed to create allocator: %d", err);
 	}
-	handles.vmemAllocator = vmaallocator;
+	//handles.vmemAllocator = vmaallocator;
 	return handles;
 }
 
