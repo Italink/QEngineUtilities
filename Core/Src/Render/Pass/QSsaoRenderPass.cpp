@@ -104,7 +104,7 @@ void QSsaoRenderPass::compile() {
 		layout (binding = 0) uniform sampler2D uPosition;
 		layout (binding = 1) uniform sampler2D uNormal;
 		layout (binding = 2) uniform SsaoState{
-			mat4 projection;
+			mat4 VP;
 			float radius;
 			float bias;
 			int size;
@@ -129,7 +129,7 @@ void QSsaoRenderPass::compile() {
 				vec3 samplePos = TBN * ssaoState.samples[i].xyz;
 				samplePos = position + samplePos * ssaoState.radius;
 
-				vec4 offset = ssaoState.projection * vec4(samplePos, 1.0);
+				vec4 offset = ssaoState.VP * vec4(samplePos, 1.0);
 				offset.xyz /= offset.w;
 				offset.xyz  = offset.xyz * 0.5 + 0.5; 
 
@@ -155,13 +155,13 @@ void QSsaoRenderPass::compile() {
 
 void QSsaoRenderPass::render(QRhiCommandBuffer* cmdBuffer) {
 	QMatrix4x4 VP = mRenderer->getCamera()->getProjectionMatrixWithCorr(mRhi) * mRenderer->getCamera()->getViewMatrix();
-	mSsaoState.projection = VP.toGenericMatrix<4, 4>();
+	mSsaoState.VP = VP.toGenericMatrix<4, 4>();
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	if (sigUpdateSsaoState.ensure()) {
 		batch->updateDynamicBuffer(mUniformBuffer.get(), 0, sizeof(SsaoState), &mSsaoState);
 	}
 	else {
-		batch->updateDynamicBuffer(mUniformBuffer.get(), offsetof(SsaoState, projection), sizeof(float) * 16, &mSsaoState);
+		batch->updateDynamicBuffer(mUniformBuffer.get(), offsetof(SsaoState, VP), sizeof(float) * 16, VP.data());
 	}
 	cmdBuffer->resourceUpdate(batch);
 	cmdBuffer->beginPass(mRT.renderTarget.get(), QColor::fromRgbF(0.0f, 0.0f, 0.0f, 0.0f), { 1.0f, 0 });

@@ -78,9 +78,10 @@ private:
 	virtual void setupRhi(QRhiEx* inRhi) override;
 	virtual void onTick(QRhiCommandBuffer* inCmdBuffer) override final;
 	void recompile();
-	void onSpawn(QRhiCommandBuffer* inCmdBuffer);
-	void onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer);
-	void onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer);
+protected:
+	virtual void onSpawn(QRhiCommandBuffer* inCmdBuffer);
+	virtual void onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer);
+	virtual void onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer);
 private:
 	QRhiEx::Signal mSigCompile;
 	QRhiEx::Signal mSigInitIndirectBuffer;

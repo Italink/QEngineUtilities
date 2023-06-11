@@ -48,7 +48,7 @@ private:
 	QScopedPointer<QRhiShaderResourceBindings> mBindings;
 
 	struct SsaoState {
-		QGenericMatrix<4, 4, float> projection;
+		QGenericMatrix<4, 4, float> VP;
 		float radius = 2.0f;
 		float bias = 0.1f;
 		uint32_t size = 0;
