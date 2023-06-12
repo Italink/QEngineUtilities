@@ -38,32 +38,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_subdirectory(Core)
-add_subdirectory(Editor)
-
-file(GLOB_RECURSE PROJECT_SOURCE FILES Src/*.h Src/*.cpp)
-
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Src FILES ${PROJECT_SOURCE})
-
-add_library(QEngineUtilities STATIC
-    ${PROJECT_SOURCE}
-)
-
-target_link_libraries(QEngineUtilities PUBLIC 
-    QEngineCore
-)
-
-target_link_libraries(QEngineUtilities PRIVATE 
-    $<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QEngineEditor>
-)
-
-target_compile_definitions(QEngineUtilities PUBLIC "$<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QENGINE_WITH_EDITOR>")
-target_include_directories(QEngineUtilities PUBLIC Src/Public) 
-target_include_directories(QEngineUtilities PRIVATE Src/Private) 
-
-set_target_properties(QEngineUtilities PROPERTIES FOLDER "QEngineUtilities")
+add_subdirectory(3rdParty)
+add_subdirectory(Source/Core)
+add_subdirectory(Source/Editor)
+add_subdirectory(Source/Engine)
 
 if(PROJECT_IS_TOP_LEVEL)
-    add_subdirectory(Examples)
+    add_subdirectory(Samples)
 endif()
 
