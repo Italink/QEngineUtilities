@@ -23,6 +23,7 @@
 #define COLOR_WHEEL_HPP
 
 #include <QWidget>
+#include "QEngineEditorAPI.h"
 
 /**
  * \brief Display an analog widget that allows the selection of a HSV color
@@ -30,7 +31,7 @@
  * It has an outer wheel to select the Hue and an intenal square to select
  * Saturation and Lightness.
  */
-class  ColorWheel : public QWidget
+class QENGINEEDITOR_API ColorWheel : public QWidget
 {
 	Q_OBJECT
 

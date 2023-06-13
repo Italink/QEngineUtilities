@@ -2,8 +2,9 @@
 #define GRADIENT_BAR_ITEM_HPP
 
 #include <QWidget>
+#include "QEngineEditorAPI.h"
 
-class GradientBarItem : public QWidget
+class QENGINEEDITOR_API GradientBarItem : public QWidget
 {
 	Q_OBJECT
 public:

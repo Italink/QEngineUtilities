@@ -1,4 +1,4 @@
-#include "../Public/CorePlugin.h"
+#include "CorePlugin.h"
 #include <QDebug>
 
 void CorePlugin::startup() {

@@ -28,8 +28,9 @@
 #include <QObject>
 #include <QPair>
 #include <QPixmap>
+#include "QEngineEditorAPI.h"
 
-class  ColorPalette : public QObject
+class QENGINEEDITOR_API ColorPalette : public QObject
 {
 	Q_OBJECT
 

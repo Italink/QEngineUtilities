@@ -192,19 +192,6 @@ void QDetailViewManager::RegisterBuiltIn() {
 		return colorButton;
 	});
 
-	//RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor4D>(), [](QPropertyHandle* InHandler) {
-	//	QColor4DButton* colorButton = new QColor4DButton();
-	//	InHandler->Bind(colorButton, &QColor4DButton::AsColorChanged,
-	//		[colorButton]() {
-	//		return QVariant::fromValue<QColor4D>(colorButton->GetColor());
-	//	},
-	//		[colorButton](QVariant var) {
-	//		colorButton->SetColor(var.value<QColor4D>());
-	//	}
-	//	);
-	//	return colorButton;
-	//});
-
 	REGISTER_NUMERIC_TYPE(int);
 	REGISTER_NUMERIC_TYPE(float);
 	REGISTER_NUMERIC_TYPE(double);

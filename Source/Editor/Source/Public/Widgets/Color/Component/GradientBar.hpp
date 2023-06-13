@@ -4,13 +4,14 @@
 #include <QLinearGradient>
 #include <QWidget>
 #include "GradientHelper.hpp"
+#include "QEngineEditorAPI.h"
 
 /**
  * \brief A slider that moves on top of a gradient
  */
 class GradientBarItem;
 
-class  GradientBar : public QWidget
+class QENGINEEDITOR_API GradientBar : public QWidget
 {
 	Q_OBJECT
 public:

@@ -7,6 +7,7 @@
 class QENGINEUTILITIES_API QEngineApplication : public QApplication {
 public:
 	QEngineApplication(int& argc, char** argv);
+	virtual ~QEngineApplication();
 };
 
 #endif // QEngineApplication_h__

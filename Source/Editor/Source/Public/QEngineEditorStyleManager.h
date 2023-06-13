@@ -26,8 +26,10 @@ private:
 	QByteArray mStyleSheet;
 public:
 	static QEngineEditorStyleManager* Instance();
+
 	void SetStyle(QDetailWidgetStyle inStyle);
 	QByteArray GetStylesheet();
+
 	QColor GetGridLineColor() const;
 	void SetGridLineColor(QColor val);
 

@@ -25,11 +25,12 @@
 #include <QWidget>
 #include <QPen>
 #include "ColorPalette.hpp"
+#include "QEngineEditorAPI.h"
 
 /**
  * \brief A widget drawing a palette
  */
-class  Swatch : public QWidget
+class QENGINEEDITOR_API Swatch : public QWidget
 {
 	Q_OBJECT
 

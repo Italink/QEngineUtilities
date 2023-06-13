@@ -25,6 +25,7 @@
 
 #include <QLineEdit>
 #include <QColor>
+#include "QEngineEditorAPI.h"
 
 /**
  * \brief A line edit used to define a color name
@@ -39,7 +40,7 @@
  *  * Long hex strings  #ff0000ff
  *  * Function like     rgba(255,0,0,255)
  */
-class  ColorLineEdit : public QLineEdit
+class QENGINEEDITOR_API ColorLineEdit : public QLineEdit
 {
 	Q_OBJECT
 		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged)

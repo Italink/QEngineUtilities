@@ -25,6 +25,7 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 	mViewportBarFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 	mViewportBarFlags |= ImGuiWindowFlags_UnsavedDocument;
 
+	ImGui::SetCurrentContext(mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
 	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
 	if (file.open(QIODevice::ReadOnly)) {

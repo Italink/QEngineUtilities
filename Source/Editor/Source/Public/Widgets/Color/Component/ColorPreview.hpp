@@ -24,11 +24,12 @@
 #define COLOR_PREVIEW_HPP
 
 #include <QWidget>
+#include "QEngineEditorAPI.h"
 
 /**
  * Simple widget that shows a preview of a color
  */
-class  ColorPreview : public QWidget
+class QENGINEEDITOR_API ColorPreview : public QWidget
 {
 	Q_OBJECT
 		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged DESIGNABLE true)

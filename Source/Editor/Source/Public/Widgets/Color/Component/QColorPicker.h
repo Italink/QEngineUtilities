@@ -4,8 +4,9 @@
 #include <QWidget>
 #include <QDialog>
 #include <QMouseEvent>
+#include "QEngineEditorAPI.h"
 
-class QColorPicker : public QDialog
+class QENGINEEDITOR_API QColorPicker : public QDialog
 {
 	Q_OBJECT
 public:

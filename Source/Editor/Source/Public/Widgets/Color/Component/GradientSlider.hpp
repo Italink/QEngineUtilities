@@ -26,11 +26,12 @@
 
 #include <QSlider>
 #include <QGradient>
+#include "QEngineEditorAPI.h"
 
 /**
  * \brief A slider that moves on top of a gradient
  */
-class  GradientSlider : public QSlider
+class QENGINEEDITOR_API GradientSlider : public QSlider
 {
 	Q_OBJECT
 		Q_PROPERTY(QBrush background READ background WRITE setBackground NOTIFY backgroundChanged)
