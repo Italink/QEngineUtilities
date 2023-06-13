@@ -1,0 +1,4 @@
+qengine_add_runtime_plugin(QEngineCorePlugin
+	PRIVATE_DEPENDENCY
+		QEngineCore
+)

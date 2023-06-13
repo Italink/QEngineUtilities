@@ -1,0 +1,12 @@
+#ifndef QENGINEEDITOR_API_H
+#define QENGINEEDITOR_API_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(QENGINEEDITOR_LIBRARY)
+#  define QENGINEEDITOR_API Q_DECL_EXPORT
+#else
+#  define QENGINEEDITOR_API Q_DECL_IMPORT
+#endif
+
+#endif // QENGINEEDITOR_API_H

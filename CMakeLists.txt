@@ -4,6 +4,8 @@ project(QEngineUtilities)
 
 cmake_minimum_required(VERSION 3.12)
 
+include(GenerateExportHeader)
+
 set(GCC_DEBUG_FLAGS "-g -Wall")
 
 if(CMAKE_CONFIGURATION_TYPES)
@@ -38,9 +40,114 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set_property(GLOBAL PROPERTY QENGINE_TARGET_LIST "")
+set_property(GLOBAL PROPERTY QENGINE_RUNTIME_PLUGIN_LIST "")
+set_property(GLOBAL PROPERTY QENGINE_EDITOR_PLUGIN_LIST "")
+
+macro(qengine_generate_export_header TARGET_NAME)
+    set(EXPORT_HEADER_PATH ${CMAKE_CURRENT_LIST_DIR}/Source/Public/${TARGET_NAME}API.h)
+    string(TOUPPER ${TARGET_NAME} API_NAME)
+    file(WRITE ${EXPORT_HEADER_PATH} "#ifndef ${API_NAME}_API_H
+#define ${API_NAME}_API_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(${API_NAME}_LIBRARY)
+#  define ${API_NAME}_API Q_DECL_EXPORT
+#else
+#  define ${API_NAME}_API Q_DECL_IMPORT
+#endif
+
+#endif // ${API_NAME}_API_H")
+    set_property(TARGET ${TARGET_NAME} APPEND PROPERTY SOURCES ${EXPORT_HEADER_PATH})  
+    target_compile_definitions(${TARGET_NAME} PRIVATE ${API_NAME}_LIBRARY)
+endmacro()
+
+macro(qengine_add_target TARGET_NAME)
+    set(prefix QENGINE)
+    set(options ENABLE_MOC)
+    set(one_value_keywords SOURCE_GROUP QRC_FILE)
+    set(multi_value_keywords PUBLIC_DEPENDENCY PRIVATE_DEPENDENCY PUBLIC_INCLUDE PRIVATE_INCLUDE PUBLIC_DEFINITIONS PRIVATE_DEFINITIONS)
+    cmake_parse_arguments(${prefix} "${options}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
+    
+    list(APPEND QENGINE_PUBLIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Public)
+    list(APPEND QENGINE_PRIVATE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Private)
+    
+    file(GLOB_RECURSE PUBLIC_FILES LIST_DIRECTORIES TRUE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Public/*)
+    foreach(PUBLIC_FILE ${PUBLIC_FILES})
+        if(IS_DIRECTORY ${PUBLIC_FILE})
+            list(APPEND QENGINE_PRIVATE_INCLUDE ${PUBLIC_FILE})
+        endif()
+    endforeach()
+
+    file(GLOB_RECURSE PROJECT_SOURCE FILES ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h  ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp)
+    if(QENGINE_QRC_FILE)
+        qt6_add_resources(QRC_FILE ${QENGINE_QRC_FILE})
+    endif()
+
+    add_library(${TARGET_NAME} SHARED ${PROJECT_SOURCE} ${QRC_FILE})
+    
+    if(QENGINE_ENABLE_MOC)
+        set_property(TARGET ${TARGET_NAME} PROPERTY AUTOMOC ON)
+    endif()
+
+    if(NOT QENGINE_SOURCE_GROUP)
+        set(QENGINE_SOURCE_GROUP "QEngineUtilities")
+    endif()
+
+    set_property(GLOBAL APPEND PROPERTY QENGINE_TARGET_LIST "${TARGET_NAME}")
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${PROJECT_SOURCE})
+    target_include_directories(${TARGET_NAME} PUBLIC  ${QENGINE_PUBLIC_INCLUDE}) 
+    target_include_directories(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_INCLUDE}) 
+    target_link_libraries(${TARGET_NAME} PUBLIC ${QENGINE_PUBLIC_DEPENDENCY})
+    target_link_libraries(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEPENDENCY})
+    target_compile_definitions(${TARGET_NAME} PUBLIC ${QENGINE_PUBLIC_DEFINITIONS})
+    target_compile_definitions(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEFINITIONS})
+    set_target_properties(${TARGET_NAME} PROPERTIES 
+        FOLDER ${QENGINE_SOURCE_GROUP}
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/Binaries/$<0:>"
+    )
+    foreach(OUTPUT_CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${OUTPUT_CONFIG} OUTPUT_CONFIG_NAME)
+        set_target_properties(${TARGET_NAME} PROPERTIES  ${OUTPUT_CONFIG_NAME}_POSTFIX -${OUTPUT_CONFIG})
+    endforeach()
+
+    qengine_generate_export_header(${TARGET_NAME})
+endmacro()
+
+macro(qengine_add_runtime_plugin PLUGIN_TARGET_NAME)
+    set_property(GLOBAL APPEND PROPERTY QENGINE_RUNTIME_PLUGIN_LIST "${PLUGIN_TARGET_NAME}")
+    qengine_add_target(${PLUGIN_TARGET_NAME} ${ARGN} SOURCE_GROUP "QEngineUtilities/Plugins")
+endmacro()
+
+macro(qengine_add_editor_plugin PLUGIN_TARGET_NAME)
+    set_property(GLOBAL APPEND PROPERTY QENGINE_EDITOR_PLUGIN_LIST "${PLUGIN_TARGET_NAME}")
+    qengine_add_target(${PLUGIN_TARGET_NAME} ${ARGN} SOURCE_GROUP "QEngineUtilities/Plugins")
+endmacro()
+
+function(qengine_copy_dll TARGET_NAME)
+    get_property(QENGINE_TARGET_LIST GLOBAL PROPERTY QENGINE_TARGET_LIST)
+    get_property(QENGINE_RUNTIME_PLUGIN_LIST GLOBAL PROPERTY QENGINE_RUNTIME_PLUGIN_LIST)
+    get_property(QENGINE_EDITOR_PLUGIN_LIST GLOBAL PROPERTY QENGINE_EDITOR_PLUGIN_LIST)
+    
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QEngineCore> $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QEngineEditor> $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QEngineUtilities> $<TARGET_FILE_DIR:${TARGET_NAME}>
+    )
+endfunction()
+
 add_subdirectory(3rdParty)
 add_subdirectory(Source/Core)
 add_subdirectory(Source/Editor)
+
+file(GLOB PLUGIN_DIR_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Plugins/*)
+foreach(PLUGIN_DIR ${PLUGIN_DIR_LIST})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_DIR})
+        add_subdirectory(${PLUGIN_DIR})
+    endif()
+endforeach()
+
 add_subdirectory(Source/Engine)
 
 if(PROJECT_IS_TOP_LEVEL)

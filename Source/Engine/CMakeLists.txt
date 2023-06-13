@@ -1,20 +1,18 @@
-file(GLOB_RECURSE PROJECT_SOURCE FILES *.h *.cpp)
-
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PROJECT_SOURCE})
-
-add_library(QEngineUtilities STATIC 
-    ${PROJECT_SOURCE}
+qengine_add_target(QEngineUtilities
+    ENABLE_MOC
+    PUBLIC_DEPENDENCY   
+        QEngineCore
+    PRIVATE_DEPENDENCY
+        $<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QEngineEditor>
+    PUBLIC_DEFINITIONS
+        "$<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QENGINE_WITH_EDITOR>"
+    SOURCE_GROUP "QEngineUtilities"
 )
 
-target_link_libraries(QEngineUtilities PUBLIC QEngineCore)
+get_property(QENGINE_RUNTIME_PLUGIN_LIST GLOBAL PROPERTY QENGINE_RUNTIME_PLUGIN_LIST)
+get_property(QENGINE_EDITOR_PLUGIN_LIST GLOBAL PROPERTY QENGINE_EDITOR_PLUGIN_LIST)
 
-target_link_libraries(QEngineUtilities PRIVATE 
-    $<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QEngineEditor>
+add_dependencies(QEngineUtilities 
+    ${QENGINE_RUNTIME_PLUGIN_LIST} 
+    ${QENGINE_EDITOR_PLUGIN_LIST} 
 )
-
-target_compile_definitions(QEngineUtilities PUBLIC "$<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QENGINE_WITH_EDITOR>")
-
-target_include_directories(QEngineUtilities PUBLIC Public) 
-target_include_directories(QEngineUtilities PRIVATE Private) 
-
-set_target_properties(QEngineUtilities PROPERTIES FOLDER "QEngineUtilities")
