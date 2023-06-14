@@ -24,6 +24,7 @@ Q_DECLARE_METATYPE(QSharedPointer<IStaticMeshCreator>)
 
 class QStaticMeshCreator_FromFile : public IStaticMeshCreator {
 	Q_OBJECT
+	Q_CLASSINFO("FilePath", "Type=FilePath")
 public:
 	Q_INVOKABLE QStaticMeshCreator_FromFile() {}
 
@@ -32,10 +33,6 @@ public:
 	}
 
 	Q_STATIC_MESH_CREATE_PROPERTY(QString, FilePath);
-
-	//Q_META_BEGIN(QStaticMeshCreator_FromFile)
-	//	Q_META_P_STRING_AS_FILE_PATH(FilePath)
-	//Q_META_END()
 };
 
 class QStaticMeshCreator_FromText : public IStaticMeshCreator {

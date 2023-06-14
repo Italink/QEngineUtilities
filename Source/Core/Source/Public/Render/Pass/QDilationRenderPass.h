@@ -5,17 +5,16 @@
 
 class QENGINECORE_API QDilationRenderPass: public IRenderPass {
 	Q_OBJECT
-		Q_PROPERTY(int DilationSize READ getDilationSize WRITE setDilationSize)
-		Q_PROPERTY(float DilationSeparation  READ getDilationSeparation WRITE setDilationSeparation)
-		Q_PROPERTY(float MinThreshold READ getMinThreshold WRITE setMinThreshold)
-		Q_PROPERTY(float MaxThreshold READ getMaxThreshold WRITE setMaxThreshold)
+	Q_PROPERTY(int DilationSize READ getDilationSize WRITE setDilationSize)
+	Q_PROPERTY(float DilationSeparation  READ getDilationSeparation WRITE setDilationSeparation)
+	Q_PROPERTY(float MinThreshold READ getMinThreshold WRITE setMinThreshold)
+	Q_PROPERTY(float MaxThreshold READ getMaxThreshold WRITE setMaxThreshold)
 
-	//Q_META_BEGIN(QDilationRenderPass)
-	//	Q_META_P_NUMBER_LIMITED(DilationSize, 1, 40)
-	//	Q_META_P_NUMBER_LIMITED(DilationSeparation, 0.01, 10)
-	//	Q_META_P_NUMBER_LIMITED(MinThreshold,0, 1)
-	//	Q_META_P_NUMBER_LIMITED(MinThreshold,0, 1)
-	//Q_META_END()
+	Q_CLASSINFO("DilationSize", "Min=1,Max=40")
+	Q_CLASSINFO("DilationSeparation", "Min=0.01,Max=10")
+	Q_CLASSINFO("MinThreshold", "Min=0,Max=1")
+	Q_CLASSINFO("MaxThreshold", "Min=0,Max=1")
+
 
 	Q_BUILDER_BEGIN_RENDER_PASS(QDilationRenderPass,Src)
 		Q_BUILDER_ATTRIBUTE(int, DilationIterations)

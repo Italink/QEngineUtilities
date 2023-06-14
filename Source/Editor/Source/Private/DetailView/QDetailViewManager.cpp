@@ -72,37 +72,6 @@ QWidget* QDetailViewManager::GetCustomPropertyValueWidget(QPropertyHandle* InHan
 	return new QWidget;
 }
 
-
-QMetaData* QDetailViewManager::GetClassMetaData(const IDetailLayoutBuilder::ObjectContext& Context) {
-	QSharedPointer<QMetaData> metaData = mClassMetaData.value(Context.MetaObject);
-	if (metaData)
-		return metaData.get();
-	metaData = QSharedPointer<QMetaData>::create();
-	for (int i = 0; i < Context.MetaObject->methodCount(); i++) {
-		QMetaMethod method = Context.MetaObject->method(i);
-		if (QString(method.name()).endsWith("_GetMetaData")) {
-			QMetaData localMetaData;
-			if(Context.ObjectPtr == Context.OwnerObject){
-				method.invoke(Context.OwnerObject, Q_RETURN_ARG(QMetaData, localMetaData));
-			}
-			else{
-				method.invokeOnGadget(Context.ObjectPtr, Q_RETURN_ARG(QMetaData, localMetaData));
-			}
-			for(auto meta:localMetaData.mClassMetaData.asKeyValueRange()){
-				metaData->mClassMetaData[meta.first] = meta.second;
-			}
-			for (auto PropertyIter = localMetaData.mPropertiesMetaData.begin(); PropertyIter != localMetaData.mPropertiesMetaData.end(); ++PropertyIter) {
-				metaData->mPropertiesMetaData[PropertyIter.key()] = PropertyIter.value();
-			}
-			for (auto category : localMetaData.mCategories.asKeyValueRange()) {
-				metaData->mCategories[category.first] = category.second;
-			}
-		}
-	}
-	mClassMetaData.insert(Context.MetaObject, metaData);
-	return metaData.get();
-}
-
 QDetailViewManager::QDetailViewManager()
 {
 	RegisterBuiltIn();
@@ -125,19 +94,6 @@ QDetailViewManager::QDetailViewManager()
 
 void QDetailViewManager::RegisterBuiltIn() {
 	RegisterCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
-	//RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
-	//RegisterCustomClassLayout<DetailCustomization_QRhiMaterialGroup>(&QRhiMaterialGroup::staticMetaObject);
-	//RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
-	//RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
-	//RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
-	//
-	//RegisterCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
-	//RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
-	//RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
-
-	//qRegisterMetaType<QRhiTextureDesc>();
-	//qRegisterMetaType<QRhiGraphicsPipelineBuilder*>();
-	//qRegisterMetaType<IStaticMeshCreator*>();
 
 	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;

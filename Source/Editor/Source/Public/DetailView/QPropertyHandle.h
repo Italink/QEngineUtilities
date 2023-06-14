@@ -21,8 +21,8 @@ public:
 	using Setter = std::function<void(QVariant)>;
 
 	static QPropertyHandle* Find(const QObject* inParent, const QString& inPropertyPath);
-	static QPropertyHandle* FindOrCreate(QObject* inObject, const QString& inPropertyPath, const QVariantHash& InMetaData = QVariantHash());
-	static QPropertyHandle* FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
+	static QPropertyHandle* FindOrCreate(QObject* inObject, const QString& inPropertyPath);
+	static QPropertyHandle* FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter);
 
 	void SetValue(QVariant inValue,QString bIsPushUndoStackAndWithDesc = QString());
 	QVariant GetValue();
@@ -68,8 +68,12 @@ public:
 Q_SIGNALS:
 	void AsValueChanged();
 	void AsRequestRebuildRow();
+
 protected:
-	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData);
+	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter);
+	void ResloveMetaData();
+
+protected:
 	QSharedPointer<IPropertyHandleImpl> mImpl;
 	QMetaType mType;
 	Getter mGetter;

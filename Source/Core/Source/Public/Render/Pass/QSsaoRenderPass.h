@@ -5,15 +5,13 @@
 
 class QENGINECORE_API QSsaoRenderPass: public IRenderPass {
 	Q_OBJECT
-		Q_PROPERTY(int SampleSize READ getSampleSize WRITE setupSampleSize)
-		Q_PROPERTY(float Radius READ getRadius WRITE setupRadius)
-		Q_PROPERTY(float Bias READ getBias WRITE setupBias)
+	Q_PROPERTY(int SampleSize READ getSampleSize WRITE setupSampleSize)
+	Q_PROPERTY(float Radius READ getRadius WRITE setupRadius)
+	Q_PROPERTY(float Bias READ getBias WRITE setupBias)
 
-	//Q_META_BEGIN(QSsaoRenderPass)
-	//	Q_META_P_NUMBER_LIMITED(SampleSize,1,128)
-	//	Q_META_P_NUMBER_LIMITED(Radius,0,4)
-	//	Q_META_P_NUMBER_LIMITED(Bias, 0.01, 1.0)
-	//Q_META_END()
+	Q_CLASSINFO("SampleSize", "Min=1,Max=128")
+	Q_CLASSINFO("Radius", "Min=0,Max=4")
+	Q_CLASSINFO("Bias", "Min=0.01,Max=1.0")
 
 	Q_BUILDER_BEGIN_RENDER_PASS(QSsaoRenderPass, Position, Normal)
 		Q_BUILDER_ATTRIBUTE(int, SampleSize)

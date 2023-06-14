@@ -39,10 +39,8 @@ class QENGINEUTILITIES_API QSplineRenderComponent :public ISceneRenderComponent 
 	Q_PROPERTY(int SubdivisionAmount READ getSubdivisionAmount WRITE setSubdivisionAmount)
 	Q_PROPERTY(QList<QSplinePoint> Points READ getPoints WRITE setPoints)
 
-	//Q_META_BEGIN(QSplineRenderComponent)
-	//	Q_META_P_NUMBER_LIMITED(LineWidth, 0, 1000)
-	//	Q_META_P_NUMBER_LIMITED(SubdivisionAmount, 0, 64)
-	//Q_META_END()
+	Q_CLASSINFO("LineWidth", "Min=0,Max=1000")
+	Q_CLASSINFO("SubdivisionAmount", "Min=0,Max=64")
 
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSplineRenderComponent)
 		Q_BUILDER_ATTRIBUTE(QList<QSplinePoint>, Points)

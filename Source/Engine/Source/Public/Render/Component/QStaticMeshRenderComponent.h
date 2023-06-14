@@ -12,10 +12,6 @@ class QENGINEUTILITIES_API QStaticMeshRenderComponent :public ISceneRenderCompon
 	Q_PROPERTY(QSharedPointer<QStaticMesh> StaticMesh READ getStaticMesh WRITE setStaticMesh)
 	Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)
 
-	//Q_META_BEGIN(QStaticMeshRenderComponent)
-	//	Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
-	//Q_META_END()
-
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QStaticMeshRenderComponent)
 		Q_BUILDER_ATTRIBUTE(QSharedPointer<QStaticMesh>, StaticMesh)
 	Q_BUILDER_END()

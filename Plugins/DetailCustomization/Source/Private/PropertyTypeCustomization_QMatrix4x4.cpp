@@ -19,8 +19,7 @@ void PropertyTypeCustomization_QMatrix4x4::CustomizeChildren(QPropertyHandle* Pr
 			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
 			MathUtils::setMatTranslate(Mat, var.value<QVector3D>());
 			PropertyHandle->SetValue(Mat);
-	}
-		, PropertyHandle->GetMetaData()
+		}
 	);
 	Builder->AddProperty(position);
 
@@ -37,7 +36,6 @@ void PropertyTypeCustomization_QMatrix4x4::CustomizeChildren(QPropertyHandle* Pr
 			MathUtils::setMatRotation(Mat, var.value<QVector3D>());
 			PropertyHandle->SetValue(Mat);
 		}
-		, PropertyHandle->GetMetaData()
 		);
 	Builder->AddProperty(rotation);
 
@@ -54,7 +52,6 @@ void PropertyTypeCustomization_QMatrix4x4::CustomizeChildren(QPropertyHandle* Pr
 			MathUtils::setMatScale3D(Mat, var.value<QVector3D>());
 			PropertyHandle->SetValue(Mat);
 		}
-		, PropertyHandle->GetMetaData()
 		);
 	Builder->AddProperty(scale);
 }

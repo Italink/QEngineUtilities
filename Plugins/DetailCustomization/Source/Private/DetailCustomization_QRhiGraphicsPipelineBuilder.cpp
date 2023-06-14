@@ -6,8 +6,7 @@
 
 void DetailCustomization_QRhiGraphicsPipelineBuilder::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QRhiGraphicsPipelineBuilder* pipeline = (QRhiGraphicsPipelineBuilder*) Context.ObjectPtr;
-	QMetaData* metaData = QDetailViewManager::Instance()->GetClassMetaData(Context);
-	QPropertyHandle* uniformblocksHandle = QPropertyHandle::FindOrCreate(pipeline, "UniformBlocks", metaData->mPropertiesMetaData.value("UniformBlocks"));
+	QPropertyHandle* uniformblocksHandle = QPropertyHandle::FindOrCreate(pipeline, "UniformBlocks");
 	for (auto uniformblock : pipeline->getUniformBlocks().keys()) {
 		if(uniformblock != "Transform")
 			Builder->AddProperty(uniformblocksHandle->CreateChildHandle(uniformblock));
@@ -24,7 +23,6 @@ void DetailCustomization_QRhiGraphicsPipelineBuilder::CustomizeDetails(const IDe
 			[textureInfo = texture.second](QVariant var) {
 				textureInfo->ImageCache = var.value<QImage>();
 			}
-			, metaData->mPropertiesMetaData.value(texture.first)
 		);
 		Builder->AddProperty(handler);
 	}

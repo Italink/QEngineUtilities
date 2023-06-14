@@ -4,7 +4,6 @@
 #include <functional>
 #include "IDetailCustomization.h"
 #include "IPropertyTypeCustomization.h"
-#include "QMetaData.h"
 
 class QENGINEEDITOR_API QDetailViewManager {
 public:
@@ -37,7 +36,6 @@ public:
 	QSharedPointer<IDetailCustomization> GetCustomDetailLayout(const QMetaObject* InMetaObject);
 	QSharedPointer<IPropertyTypeCustomization> GetCustomPropertyType(const QMetaType& InMetaType);
 	QWidget* GetCustomPropertyValueWidget(QPropertyHandle* InHandler);
-	QMetaData* GetClassMetaData(const IDetailLayoutBuilder::ObjectContext& Context);
 protected:
 	QDetailViewManager();
 	void RegisterBuiltIn();
@@ -45,7 +43,6 @@ private:
 	QHash<const QMetaObject*, CustomClassLayoutCreator> mCustomClassLayoutMap;
 	QHash<QMetaType, CustomPropertyTypeLayoutCreator  > mCustomPropertyTypeLayoutMap;
 	QHash<QMetaType, CustomPropertyValueWidgetCreator > mCustomPropertyValueWidgetMap;
-	QHash<const QMetaObject*, QSharedPointer<QMetaData>> mClassMetaData;
 };
 
 

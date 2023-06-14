@@ -5,15 +5,13 @@
 
 class QENGINECORE_API QToneMappingRenderPass :public IRenderPass {
 	Q_OBJECT
-		Q_PROPERTY(float Gamma READ getGamma WRITE setGamma)
-		Q_PROPERTY(float Exposure READ getExposure WRITE setExposure)
-		Q_PROPERTY(float PureWhite READ getPureWhite WRITE setPureWhite)
+	Q_PROPERTY(float Gamma READ getGamma WRITE setGamma)
+	Q_PROPERTY(float Exposure READ getExposure WRITE setExposure)
+	Q_PROPERTY(float PureWhite READ getPureWhite WRITE setPureWhite)
 
-	//Q_META_BEGIN(QToneMappingRenderPass)
-	//	Q_META_P_NUMBER_LIMITED(Gamma, 0, 16)
-	//	Q_META_P_NUMBER_LIMITED(Exposure, 0, 16)
-	//	Q_META_P_NUMBER_LIMITED(PureWhite, 0, 16)
-	//Q_META_END()
+	Q_CLASSINFO("Gamma"		, "Min=0,Max=16")
+	Q_CLASSINFO("Exposure"	, "Min=0,Max=16")
+	Q_CLASSINFO("PureWhite"	, "Min=0,Max=16")
 
 	Q_BUILDER_BEGIN_RENDER_PASS(QToneMappingRenderPass, Src)
 		Q_BUILDER_ATTRIBUTE(float, Gamma)

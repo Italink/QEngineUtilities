@@ -63,8 +63,7 @@ QPropertyHandle* QSequentialPropertyHandleImpl::CreateChildHandle(const QString&
 			const void* dataPtr = coercer.coerce(var, var.metaType());
 			metaSequence.setValueAtIndex(containterPtr, index, dataPtr);
 			mHandle->SetValue(varList);
-		},
-		mHandle->GetMetaData()
+		}
 	);
 	handle->SetAttachButtonWidgetCallback([this,index](QHBoxLayout* Layout) {
 		int count = ItemCount();

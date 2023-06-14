@@ -6,7 +6,6 @@
 
 void DetailCustomization_QRhiMaterialGroup::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QRhiMaterialGroup* group = (QRhiMaterialGroup*) Context.ObjectPtr;
-	QMetaData* metaData = QDetailViewManager::Instance()->GetClassMetaData(Context);
 	int index = 0;
 	for (auto materialDesc : group->getDescList()) {
 		auto rowBuilder = Builder->AddRowByNameValueWidget(QString::number(index++), nullptr);
@@ -23,7 +22,6 @@ void DetailCustomization_QRhiMaterialGroup::CustomizeDetails(const IDetailLayout
 				[textureInfo = textureDesc](QVariant var) {
 					textureInfo->ImageCache = var.value<QImage>();
 				}
-				, metaData->mPropertiesMetaData.value(textureDesc->Name)
 			);
 			rowBuilder->AddProperty(handler);
 		}

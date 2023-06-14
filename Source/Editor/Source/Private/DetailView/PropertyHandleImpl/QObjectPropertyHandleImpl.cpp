@@ -89,8 +89,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 					},
 					[this, prop](QVariant var) {
 						prop.write(mOwnerObject, var);
-					},
-					mHandle->GetMetaData()
+					}
 				);
 			}
 			else{
@@ -105,8 +104,7 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 						prop.writeOnGadget(mObjectPtr, var);
 						mHandle->SetValue(mObjectHolder);
 						RefreshObjectPtr();
-					},
-					mHandle->GetMetaData()
+					}
 					);
 			}
 			break;

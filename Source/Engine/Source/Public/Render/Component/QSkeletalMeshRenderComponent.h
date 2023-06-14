@@ -8,13 +8,10 @@
 
 class QENGINEUTILITIES_API QSkeletalMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
-		Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
-		Q_PROPERTY(QRhiMaterialGroup* MaterialGroup READ getMaterialGroup)
+	Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
+	Q_PROPERTY(QRhiMaterialGroup* MaterialGroup READ getMaterialGroup)
 
-	//Q_META_BEGIN(QSkeletalMeshRenderComponent)
-	//	Q_META_P_STRING_AS_FILE_PATH(SkeletalMeshPath)
-	//	Q_META_P_ARRAY_FIXED_SIZE(Pipelines, true)
-	//Q_META_END()
+	Q_CLASSINFO("SkeletalMeshPath", "Type=FilePath")
 
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSkeletalMeshRenderComponent)
 		Q_BUILDER_ATTRIBUTE(QSharedPointer<QSkeletalMesh>, SkeletalMesh)

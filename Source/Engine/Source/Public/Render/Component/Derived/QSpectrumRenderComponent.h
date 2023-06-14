@@ -14,12 +14,10 @@ class QENGINEUTILITIES_API QSpectrumRenderComponent :public QDynamicMeshRenderCo
 	Q_PROPERTY(int LowFreq READ getLowFreq WRITE setLowFreq)
 	Q_PROPERTY(int HighFreq READ getHighFreq WRITE setHighFreq)
 
-	//Q_META_BEGIN(QSpectrumRenderComponent)
-	//	Q_META_P_NUMBER_LIMITED(FramesPerBuffer,4,14)
-	//	Q_META_P_NUMBER_LIMITED(BarCount, 1, 1000)
-	//	Q_META_P_NUMBER_LIMITED(LowFreq, 0, 48000)
-	//	Q_META_P_NUMBER_LIMITED(HighFreq, 0, 48000)
-	//Q_META_END()
+	Q_CLASSINFO("FramesPerBuffer", "Min=4,Max=14")
+	Q_CLASSINFO("BarCount", "Min=1,Max=1000")
+	Q_CLASSINFO("LowFreq", "Min=0,Max=48000")
+	Q_CLASSINFO("HighFreq", "Min=0,Max=48000")
 
 	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSpectrumRenderComponent)
 		Q_BUILDER_ATTRIBUTE(QString, Audio)

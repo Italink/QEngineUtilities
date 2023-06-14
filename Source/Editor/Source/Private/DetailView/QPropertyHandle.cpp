@@ -12,14 +12,14 @@
 #include "DetailView/PropertyHandleImpl/QEnumPropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QObjectPropertyHandleImpl.h"
 
-QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData)
+QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter)
 	: mType(inType)
 	, mGetter(inGetter)
 	, mSetter(inSetter)
-	, mMetaData(inMetaData)
 {
 	setParent(inParent);
 	setObjectName(inPropertyPath);
+	ResloveMetaData();
 	mInitialValue = inGetter();
 	if (QMetaType::canConvert(inType, QMetaType::fromType<QVariantList>())
 		&& !QMetaType::canConvert(inType, QMetaType::fromType<QString>())
@@ -57,6 +57,29 @@ QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString in
 	}
 }
 
+void QPropertyHandle::ResloveMetaData() {
+	auto metaObj = parent()->metaObject();
+	auto firstField = GetPath().split(".").first();
+	for (int i = 0; i < metaObj->classInfoCount(); i++) {
+		auto metaClassInfo = metaObj->classInfo(i);
+		if (metaClassInfo.name() == firstField) {
+			QStringList fields = QString(metaClassInfo.value()).split(",", Qt::SplitBehaviorFlags::SkipEmptyParts);
+			for (auto field : fields) {
+				QStringList pair = field.split("=");
+				QString key, value;
+				if (pair.size() > 0) {
+					key = pair.first().trimmed();
+				}
+				if (pair.size() > 1) {
+					value = pair[1].trimmed();
+				}
+				mMetaData[key] = value;
+			}
+			return;
+		}
+	}
+}
+
 QPropertyHandle* QPropertyHandle::Find(const QObject* inParent, const QString& inPropertyPath) {
 	for (QObject* child : inParent->children()) {
 		QPropertyHandle* handler = qobject_cast<QPropertyHandle*>(child);
@@ -67,7 +90,7 @@ QPropertyHandle* QPropertyHandle::Find(const QObject* inParent, const QString& i
 	return nullptr;
 }
 
-QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString& inPropertyPath, const QVariantHash& InMetaData) {
+QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString& inPropertyPath) {
 	QPropertyHandle* handle = Find(inObject, inPropertyPath);
 	if (handle)
 		return handle;
@@ -87,7 +110,6 @@ QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString&
 			inPropertyPath,
 			[inObject, metaProperty]() {return metaProperty.read(inObject); },
 			[inObject, metaProperty](QVariant var) {  metaProperty.write(inObject, var); }
-			, InMetaData
 		);
 	}
 	while (currIndex < pathList.size()) {
@@ -106,7 +128,7 @@ QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString&
 	return handle;
 }
 
-QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter, QVariantHash inMetaData) {
+QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter) {
 	QPropertyHandle* handle = Find(inParent, inPropertyPath);
 	if (handle)
 		return handle;
@@ -115,8 +137,7 @@ QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inParent, QMetaType inTy
 		inType,
 		inPropertyPath,
 		inGetter,
-		inSetter,
-		inMetaData
+		inSetter
 	);
 }
 

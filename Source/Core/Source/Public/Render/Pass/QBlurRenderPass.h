@@ -5,15 +5,13 @@
 
 class QENGINECORE_API QBlurRenderPass: public IRenderPass {
 	Q_OBJECT
-		Q_PROPERTY(int BlurIterations READ getBlurIter WRITE setBlurIter)
-		Q_PROPERTY(int BlurSize READ getBlurSize WRITE setBlurSize)
-		Q_PROPERTY(int DownSampleCount READ getDownSamplerCount WRITE setDownSample)
+	Q_PROPERTY(int BlurIterations READ getBlurIter WRITE setBlurIter)
+	Q_PROPERTY(int BlurSize READ getBlurSize WRITE setBlurSize)
+	Q_PROPERTY(int DownSampleCount READ getDownSamplerCount WRITE setDownSample)
 
-	//Q_META_BEGIN(QBlurRenderPass)
-	//	Q_META_P_NUMBER_LIMITED(BlurIterations, 0, 10)
-	//	Q_META_P_NUMBER_LIMITED(BlurSize, 1, 40)
-	//	Q_META_P_NUMBER_LIMITED(DownSampleCount, 1, 16)
-	//Q_META_END()
+	Q_CLASSINFO("BlurIterations", "Min=0,Max=10")
+	Q_CLASSINFO("BlurSize", "Min=1,Max=40")
+	Q_CLASSINFO("DownSampleCount", "Min=1,Max=16")
 
 	Q_BUILDER_BEGIN_RENDER_PASS(QBlurRenderPass,Src)
 		Q_BUILDER_ATTRIBUTE(int, BlurIterations)

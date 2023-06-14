@@ -68,8 +68,7 @@ QPropertyHandle* QAssociativePropertyHandleImpl::CreateChildHandle(const QString
 		const void* dataPtr = mappedCoercer.coerce(var, var.metaType());
 		mMetaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, mMetaAssociation.keyMetaType()), dataPtr);
 		mHandle->SetValue(varMap);
-		},
-		mHandle->GetMetaData()
+		}
 		);
 	handle->SetAttachButtonWidgetCallback([inKey, this](QHBoxLayout* Layout) {
 		QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
