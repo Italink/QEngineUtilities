@@ -74,6 +74,7 @@ void QRhiWindow::renderInternal() {
 
 	if (mNeedResize && !(QGuiApplication::mouseButtons() & Qt::LeftButton) ) {
 		onResize(mSwapChain->currentPixelSize());
+		mNeedResize = false;
 	}
 
 	static int CpuFrameCounter = 0;

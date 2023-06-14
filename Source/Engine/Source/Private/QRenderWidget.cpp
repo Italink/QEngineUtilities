@@ -3,6 +3,7 @@
 #include "Render/Renderer/QWindowRenderer.h"
 #include "QSplitter"
 #include "qevent.h"
+#include "QEngineCoreEntry.h"
 
 #ifdef QENGINE_WITH_EDITOR
 #include "DetailView/QDetailView.h"
@@ -130,6 +131,7 @@ void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 			QEngineUndoStack::Instance()->Redo();
 		}
 	}
+	Q_EMIT QEngineCoreEntry::Instance()->asViewportKeyPressEvent(event);
 }
 
 bool QRenderWidget::eventFilter(QObject* obj, QEvent* event) {

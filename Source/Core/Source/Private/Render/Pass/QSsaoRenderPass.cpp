@@ -14,7 +14,7 @@ QSsaoRenderPass* QSsaoRenderPass::setupSampleSize(int size) {
 		return this;
 	mSsaoState.size = size;
 	QRandomGenerator generator;
-	for (unsigned int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 		QVector3D sample(
 			generator.generateDouble() * 2.0 - 1.0,
 			generator.generateDouble() * 2.0 - 1.0,
