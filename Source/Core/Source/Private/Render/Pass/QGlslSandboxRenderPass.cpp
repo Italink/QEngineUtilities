@@ -31,6 +31,7 @@ void QGlslSandboxRenderPass::compile() {
 	blendState.enable = true;
 	mPipeline->setTargetBlends({ blendState });
 	mPipeline->setSampleCount(mRT.renderTarget->sampleCount());
+
 	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 450
 		layout (location = 0) out vec2 sufacePosition;
 		out gl_PerVertex{
@@ -39,8 +40,14 @@ void QGlslSandboxRenderPass::compile() {
 		void main() {
 			gl_Position = vec4(vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2)* 2 -1, 0.0f, 1.0f);
 			sufacePosition = gl_Position.xy;
-		}
-	)");
+			#if Y_UP_IN_NDC
+				sufacePosition.y = - sufacePosition.y;
+			#endif 
+		})"
+		, QShaderDefinitions()
+		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC())
+	);
+
 	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
 		layout (location = 0) in vec2 sufacePosition;
 		layout (binding = 0) uniform UniformBlock{
@@ -55,6 +62,11 @@ void QGlslSandboxRenderPass::compile() {
 		#define resolution UBO.resolution
 		#define sufaceSize UBO.sufaceSize
 		#define time UBO.time
+
+		#define iTime  time
+        #define iMouse mouse
+        #define iResolution resolution
+
 		#define gl_FragColor fragColor
 
 	)" + mShaderCode.toLocal8Bit());

@@ -10,6 +10,7 @@
 #include "Widgets/QObjectTreeView.h"
 #include "Utils/QEngineUndoStack.h"
 #endif
+#include "../../Src/qtbase/src/widgets/kernel/qapplication.h"
 
 
 class QInnerRhiWindow : public QRhiWindow {
@@ -50,15 +51,15 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	hLayout->setSpacing(0);
 	setMinimumSize(800, 600);
 	mRhiWindow = new QInnerRhiWindow(inInitParams, this);
-	QWidget* viewport = QWidget::createWindowContainer(mRhiWindow);
+	mViweport = QWidget::createWindowContainer(mRhiWindow);
 #ifdef QENGINE_WITH_EDITOR
 	QSplitter* splitter = new QSplitter;
-	viewport->setMinimumWidth(400);
+	mViweport->setMinimumWidth(400);
 	QSplitter* panel = new QSplitter(Qt::Vertical);
 	panel->addWidget(mObjectTreeView);
 	panel->addWidget(mDetailView);
 	panel->setSizes({ 1, 10 });
-	splitter->addWidget(viewport);
+	splitter->addWidget(mViweport);
 	splitter->addWidget(panel);
 	mObjectTreeView->setFocusProxy(this);
 	mRhiWindow->installEventFilter(this);
@@ -74,6 +75,10 @@ QCamera* QRenderWidget::setupCamera() {
 	return mCamera;
 }
 
+IRenderer* QRenderWidget::getRenderer() {
+	return mRenderer.get();
+}
+
 void QRenderWidget::setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph) {
 	mFrameGraph = inFrameGraph;
 	requestCompileRenderer();
@@ -87,7 +92,19 @@ QWindow* QRenderWidget::getRhiWindow() {
 	return mRhiWindow;
 }
 
+QWidget* QRenderWidget::getViweport() const {
+	return mViweport;
+}
+
+void QRenderWidget::showAndWaitInitialized() {
+	show();
+	while (!bInitialized) {
+		QApplication::processEvents();
+	}
+}
+
 void QRenderWidget::onInit() {
+	bInitialized = true;
 	mRenderer.reset(new QWindowRenderer(mRhiWindow));
 	mRenderer->setCamera(mCamera);
 #ifdef QENGINE_WITH_EDITOR

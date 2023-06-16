@@ -12,7 +12,6 @@ class QENGINECORE_API QFrameGraph {
 	friend class FrameGraphView;
 public:
 	static QFrameGraphBuilder Begin();
-
 	void compile(IRenderer* inRenderer);
 	void render(QRhiCommandBuffer* inCmdBuffer);
 	void resize(const QSize& size);
@@ -25,6 +24,8 @@ private:
 	QPair<QString, int> mOutputSlot;
 	QHash<QString, IRenderPass*> mRenderPassNodeMap;
 	QList<IRenderPass*> mRenderPassTopology;
+	QSize mLastSize;
+	IRenderer* mRenderer = nullptr;
 };
 
 class QENGINECORE_API QFrameGraphBuilder {

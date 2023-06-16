@@ -7,6 +7,9 @@ QFrameGraphBuilder QFrameGraph::Begin() {
 }
 
 void QFrameGraph::compile(IRenderer* inRenderer) {
+	if (inRenderer == mRenderer)
+		return;
+	mRenderer = inRenderer;
 	mRenderPassTopology.clear();
 	QMap<QString, bool> visited;
 	while (mRenderPassTopology.size() != mRenderPassNodeMap.size()) {
@@ -36,9 +39,12 @@ void QFrameGraph::render(QRhiCommandBuffer* inCmdBuffer) {
 }
 
 void QFrameGraph::resize(const QSize& size) {
-	for (auto& renderPass : mRenderPassTopology) {
-		renderPass->resizeAndLinkNode(size);
-		renderPass->compile();
+	if (size != mLastSize) {
+		for (auto& renderPass : mRenderPassTopology) {
+			renderPass->resizeAndLinkNode(size);
+			renderPass->requestCompile();
+		}
+		mLastSize = size;
 	}
 }
 

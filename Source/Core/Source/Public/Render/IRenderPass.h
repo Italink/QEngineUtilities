@@ -32,15 +32,16 @@ class QSkyboxRenderComponent;
 		Q_MACRO_EXPAND(Q_MACRO_PASTE(Q_EXPAND_OUTPUR_TEXTURE_REGISTER, __VA_ARGS__))
 
 class QENGINECORE_API IRenderPass: public QObject{
+	friend class QFrameGraph;
 public:
 	virtual ~IRenderPass(){}
-	virtual void setRenderer(IRenderer* inRenderer);
-	virtual void compile() {};
-	virtual void resizeAndLinkNode(const QSize& size) {}
-	virtual void render(QRhiCommandBuffer* cmdBuffer) = 0;
 
+	virtual void setRenderer(IRenderer* inRenderer);
 	IRenderer* getRenderer() const { return mRenderer; }
+
 	const QSet<QString>& getDependentPassNodeNames();
+
+	void requestCompile(bool bForce = false);
 
 	int getOutputTextureSize();
 	QRhiTexture* getOutputTexture(const int& inSlot);
@@ -49,6 +50,10 @@ public:
 	QRhiTexture* getFirstOutputTexture();
 	const QMap<QString, QPair<QString, int>>& getInputTextureLinks();
 protected:
+	virtual void compile() {};
+	virtual void resizeAndLinkNode(const QSize& size) {}
+	virtual void render(QRhiCommandBuffer* cmdBuffer) = 0;
+
 	QRhiTexture* getInputTexture(const QString& inName);
 	void registerOutputTexture(int inSlot, const QString& inName, QRhiTexture* inTexture);
 	void registerInputTextureLink(const QString& inTexName, const QString& inPassName, int inSlot);
@@ -59,6 +64,7 @@ protected:
 	QMap<QString, QPair<QString, int>> mInputTextureLinks;
 private:
 	QSet<QString> mDependentPassNodeNames;
+	bool bCompiled = false;
 };
 
 #define Q_BUILDER_BEGIN_BASE_PASS(ClassType) \

@@ -10,6 +10,13 @@ const QSet<QString>& IRenderPass::getDependentPassNodeNames() {
 	return mDependentPassNodeNames;
 }
 
+void IRenderPass::requestCompile(bool bForce) {
+	if (bForce ||!bCompiled) {
+		compile();
+		bCompiled = true;
+	}
+}
+
 int IRenderPass::getOutputTextureSize() {
 	return mOutputTexutres.size();
 }

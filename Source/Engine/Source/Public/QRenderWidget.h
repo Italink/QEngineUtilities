@@ -11,6 +11,7 @@ class QInnerRhiWindow;
 class QWindowRenderer;
 class QDetailView;
 class QObjectTreeView;
+class IRenderer;
 
 class QENGINEUTILITIES_API QRenderWidget :public QWidget {
 public:
@@ -19,9 +20,12 @@ public:
 public:
 	QRenderWidget(QRhiWindow::InitParams inInitParams);
 	QCamera* setupCamera();
+	IRenderer* getRenderer();
 	void setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph);
 	void requestCompileRenderer();
 	QWindow* getRhiWindow();
+	QWidget* getViweport() const;
+	void showAndWaitInitialized();
 protected:
 	void onInit();
 	void onRenderTick();
@@ -32,8 +36,10 @@ protected:
 	bool eventFilter(QObject* obj, QEvent* event) override;
 #endif 
 protected:
+	bool bInitialized = false;
 	QRhiWindow::InitParams mInitParams;
 	QInnerRhiWindow* mRhiWindow = nullptr;
+	QWidget* mViweport = nullptr;
 	QCamera* mCamera;
 	QSharedPointer<QFrameGraph> mFrameGraph;
 	QSharedPointer<QWindowRenderer> mRenderer;
