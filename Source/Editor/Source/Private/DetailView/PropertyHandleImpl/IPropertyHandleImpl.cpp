@@ -1,8 +1,8 @@
 #include "DetailView/PropertyHandleImpl/IPropertyHandleImpl.h"
-#include "Widgets/QElideLabel.h"
+#include "DetailView/QDetailViewManager.h"
 #include "DetailView/QPropertyHandle.h"
 #include "QBoxLayout"
-#include "DetailView/QDetailViewManager.h"
+#include "Widgets/QElideLabel.h"
 
 QPropertyHandle* IPropertyHandleImpl::FindChildHandle(const QString& inSubName) {
 	return QPropertyHandle::Find(mHandle->parent(), mHandle->GetSubPath(inSubName));

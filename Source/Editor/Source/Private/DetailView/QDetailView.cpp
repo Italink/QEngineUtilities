@@ -9,7 +9,6 @@
 #include "QEngineEditorStyleManager.h"
 #include "QApplication"
 
-
 QDetailView::QDetailView()
 	: mView(new QWidget)
 	, mLayout(new QVBoxLayout())

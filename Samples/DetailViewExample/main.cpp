@@ -2,9 +2,8 @@
 #include "qvariant.h"
 #include "qsequentialiterable.h"
 #include "TestObject.h"
-#include "DetailView/QDetailView.h"
 #include "qbasicatomic.h"
-
+#include "DetailView/QDetailView.h"
 
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);

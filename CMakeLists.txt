@@ -136,7 +136,5 @@ endforeach()
 
 add_subdirectory(Source/Engine)
 
-if(PROJECT_IS_TOP_LEVEL)
-    add_subdirectory(Samples)
-endif()
+add_subdirectory(Samples)
 

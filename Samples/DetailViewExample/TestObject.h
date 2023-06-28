@@ -6,7 +6,6 @@
 #include "QFile"
 #include "QDir"
 #include "QColor"
-#include "Utils/QMetaData.h"
 
 #define Q_PROPERTY_VAR(Type,Name)\
     Q_PROPERTY(Type Name READ get_##Name WRITE set_##Name) \
@@ -20,9 +19,9 @@
 
 class TestInlineGadget {
 	Q_GADGET
-		Q_META_BEGIN(TestInlineGadget)
-		Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
-		Q_META_END()
+		//Q_META_BEGIN(TestInlineGadget)
+		//Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
+		//Q_META_END()
 public:
 	TestInlineGadget() { qDebug() << "Create"; }
 	~TestInlineGadget() { qDebug() << "Release"; }
@@ -55,26 +54,27 @@ static QDebug operator<<(QDebug debug, const std::shared_ptr<TestInlineGadget>& 
 
 class TestObject :public QObject {
 	Q_OBJECT
-		Q_META_BEGIN(TestObject)
-		//Q_META_CATEGORY_ENABLED()
-		//Q_META_CATEGORY_DEFINE(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
-		//Q_META_CATEGORY_DEFINE(Color, Color, Colors, ColorList, StdColorList, ColorMap)
-		//Q_META_CATEGORY_DEFINE(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
-		//Q_META_CATEGORY_DEFINE(Inline, InlineGadget, InlineGadgetPtr, InlineGadgetSPtr, InlineGadgetStdSPtr, InlineObject, InlineObjectSPtr, InlineObjectList, InlineGadgetList, InlineGadgetPtrList, InlineGadgetSPtrList, InlineGadgetStdPtrList, InlineGadgetSPtrMap)
-		//Q_META_CATEGORY_DEFINE(Other, Bool)
-		//Q_META_CATEGORY_VISIBLE(Inline, false)
-		Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
-		Q_META_P_STRING_AS_LINE(QtString, "This is QString")
-		Q_META_P_STRING_AS_LINE(StdString, "This is std::string")
-		Q_META_P_STRING_AS_MULTI_LINE(AsMultiLineString, 80, "This is MultiLine")
-		Q_META_P_STRING_AS_FILE_PATH(AsPath)
-		Q_META_P_STRING_AS_COMBO(AsCombo, A, B, C, D)
-		Q_META_P_ARRAY_FIXED_SIZE(ColorList, true)
-		Q_META_P_ARRAY_FIXED_ORDER(ColorList, true)
-		Q_META_P_MAP_FIXED_KEY(ColorMap, true)
-		Q_META_P_MAP_FIXED_SIZE(ColorMap, true)
-		Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetSPtr, TestInlineGadget, TestInlineGadget, TestInlineGadget);
-	Q_META_END()
+
+	//Q_META_BEGIN(TestObject)
+	//	Q_META_CATEGORY_ENABLED()
+	//	Q_META_CATEGORY_DEFINE(Number, Int, Float, LimitedDouble, Vec2, Vec3, Vec4)
+	//	Q_META_CATEGORY_DEFINE(Color, Color, Colors, ColorList, StdColorList, ColorMap)
+	//	Q_META_CATEGORY_DEFINE(String, QtString, StdString, AsMultiLineString, AsPath, AsCombo)
+	//	Q_META_CATEGORY_DEFINE(Inline, InlineGadget, InlineGadgetPtr, InlineGadgetSPtr, InlineGadgetStdSPtr, InlineObject, InlineObjectSPtr, InlineObjectList, InlineGadgetList, InlineGadgetPtrList, InlineGadgetSPtrList, InlineGadgetStdPtrList, InlineGadgetSPtrMap)
+	//	Q_META_CATEGORY_DEFINE(Other, Bool)
+	//	Q_META_CATEGORY_VISIBLE(Inline, false)
+	//	Q_META_P_NUMBER_LIMITED(LimitedDouble, 0, 100)
+	//	Q_META_P_STRING_AS_LINE(QtString, "This is QString")
+	//	Q_META_P_STRING_AS_LINE(StdString, "This is std::string")
+	//	Q_META_P_STRING_AS_MULTI_LINE(AsMultiLineString, 80, "This is MultiLine")
+	//	Q_META_P_STRING_AS_FILE_PATH(AsPath)
+	//	Q_META_P_STRING_AS_COMBO(AsCombo, A, B, C, D)
+	//	Q_META_P_ARRAY_FIXED_SIZE(ColorList, true)
+	//	Q_META_P_ARRAY_FIXED_ORDER(ColorList, true)
+	//	Q_META_P_MAP_FIXED_KEY(ColorMap, true)
+	//	Q_META_P_MAP_FIXED_SIZE(ColorMap, true)
+	//	Q_META_P_INS_PTR_CHOSE_SUBTYPE_BY_META(InlineGadgetSPtr, TestInlineGadget, TestInlineGadget, TestInlineGadget);
+	//Q_META_END()
 public:
 	enum TestEnum {
 		One,

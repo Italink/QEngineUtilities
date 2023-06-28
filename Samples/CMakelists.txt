@@ -2,18 +2,12 @@ add_executable(DetailViewExample
     DetailViewExample/main.cpp
     DetailViewExample/TestObject.h
 )
+target_link_libraries(DetailViewExample PRIVATE QEngineEditor)
+qengine_setup_env(DetailViewExample)
 
-target_link_libraries(DetailViewExample PRIVATE 
-    QEngineUtilties
-)
+add_executable(RenderExample RenderExample/main.cpp)
+target_link_libraries(RenderExample PRIVATE QEngineUtilities)
+qengine_setup_env(RenderExample)
 
-add_executable(RenderExample
-    RenderExample/main.cpp
-)
-
-target_link_libraries(RenderExample PRIVATE 
-    QEngineUtilties
-)
-
-set_target_properties(DetailViewExample PROPERTIES FOLDER "QEngineUtilties/Examples")
-set_target_properties(RenderExample PROPERTIES FOLDER "QEngineUtilties/Examples")
+set_target_properties(DetailViewExample PROPERTIES FOLDER "QEngineUtilities/Samples")
+set_target_properties(RenderExample PROPERTIES FOLDER "QEngineUtilities/Samples")
