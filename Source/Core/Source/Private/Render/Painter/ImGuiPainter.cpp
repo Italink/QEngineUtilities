@@ -312,7 +312,7 @@ void ImGuiPainter::resourceUpdate(QRhiResourceUpdateBatch* batch) {
 	}
 	ImGui::NewFrame();
 	if (mPaintFunctor)
-		mPaintFunctor();
+		mPaintFunctor(mImGuiContext);
 	ImGui::EndFrame();
 	ImGui::Render();
 

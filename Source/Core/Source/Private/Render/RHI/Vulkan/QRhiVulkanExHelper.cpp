@@ -1,9 +1,7 @@
 #include "QRhiVulkanExHelper.h"
-#include "private/qrhi_p_p.h"
 #include "QVulkanInstance"
 #include <QtGui/private/qrhinull_p.h>
 
-#include "private/qrhivulkanext_p.h"
 #include "private/qvulkandefaultinstance_p.h"
 
 #include <qmath.h>

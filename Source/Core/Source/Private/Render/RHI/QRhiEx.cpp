@@ -1,12 +1,22 @@
 #include "Render/RHI/QRhiEx.h"
 #include <QFile>
-#include "private/qshaderbaker_p.h"
+
+
 #include "private/qrhivulkan_p.h"
-#include "private/qrhi_p_p.h"
+
 #ifndef QT_NO_OPENGL
 #include <QOffscreenSurface>
 #include "private/qrhigles2_p.h"
 #endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+#include "rhi/qshaderbaker.h"
+#else
+#include "private/qshaderbaker_p.h"
+#include "private/qrhi_p_p.h"
+#include "private/qrhivulkanext_p.h"
+#endif
+
 
 #ifdef Q_OS_WIN
 #include <QtGui/private/qrhid3d11_p.h>
@@ -22,7 +32,7 @@
 #include "QVulkanInstance"
 #include <QtGui/private/qrhinull_p.h>
 
-#include "private/qrhivulkanext_p.h"
+
 #include "private/qvulkandefaultinstance_p.h"
 
 #include <qmath.h>

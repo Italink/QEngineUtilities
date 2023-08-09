@@ -2,8 +2,9 @@
 #define QBlinnPhongBasePassDeferred_h__
 
 #include "Render/IRenderPass.h"
+#include "QEngineUtilitiesAPI.h"
 
-class QBlinnPhongBasePassDeferred : public IBasePass {
+class QENGINEUTILITIES_API QBlinnPhongBasePassDeferred : public IBasePass {
 	Q_OBJECT
 public:
 

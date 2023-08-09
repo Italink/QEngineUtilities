@@ -11,7 +11,7 @@ class QENGINECORE_API ImGuiPainter :public QObject ,public IPainter{
 public:
 	ImGuiPainter();
 	void setupWindow(QWindow* window);
-	void setupPaintFunctor(std::function<void()> val) { mPaintFunctor = val; }
+	void setupPaintFunctor(std::function<void(ImGuiContext*)> val) { mPaintFunctor = val; }
 	void registerImage(const QString& inName, const QImage& inImage);
 	ImTextureID getImageId(const QString& inName);
 	void compile() override;
@@ -39,7 +39,7 @@ protected:
 	bool         mMousePressed[3] = { false, false, false };
 	float        mMouseWheel = 0;
 	float        mMouseWheelH = 0;
-	std::function<void()> mPaintFunctor;
+	std::function<void(ImGuiContext*)> mPaintFunctor;
 };
 
 #endif // ImGuiPainter_h__

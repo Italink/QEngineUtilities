@@ -69,7 +69,7 @@ protected:
 	QList<QSplinePoint> mPoints;
 	QList<QVector4D> mSegmentData;
 	
-	QScopedPointer<QRhiBuffer> mInstancingBuffer;
+	QScopedPointer<QRhiBuffer> mInstanceBuffer;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 
 	QScopedPointer<QRhiShaderResourceBindings> mShaderBindings;

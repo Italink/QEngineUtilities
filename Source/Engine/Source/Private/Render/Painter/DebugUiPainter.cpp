@@ -37,7 +37,8 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 		io.Fonts->Build();
 	}
 
-	setupPaintFunctor([this]() {
+	setupPaintFunctor([this](ImGuiContext* Ctx) {
+		ImGui::SetCurrentContext(Ctx);
 		QCamera* camera = mRenderer->getCamera();
 		if (camera) {
 			auto& io = ImGui::GetIO();

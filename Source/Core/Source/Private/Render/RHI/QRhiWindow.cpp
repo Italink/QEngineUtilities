@@ -52,9 +52,9 @@ void QRhiWindow::initializeInternal() {
 	mHasSwapChain = true;
 	if (mInitParams.enableStat) {
 		mCpuFrameTimer.start();
-		mRhi->addGpuFrameTimeCallback([this](float elapsedMs) {
-			mGpuFrameTime = elapsedMs;
-		});
+		//mRhi->addGpuFrameTimeCallback([this](float elapsedMs) {
+		//	mGpuFrameTime = elapsedMs;
+		//});
 	}
 }
 

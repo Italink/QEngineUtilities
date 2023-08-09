@@ -6,7 +6,7 @@ QImGUIRenderPass::QImGUIRenderPass()
 {
 }
 
-void QImGUIRenderPass::setPaintFunctor(std::function<void()> val) {
+void QImGUIRenderPass::setPaintFunctor(std::function<void(ImGuiContext*)> val) {
 	mPainter->setupPaintFunctor(val);
 }
 

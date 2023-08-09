@@ -83,12 +83,11 @@ void QSplineRenderComponent::onRebuildResource() {
 		});
 	}
 
-	mInstancingBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::VertexBuffer, sizeof(QSplinePoint)*mPoints.size()));
-	mInstancingBuffer->create();
+	mInstanceBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::VertexBuffer, sizeof(QSplinePoint)*mPoints.size()));
+	mInstanceBuffer->create();
 
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(QVector4D) * mSegmentData.size()));
 	mVertexBuffer->create();
-	
 
 	if (!mPipelineBuilder) {
 		mPipelineBuilder.reset(new QRhiGraphicsPipelineBuilder);
@@ -99,7 +98,7 @@ void QSplineRenderComponent::onRebuildResource() {
 			->addParam("ScreenResolution", QVector2D(800, 600));
 
 		mPipelineBuilder->setInputBindings({
-			QRhiVertexInputBindingEx(mInstancingBuffer.get(),sizeof(QSplinePoint),0 , QRhiVertexInputBinding::PerInstance) ,
+			QRhiVertexInputBindingEx(mInstanceBuffer.get(),sizeof(QSplinePoint),0 , QRhiVertexInputBinding::PerInstance) ,
 			QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QVector4D)),
 		});
 
@@ -108,7 +107,7 @@ void QSplineRenderComponent::onRebuildResource() {
 			QRhiVertexInputAttributeEx("inColorA"		 ,0, 1, QRhiVertexInputAttribute::Float4, offsetof(QSplinePoint,mColor)),
 			QRhiVertexInputAttributeEx("inPointB"		 ,0, 2, QRhiVertexInputAttribute::Float3, offsetof(QSplinePoint,mPoint) + sizeof(QSplinePoint)),
 			QRhiVertexInputAttributeEx("inColorB"		 ,0, 3, QRhiVertexInputAttribute::Float4, offsetof(QSplinePoint,mColor) + sizeof(QSplinePoint)),
-			QRhiVertexInputAttributeEx("inInstancingPos" ,1, 4, QRhiVertexInputAttribute::Float3, 0),
+			QRhiVertexInputAttributeEx("inPos" ,1, 4, QRhiVertexInputAttribute::Float3, 0),
 		});
 
 		mPipelineBuilder->setShaderMainCode(QRhiShaderStage::Vertex, R"(
@@ -120,15 +119,14 @@ void QSplineRenderComponent::onRebuildResource() {
 					vec2 screen1 = UBO.ScreenResolution * (0.5 * clip1.xy/clip1.w + 0.5);
 					vec2 xBasis = normalize(screen1 - screen0);
 					vec2 yBasis = vec2(-xBasis.y, xBasis.x);
-					vec2 pt0 = screen0 + UBO.Width * (inInstancingPos.x * xBasis + inInstancingPos.y * yBasis);
-					vec2 pt1 = screen1 + UBO.Width * (inInstancingPos.x * xBasis + inInstancingPos.y * yBasis);
-					vec2 pt = mix(pt0, pt1, inInstancingPos.z);
-					vec4 clip = mix(clip0, clip1, inInstancingPos.z);
+					vec2 pt0 = screen0 + UBO.Width * (inPos.x * xBasis + inPos.y * yBasis);
+					vec2 pt1 = screen1 + UBO.Width * (inPos.x * xBasis + inPos.y * yBasis);
+					vec2 pt = mix(pt0, pt1, inPos.z);
+					vec4 clip = mix(clip0, clip1, inPos.z);
 					gl_Position = vec4(clip.w * ((2.0 * pt) / UBO.ScreenResolution - 1.0), clip.z, clip.w);
-					vColor = mix(inColorA, inColorB, inInstancingPos.z);
+					vColor = mix(inColorA, inColorB, inPos.z);
 				}
 		)");
-
 
 		mPipelineBuilder->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec4 vColor;
@@ -152,7 +150,7 @@ void QSplineRenderComponent::onRebuildPipeline() {
 }
 
 void QSplineRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
-	batch->updateDynamicBuffer(mInstancingBuffer.get(), 0, mPoints.size() * sizeof(QSplinePoint), mPoints.data());
+	batch->updateDynamicBuffer(mInstanceBuffer.get(), 0, mPoints.size() * sizeof(QSplinePoint), mPoints.data());
 	batch->uploadStaticBuffer(mVertexBuffer.get(), mSegmentData.data());
 }
 
@@ -173,7 +171,7 @@ void QSplineRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiVi
 	cmdBuffer->setViewport(viewport);
 	cmdBuffer->setShaderResources();
 	const QRhiCommandBuffer::VertexInput vertexBindings[] = {
-		{ mInstancingBuffer.get(), 0 },
+		{ mInstanceBuffer.get(), 0 },
 		{ mVertexBuffer.get(), 0 },
 	};
 	cmdBuffer->setVertexInput(0, 2, vertexBindings);

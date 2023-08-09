@@ -5,9 +5,10 @@
 #include "Render/Painter/TexturePainter.h"
 #include "Render/Component/Light/QPointLightComponent.h"
 #include "Render/Component/Light/QDirectionLightComponent.h"
+#include "QEngineUtilitiesAPI.h"
 #include "Type/QColor4D.h"
 
-class QBlinnPhongLightingPass : public IRenderPass {
+class QENGINEUTILITIES_API QBlinnPhongLightingPass : public IRenderPass {
 	Q_OBJECT
 		Q_PROPERTY(QColor4D Ambient READ getAmbientLight WRITE setAmbientLight)
 

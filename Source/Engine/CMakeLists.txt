@@ -1,5 +1,11 @@
 set(QENGINE_PLUGINS_JSON_FILE ${QENGINE_BINARIES_DIR}/QEnginePlugins.json)
 
+if(QENGINE_BUILD_RELEASE)
+    set(QENGINE_PLUGINS_JSON_FILE_MACRO "./QEnginePlugins.json")
+else()
+    set(QENGINE_PLUGINS_JSON_FILE_MACRO ${QENGINE_PLUGINS_JSON_FILE})
+endif()
+
 qengine_add_target(QEngineUtilities
     ENABLE_MOC
     PUBLIC_DEPENDENCY   
@@ -9,7 +15,7 @@ qengine_add_target(QEngineUtilities
     PUBLIC_DEFINITIONS
         "$<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QENGINE_WITH_EDITOR>"
     PRIVATE_DEFINITIONS
-        QENGINE_PLUGINS_JSON_FILE="${QENGINE_PLUGINS_JSON_FILE}"
+        QENGINE_PLUGINS_JSON_FILE="${QENGINE_PLUGINS_JSON_FILE_MACRO}"
     SOURCE_GROUP "QEngineUtilities"
 )
 

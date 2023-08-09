@@ -8,13 +8,13 @@ class QENGINECORE_API QImGUIRenderPass : public IRenderPass {
 	Q_OBJECT
 
 	Q_BUILDER_BEGIN(QImGUIRenderPass)
-		Q_BUILDER_FUNCTION_BEGIN(setPaintFunctor, std::function<void()> val)
+		Q_BUILDER_FUNCTION_BEGIN(setPaintFunctor, std::function<void(ImGuiContext*)> val)
 			Q_BUILDER_OBJECT_PTR->setPaintFunctor(val);
 		Q_BUILDER_FUNCTION_END()
 	Q_BUILDER_END_RENDER_PASS(UiLayer)
 public:
 	QImGUIRenderPass();
-	void setPaintFunctor(std::function<void()> val);
+	void setPaintFunctor(std::function<void(ImGuiContext*)> val);
 protected:
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;
