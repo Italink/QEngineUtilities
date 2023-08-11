@@ -54,7 +54,7 @@ QSsaoRenderPass* QSsaoRenderPass::setupBias(float var) {
 void QSsaoRenderPass::resizeAndLinkNode(const QSize& size) {
 	auto positionTexture = getTextureIn_Position();
 	auto normalTexture = getTextureIn_Normal();
-	mRT.colorAttachment.reset(mRhi->newTexture(QRhiTexture::RGBA32F, positionTexture->pixelSize() , 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+	mRT.colorAttachment.reset(mRhi->newTexture(QRhiTexture::R16F, positionTexture->pixelSize() , 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.colorAttachment->create();
 	mRT.renderTarget.reset(mRhi->newTextureRenderTarget({ mRT.colorAttachment.get() }));
 	renderPassDesc.reset(mRT.renderTarget->newCompatibleRenderPassDescriptor());
@@ -112,7 +112,7 @@ void QSsaoRenderPass::compile() {
 			vec4 noise[16];
 		}ssaoState;
 		layout (location = 0) in vec2 vUV;
-		layout (location = 0) out vec4 outFragColor;
+		layout (location = 0) out float outFragColor;
 		void main(){
 			vec3 position = texture(uPosition, vUV).xyz;
 			vec3 normal   = normalize(texture(uNormal, vUV).xyz);
@@ -138,7 +138,7 @@ void QSsaoRenderPass::compile() {
 				occlusion       += (sampleDepth >= samplePos.z + ssaoState.bias ? 1.0 : 0.0) * rangeCheck;  
 			}
 			occlusion = 1.0 - (occlusion / ssaoState.size);
-			outFragColor = vec4(occlusion,occlusion,occlusion,1.0f);  
+			outFragColor = occlusion;  
 		}
 	)");
 

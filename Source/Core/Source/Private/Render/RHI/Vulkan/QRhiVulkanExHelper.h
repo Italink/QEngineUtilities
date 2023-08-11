@@ -8,6 +8,12 @@
 namespace QRhiVulkanExHelper {
 	QRhiBuffer* newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
 
+	void updateShaderResourceBindings(QVulkanDeviceFunctions* df, VkDevice dev, QRhiVulkan* rhi, QRhiShaderResourceBindings* srb, int descSetIdx = -1);
+
+	VkImageView imageViewForLevel(QVkTexture* texture, int level);
+
+	void setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb = nullptr, int dynamicOffsetCount = 0, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets = nullptr);
+
 	QRhiVulkanNativeHandles createVulkanNativeHandles(const QRhiVulkanInitParams& params);
 
 	void destroyVulkanNativeHandles(const QRhiVulkanNativeHandles& handles);

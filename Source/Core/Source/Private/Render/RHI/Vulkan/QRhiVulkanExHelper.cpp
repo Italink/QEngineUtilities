@@ -41,6 +41,26 @@ static VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL wrap_vkGetDeviceProcAddr(VkDevic
     return globalVulkanInstance->functions()->vkGetDeviceProcAddr(device, pName);
 }
 
+static constexpr inline bool isDepthTextureFormat(QRhiTexture::Format format)
+{
+	switch (format) {
+	case QRhiTexture::Format::D16:
+	case QRhiTexture::Format::D24:
+	case QRhiTexture::Format::D24S8:
+	case QRhiTexture::Format::D32F:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+static constexpr inline VkImageAspectFlags aspectMaskForTextureFormat(QRhiTexture::Format format)
+{
+	return isDepthTextureFormat(format) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+}
+
+
 struct QVkBufferEx : public QRhiBuffer {
 	QVkBufferEx(QRhiImplementation* rhi, Type type, VkBufferUsageFlags usage, int size);
 	~QVkBufferEx();
@@ -139,7 +159,7 @@ bool QVkBufferEx::create() {
 	if (buffers[0])
 		destroy();
 
-	if (m_usage.testFlag(QRhiBuffer::StorageBuffer) && m_type == Dynamic) {
+	if (m_usage.testFlag(QRhiBuffer::StorageBuffer) && type() == Dynamic) {
 		qWarning("StorageBuffer cannot be combined with Dynamic");
 		return false;
 	}
@@ -155,7 +175,7 @@ bool QVkBufferEx::create() {
 	VmaAllocationCreateInfo allocInfo;
 	memset(&allocInfo, 0, sizeof(allocInfo));
 
-	if (m_type == Dynamic) {
+	if (type() == Dynamic) {
 	#ifndef Q_OS_DARWIN // not for MoltenVK
 		allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 	#endif
@@ -173,7 +193,7 @@ bool QVkBufferEx::create() {
 		buffers[i] = VK_NULL_HANDLE;
 		allocations[i] = nullptr;
 		usageState[i].access = usageState[i].stage = 0;
-		if (i == 0 || m_type == Dynamic) {
+		if (i == 0 || type() == Dynamic) {
 			VmaAllocation allocation;
 			err = vmaCreateBuffer(toVmaAllocator(rhiD->allocator), &bufferInfo, &allocInfo, &buffers[i], &allocation, nullptr);
 			if (err != VK_SUCCESS)
@@ -197,7 +217,7 @@ void executeBufferHostWritesForSlot(QVkBuffer* bufD, int slot, QRhiVulkan* rhiD)
 	if (bufD->pendingDynamicUpdates[slot].isEmpty())
 		return;
 
-	//Q_ASSERT(bufD->m_type == QRhiBuffer::Dynamic);
+	//Q_ASSERT(bufD->type() == QRhiBuffer::Dynamic);
 	void* p = nullptr;
 	VmaAllocation a = toVmaAllocation(bufD->allocations[slot]);
 	// The vmaMap/Unmap are basically a no-op when persistently mapped since it
@@ -225,7 +245,7 @@ void executeBufferHostWritesForSlot(QVkBuffer* bufD, int slot, QRhiVulkan* rhiD)
 }
 
 QRhiBuffer::NativeBuffer QVkBufferEx::nativeBuffer() {
-	if (m_type == Dynamic) {
+	if (type() == Dynamic) {
 		QRHI_RES_RHI(QRhiVulkan);
 		NativeBuffer b;
 		Q_ASSERT(sizeof(b.objects) / sizeof(b.objects[0]) >= size_t(QVK_FRAMES_IN_FLIGHT));
@@ -240,7 +260,7 @@ QRhiBuffer::NativeBuffer QVkBufferEx::nativeBuffer() {
 }
 
 char* QVkBufferEx::beginFullDynamicBufferUpdateForCurrentFrame() {
-	Q_ASSERT(m_type == Dynamic);
+	Q_ASSERT(type() == Dynamic);
 	QRHI_RES_RHI(QRhiVulkan);
 	Q_ASSERT(rhiD->inFrame);
 	const int slot = rhiD->currentFrameSlot;
@@ -265,6 +285,404 @@ void QVkBufferEx::endFullDynamicBufferUpdateForCurrentFrame() {
 QRhiBuffer* QRhiVulkanExHelper::newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size) {
 	QRhiImplementation* ptr = (*(QRhiImplementation**)inRhi);
 	return new QVkBufferEx(ptr, type, flags, size);
+}
+
+void QRhiVulkanExHelper::updateShaderResourceBindings(QVulkanDeviceFunctions* df,VkDevice dev, QRhiVulkan* rhi, QRhiShaderResourceBindings* srb, int descSetIdx /*= -1*/)
+{
+	QVkShaderResourceBindings* srbD = QRHI_RES(QVkShaderResourceBindings, srb);
+
+	QVarLengthArray<VkDescriptorBufferInfo, 8> bufferInfos;
+	using ArrayOfImageDesc = QVarLengthArray<VkDescriptorImageInfo, 8>;
+	QVarLengthArray<ArrayOfImageDesc, 8> imageInfos;
+	QVarLengthArray<VkWriteDescriptorSet, 12> writeInfos;
+	QVarLengthArray<QPair<int, int>, 12> infoIndices;
+
+	const bool updateAll = descSetIdx < 0;
+	int frameSlot = updateAll ? 0 : descSetIdx;
+	while (frameSlot < (updateAll ? QVK_FRAMES_IN_FLIGHT : descSetIdx + 1)) {
+		for (int i = 0, ie = srbD->sortedBindings.size(); i != ie; ++i) {
+			const QRhiShaderResourceBinding::Data* b = rhi->shaderResourceBindingData(srbD->sortedBindings.at(i));
+			QVkShaderResourceBindings::BoundResourceData& bd(srbD->boundResourceData[frameSlot][i]);
+
+			VkWriteDescriptorSet writeInfo = {};
+			writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writeInfo.dstSet = srbD->descSets[frameSlot];
+			writeInfo.dstBinding = uint32_t(b->binding);
+			writeInfo.descriptorCount = 1;
+
+			int bufferInfoIndex = -1;
+			int imageInfoIndex = -1;
+
+			switch (b->type) {
+			case QRhiShaderResourceBinding::UniformBuffer:
+			{
+				writeInfo.descriptorType = b->u.ubuf.hasDynamicOffset ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
+					: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				QRhiBuffer* buf = b->u.ubuf.buf;
+				QVkBuffer* bufD = QRHI_RES(QVkBuffer, buf);
+				bd.ubuf.id = bufD->globalResourceId();
+				bd.ubuf.generation = bufD->generation;
+				VkDescriptorBufferInfo bufInfo;
+				bufInfo.buffer = bufD->type() == QRhiBuffer::Dynamic ? bufD->buffers[frameSlot] : bufD->buffers[0];
+				bufInfo.offset = b->u.ubuf.offset;
+				bufInfo.range = b->u.ubuf.maybeSize ? b->u.ubuf.maybeSize : bufD->size();
+				bufferInfoIndex = bufferInfos.size();
+				bufferInfos.append(bufInfo);
+			}
+			break;
+			case QRhiShaderResourceBinding::SampledTexture:
+			{
+				const QRhiShaderResourceBinding::Data::TextureAndOrSamplerData* data = &b->u.stex;
+				writeInfo.descriptorCount = data->count; // arrays of combined image samplers are supported
+				writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				ArrayOfImageDesc imageInfo(data->count);
+				for (int elem = 0; elem < data->count; ++elem) {
+					QVkTexture* texD = QRHI_RES(QVkTexture, data->texSamplers[elem].tex);
+					QVkSampler* samplerD = QRHI_RES(QVkSampler, data->texSamplers[elem].sampler);
+					bd.stex.d[elem].texId = texD->globalResourceId();
+					bd.stex.d[elem].texGeneration = texD->generation;
+					bd.stex.d[elem].samplerId = samplerD->globalResourceId();
+					bd.stex.d[elem].samplerGeneration = samplerD->generation;
+					imageInfo[elem].sampler = samplerD->sampler;
+					imageInfo[elem].imageView = texD->imageView;
+					imageInfo[elem].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				}
+				bd.stex.count = data->count;
+				imageInfoIndex = imageInfos.size();
+				imageInfos.append(imageInfo);
+			}
+			break;
+			case QRhiShaderResourceBinding::Texture:
+			{
+				const QRhiShaderResourceBinding::Data::TextureAndOrSamplerData* data = &b->u.stex;
+				writeInfo.descriptorCount = data->count; // arrays of (separate) images are supported
+				writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				ArrayOfImageDesc imageInfo(data->count);
+				for (int elem = 0; elem < data->count; ++elem) {
+					QVkTexture* texD = QRHI_RES(QVkTexture, data->texSamplers[elem].tex);
+					bd.stex.d[elem].texId = texD->globalResourceId();
+					bd.stex.d[elem].texGeneration = texD->generation;
+					bd.stex.d[elem].samplerId = 0;
+					bd.stex.d[elem].samplerGeneration = 0;
+					imageInfo[elem].sampler = VK_NULL_HANDLE;
+					imageInfo[elem].imageView = texD->imageView;
+					imageInfo[elem].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				}
+				bd.stex.count = data->count;
+				imageInfoIndex = imageInfos.size();
+				imageInfos.append(imageInfo);
+			}
+			break;
+			case QRhiShaderResourceBinding::Sampler:
+			{
+				QVkSampler* samplerD = QRHI_RES(QVkSampler, b->u.stex.texSamplers[0].sampler);
+				writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+				bd.stex.d[0].texId = 0;
+				bd.stex.d[0].texGeneration = 0;
+				bd.stex.d[0].samplerId = samplerD->globalResourceId();
+				bd.stex.d[0].samplerGeneration = samplerD->generation;
+				ArrayOfImageDesc imageInfo(1);
+				imageInfo[0].sampler = samplerD->sampler;
+				imageInfo[0].imageView = VK_NULL_HANDLE;
+				imageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+				imageInfoIndex = imageInfos.size();
+				imageInfos.append(imageInfo);
+			}
+			break;
+			case QRhiShaderResourceBinding::ImageLoad:
+			case QRhiShaderResourceBinding::ImageStore:
+			case QRhiShaderResourceBinding::ImageLoadStore:
+			{
+				QVkTexture* texD = QRHI_RES(QVkTexture, b->u.simage.tex);
+				VkImageView view = imageViewForLevel(texD,b->u.simage.level);
+				if (view) {
+					writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+					bd.simage.id = texD->globalResourceId();
+					bd.simage.generation = texD->generation;
+					ArrayOfImageDesc imageInfo(1);
+					imageInfo[0].sampler = VK_NULL_HANDLE;
+					imageInfo[0].imageView = view;
+					imageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imageInfoIndex = imageInfos.size();
+					imageInfos.append(imageInfo);
+				}
+			}
+			break;
+			case QRhiShaderResourceBinding::BufferLoad:
+			case QRhiShaderResourceBinding::BufferStore:
+			case QRhiShaderResourceBinding::BufferLoadStore:
+			{
+				QVkBuffer* bufD = QRHI_RES(QVkBuffer, b->u.sbuf.buf);
+				writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+				bd.sbuf.id = bufD->globalResourceId();
+				bd.sbuf.generation = bufD->generation;
+				VkDescriptorBufferInfo bufInfo;
+				bufInfo.buffer = bufD->type() == QRhiBuffer::Dynamic ? bufD->buffers[frameSlot] : bufD->buffers[0];
+				bufInfo.offset = b->u.ubuf.offset;
+				bufInfo.range = b->u.ubuf.maybeSize ? b->u.ubuf.maybeSize : bufD->size();
+				bufferInfoIndex = bufferInfos.size();
+				bufferInfos.append(bufInfo);
+			}
+			break;
+			default:
+				continue;
+			}
+
+			writeInfos.append(writeInfo);
+			infoIndices.append({ bufferInfoIndex, imageInfoIndex });
+		}
+		++frameSlot;
+	}
+
+	for (int i = 0, writeInfoCount = writeInfos.size(); i < writeInfoCount; ++i) {
+		const int bufferInfoIndex = infoIndices[i].first;
+		const int imageInfoIndex = infoIndices[i].second;
+		if (bufferInfoIndex >= 0)
+			writeInfos[i].pBufferInfo = &bufferInfos[bufferInfoIndex];
+		else if (imageInfoIndex >= 0)
+			writeInfos[i].pImageInfo = imageInfos[imageInfoIndex].constData();
+	}
+
+	df->vkUpdateDescriptorSets(dev, uint32_t(writeInfos.size()), writeInfos.constData(), 0, nullptr);
+}
+
+VkImageView QRhiVulkanExHelper::imageViewForLevel(QVkTexture* texture, int level)
+{
+	Q_ASSERT(level >= 0 && level < int(texture->mipLevelCount));
+	if (texture->perLevelImageViews[level] != VK_NULL_HANDLE)
+		return texture->perLevelImageViews[level];
+
+	const VkImageAspectFlags aspectMask = aspectMaskForTextureFormat(texture->format());
+	const bool isCube = texture->flags().testFlag(QRhiTexture::CubeMap);
+	const bool isArray = texture->flags().testFlag(QRhiTexture::TextureArray);
+	const bool is3D = texture->flags().testFlag(QRhiTexture::ThreeDimensional);
+	const bool is1D = texture->flags().testFlag(QRhiTexture::OneDimensional);
+
+	VkImageViewCreateInfo viewInfo = {};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = texture->image;
+	viewInfo.viewType = isCube
+		? VK_IMAGE_VIEW_TYPE_CUBE
+		: (is3D ? VK_IMAGE_VIEW_TYPE_3D
+			: (is1D ? (isArray ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_1D)
+				: (isArray ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D)));
+	viewInfo.format = texture->vkformat;
+	viewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+	viewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+	viewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+	viewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+	viewInfo.subresourceRange.aspectMask = aspectMask;
+	viewInfo.subresourceRange.baseMipLevel = uint32_t(level);
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = isCube ? 6 : (isArray ? qMax(0, texture->arraySize()) : 1);
+
+	VkImageView v = VK_NULL_HANDLE;
+
+
+	QRhiVulkan* rhiD = *(QRhiVulkan**)(texture->rhi());
+	VkResult err = rhiD->df->vkCreateImageView(rhiD->dev, &viewInfo, nullptr, &v);
+	if (err != VK_SUCCESS) {
+		qWarning("Failed to create image view: %d", err);
+		return VK_NULL_HANDLE;
+	}
+
+	texture->perLevelImageViews[level] = v;
+	return v;
+}
+
+void QRhiVulkanExHelper::setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb, int dynamicOffsetCount, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets)
+{
+	QVkCommandBuffer* cbD = QRHI_RES(QVkCommandBuffer, cb);
+	QVkGraphicsPipeline* gfxPsD = QRHI_RES(QVkGraphicsPipeline, cbD->currentGraphicsPipeline);
+	QVkComputePipeline* compPsD = QRHI_RES(QVkComputePipeline, cbD->currentComputePipeline);
+
+	if (!srb) {
+		if (gfxPsD)
+			srb = gfxPsD->shaderResourceBindings();
+		else
+			srb = compPsD->shaderResourceBindings();
+	}
+
+	QVkShaderResourceBindings* srbD = QRHI_RES(QVkShaderResourceBindings, srb);
+	const int descSetIdx = srbD->hasSlottedResource ? rhi->currentFrameSlot : 0;
+	auto& descSetBd(srbD->boundResourceData[descSetIdx]);
+	bool rewriteDescSet = false;
+
+	// Do host writes and mark referenced shader resources as in-use.
+	// Also prepare to ensure the descriptor set we are going to bind refers to up-to-date Vk objects.
+	for (int i = 0, ie = srbD->sortedBindings.size(); i != ie; ++i) {
+		const QRhiShaderResourceBinding::Data* b = rhi->shaderResourceBindingData(srbD->sortedBindings[i]);
+		QVkShaderResourceBindings::BoundResourceData& bd(descSetBd[i]);
+		switch (b->type) {
+		case QRhiShaderResourceBinding::UniformBuffer:
+		{
+			QVkBuffer* bufD = QRHI_RES(QVkBuffer, b->u.ubuf.buf);
+			Q_ASSERT(bufD->usage().testFlag(QRhiBuffer::UniformBuffer));
+
+			if (bufD->type() == QRhiBuffer::Dynamic)
+				executeBufferHostWritesForSlot(bufD, rhi->currentFrameSlot,rhi);
+
+			bufD->lastActiveFrameSlot = rhi->currentFrameSlot;
+
+			// Check both the "local" id (the generation counter) and the
+			// global id. The latter is relevant when a newly allocated
+			// QRhiResource ends up with the same pointer as a previous one.
+			// (and that previous one could have been in an srb...)
+			if (bufD->generation != bd.ubuf.generation || bufD->globalResourceId() != bd.ubuf.id) {
+				rewriteDescSet = true;
+				bd.ubuf.id = bufD->globalResourceId();
+				bd.ubuf.generation = bufD->generation;
+			}
+		}
+		break;
+		case QRhiShaderResourceBinding::SampledTexture:
+		case QRhiShaderResourceBinding::Texture:
+		case QRhiShaderResourceBinding::Sampler:
+		{
+			const QRhiShaderResourceBinding::Data::TextureAndOrSamplerData* data = &b->u.stex;
+			if (bd.stex.count != data->count) {
+				bd.stex.count = data->count;
+				rewriteDescSet = true;
+			}
+			for (int elem = 0; elem < data->count; ++elem) {
+				QVkTexture* texD = QRHI_RES(QVkTexture, data->texSamplers[elem].tex);
+				QVkSampler* samplerD = QRHI_RES(QVkSampler, data->texSamplers[elem].sampler);
+				// We use the same code path for both combined and separate
+				// images and samplers, so tex or sampler (but not both) can be
+				// null here.
+				Q_ASSERT(texD || samplerD);
+				if (texD) {
+					texD->lastActiveFrameSlot = rhi->currentFrameSlot;
+				}
+				if (samplerD)
+					samplerD->lastActiveFrameSlot = rhi->currentFrameSlot;
+				const quint64 texId = texD ? texD->globalResourceId() : 0;
+				const uint texGen = texD ? texD->generation : 0;
+				const quint64 samplerId = samplerD ? samplerD->globalResourceId() : 0;
+				const uint samplerGen = samplerD ? samplerD->generation : 0;
+				if (texGen != bd.stex.d[elem].texGeneration
+					|| texId != bd.stex.d[elem].texId
+					|| samplerGen != bd.stex.d[elem].samplerGeneration
+					|| samplerId != bd.stex.d[elem].samplerId)
+				{
+					rewriteDescSet = true;
+					bd.stex.d[elem].texId = texId;
+					bd.stex.d[elem].texGeneration = texGen;
+					bd.stex.d[elem].samplerId = samplerId;
+					bd.stex.d[elem].samplerGeneration = samplerGen;
+				}
+			}
+		}
+		break;
+		case QRhiShaderResourceBinding::ImageLoad:
+		case QRhiShaderResourceBinding::ImageStore:
+		case QRhiShaderResourceBinding::ImageLoadStore:
+		{
+			QVkTexture* texD = QRHI_RES(QVkTexture, b->u.simage.tex);
+			Q_ASSERT(texD->flags().testFlag(QRhiTexture::UsedWithLoadStore));
+			texD->lastActiveFrameSlot = rhi->currentFrameSlot;
+			QRhiPassResourceTracker::TextureAccess access;
+			if (b->type == QRhiShaderResourceBinding::ImageLoad)
+				access = QRhiPassResourceTracker::TexStorageLoad;
+			else if (b->type == QRhiShaderResourceBinding::ImageStore)
+				access = QRhiPassResourceTracker::TexStorageStore;
+			else
+				access = QRhiPassResourceTracker::TexStorageLoadStore;
+
+			if (texD->generation != bd.simage.generation || texD->globalResourceId() != bd.simage.id) {
+				rewriteDescSet = true;
+				bd.simage.id = texD->globalResourceId();
+				bd.simage.generation = texD->generation;
+			}
+		}
+		break;
+		case QRhiShaderResourceBinding::BufferLoad:
+		case QRhiShaderResourceBinding::BufferStore:
+		case QRhiShaderResourceBinding::BufferLoadStore:
+		{
+			QVkBuffer* bufD = QRHI_RES(QVkBuffer, b->u.sbuf.buf);
+			Q_ASSERT(bufD->usage().testFlag(QRhiBuffer::StorageBuffer));
+
+			if (bufD->type() == QRhiBuffer::Dynamic)
+				executeBufferHostWritesForSlot(bufD, rhi->currentFrameSlot,rhi);
+
+			bufD->lastActiveFrameSlot = rhi->currentFrameSlot;
+			QRhiPassResourceTracker::BufferAccess access;
+			if (b->type == QRhiShaderResourceBinding::BufferLoad)
+				access = QRhiPassResourceTracker::BufStorageLoad;
+			else if (b->type == QRhiShaderResourceBinding::BufferStore)
+				access = QRhiPassResourceTracker::BufStorageStore;
+			else
+				access = QRhiPassResourceTracker::BufStorageLoadStore;
+
+			if (bufD->generation != bd.sbuf.generation || bufD->globalResourceId() != bd.sbuf.id) {
+				rewriteDescSet = true;
+				bd.sbuf.id = bufD->globalResourceId();
+				bd.sbuf.generation = bufD->generation;
+			}
+		}
+		break;
+		default:
+			Q_UNREACHABLE();
+			break;
+		}
+	}
+
+	// write descriptor sets, if needed
+	if (rewriteDescSet)
+		updateShaderResourceBindings(rhi->df,rhi->dev,rhi,srb, descSetIdx);
+
+	// make sure the descriptors for the correct slot will get bound.
+	// also, dynamic offsets always need a bind.
+	const bool forceRebind = (srbD->hasSlottedResource && cbD->currentDescSetSlot != descSetIdx) || srbD->hasDynamicOffset;
+
+	const bool srbChanged = gfxPsD ? (cbD->currentGraphicsSrb != srb) : (cbD->currentComputeSrb != srb);
+
+	if (forceRebind || rewriteDescSet || srbChanged || cbD->currentSrbGeneration != srbD->generation) {
+		QVarLengthArray<uint32_t, 4> dynOfs;
+		if (srbD->hasDynamicOffset) {
+			// Filling out dynOfs based on the sorted bindings is important
+			// because dynOfs has to be ordered based on the binding numbers,
+			// and neither srb nor dynamicOffsets has any such ordering
+			// requirement.
+			for (const QRhiShaderResourceBinding& binding : std::as_const(srbD->sortedBindings)) {
+				const QRhiShaderResourceBinding::Data* b = rhi->shaderResourceBindingData(binding);
+				if (b->type == QRhiShaderResourceBinding::UniformBuffer && b->u.ubuf.hasDynamicOffset) {
+					uint32_t offset = 0;
+					for (int i = 0; i < dynamicOffsetCount; ++i) {
+						const QRhiCommandBuffer::DynamicOffset& bindingOffsetPair(dynamicOffsets[i]);
+						if (bindingOffsetPair.first == b->binding) {
+							offset = bindingOffsetPair.second;
+							break;
+						}
+					}
+					dynOfs.append(offset); // use 0 if dynamicOffsets did not contain this binding
+				}
+			}
+		}
+
+		rhi->df->vkCmdBindDescriptorSets(cbD->cb,
+			gfxPsD ? VK_PIPELINE_BIND_POINT_GRAPHICS : VK_PIPELINE_BIND_POINT_COMPUTE,
+			gfxPsD ? gfxPsD->layout : compPsD->layout,
+			0, 1, & srbD->descSets[descSetIdx],
+			uint32_t(dynOfs.size()),
+			dynOfs.size() ? dynOfs.constData() : nullptr);
+		
+
+		if (gfxPsD) {
+			cbD->currentGraphicsSrb = srb;
+			cbD->currentComputeSrb = nullptr;
+		}
+		else {
+			cbD->currentGraphicsSrb = nullptr;
+			cbD->currentComputeSrb = srb;
+		}
+		cbD->currentSrbGeneration = srbD->generation;
+		cbD->currentDescSetSlot = descSetIdx;
+	}
+
+	srbD->lastActiveFrameSlot = rhi->currentFrameSlot;
 }
 
 QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRhiVulkanInitParams& params) {

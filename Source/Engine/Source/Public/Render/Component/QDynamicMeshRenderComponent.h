@@ -32,7 +32,6 @@ protected:
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline;
 	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
-
 };
 
 #endif // QDynamicMeshRenderComponent_h__

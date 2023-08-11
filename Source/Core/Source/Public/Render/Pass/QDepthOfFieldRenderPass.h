@@ -34,7 +34,6 @@ public:
 	void setBokehSqueezeFalloff(float val);
 	void setIterations(int val);
 
-
 	float getFocus() const { return mParams.focus; }
 	float getAperture() const { return mParams.aperture; }
 	float getFocalLength() const { return mParams.focalLength; }

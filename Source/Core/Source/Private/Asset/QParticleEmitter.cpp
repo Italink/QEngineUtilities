@@ -5,6 +5,7 @@
 #include "private/qvulkandefaultinstance_p.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
+#include "Render/RHI/Vulkan/QRhiVulkanExHelper.h"
 
 int IParticleEmitter::getNumOfSpawnPerFrame() const {
 	return mNumOfSpawnPerFrame;
@@ -69,8 +70,13 @@ void QCpuParticleEmitter::onTick(QRhiCommandBuffer* inCmdBuffer) {
 	QVector<MathUtils::Mat4> transforms(mCurrentParticles.size());
 	for (int i = 0; i < mCurrentParticles.size(); i++) {
 		const Particle& particle = mCurrentParticles[i];
-		MathUtils::Mat4& transform = transforms[i];
-		ImGuizmo::RecomposeMatrixFromComponents((float*)&particle.position, (float*)&particle.rotation, (float*)&particle.scaling, transform.data());
+		QMatrix4x4 mat;
+		mat.translate(particle.position);
+		mat.rotate(particle.rotation.x(), QVector3D(1, 0, 0));
+		mat.rotate(particle.rotation.y(), QVector3D(0, 1, 0));
+		mat.rotate(particle.rotation.z(), QVector3D(0, 0, 1));
+		mat.scale(particle.scaling);
+		transforms[i] = mat.toGenericMatrix<4, 4>();
 	}
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	batch->updateDynamicBuffer(mTransfromBuffer.get(), 0, sizeof(MathUtils::Mat4) * transforms.size(), transforms.data());
@@ -206,7 +212,7 @@ void QGpuParticleEmitter::recompile() {
 	mParams.updateParams->create(mRhi);
 
 	QVector<QRhiShaderResourceBinding> updateBindings;
-	updateBindings << QRhiShaderResourceBinding::bufferLoadStore(0, QRhiShaderResourceBinding::ComputeStage, mIndirectDispatchBuffer[1].get());
+	updateBindings << QRhiShaderResourceBinding::bufferStore(0, QRhiShaderResourceBinding::ComputeStage, mIndirectDispatchBuffer[1].get());
 	updateBindings << QRhiShaderResourceBinding::bufferLoad(1, QRhiShaderResourceBinding::ComputeStage, mParticlesBuffer[0].get());
 	updateBindings << QRhiShaderResourceBinding::bufferStore(2, QRhiShaderResourceBinding::ComputeStage, mParticlesBuffer[1].get());
 	updateBindings << QRhiShaderResourceBinding::uniformBuffer(3, QRhiShaderResourceBinding::ComputeStage, mUpdateContextBuffer.get());
@@ -217,7 +223,7 @@ void QGpuParticleEmitter::recompile() {
 	mUpdateBindings[0]->setBindings(updateBindings.begin(), updateBindings.end());
 	mUpdateBindings[0]->create();
 
-	updateBindings[0] = QRhiShaderResourceBinding::bufferLoadStore(0, QRhiShaderResourceBinding::ComputeStage, mIndirectDispatchBuffer[0].get());
+	updateBindings[0] = QRhiShaderResourceBinding::bufferStore(0, QRhiShaderResourceBinding::ComputeStage, mIndirectDispatchBuffer[0].get());
 	updateBindings[1] = QRhiShaderResourceBinding::bufferLoad(1, QRhiShaderResourceBinding::ComputeStage, mParticlesBuffer[1].get());
 	updateBindings[2] = QRhiShaderResourceBinding::bufferStore(2, QRhiShaderResourceBinding::ComputeStage, mParticlesBuffer[0].get());
 	mUpdateBindings[1].reset(mRhi->newShaderResourceBindings());
@@ -258,6 +264,7 @@ void QGpuParticleEmitter::recompile() {
 			int isAlive = inParticles[inID].age < inParticles[inID].lifetime ? 1 : 0;
 			uint outID = atomicAdd(outputDispatch.x,isAlive);
 			outID = max(GPU_PARTICLE_MAX_SIZE*(1-isAlive),outID);
+			outParticle.lifetime = inParticle.lifetime;
 			%3
 		})")
 		.arg(mParams.updateParams->createDefineCode(4))
@@ -348,59 +355,137 @@ void QGpuParticleEmitter::onTick(QRhiCommandBuffer* inCmdBuffer) {
 		inCmdBuffer->resourceUpdate(batch);
 		mRhi->finish();
 	}
-	onSpawn(inCmdBuffer);
-	mRhi->finish();
-	onUpdateAndRecyle(inCmdBuffer);
-	mRhi->finish();
-	onCalcAndSubmitTransform(inCmdBuffer);
-	mRhi->finish();
-	qSwap(mInputSlot, mOutputSlot);
-}
-
-void QGpuParticleEmitter::onSpawn(QRhiCommandBuffer* inCmdBuffer) {
-	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
-	UpdateContextBuffer updateCtx;
-	updateCtx.deltaSec = mDeltaSec;
-	updateCtx.timestamp = QTime::currentTime().msecsSinceStartOfDay() / 1000000.0f;
-	batch->updateDynamicBuffer(mUpdateContextBuffer.get(), 0, sizeof(UpdateContextBuffer), &updateCtx);
 	if (mParams.spawnParams->sigRecreateBuffer.ensure()) {
 		mSigCompile.request();
 	}
 	if (mParams.updateParams->sigRecreateBuffer.ensure()) {
 		mSigCompile.request();
 	}
+
+	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	mParams.spawnParams->updateResource(batch);
 	mParams.updateParams->updateResource(batch);
-	
-	inCmdBuffer->beginComputePass(batch);
-	inCmdBuffer->setComputePipeline(mSpawnPipeline.get());
-	inCmdBuffer->setShaderResources(mSpawnBindings[mInputSlot].get());
-	inCmdBuffer->dispatch(mNumOfSpawnPerFrame, 1, 1);
-	inCmdBuffer->endComputePass(nullptr);
+	inCmdBuffer->resourceUpdate(batch);
+
+	onSpawn(inCmdBuffer);
+	onUpdateAndRecyle(inCmdBuffer);
+	onCalcAndSubmitTransform(inCmdBuffer);
+	qSwap(mInputSlot, mOutputSlot);
+}
+
+void QGpuParticleEmitter::onSpawn(QRhiCommandBuffer* inCmdBuffer) {
+	QRhiVulkanCommandBufferNativeHandles* cmdBufferHandles = (QRhiVulkanCommandBufferNativeHandles*)inCmdBuffer->nativeHandles();
+	VkCommandBuffer cmdBuffer = cmdBufferHandles->commandBuffer;
+	QVkComputePipeline* pipelineHandles = (QVkComputePipeline*)mSpawnPipeline.get();
+	QVkShaderResourceBindings* bindingsHandles = (QVkShaderResourceBindings*)mSpawnBindings[mInputSlot].get();
+	QRhiVulkan* rhi = *(QRhiVulkan**)(mRhi);
+	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
+	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
+
+
+	UpdateContextBuffer updateCtx;
+	updateCtx.deltaSec = mDeltaSec;
+	updateCtx.timestamp = QTime::currentTime().msecsSinceStartOfDay() / 1000000.0f;
+	char* p = mUpdateContextBuffer->beginFullDynamicBufferUpdateForCurrentFrame();
+	memcpy(p, &updateCtx, sizeof(UpdateContextBuffer));
+	mUpdateContextBuffer->endFullDynamicBufferUpdateForCurrentFrame();
+
+	inCmdBuffer->beginExternal();
+
+	VkBufferMemoryBarrier barrier;
+	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	barrier.buffer = vkBuffer;
+	barrier.offset = 0;
+	barrier.pNext = nullptr;
+	barrier.srcQueueFamilyIndex = barrier.dstQueueFamilyIndex = -1;
+	barrier.size = mIndirectDispatchBuffer[mInputSlot]->size();
+	mVkDevFunc->vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 1, &barrier, 0, nullptr);
+
+	mVkDevFunc->vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, pipelineHandles->pipeline);
+	QVkCommandBuffer* cbD = QRHI_RES(QVkCommandBuffer, inCmdBuffer);
+	cbD->currentComputePipeline = mSpawnPipeline.get();
+	QRhiVulkanExHelper::setShaderResources(rhi, inCmdBuffer, mSpawnBindings[mInputSlot].get());
+	mVkDevFunc->vkCmdDispatch(cmdBuffer, mNumOfSpawnPerFrame, 1, 1);
+
+	inCmdBuffer->endExternal();
 }
 
 void QGpuParticleEmitter::onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer) {
+	QRhiVulkanCommandBufferNativeHandles* cmdBufferHandles = (QRhiVulkanCommandBufferNativeHandles*)inCmdBuffer->nativeHandles();
+	VkCommandBuffer cmdBuffer = cmdBufferHandles->commandBuffer;
+	QVkComputePipeline* pipelineHandles = (QVkComputePipeline*)mUpdatePipeline.get();
+	QRhiVulkan* rhi = *(QRhiVulkan**)(mRhi);
+
+	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
+	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
+
+	auto outputBuffer = mIndirectDispatchBuffer[mOutputSlot]->nativeBuffer();
+	VkBuffer outputVkBuffer = *(VkBuffer*)outputBuffer.objects[0];
 
 	IndirectDispatchBuffer dispatch = { 0,1,1 };
 	QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 	batch->uploadStaticBuffer(mIndirectDispatchBuffer[mOutputSlot].get(), &dispatch);
-	inCmdBuffer->beginComputePass(batch, QRhiCommandBuffer::ExternalContent);
-	inCmdBuffer->setComputePipeline(mUpdatePipeline.get());
-	inCmdBuffer->setShaderResources(mUpdateBindings[mInputSlot].get());
-	QRhiVulkanCommandBufferNativeHandles* sencCmdBufferHandler = (QRhiVulkanCommandBufferNativeHandles*)inCmdBuffer->nativeHandles();
-	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
-	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-	mVkDevFunc->vkCmdDispatchIndirect(sencCmdBufferHandler->commandBuffer, vkBuffer, 0);
-	inCmdBuffer->endComputePass();
+	inCmdBuffer->resourceUpdate(batch);
+
+	inCmdBuffer->beginExternal();
+
+	VkBufferMemoryBarrier barrier[2];
+	barrier[0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	barrier[0].buffer = outputVkBuffer;
+	barrier[0].offset = 0;
+	barrier[0].pNext = nullptr;
+	barrier[0].srcQueueFamilyIndex = barrier[0].dstQueueFamilyIndex = -1;
+	barrier[0].size = mIndirectDispatchBuffer[mOutputSlot]->size();
+
+	barrier[1].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barrier[1].srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	barrier[1].dstAccessMask = VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+	barrier[1].buffer = vkBuffer;
+	barrier[1].offset = 0;
+	barrier[1].pNext = nullptr;
+	barrier[1].srcQueueFamilyIndex = barrier[1].dstQueueFamilyIndex = -1;
+	barrier[1].size = mIndirectDispatchBuffer[mInputSlot]->size();
+
+	mVkDevFunc->vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 1, &barrier[0], 0, nullptr);
+	mVkDevFunc->vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT, 0, 0, nullptr, 1, &barrier[1], 0, nullptr);
+
+	mVkDevFunc->vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, pipelineHandles->pipeline);
+	QVkCommandBuffer* cbD = QRHI_RES(QVkCommandBuffer, inCmdBuffer);
+	cbD->currentComputePipeline = mUpdatePipeline.get();
+	QRhiVulkanExHelper::setShaderResources(rhi, inCmdBuffer, mUpdateBindings[mInputSlot].get());
+	mVkDevFunc->vkCmdDispatchIndirect(cmdBuffer, vkBuffer, 0);
+	inCmdBuffer->endExternal();
 }
 
 void QGpuParticleEmitter::onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer) {
-	inCmdBuffer->beginComputePass(nullptr, QRhiCommandBuffer::ExternalContent);
-	inCmdBuffer->setComputePipeline(mTranformComputePipline.get());
-	inCmdBuffer->setShaderResources(mTranformComputeBindings[mOutputSlot].get());
-	QRhiVulkanCommandBufferNativeHandles* vkCmdBufferHandle = (QRhiVulkanCommandBufferNativeHandles*)inCmdBuffer->nativeHandles();
+	QRhiVulkanCommandBufferNativeHandles* cmdBufferHandles = (QRhiVulkanCommandBufferNativeHandles*)inCmdBuffer->nativeHandles();
+	VkCommandBuffer cmdBuffer = cmdBufferHandles->commandBuffer;
+	QVkComputePipeline* pipelineHandles = (QVkComputePipeline*)mTranformComputePipline.get();
+	QRhiVulkan* rhi = *(QRhiVulkan**)(mRhi);
 	auto buffer = mIndirectDispatchBuffer[mOutputSlot]->nativeBuffer();
 	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-	mVkDevFunc->vkCmdDispatchIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0);
-	inCmdBuffer->endComputePass();
+
+	inCmdBuffer->beginExternal();
+
+	VkBufferMemoryBarrier barrier;
+	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+	barrier.buffer = vkBuffer;
+	barrier.offset = 0;
+	barrier.pNext = nullptr;
+	barrier.srcQueueFamilyIndex = barrier.dstQueueFamilyIndex = -1;
+	barrier.size = mIndirectDispatchBuffer[mOutputSlot]->size();
+	mVkDevFunc->vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT, 0, 0, nullptr, 1, &barrier, 0, nullptr);
+
+	mVkDevFunc->vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, pipelineHandles->pipeline);
+	QVkCommandBuffer* cbD = QRHI_RES(QVkCommandBuffer, inCmdBuffer);
+	cbD->currentComputePipeline = mTranformComputePipline.get();
+	QRhiVulkanExHelper::setShaderResources(rhi, inCmdBuffer, mTranformComputeBindings[mOutputSlot].get());
+	mVkDevFunc->vkCmdDispatchIndirect(cmdBuffer, vkBuffer, 0);
+	inCmdBuffer->endExternal();
 }

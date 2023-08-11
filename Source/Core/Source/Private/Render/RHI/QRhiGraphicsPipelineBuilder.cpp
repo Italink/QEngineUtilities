@@ -282,7 +282,18 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 	}
 	QString vertexInputCode;
 	for (auto& input : mInputAttributes) {
-		vertexInputCode += QString::asprintf("layout(location = %d) in %s %s;\n", input.location(), getInputFormatTypeName(input.format()).data(), input.mName.toLocal8Bit().data());
+		if (input.matrixSlice() == -1) {
+			vertexInputCode += QString::asprintf("layout(location = %d) in %s %s;\n", input.location(), getInputFormatTypeName(input.format()).data(), input.mName.toLocal8Bit().data());
+		}
+		int matrixRows = 0;
+		for (auto& item : mInputAttributes) {
+			if (item.mName == input.mName) {
+				matrixRows++;
+			}
+		}
+		if (input.matrixSlice() == 0 && matrixRows == 4) {
+			vertexInputCode += QString::asprintf("layout(location = %d) in mat4 %s;\n", input.location(), input.mName.toLocal8Bit().data());
+		}
 	}
 	vertexInputCode += "out gl_PerVertex { vec4 gl_Position;}; \n";
 	mStageInfos[QRhiShaderStage::Vertex].defineCode = vertexInputCode.toLocal8Bit();

@@ -1,28 +1,36 @@
 #ifndef QParticlesRenderComponent_h__
 #define QParticlesRenderComponent_h__
 
-#include "Render/ISceneRenderComponent.h"
 #include "Asset/QParticleEmitter.h"
-#include "Type/QColor4D.h"
+#include "Asset/QStaticMesh.h"
 #include "QEngineUtilitiesAPI.h"
+#include "Render/ISceneRenderComponent.h"
+#include "Type/QColor4D.h"
+#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
 
 class QENGINEUTILITIES_API QParticlesRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
+		Q_PROPERTY(QSharedPointer<QStaticMesh> ParticleShape READ getParticleShape WRITE setParticleShape)
+		Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)
 		Q_PROPERTY(IParticleEmitter* Emitter READ getEmitter WRITE setEmitter)
 		Q_PROPERTY(bool FacingCamera READ getFacingCamera WRITE setFacingCamera)
 
-	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QParticlesRenderComponent)
-		Q_BUILDER_ATTRIBUTE(IParticleEmitter*, Emitter)
-		Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
-	Q_BUILDER_END()
+		Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QParticlesRenderComponent)
+			Q_BUILDER_ATTRIBUTE(IParticleEmitter*, Emitter)
+			Q_BUILDER_ATTRIBUTE(QSharedPointer<QStaticMesh>, ParticleShape)
+			Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
+		Q_BUILDER_END()
 public:
 	QParticlesRenderComponent();
 
 	void setEmitter(IParticleEmitter* inEmitter);
 	IParticleEmitter* getEmitter() const { return mEmitter.get(); }
 
+	void setParticleShape(QSharedPointer<QStaticMesh> inStaticMesh);
+	QSharedPointer<QStaticMesh> getParticleShape();
 	void setFacingCamera(bool val);
 	bool getFacingCamera() const;
+	QRhiMaterialGroup* getMaterialGroup() const { return mMaterialGroup.get(); }
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;
@@ -34,24 +42,22 @@ protected:
 protected:
 	QSharedPointer<IParticleEmitter> mEmitter;
 	QScopedPointer<QRhiBuffer> mIndirectDrawBuffer;
+
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
-	QScopedPointer<QRhiBuffer> mUniformBuffer;
-	QScopedPointer<QRhiGraphicsPipeline> mPipeline;
-	QScopedPointer<QRhiShaderResourceBindings> mBindings;
+	QScopedPointer<QRhiBuffer> mIndexBuffer;
+	QSharedPointer<QRhiGraphicsPipelineBuilder> mParticlePipeline;
+	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 
 	struct IndirectDrawBuffer {
-		quint32 vertexCount;
-		quint32 instanceCount = 1;
-		quint32 firstVertex = 0;
-		quint32 firstInstance = 0;
+		uint32_t indexCount;
+		uint32_t instanceCount = 1;
+		uint32_t firstIndex;
+		int32_t vertexOffset;
+		uint32_t firstInstance;
 	};
-	struct UniformBlock {
-		QGenericMatrix<4, 4, float> M;
-		QGenericMatrix<4, 4, float> V;
-		QGenericMatrix<4, 4, float> P;
-		QColor4D Color = QColor4D(1.0f,1.0f,1.0f);
-	}mUniform;
-	bool bFacingCamera = true;
+
+	bool bFacingCamera = false;
+	QSharedPointer<QStaticMesh> mStaticMesh;
 };
 
 #endif // QParticlesRenderComponent_h__
