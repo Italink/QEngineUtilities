@@ -1,7 +1,6 @@
 #include "QEngineApplication.h"
 #include "Plugin/QEnginePluginManager.h"
 
-
 QEngineApplication::QEngineApplication(int& argc, char** argv)
 	: QApplication(argc,argv)
 {
