@@ -857,7 +857,7 @@ QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRh
 		physDevFeatures2.pNext = &features11;
 		features11.pNext = &features12;
 	#ifdef VK_VERSION_1_3
-		if (caps.apiVersion >= QVersionNumber(1, 3))
+		if (inst->apiVersion() >= QVersionNumber(1, 3))
 			features12.pNext = &features13;
 	#endif
 		f->vkGetPhysicalDeviceFeatures2(physDev, &physDevFeatures2);

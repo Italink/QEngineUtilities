@@ -10,8 +10,27 @@
 #include "QEngineCoreAPI.h"
 
 struct QENGINECORE_API QStaticMesh {
+
+	enum Shape {
+		Plane,
+		Cube,
+
+	};
+
 	static QSharedPointer<QStaticMesh> CreateFromFile(const QString& inFilePath);
-	static QSharedPointer<QStaticMesh> CreateFromText(const QString& inText, const QFont& inFont, QColor inColor = Qt::white, Qt::Orientation o = Qt::Horizontal, int inSpacing = 2, bool bUseTexture = true);
+
+	static QSharedPointer<QStaticMesh> CreateFromShape(Shape shape);
+
+	static QSharedPointer<QStaticMesh> CreateFromText(
+		const QString& inText,
+		const QFont& inFont,
+		QColor inColor = Qt::white,
+		Qt::Orientation o = Qt::Horizontal,
+		int inSpacing = 2,
+		bool bUseTexture = true,
+		float lod = 1.0f
+	);
+
 
 	struct Vertex {
 		QVector3D position;

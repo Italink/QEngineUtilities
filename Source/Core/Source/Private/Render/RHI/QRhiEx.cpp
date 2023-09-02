@@ -83,7 +83,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 
 #if QT_CONFIG(vulkan)
 	if (inBackend == QRhi::Vulkan) {
-		QVulkanDefaultInstance::setFlag(QVulkanDefaultInstance::EnableValidation);
+		//QVulkanDefaultInstance::setFlag(QVulkanDefaultInstance::EnableValidation);
 		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
 		QRhiVulkanInitParams params;
 		if (inWindow) {

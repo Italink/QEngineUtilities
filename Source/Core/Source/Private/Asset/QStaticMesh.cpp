@@ -10,6 +10,7 @@
 #include <QPainterPath>
 #include <QPainter>
 #include "Utils/EarCut.h"
+#include <private/qtriangulator_p.h>
 
 QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePath) {
 	QSharedPointer<QStaticMesh> staticMesh;
@@ -64,26 +65,36 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePat
 	return staticMesh;
 }
 
-QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, const QFont& inFont, QColor inColor /*= Qt::white*/, Qt::Orientation inOrientation /*= Qt::Horizontal*/, int inSpacing /*= 2*/, bool bUseTexture) {
+QSharedPointer<QStaticMesh> QStaticMesh::CreateFromShape(Shape shape)
+{
+	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
+	QSharedPointer<QMaterial> material = QSharedPointer<QMaterial>::create();
+
+	return staticMesh;
+}
+
+QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, const QFont& inFont, QColor inColor /*= Qt::white*/, Qt::Orientation inOrientation /*= Qt::Horizontal*/, int inSpacing /*= 2*/, bool bUseTexture, float lod) {
 	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
 	QSharedPointer<QMaterial> material = QSharedPointer<QMaterial>::create();
 	QVector<Vertex>& vertices = staticMesh->mVertices;
 	QVector<Index>& indices = staticMesh->mIndices;
-	QFontMetrics fontMetrics(inFont);
-	QPainterPath fontPath;
+	QFont font = inFont;
+	font.setPointSizeF(inFont.pointSizeF() * lod);
+	QFontMetrics fontMetrics(font);
+	QPainterPath textPath;
 	SubMeshData submesh;
 	QSize textSize;
 	if (inOrientation == Qt::Orientation::Horizontal) {
 		textSize = { 0,fontMetrics.height() };
 		for (int i = 0; i < inText.size(); i++) {
-			fontPath.addText(textSize.width(), fontMetrics.ascent(), inFont, inText[i]);
+			textPath.addText(textSize.width(), fontMetrics.ascent(), font, inText[i]);
 			textSize.setWidth(textSize.width() + inSpacing + fontMetrics.horizontalAdvance(inText[i]));
 		}
 	}
 	else {
 		textSize = { 0,fontMetrics.ascent() };
 		for (int i = 0; i < inText.size(); i++) {
-			fontPath.addText(0, textSize.height(), inFont, inText[i]);
+			textPath.addText(0, textSize.height(), font, inText[i]);
 			textSize.setWidth(qMax(textSize.width(), fontMetrics.horizontalAdvance(inText[i])));
 			textSize.setHeight(textSize.height() + inSpacing + fontMetrics.height());
 		}
@@ -92,7 +103,7 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 		QImage image(textSize, QImage::Format_RGBA8888);
 		image.fill(Qt::transparent);
 		QPainter painter(&image);
-		painter.fillPath(fontPath, inColor);
+		painter.fillPath(textPath, inColor);
 		painter.end();
 		material->mProperties["BaseColor"] = image;
 
@@ -120,41 +131,16 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 		indices << 0 << 1 << 2 << 0 << 2 << 3;
 	}
 	else {
-		const QList<QPolygonF>& polygonList = fontPath.toSubpathPolygons();
-		QList<QList<QPolygonF>> polygons;
-		QList<QPolygonF> holes;
-		for (const auto& polygon : polygonList) {
-			if (mapbox::detail::PolygonIsClockwise(polygon))
-				polygons << QList<QPolygonF>{polygon};
-			else
-				holes << polygon;
+		QTriangleSet triangleSet = qTriangulate(textPath, QTransform(), lod, true);
+		for (int i = 0; i < triangleSet.vertices.size(); i += 2) {
+			Vertex vertex;
+			vertex.position = QVector3D(triangleSet.vertices[i], triangleSet.vertices[i + 1] , 0);
+			vertices.push_back(vertex);
 		}
-		for (const auto& hole : holes) {
-			for (auto& polygon : polygons) {
-				if (polygon.first().containsPoint(hole.first(), Qt::FillRule::WindingFill)) {
-					polygon << hole;
-				}
-			}
-		}
-		Index offset = 0;
-		for (const auto& polygonSet : polygons) {
-			for (auto& polygon : polygonSet) {
-				for (auto& point : polygon) {
-					Vertex vertex;
-					vertex.position = QVector3D(point.x(), point.y(), 0);
-					vertices.push_back(vertex);
-				}
-			}
-			auto localIndices = mapbox::earcut<Index>(polygonSet);
-			for (auto it : localIndices) {
-				indices << it + offset;
-			}
-			offset = vertices.size();
-		}
-
-		for (auto& vertex : vertices) {
-			vertex.position.setY(textSize.height() - vertex.position.y());
-			vertex.position -= QVector3D(textSize.width() / 2.0f, textSize.height() / 2.0f, 0.0f);
+		Q_ASSERT(triangleSet.indices.type() == QVertexIndexVector::UnsignedInt);
+		unsigned int* indicesData = (unsigned int*)triangleSet.indices.data();
+		for (auto i = 0; i < triangleSet.indices.size(); i++) {
+			indices.push_back(indicesData[i]);
 		}
 		material->mProperties["BaseColor"] = inColor;
 	}

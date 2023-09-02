@@ -382,7 +382,6 @@ void QGpuParticleEmitter::onSpawn(QRhiCommandBuffer* inCmdBuffer) {
 	auto buffer = mIndirectDispatchBuffer[mInputSlot]->nativeBuffer();
 	VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
 
-
 	UpdateContextBuffer updateCtx;
 	updateCtx.deltaSec = mDeltaSec;
 	updateCtx.timestamp = QTime::currentTime().msecsSinceStartOfDay() / 1000000.0f;
