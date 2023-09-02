@@ -219,6 +219,11 @@ QRhiShaderResourceBindings* QRhiGraphicsPipelineBuilder::getShaderResourceBindin
 void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mBlendStates.resize(inRenderComponent->getBasePass()->getRenderTargetColorAttachments().size());
 	QRhiEx* rhi = inRenderComponent->getBasePass()->getRenderer()->getRhi();
+	for (auto& state : mBlendStates) {
+		state.enable = true;
+		state.srcColor = QRhiGraphicsPipeline::SrcAlpha;
+		state.dstColor = QRhiGraphicsPipeline::OneMinusSrcAlpha;
+	}
 	mPipeline.reset(rhi->newGraphicsPipeline());
 	mPipeline->setTopology(mTopology);
 	mPipeline->setCullMode(mCullMode);

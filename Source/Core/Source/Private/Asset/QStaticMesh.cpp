@@ -9,7 +9,6 @@
 #include <QFontMetrics>
 #include <QPainterPath>
 #include <QPainter>
-#include "Utils/EarCut.h"
 #include <private/qtriangulator_p.h>
 
 QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePath) {
@@ -65,11 +64,69 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromFile(const QString& inFilePat
 	return staticMesh;
 }
 
+QSharedPointer<QStaticMesh> QStaticMesh::CreateFromImage(QImage image)
+{
+	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
+	QSharedPointer<QMaterial> material = QSharedPointer<QMaterial>::create();
+	QVector<Vertex>& vertices = staticMesh->mVertices;
+	QVector<Index>& indices = staticMesh->mIndices;
+	SubMeshData submesh;
+	Vertex vertex;
+
+	vertex.position = QVector3D(-1, -1, 0);
+	vertex.uv = QVector2D(0, 1);
+	vertices << vertex;
+
+	vertex.position = QVector3D(1, -1, 0);
+	vertex.uv = QVector2D(1, 1);
+	vertices << vertex;
+
+	vertex.position = QVector3D(1, 1, 0);
+	vertex.uv = QVector2D(1, 0);
+	vertices << vertex;
+
+	vertex.position = QVector3D(-1, 1, 0);
+	vertex.uv = QVector2D(0, 0);
+	vertices << vertex;
+
+	indices << 0 << 1 << 2 << 0 << 2 << 3;
+
+	material->mProperties["BaseColor"] = image;
+	submesh.indicesOffset = 0;
+	submesh.verticesOffset = 0;
+	submesh.indicesRange = indices.size();
+	submesh.verticesRange = vertices.size();
+	submesh.materialIndex = 0;
+	staticMesh->mMaterials << material;
+	staticMesh->mSubmeshes << submesh;
+	return staticMesh;
+}
+
 QSharedPointer<QStaticMesh> QStaticMesh::CreateFromShape(Shape shape)
 {
 	QSharedPointer<QStaticMesh> staticMesh = QSharedPointer<QStaticMesh>::create();
 	QSharedPointer<QMaterial> material = QSharedPointer<QMaterial>::create();
+	QVector<Vertex>& vertices = staticMesh->mVertices;
+	QVector<Index>& indices = staticMesh->mIndices;
+	SubMeshData submesh;
 
+	if (shape == QStaticMesh::Shape::Plane) {
+
+	}
+
+	else if (shape == QStaticMesh::Shape::Cube) {
+
+	}
+	else if (shape == QStaticMesh::Shape::Sphere) {
+
+	}
+	submesh.indicesOffset = 0;
+	submesh.verticesOffset = 0;
+	submesh.indicesRange = indices.size();
+	submesh.verticesRange = vertices.size();
+	submesh.materialIndex = 0;
+	staticMesh->mMaterials << material;
+	staticMesh->mSubmeshes << submesh;
 	return staticMesh;
 }
 

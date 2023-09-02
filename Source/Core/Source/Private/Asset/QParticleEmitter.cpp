@@ -126,7 +126,7 @@ QRhiBuffer* QGpuParticleEmitter::getCurrentIndirectDispatchBuffer() {
 void QGpuParticleEmitter::setupRhi(QRhiEx* inRhi) {
 	IParticleEmitter::setupRhi(inRhi);
 	mVkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
-	mVkInstance = QVulkanDefaultInstance::instance();
+	mVkInstance = QRhiVulkanExHelper::instance();
 	mVkDevFunc = mVkInstance->deviceFunctions(mVkHandles->dev);
 
 	mSigCompile.request();

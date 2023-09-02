@@ -14,10 +14,12 @@ struct QENGINECORE_API QStaticMesh {
 	enum Shape {
 		Plane,
 		Cube,
-
+		Sphere,
 	};
 
 	static QSharedPointer<QStaticMesh> CreateFromFile(const QString& inFilePath);
+
+	static QSharedPointer<QStaticMesh> CreateFromImage(QImage image);
 
 	static QSharedPointer<QStaticMesh> CreateFromShape(Shape shape);
 

@@ -28,6 +28,7 @@ void RenderDocPlugin::startup() {
 }
 
 void RenderDocPlugin::shutdown() {
+
 }
 
 QENGINE_IMPLEMENT_PLUGIN(RenderDocPlugin, RenderDocPlugin)

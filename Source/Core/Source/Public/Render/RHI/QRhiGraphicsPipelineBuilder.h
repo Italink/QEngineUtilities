@@ -59,6 +59,9 @@ public:
 	QRhiGraphicsPipeline::FrontFace getFrontFace() const { return mFrontFace; }
 	void setFrontFace(QRhiGraphicsPipeline::FrontFace val) { mFrontFace = val; sigRebuild.request(); }
 
+	QVector<QRhiGraphicsPipeline::TargetBlend> getBlendStates() const { return mBlendStates; }
+	void setBlendStates(QVector<QRhiGraphicsPipeline::TargetBlend> val) { mBlendStates = val; }
+
 	bool isDepthTestEnabled() const { return bEnableDepthTest; }
 	void setDepthTest(bool val) { bEnableDepthTest = val; sigRebuild.request(); }
 

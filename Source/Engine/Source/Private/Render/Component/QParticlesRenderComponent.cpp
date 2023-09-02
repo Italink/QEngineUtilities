@@ -3,7 +3,6 @@
 #include "QVulkanInstance"
 #include "qvulkanfunctions.h"
 #include "Utils/DebugUtils.h"
-#include "private/qvulkandefaultinstance_p.h"
 
 static float ParticleShape[] = {
 	 0.01f,   0.01f,
@@ -13,7 +12,9 @@ static float ParticleShape[] = {
 };
 
 QParticlesRenderComponent::QParticlesRenderComponent() {
-	setParticleShape(QStaticMesh::CreateFromText("Hello", QFont()));
+	QImage image(10, 10, QImage::Format_RGBA8888);
+	image.fill(Qt::white);
+	setParticleShape(QStaticMesh::CreateFromImage(image));
 }
 
 void QParticlesRenderComponent::setEmitter(IParticleEmitter* inEmitter) {
@@ -35,6 +36,7 @@ QSharedPointer<QStaticMesh> QParticlesRenderComponent::getParticleShape()
 
 void QParticlesRenderComponent::setFacingCamera(bool val) {
 	bFacingCamera = val;
+	mSigRebuildResource.request();
 	mSigRebuildPipeline.request();
 }
 
@@ -57,9 +59,16 @@ void QParticlesRenderComponent::onRebuildResource() {
 	mParticlePipeline->addUniformBlock(QRhiShaderStage::Vertex, "Transform")
 		->addParam("M", QGenericMatrix<4, 4, float>())
 		->addParam("V", QGenericMatrix<4, 4, float>())
-		->addParam("P", QGenericMatrix<4, 4, float>())
-		;
+		->addParam("P", QGenericMatrix<4, 4, float>());
 
+	QVector<QRhiGraphicsPipeline::TargetBlend> blendState(getBasePass()->getRenderTargetColorAttachments().size());
+	for (auto& state : blendState) {
+		state.enable = true;
+		state.srcColor = QRhiGraphicsPipeline::SrcAlpha;
+		state.dstColor = QRhiGraphicsPipeline::OneMinusSrcAlpha;
+	}
+	mParticlePipeline->setBlendStates(blendState);
+	mParticlePipeline->setDepthTest(false);
 	mParticlePipeline->setInputBindings({
 		QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QStaticMesh::Vertex)),
 		QRhiVertexInputBindingEx(mIndirectDrawBuffer.get(),sizeof(float) * 16, 0 , QRhiVertexInputBinding::Classification::PerInstance)
@@ -112,7 +121,6 @@ void QParticlesRenderComponent::onRebuildResource() {
 	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 	auto materialDesc = mMaterialGroup->getMaterialDesc(mStaticMesh->mSubmeshes[0].materialIndex);
 	mParticlePipeline->addMaterial(materialDesc);
-
 	mParticlePipeline->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec2 vUV;
 			layout(location = 1) in vec3 vWorldPosition;
@@ -159,7 +167,7 @@ void QParticlesRenderComponent::onPreUpdate(QRhiCommandBuffer* cmdBuffer) {
 		QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 		VkBuffer indirectDispatchBuffer = *(VkBuffer*)gpuEmitter->getCurrentIndirectDispatchBuffer()->nativeBuffer().objects[0];
 		VkBuffer indirectDrawBuffer = *(VkBuffer*)mIndirectDrawBuffer->nativeBuffer().objects[0];
-		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
+		QVulkanInstance* vkInstance = (*(QRhiVulkan**)(mRhi))->inst;
 		VkBufferCopy bufferCopy;
 		bufferCopy.srcOffset = 0;
 		bufferCopy.dstOffset = offsetof(IndirectDrawBuffer, instanceCount);
@@ -223,7 +231,7 @@ void QParticlesRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRh
 		QRhiVulkanNativeHandles* vkHandles = (QRhiVulkanNativeHandles*)mRhi->nativeHandles();
 		auto buffer = mIndirectDrawBuffer->nativeBuffer();
 		VkBuffer vkBuffer = *(VkBuffer*)buffer.objects[0];
-		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
+		QVulkanInstance* vkInstance = (*(QRhiVulkan**)(mRhi))->inst;
 		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDrawIndexedIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0, 1, sizeof(IndirectDrawBuffer));
 	}
 }

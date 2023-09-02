@@ -21,9 +21,9 @@ public:
 
 	QShader newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble = QByteArray());
 
-	static QShader newShaderFromQSBFile(const char* filename);
-
 	QRhiBuffer* newVkBuffer(QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
+
+	static QShader newShaderFromQSBFile(const char* filename);
 public:
 	class QENGINECORE_API Signal {
 	public:

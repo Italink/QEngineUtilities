@@ -5,7 +5,10 @@
 #include "private/qrhi_p.h"
 #include "qsharedpointer.h"
 
+
 namespace QRhiVulkanExHelper {
+	QVulkanInstance* instance();
+
 	QRhiBuffer* newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
 
 	void updateShaderResourceBindings(QVulkanDeviceFunctions* df, VkDevice dev, QRhiVulkan* rhi, QRhiShaderResourceBindings* srb, int descSetIdx = -1);

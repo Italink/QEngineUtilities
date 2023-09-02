@@ -17,7 +17,6 @@
 #include "private/qrhivulkanext_p.h"
 #endif
 
-
 #ifdef Q_OS_WIN
 #include <QtGui/private/qrhid3d11_p.h>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
@@ -31,9 +30,6 @@
 
 #include "QVulkanInstance"
 #include <QtGui/private/qrhinull_p.h>
-
-
-#include "private/qvulkandefaultinstance_p.h"
 
 #include <qmath.h>
 #include <QVulkanFunctions>
@@ -83,8 +79,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 
 #if QT_CONFIG(vulkan)
 	if (inBackend == QRhi::Vulkan) {
-		//QVulkanDefaultInstance::setFlag(QVulkanDefaultInstance::EnableValidation);
-		QVulkanInstance* vkInstance = QVulkanDefaultInstance::instance();
+		QVulkanInstance* vkInstance = QRhiVulkanExHelper::instance();
 		QRhiVulkanInitParams params;
 		if (inWindow) {
 			inWindow->setVulkanInstance(vkInstance);

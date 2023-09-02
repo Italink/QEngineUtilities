@@ -1,9 +1,6 @@
 #include "QRhiVulkanExHelper.h"
 #include "QVulkanInstance"
 #include <QtGui/private/qrhinull_p.h>
-
-#include "private/qvulkandefaultinstance_p.h"
-
 #include <qmath.h>
 #include <QVulkanFunctions>
 
@@ -26,6 +23,7 @@ QT_WARNING_DISABLE_GCC("-Wsuggest-override")
 #if defined(Q_CC_CLANG) && Q_CC_CLANG >= 1100
 QT_WARNING_DISABLE_CLANG("-Wdeprecated-copy")
 #endif
+#define VMA_VULKAN_VERSION 1002000
 #include "vk_mem_alloc.h"
 QT_WARNING_POP
 
@@ -150,7 +148,10 @@ void QVkBufferEx::destroy() {
 	// for m_rhi being null, to allow surviving in case one attempts to destroy
 	// a (leaked) resource after the QRhi.
 	if (rhiD) {
-		rhiD->releaseQueue.append(e);
+		for (int i = 0; i < QVK_FRAMES_IN_FLIGHT; ++i) {
+			vmaDestroyBuffer(toVmaAllocator(rhiD->allocator), e.buffer.buffers[i], toVmaAllocation(e.buffer.allocations[i]));
+			vmaDestroyBuffer(toVmaAllocator(rhiD->allocator), e.buffer.stagingBuffers[i], toVmaAllocation(e.buffer.stagingAllocations[i]));
+		}
 		rhiD->unregisterResource(this);
 	}
 }
@@ -280,6 +281,29 @@ void QVkBufferEx::endFullDynamicBufferUpdateForCurrentFrame() {
 	VmaAllocation a = toVmaAllocation(allocations[slot]);
 	vmaUnmapMemory(toVmaAllocator(rhiD->allocator), a);
 	vmaFlushAllocation(toVmaAllocator(rhiD->allocator), a, 0, m_size);
+}
+
+QVulkanInstance* QRhiVulkanExHelper::instance()
+{
+	if (globalVulkanInstance)
+		return globalVulkanInstance;
+	globalVulkanInstance = new QVulkanInstance;
+	const QVersionNumber supportedVersion = globalVulkanInstance->supportedApiVersion();
+	if (supportedVersion >= QVersionNumber(1, 3))
+		globalVulkanInstance->setApiVersion(QVersionNumber(1, 3));
+	else if (supportedVersion >= QVersionNumber(1, 2))
+		globalVulkanInstance->setApiVersion(QVersionNumber(1, 2));
+	else if (supportedVersion >= QVersionNumber(1, 1))
+		globalVulkanInstance->setApiVersion(QVersionNumber(1, 1));
+	
+	globalVulkanInstance->setLayers({ "VK_LAYER_KHRONOS_validation"/*,"VK_LAYER_TENCENT_wegame_cross_overlay","VK_LAYER_LUNARG_screenshot","VK_LAYER_NV_optimus","VK_LAYER_LUNARG_gfxreconstruct","VK_LAYER_LUNARG_monitor" */});
+	globalVulkanInstance->setExtensions(QRhiVulkanInitParams::preferredInstanceExtensions());
+	if (!globalVulkanInstance->create()) {
+		qWarning("Failed to create Vulkan instance");
+		delete globalVulkanInstance;
+		globalVulkanInstance = nullptr;
+	}
+	return globalVulkanInstance;
 }
 
 QRhiBuffer* QRhiVulkanExHelper::newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size) {
@@ -835,8 +859,8 @@ QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRh
 	devInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	devInfo.queueCreateInfoCount = 1;
 	devInfo.pQueueCreateInfos = &queueInfo;
-	devInfo.enabledLayerCount = uint32_t(devLayers.size());
-	devInfo.ppEnabledLayerNames = devLayers.constData();
+	//devInfo.enabledLayerCount = uint32_t(devLayers.size());
+	//devInfo.ppEnabledLayerNames = devLayers.constData();
 	devInfo.enabledExtensionCount = uint32_t(requestedDevExts.size());
 	devInfo.ppEnabledExtensionNames = requestedDevExts.constData();
 
@@ -852,7 +876,6 @@ QRhiVulkanNativeHandles  QRhiVulkanExHelper::createVulkanNativeHandles(const QRh
 	VkPhysicalDeviceVulkan13Features features13 = {};
 	features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 #endif
-
 	if (inst->apiVersion() >= QVersionNumber(1, 2)) {
 		physDevFeatures2.pNext = &features11;
 		features11.pNext = &features12;
