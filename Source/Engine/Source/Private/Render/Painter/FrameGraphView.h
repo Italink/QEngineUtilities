@@ -6,7 +6,8 @@
 #include "GraphEditor.h"
 #include "Render/Renderer/QWindowRenderer.h"
 
-struct FrameGraphView : public GraphEditor::Delegate {
+class FrameGraphView : public GraphEditor::Delegate {
+public:
 	FrameGraphView();
 	void Rebuild(QFrameGraph* frameGraph);
 	void Show();

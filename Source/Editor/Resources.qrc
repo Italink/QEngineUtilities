@@ -31,5 +31,6 @@
         <file>Resources/replace.png</file>
         <file>Resources/text-format.png</file>
         <file>Resources/close.png</file>
+        <file>Resources/tips.png</file>
     </qresource>
 </RCC>

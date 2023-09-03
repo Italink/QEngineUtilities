@@ -25,6 +25,9 @@ void RenderDocPlugin::startup() {
 			}
 		});
 	}
+	else {
+		qWarning() << "Render Doc Load Failed: " << renderdoc.errorString();
+	}
 }
 
 void RenderDocPlugin::shutdown() {

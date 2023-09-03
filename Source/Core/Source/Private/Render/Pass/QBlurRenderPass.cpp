@@ -36,7 +36,7 @@ void QBlurRenderPass::setDownSample(int val) {
 void QBlurRenderPass::resizeAndLinkNode(const QSize& size) {
 	mSrcTexture = getTextureIn_Src();
 	for (int i = 0; i < 2; i++) {
-		mBlurRT[i].colorAttachment.reset(mRhi->newTexture(QRhiTexture::RGBA32F, mSrcTexture->pixelSize() / mDownSampleCount, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+		mBlurRT[i].colorAttachment.reset(mRhi->newTexture(mSrcTexture->format(), mSrcTexture->pixelSize() / mDownSampleCount, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 		mBlurRT[i].colorAttachment->create();
 		mBlurRT[i].renderTarget.reset(mRhi->newTextureRenderTarget({ mBlurRT[i].colorAttachment.get() }));
 	}

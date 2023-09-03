@@ -168,6 +168,7 @@ void FrameGraphView::ShowFrameComparer(float thickness, float leftMinWidth, floa
 	auto dpr = qApp->devicePixelRatio();
 	ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 60 * dpr , viewport->WorkSize.y - 40 * dpr));
 	ImGui::SetNextWindowSize(ImVec2(100 * dpr, 40 * dpr));
+
 	ImGui::Begin("ExitButton", NULL,
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar

@@ -72,7 +72,7 @@ private:
 	float mFov = 45.0f;
 	float mAspectRatio = 1.0;
 	float mNearPlane = 0.1f;
-	float mFarPlane = 10000.0f;
+	float mFarPlane = 3000.0f;
 
 	QVector3D mCameraDirection;
 	QVector3D mCameraUp;

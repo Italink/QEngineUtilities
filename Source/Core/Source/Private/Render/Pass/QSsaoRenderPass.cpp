@@ -54,7 +54,7 @@ QSsaoRenderPass* QSsaoRenderPass::setupBias(float var) {
 void QSsaoRenderPass::resizeAndLinkNode(const QSize& size) {
 	auto positionTexture = getTextureIn_Position();
 	auto normalTexture = getTextureIn_Normal();
-	mRT.colorAttachment.reset(mRhi->newTexture(QRhiTexture::R16F, positionTexture->pixelSize() , 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+	mRT.colorAttachment.reset(mRhi->newTexture(QRhiTexture::R16, positionTexture->pixelSize() , 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
 	mRT.colorAttachment->create();
 	mRT.renderTarget.reset(mRhi->newTextureRenderTarget({ mRT.colorAttachment.get() }));
 	renderPassDesc.reset(mRT.renderTarget->newCompatibleRenderPassDescriptor());

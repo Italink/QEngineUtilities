@@ -5,7 +5,8 @@
 #include "Render/RHI/QRhiWindow.h"
 #include "Utils/ImGuiWidgets.h"
 #include "QEngineEditorStyleManager.h"
-#include "QFile"
+#include <QFile>
+#include <QTime>
 
 void QDebugUIPainter::setupDebugIdTexture(QRhiTexture* texture) {
 	mDebugIdTexture = texture;
@@ -125,6 +126,29 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 			}
 			ImGui::PopStyleVar();
 			ImGui::End();
+
+			static int FrameCounter = 1000;
+			if (FrameCounter >= 0) {
+				ImGui::SetNextWindowBgAlpha(0);
+				ImVec2 Size(700, 170);
+				ImVec2 Pos(viewport->WorkSize.x - Size.x, viewport->WorkSize.y - Size.y);
+				ImGui::SetNextWindowPos(Pos);
+				ImGui::SetNextWindowSize(Size);
+				ImGui::Begin("Tips", NULL,
+					ImGuiWindowFlags_NoTitleBar
+					| ImGuiWindowFlags_NoScrollbar
+					| ImGuiWindowFlags_NoMove
+					| ImGuiWindowFlags_NoResize
+					| ImGuiWindowFlags_NoCollapse
+					| ImGuiWindowFlags_NoNav
+					| ImGuiWindowFlags_NoBackground
+					| ImGuiWindowFlags_NoBringToFrontOnFocus
+					| ImGuiWindowFlags_UnsavedDocument);
+				ImGui::Image(getImageId("tips"), Size,ImVec2(0,0),ImVec2(1,1),ImVec4(1,1,1,FrameCounter/500.0f));
+				ImGui::End();
+				FrameCounter--;
+			}
+
 			if (bUseLineMode)
 				QRhiGraphicsPipelineBuilder::setPolygonModeOverride(QRhiGraphicsPipeline::Line);
 			else
@@ -143,7 +167,6 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 				ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", mRenderer->getRhiWindow()->getGpuFrameTime());
 				ImGui::End();
 			}
-
 		}
 	});
 	setupRhi(mRenderer->getRhi());
@@ -188,6 +211,7 @@ void QDebugUIPainter::compile() {
 	registerImage("polygon", QImage(":/Resources/polygon.png"));
 	registerImage("camera", QImage(":/Resources/camera.png"));
 	registerImage("graph", QImage(":/Resources/graph.png"));
+	registerImage("tips", QImage(":/Resources/tips.png"));
 	ImGuiPainter::compile();
 	if (mDebugIdTexture == nullptr)
 		return;
