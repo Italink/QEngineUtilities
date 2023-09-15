@@ -1,5 +1,5 @@
 #include "DetailView/QDetailViewRow.h"
-
+#include "DetailView/QPropertyHandle.h"
 #include "QEngineEditorStyleManager.h"
 #include "QPainter"
 #include "Widgets/QSvgIcon.h"
@@ -108,6 +108,12 @@ Q_SIGNALS:
 	void AsToggledExpand();
 	void AsShowEvent();
 protected:
+	void mousePressEvent(QMouseEvent* event) override {
+		if (event->button() == Qt::LeftButton) {
+			mRow->mView->SetCurrentRow(mRow);
+		}
+	}
+
 	void mouseDoubleClickEvent(QMouseEvent* event) override{
 		Q_EMIT AsToggledExpand();
 		event->accept();
@@ -116,6 +122,9 @@ protected:
 		QPainter painter(this);
 		if(mRow->IsCategory()){
 			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->GetCategoryColor());
+		}
+		else if (mRow->IsCurrent()) {
+			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->GetSelectedColor());
 		}
 		QPen pen(QEngineEditorStyleManager::Instance()->GetGridLineColor());
 		pen.setWidth(1);
@@ -187,6 +196,17 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 	SetupContentWidget(content);
 }
 
+void QDetailViewRow::SetupPropertyHandle(QPropertyHandle* val)
+{
+	mHandle = val;
+	if (mHandle) {
+		connect(mHandle, &QPropertyHandle::AsChildEvent, this, [this](QChildEvent* event) {
+			if (!mView->GetIgnoreMetaObjects().contains(event->child()->metaObject()))
+				mHandle->AsRequestRebuildRow();
+		});
+	}
+}
+
 int QDetailViewRow::ChildCount() const {
 	return mChildren.count();
 }
@@ -244,6 +264,11 @@ bool QDetailViewRow::IsVisible() const {
 	return mWidget->isVisible();
 }
 
+bool QDetailViewRow::IsCurrent() const
+{
+	return mView->GetCurrentRow() == this;
+}
+
 void QDetailViewRow::SetExpanded(bool inExpanded, bool bRecursive) {
 	bExpanded = inExpanded;
 	mWidget->mIndentWidget->RefreshState(mChildren.count(), bExpanded);
@@ -257,6 +282,11 @@ void QDetailViewRow::SetExpanded(bool inExpanded, bool bRecursive) {
 
 bool QDetailViewRow::IsExpanded() const {
 	return bExpanded;
+}
+
+void QDetailViewRow::UpdateWidget()
+{
+	mWidget->update();
 }
 
 void QDetailViewRow::Refresh() {

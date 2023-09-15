@@ -7,6 +7,7 @@
 
 class QDetailView;
 class QDetailViewRowWidget;
+class QPropertyHandle;
 
 class QENGINEEDITOR_API QDetailViewRow : public QObject{
 	Q_OBJECT
@@ -18,6 +19,7 @@ public:
 
 	void SetupContentWidget(QWidget* inContent);
 	void SetupNameValueWidget(QWidget* inNameWidget,QWidget* inValueWidget);
+	void SetupPropertyHandle(QPropertyHandle* val);
 
 	int ChildCount() const;
 	QDetailViewRow* ChildAt(int inIndex);
@@ -29,9 +31,12 @@ public:
 	void SetVisible(bool inVisiable);
 	bool IsVisible() const;
 
+	bool IsCurrent() const;
+
 	void SetExpanded(bool inExpanded, bool bRecursive = false);
 	bool IsExpanded() const;
 
+	void UpdateWidget();
 	void Refresh();
 	void MarkIsCategory();
 	bool IsCategory();
@@ -46,6 +51,7 @@ Q_SIGNALS:
 protected:
 	QDetailView* mView = nullptr;
 	QDetailViewRowWidget* mWidget = nullptr;
+	QPropertyHandle* mHandle = nullptr;
 	QList<QDetailViewRow*> mChildren;
 	bool bExpanded = false;
 	bool bIsCategory = false;

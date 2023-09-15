@@ -9,6 +9,7 @@ QStaticMeshRenderComponent::QStaticMeshRenderComponent() {
 void QStaticMeshRenderComponent::setStaticMesh(QSharedPointer<QStaticMesh> val) {
 	mStaticMesh = val;
 	if (mStaticMesh) {
+		mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 		mSigRebuildResource.request();
 		mSigRebuildPipeline.request();
 	}
@@ -17,7 +18,6 @@ void QStaticMeshRenderComponent::setStaticMesh(QSharedPointer<QStaticMesh> val) 
 void QStaticMeshRenderComponent::onRebuildResource() {
 	if (mStaticMesh.isNull())
 		return;
-	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(QStaticMesh::Vertex) * mStaticMesh->mVertices.size()));
 	mVertexBuffer->create();
@@ -88,10 +88,20 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 	}
 }
 
+QSharedPointer<QStaticMesh> QStaticMeshRenderComponent::getStaticMesh() const
+{
+	return mStaticMesh;
+}
+
 void QStaticMeshRenderComponent::onRebuildPipeline() {
 	for (auto& pipeline : mPipelines) {
 		pipeline->create(this);
 	}
+}
+
+QRhiMaterialGroup* QStaticMeshRenderComponent::getMaterialGroup()
+{
+	return mMaterialGroup.get();
 }
 
 void QStaticMeshRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {

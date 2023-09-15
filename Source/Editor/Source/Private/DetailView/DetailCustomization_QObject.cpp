@@ -14,7 +14,7 @@ void DetailCustomization_QObject::CustomizeDetails(const IDetailLayoutBuilder::O
 	for (int i = 1; i < Context.MetaObject->propertyCount(); i++) {
 		QMetaProperty prop = Context.MetaObject->property(i);
 		QString propertyPath = prop.name();
-		if(!Context.PrePath.isEmpty()){
+		if (!Context.PrePath.isEmpty()) {
 			propertyPath = Context.PrePath + "." + propertyPath;
 		}
 		QPropertyHandle* handler = QPropertyHandle::FindOrCreate(Context.OwnerObject, propertyPath);
@@ -30,7 +30,28 @@ void DetailCustomization_QObject::CustomizeDetails(const IDetailLayoutBuilder::O
 			//}
 		}
 		else{
-			qWarning() << "property handle is null";
+			qWarning() << "property handle is null " << propertyPath;
+		}
+	}
+	if (Builder->ShowChildren() && Context.OwnerObject == Context.ObjectPtr) {
+		auto children = Context.OwnerObject->children();
+		for (int i = 0; i < children.size(); i++) {
+			QObject* child = children[i];
+			if (!Builder->IsIgnoreMetaObject(child->metaObject())) {
+				QString name = QString("%1 [%2]").arg(child->objectName()).arg(child->metaObject()->className());
+				
+				QPropertyHandle* handler = QPropertyHandle::FindOrCreate(
+					child,
+					QMetaType::fromType<QObject*>(),
+					name,
+					[child]() {
+						return QVariant::fromValue<>(child);
+					},
+					[child](QVariant var) {
+					}
+				);
+				Builder->AddProperty(handler);
+			}
 		}
 	}
 }

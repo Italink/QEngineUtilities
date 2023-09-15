@@ -12,7 +12,7 @@ QEngineEditorStyleManager::QEngineEditorStyleManager()
 {
 	int id = QFontDatabase::addApplicationFont(mFontFilePath);
 	QStringList families = QFontDatabase::applicationFontFamilies(id);
-	mFont = QFont(families.first(), 10);
+	mFont = QFont(families.first(), 12);
 	qApp->setFont(mFont);
 	SetStyle(mCurrentStyle);
 }
@@ -65,9 +65,9 @@ void QEngineEditorStyleManager::SetStyle(QDetailWidgetStyle inStyle) {
 	if (inStyle == QDetailWidgetStyle::Unreal) {
 		mShadowColor = QColor(5, 5, 5);
 		mGridLineColor = QColor(5, 5, 5);
-		mCategoryColor = QColor(61, 61, 61);
-		mHoveredColor = QColor(51, 51, 51);
-		mSelectedColor = QColor(79, 110, 242);
+		mCategoryColor = QColor(61, 61, 61, 100);
+		mHoveredColor = QColor(79, 110, 242, 150);
+		mSelectedColor = QColor(79, 110, 242, 200);
 		mArrowColor = QColor(220, 220, 220);
 		QSvgIcon::setIconColor(QColor(200, 200, 200));
 		mStyleSheet = R"(

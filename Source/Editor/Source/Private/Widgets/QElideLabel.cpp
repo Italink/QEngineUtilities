@@ -38,3 +38,19 @@ void QElideLabel::paintEvent(QPaintEvent* event) {
 	}
 }
 
+QSize QElideLabel::sizeHint() const
+{
+	int w = 0, h = 0;
+	QString s(mText);
+	bool empty = s.isEmpty();
+	if (empty)
+		s = QStringLiteral("XXXX");
+	QFontMetrics fm = fontMetrics();
+	QSize sz = fm.size(Qt::TextShowMnemonic, s);
+	if (!empty || !w)
+		w += sz.width();
+	if (!empty || !h)
+		h = qMax(h, sz.height());
+	return QSize(w, h + 10);
+}
+

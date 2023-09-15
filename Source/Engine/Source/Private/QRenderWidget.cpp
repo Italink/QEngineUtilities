@@ -40,7 +40,6 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 	:  mCamera(new QCamera)
 #ifdef QENGINE_WITH_EDITOR
 	, mDetailView(new QDetailView)
-	, mObjectTreeView(new QObjectTreeView) 
 #endif
 {
 #ifdef QENGINE_WITH_EDITOR
@@ -55,18 +54,14 @@ QRenderWidget::QRenderWidget(QRhiWindow::InitParams inInitParams)
 #ifdef QENGINE_WITH_EDITOR
 	QSplitter* splitter = new QSplitter;
 	mViweport->setMinimumWidth(400);
-	QSplitter* panel = new QSplitter(Qt::Vertical);
-	panel->addWidget(mObjectTreeView);
-	panel->addWidget(mDetailView);
-	panel->setSizes({ 1, 10 });
 	splitter->addWidget(mViweport);
-	splitter->addWidget(panel);
-	mObjectTreeView->setFocusProxy(this);
+	splitter->addWidget(mDetailView);
+	splitter->setSizes({ 700,300 });
 	mRhiWindow->installEventFilter(this);
-	connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, mDetailView, &QDetailView::SetObject);
+	//connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, mDetailView, &QDetailView::SetObject);
 	hLayout->addWidget(splitter);
 #else
-	hLayout->addWidget(viewport);
+	hLayout->addWidget(mViweport);
 #endif
 }
 
@@ -108,17 +103,18 @@ void QRenderWidget::onInit() {
 	mRenderer.reset(new QWindowRenderer(mRhiWindow));
 	mRenderer->setCamera(mCamera);
 #ifdef QENGINE_WITH_EDITOR
-	connect(mRenderer.get(), &IRenderer::asCurrentObjectChanged, this, [this](QObject* object) {
-		mObjectTreeView->SelectObjects({ object });
-		mDetailView->SetObject(object);
-	});
-	connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, this, [this](QObject* object) {
-		if (mRenderer->getCurrentObject() != object) {
-			mRenderer->setCurrentObject(object);
-		}
-	});
-	mObjectTreeView->SetObjects({ mRenderer.get() });
-	mObjectTreeView->expandAll();
+	mDetailView->SetFlags(QDetailView::ShowChildren);
+	//connect(mRenderer.get(), &IRenderer::asCurrentObjectChanged, this, [this](QObject* object) {
+	//	mObjectTreeView->SelectObjects({ object });
+	//	mDetailView->SetObject(object);
+	//});
+	//connect(mObjectTreeView, &QObjectTreeView::AsObjecteSelected, this, [this](QObject* object) {
+	//	if (mRenderer->getCurrentObject() != object) {
+	//		mRenderer->setCurrentObject(object);
+	//	}
+	//});
+	//mObjectTreeView->SetObjects({ mRenderer.get() });
+	//mObjectTreeView->expandAll();
 #endif
 }
 
@@ -126,6 +122,9 @@ void QRenderWidget::onRenderTick() {
 	if (sigRecompileRenderer.ensure()) {
 		mRenderer->setFrameGraph(mFrameGraph);
 		mRenderer->compile();
+#ifdef QENGINE_WITH_EDITOR
+		mDetailView->SetObject(mRenderer.get());
+#endif
 	}
 	mRenderer->render();
 }

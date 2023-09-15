@@ -57,7 +57,8 @@ IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByNameValueWidget(const QStrin
 }
 
 void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
-;	QDetailViewRow* row = NewChildRow();
+	QDetailViewRow* row = NewChildRow();
+	row->SetupPropertyHandle(InPropertyHandle);
 	QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	if (customizationInstance.isNull()) {
@@ -75,7 +76,6 @@ void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
 	}
 	QObject::connect(InPropertyHandle, &QPropertyHandle::AsRequestRebuildRow, row, [this, row, InPropertyHandle]() {
 		row->DeleteChildren();
-
 		QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 		const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 		if (customizationInstance.isNull()) {
@@ -96,22 +96,21 @@ void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
 	});
 }
 
-void IDetailLayoutBuilder::AddObject(QObject* InObject, QString InPrePath /*= QString()*/, bool HideHeader /*= true*/) {
+void IDetailLayoutBuilder::AddObject(QObject* InObject, QString InPrePath /*= QString()*/) {
 	if (InObject) {
 		IDetailLayoutBuilder::ObjectContext Context;
 		Context.MetaObject = InObject->metaObject();
 		Context.ObjectPtr = InObject;
 		Context.OwnerObject = InObject;
 		Context.PrePath = InPrePath;
-		AddObject(Context, HideHeader);
+		AddObject(Context);
 	}
 	else {
 		qWarning() << "IDetailLayoutBuilder::AddObject: QObject is nullptr";
 	}
 }
 
-
-void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context, bool HideHeader /*= true*/) {
+void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context) {
 	QSharedPointer<IDetailCustomization> customizationInstance = mClassCustomizationMap.value(Context.ObjectPtr);
 	if (customizationInstance.isNull()) {
 		customizationInstance = QDetailViewManager::Instance()->GetCustomDetailLayout(Context.MetaObject);
@@ -134,6 +133,18 @@ void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context
 				qWarning() << "property handle is null";
 		}
 	}
+}
+
+
+bool IDetailLayoutBuilder::ShowChildren() const
+{
+	return mDetailView->GetFlags().testFlag(QDetailView::ShowChildren);
+}
+
+
+bool IDetailLayoutBuilder::IsIgnoreMetaObject(const QMetaObject* inMetaObj)
+{
+	return mDetailView->mIgnoreMetaObjects.contains(inMetaObj);
 }
 
 IDetailLayoutBuilder* IDetailLayoutBuilder::FindOrAddCategory(const QString& InName){

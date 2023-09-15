@@ -28,8 +28,11 @@ public:
 	IDetailLayoutBuilder* AddRowByNameValueWidget(const QString& inName, QWidget* InValue);
 
 	void AddProperty(QPropertyHandle* InPropertyHandle);
-	void AddObject(QObject* InObject, QString InPrePath = QString(), bool HideHeader = true);
-	void AddObject(IDetailLayoutBuilder::ObjectContext Context, bool HideHeader = true);
+	void AddObject(QObject* InObject, QString InPrePath = QString());
+	void AddObject(IDetailLayoutBuilder::ObjectContext Context);
+
+	bool ShowChildren() const;
+	bool IsIgnoreMetaObject(const QMetaObject* inMetaObj);
 
 	IDetailLayoutBuilder* FindOrAddCategory(const QString& InName);
 

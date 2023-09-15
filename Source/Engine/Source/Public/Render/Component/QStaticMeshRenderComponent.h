@@ -18,8 +18,8 @@ class QENGINEUTILITIES_API QStaticMeshRenderComponent :public ISceneRenderCompon
 public:
 	QStaticMeshRenderComponent();
 	void setStaticMesh(QSharedPointer<QStaticMesh> val);
-	QSharedPointer<QStaticMesh> getStaticMesh() const { return mStaticMesh; }
-	QRhiMaterialGroup* getMaterialGroup() { return mMaterialGroup.get(); }
+	QSharedPointer<QStaticMesh> getStaticMesh() const;
+	QRhiMaterialGroup* getMaterialGroup();
 protected:
 	void onRebuildResource() override;
 	void onRebuildPipeline() override;

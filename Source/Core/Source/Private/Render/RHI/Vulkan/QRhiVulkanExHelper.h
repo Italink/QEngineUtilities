@@ -4,22 +4,23 @@
 #include "private/qrhivulkan_p.h"
 #include "private/qrhi_p.h"
 #include "qsharedpointer.h"
+#include "QEngineCoreAPI.h"
 
 
 namespace QRhiVulkanExHelper {
-	QVulkanInstance* instance();
+	QENGINECORE_API QVulkanInstance* instance();
 
-	QRhiBuffer* newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
+	QENGINECORE_API QRhiBuffer* newVkBuffer(QRhi* inRhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);
 
-	void updateShaderResourceBindings(QVulkanDeviceFunctions* df, VkDevice dev, QRhiVulkan* rhi, QRhiShaderResourceBindings* srb, int descSetIdx = -1);
+	QENGINECORE_API void updateShaderResourceBindings(QVulkanDeviceFunctions* df, VkDevice dev, QRhiVulkan* rhi, QRhiShaderResourceBindings* srb, int descSetIdx = -1);
 
-	VkImageView imageViewForLevel(QVkTexture* texture, int level);
+	QENGINECORE_API VkImageView imageViewForLevel(QVkTexture* texture, int level);
 
-	void setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb = nullptr, int dynamicOffsetCount = 0, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets = nullptr);
+	QENGINECORE_API void setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb = nullptr, int dynamicOffsetCount = 0, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets = nullptr);
 
-	QRhiVulkanNativeHandles createVulkanNativeHandles(const QRhiVulkanInitParams& params);
+	QENGINECORE_API QRhiVulkanNativeHandles createVulkanNativeHandles(const QRhiVulkanInitParams& params);
 
-	void destroyVulkanNativeHandles(const QRhiVulkanNativeHandles& handles);
+	QENGINECORE_API void destroyVulkanNativeHandles(const QRhiVulkanNativeHandles& handles);
 };
 
 

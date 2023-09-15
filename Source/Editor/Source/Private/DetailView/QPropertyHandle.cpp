@@ -1,9 +1,10 @@
 #include "DetailView/QPropertyHandle.h"
-#include "QBoxLayout"
-#include "QMetaObject"
-#include "QMetaProperty"
-#include "QRegularExpression"
-#include "QTime"
+#include <QBoxLayout>
+#include <QEvent>
+#include <QMetaObject>
+#include <QMetaProperty>
+#include <QRegularExpression>
+#include <QTime>
 #include "DetailView/QDetailViewManager.h"
 #include "DetailView/PropertyHandleImpl/QAssociativePropertyHandleImpl.h"
 #include "DetailView/PropertyHandleImpl/QSequentialPropertyHandleImpl.h"
@@ -78,6 +79,16 @@ void QPropertyHandle::ResloveMetaData() {
 			return;
 		}
 	}
+}
+
+bool QPropertyHandle::eventFilter(QObject* object, QEvent* event)
+{
+	if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved) {
+		QChildEvent* childEvent = static_cast<QChildEvent*>(event);
+		if(childEvent)
+			Q_EMIT AsChildEvent(childEvent);
+	}
+	return QObject::eventFilter(object, event);
 }
 
 QPropertyHandle* QPropertyHandle::Find(const QObject* inParent, const QString& inPropertyPath) {

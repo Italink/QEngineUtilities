@@ -8,6 +8,7 @@
 #include "DetailView/QDetailLayoutBuilder.h"
 #include "QEngineEditorStyleManager.h"
 #include "QApplication"
+#include "QEngineUndoStack.h"
 
 QDetailView::QDetailView()
 	: mView(new QWidget)
@@ -25,6 +26,12 @@ QDetailView::QDetailView()
 	mLayout->setContentsMargins(0, 0, 0, 0);
 	mLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 	qApp->setStyleSheet(QEngineEditorStyleManager::Instance()->GetStylesheet());
+
+	mIgnoreMetaObjects = {
+		&QPropertyHandle::staticMetaObject,
+		&QEngineUndoEntry::staticMetaObject,
+		&QEngineUndoStack::staticMetaObject,
+	};
 }
 
 void QDetailView::SetObject(QObject* inObject) {
@@ -36,6 +43,16 @@ void QDetailView::SetObjects(const QObjectList& inObjects) {
 		mObjects = inObjects;
 		ForceRebuild();
 	}
+}
+
+void QDetailView::SetFlags(Flags inFlag)
+{
+	mFlags = inFlag;
+}
+
+QDetailView::Flags QDetailView::GetFlags() const
+{
+	return mFlags;
 }
 
 void QDetailView::SearchByKeywords(QString inKeywords) {
@@ -121,5 +138,41 @@ QDetailViewRow* QDetailView::AddTopLevelRow() {
 	mTopLevelRows << row;
 	mLayout->addWidget((QWidget*)row->mWidget, 0, Qt::AlignTop);
 	return row;
+}
+
+QDetailViewRow* QDetailView::GetCurrentRow() const{
+	return mCurrentRow;
+}
+
+void QDetailView::SetCurrentRow(QDetailViewRow* val){
+	if (mCurrentRow != val) {
+		auto LastRow = mCurrentRow;
+		mCurrentRow = val;
+		if (mCurrentRow) 
+			mCurrentRow->UpdateWidget();	
+		if (LastRow) 
+			LastRow->UpdateWidget();
+		Q_EMIT AsCurrentRowChanged(mCurrentRow);
+	}
+}
+
+const QSet<QMetaType>& QDetailView::GetIgnoreMetaTypes() const{
+	return mIgnoreMetaTypes;
+}
+
+void QDetailView::SetIgnoreMetaTypes(QSet<QMetaType> val){
+	mIgnoreMetaTypes = val;
+}
+
+const QSet<const QMetaObject*>& QDetailView::GetIgnoreMetaObjects() const{
+	return mIgnoreMetaObjects;
+}
+
+void QDetailView::SetIgnoreMetaObjects(QSet<const QMetaObject*> val){
+	mIgnoreMetaObjects = val;
+	mIgnoreMetaObjects 
+		<< &QPropertyHandle::staticMetaObject
+		<< &QEngineUndoEntry::staticMetaObject
+		<< &QEngineUndoStack::staticMetaObject;
 }
 

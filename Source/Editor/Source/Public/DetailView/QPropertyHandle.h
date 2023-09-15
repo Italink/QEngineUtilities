@@ -68,11 +68,11 @@ public:
 Q_SIGNALS:
 	void AsValueChanged();
 	void AsRequestRebuildRow();
-
+	void AsChildEvent(QChildEvent*);
 protected:
 	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter);
 	void ResloveMetaData();
-
+	bool eventFilter(QObject* object, QEvent* event) override;
 protected:
 	QSharedPointer<IPropertyHandleImpl> mImpl;
 	QMetaType mType;

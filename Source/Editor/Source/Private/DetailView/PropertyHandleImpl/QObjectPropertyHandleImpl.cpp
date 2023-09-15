@@ -1,10 +1,8 @@
 #include "DetailView/PropertyHandleImpl/QObjectPropertyHandleImpl.h"
-
 #include <qsequentialiterable.h>
-
 #include "DetailView/QPropertyHandle.h"
 #include "QRegularExpression"
-#include "QMetaProperty"
+#include <QMetaProperty>
 
 QObjectPropertyHandleImpl::QObjectPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
@@ -43,6 +41,9 @@ void QObjectPropertyHandleImpl::RefreshObjectPtr() {
 			}
 			mObjectPtr = objectPtr;
 			mOwnerObject = objectPtr;
+			if (mOwnerObject) {
+				mOwnerObject->installEventFilter(mHandle);
+			}
 		}
 		else {
 			void* ptr = mObjectHolder.data();

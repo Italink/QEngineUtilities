@@ -8,6 +8,7 @@ QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent() {
 void QSkeletalMeshRenderComponent::setSkeletalMesh(QSharedPointer<QSkeletalMesh> val) {
 	mSkeletalMesh = val;
 	if (mSkeletalMesh) {
+		mMaterialGroup.reset(new QRhiMaterialGroup(mSkeletalMesh->mMaterials));
 		mSigRebuildResource.request();
 		mSigRebuildPipeline.request();
 	}
@@ -16,8 +17,6 @@ void QSkeletalMeshRenderComponent::setSkeletalMesh(QSharedPointer<QSkeletalMesh>
 void QSkeletalMeshRenderComponent::onRebuildResource() {
 	if (mSkeletalMesh.isNull())
 		return;
-
-	mMaterialGroup.reset(new QRhiMaterialGroup(mSkeletalMesh->mMaterials));
 
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(QSkeletalMesh::Vertex) * mSkeletalMesh->mVertices.size()));
 	mVertexBuffer->create();
