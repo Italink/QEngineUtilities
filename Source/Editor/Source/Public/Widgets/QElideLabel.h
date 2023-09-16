@@ -21,7 +21,6 @@ private:
 	QHoverLineEdit* mLineEditor;
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
-	virtual QSize sizeHint() const override;
 };
 
 #endif // QElideLabel_h__
