@@ -4,7 +4,7 @@
 #include <QWindow>
 #include "QQuaternion"
 #include "QMatrix4x4"
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 
 class QENGINECORE_API QCamera :public QObject {
 	Q_OBJECT
@@ -53,7 +53,7 @@ public:
 	void setFarPlane(float val);
 	float getFarPlane() { return mFarPlane; }
 
-	QMatrix4x4 getProjectionMatrixWithCorr(QRhiEx* inRhi);
+	QMatrix4x4 getProjectionMatrixWithCorr(QRhi* inRhi);
 	QMatrix4x4 getProjectionMatrix();
 	QMatrix4x4 getViewMatrix();
 private:

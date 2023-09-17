@@ -27,7 +27,7 @@ protected:
 
 	QString mShaderCode;
 	QString mRawShaderCode;
-	QRhiEx::Signal sigRecompile;
+	QRhiSignal sigRecompile;
 
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;
 	QScopedPointer<QRhiBuffer> mUniformBlock;

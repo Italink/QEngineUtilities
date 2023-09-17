@@ -295,7 +295,7 @@ QVulkanInstance* QRhiVulkanExHelper::instance()
 		globalVulkanInstance->setApiVersion(QVersionNumber(1, 2));
 	else if (supportedVersion >= QVersionNumber(1, 1))
 		globalVulkanInstance->setApiVersion(QVersionNumber(1, 1));
-	
+	globalVulkanInstance->setFlags(QVulkanInstance::Flag::NoPortabilityDrivers);
 	globalVulkanInstance->setLayers({ "VK_LAYER_KHRONOS_validation"/*,"VK_LAYER_TENCENT_wegame_cross_overlay","VK_LAYER_LUNARG_screenshot","VK_LAYER_NV_optimus","VK_LAYER_LUNARG_gfxreconstruct","VK_LAYER_LUNARG_monitor" */});
 	globalVulkanInstance->setExtensions(QRhiVulkanInitParams::preferredInstanceExtensions());
 	if (!globalVulkanInstance->create()) {
@@ -515,11 +515,12 @@ VkImageView QRhiVulkanExHelper::imageViewForLevel(QVkTexture* texture, int level
 	return v;
 }
 
-void QRhiVulkanExHelper::setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb, int dynamicOffsetCount, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets)
+void QRhiVulkanExHelper::setShaderResources(QRhiResource *pipeline, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb, int dynamicOffsetCount, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets)
 {
+	QRhiVulkan* rhi = *(QRhiVulkan**)(pipeline->rhi());
 	QVkCommandBuffer* cbD = QRHI_RES(QVkCommandBuffer, cb);
-	QVkGraphicsPipeline* gfxPsD = QRHI_RES(QVkGraphicsPipeline, cbD->currentGraphicsPipeline);
-	QVkComputePipeline* compPsD = QRHI_RES(QVkComputePipeline, cbD->currentComputePipeline);
+	QVkGraphicsPipeline* gfxPsD = pipeline->resourceType() == QRhiResource::Type::GraphicsPipeline ? QRHI_RES(QVkGraphicsPipeline, pipeline) : nullptr;
+	QVkComputePipeline* compPsD = pipeline->resourceType() == QRhiResource::Type::ComputePipeline ? QRHI_RES(QVkComputePipeline, pipeline) : nullptr;
 
 	if (!srb) {
 		if (gfxPsD)

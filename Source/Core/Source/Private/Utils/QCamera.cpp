@@ -89,7 +89,7 @@ void QCamera::setFarPlane(float val) {
 	calculateProjectionMatrix();
 }
 
-QMatrix4x4 QCamera::getProjectionMatrixWithCorr(QRhiEx* inRhi) {
+QMatrix4x4 QCamera::getProjectionMatrixWithCorr(QRhi* inRhi) {
 	return inRhi->clipSpaceCorrMatrix() * getProjectionMatrix();
 }
 

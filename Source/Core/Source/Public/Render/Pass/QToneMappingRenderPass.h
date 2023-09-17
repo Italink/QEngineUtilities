@@ -47,7 +47,7 @@ private:
 		float exposure = 1.0f;
 		float pureWhite = 1.0;
 	}mParams;
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 };
 
 #endif // QToneMappingRenderPass_h__

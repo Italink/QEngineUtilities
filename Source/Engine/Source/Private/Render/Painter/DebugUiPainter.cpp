@@ -126,9 +126,16 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 			}
 			ImGui::PopStyleVar();
 			ImGui::End();
+			
+			static bool showTips = true;
+			static int FrameCounter = 500;
+			if (showTips || FrameCounter) {
+				if(ImGui::GetIO().MouseDown[ImGuiMouseButton_Left] 
+					|| ImGui::GetIO().MouseDown[ImGuiMouseButton_Right]
+					|| ImGui::GetIO().MouseDown[ImGuiMouseButton_Middle]) {
+					showTips = false;
+				}
 
-			static int FrameCounter = 1000;
-			if (FrameCounter >= 0) {
 				ImGui::SetNextWindowBgAlpha(0);
 				ImVec2 Size(700, 170);
 				ImVec2 Pos(viewport->WorkSize.x - Size.x, viewport->WorkSize.y - Size.y);
@@ -146,7 +153,9 @@ QDebugUIPainter::QDebugUIPainter(QWindowRenderer* inRenderer)
 					| ImGuiWindowFlags_UnsavedDocument);
 				ImGui::Image(getImageId("tips"), Size,ImVec2(0,0),ImVec2(1,1),ImVec4(1,1,1,FrameCounter/500.0f));
 				ImGui::End();
-				FrameCounter--;
+				if (!showTips) {
+					FrameCounter--;
+				}
 			}
 
 			if (bUseLineMode)
@@ -241,9 +250,9 @@ void QDebugUIPainter::compile() {
 		%1
 	}
 	)";
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
 
-	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 	layout (location = 0) in vec2 vUV;
 	layout (location = 0) out vec4 outFragColor;
 

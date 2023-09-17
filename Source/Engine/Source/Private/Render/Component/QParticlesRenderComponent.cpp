@@ -149,7 +149,7 @@ void QParticlesRenderComponent::onRebuildResource() {
 	);
 
 	if (mEmitter && mEmitter->metaObject()->inherits(&QGpuParticleEmitter::staticMetaObject)) {
-		mIndirectDrawBuffer.reset(mRhi->newVkBuffer(QRhiBuffer::Static, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, sizeof(IndirectDrawBuffer)));
+		mIndirectDrawBuffer.reset(QRhiHelper::newVkBuffer(mRhi, QRhiBuffer::Static, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, sizeof(IndirectDrawBuffer)));
 		mIndirectDrawBuffer->create();
 		mIndirectDrawBuffer->setName("IndirectDrawBuffer");
 	}

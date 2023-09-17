@@ -69,7 +69,7 @@ private:
 		float aspectRatio = 1.77f;
 		int iterations = 64;
 	}mParams;
-	QRhiEx::Signal mSigUpdateParams;
+	QRhiSignal mSigUpdateParams;
 };
 
 #endif // QDepthOfFieldRenderPass_h__

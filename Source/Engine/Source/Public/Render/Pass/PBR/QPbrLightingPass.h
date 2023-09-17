@@ -10,7 +10,7 @@ class QENGINEUTILITIES_API QPbrLightingPass : public IRenderPass {
 	Q_BUILDER_BEGIN_RENDER_PASS(QPbrLightingPass, Albedo, Position, Normal, Metallic, Roughness, SkyTexture, SkyCube)
 	Q_BUILDER_END_RENDER_PASS(FragColor)
 protected:
-	QRhiEx::Signal sigInit;
+	QRhiSignal mSigGeneratePbrTexture;
 
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;

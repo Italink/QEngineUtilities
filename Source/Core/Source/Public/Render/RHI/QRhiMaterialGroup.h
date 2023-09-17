@@ -21,7 +21,7 @@ struct QENGINECORE_API QRhiTextureDesc {
 	QRhiSampler::AddressMode AddressV;
 	QRhiSampler::AddressMode AddressW;
 
-	QRhiEx::Signal sigUpdate;
+	QRhiSignal sigUpdate;
 	QScopedPointer<QRhiTexture> Texture;
 	QSharedPointer<QRhiSampler> Sampler;
 };

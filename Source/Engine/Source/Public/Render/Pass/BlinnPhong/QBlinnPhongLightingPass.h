@@ -18,7 +18,7 @@ public:
 	QColor4D getAmbientLight() const;
 	void setAmbientLight(QColor4D val);
 protected:
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 
 	void resizeAndLinkNode(const QSize& size) override;
 	void compile() override;

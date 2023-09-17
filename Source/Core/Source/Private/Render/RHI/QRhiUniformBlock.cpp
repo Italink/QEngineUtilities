@@ -65,7 +65,7 @@ void QRhiUniformBlock::updateLayout() {
 	}
 }
 
-void QRhiUniformBlock::create(QRhiEx* inRhi) {
+void QRhiUniformBlock::create(QRhi* inRhi) {
 	updateLayout();
 	if (mUniformBlock.isNull() || mUniformBlock->size() != mDataByteSize) {
 		mUniformBlock.reset(inRhi->newBuffer(QRhiBuffer::Type::Dynamic, QRhiBuffer::UniformBuffer, mDataByteSize));

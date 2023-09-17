@@ -2,7 +2,7 @@
 #define QParticleSystem_h__
 
 #include "qvectornd.h"
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 #include "Utils/MathUtils.h"
 #include "Render/RHI/QRhiUniformBlock.h"
 #include "QEngineCoreAPI.h"
@@ -27,12 +27,12 @@ protected:
 		float lifetime = 2.0f;
 	};
 
-	virtual void setupRhi(QRhiEx* inRhi);
+	virtual void setupRhi(QRhi* inRhi);
 	QRhiBuffer* getTransformBuffer();
 
 	virtual void onTick(QRhiCommandBuffer* inCmdBuffer);
 protected:
-	QRhiEx* mRhi;
+	QRhi* mRhi;
 	QScopedPointer<QRhiBuffer> mTransfromBuffer;
 
 	int mNumOfSpawnPerFrame = 100;
@@ -76,7 +76,7 @@ public:
 	QRhiUniformBlock* getSpawnParams() { return mParams.spawnParams.get(); }
 	QRhiUniformBlock* getUpdateParams() { return mParams.updateParams.get(); }
 private:
-	virtual void setupRhi(QRhiEx* inRhi) override;
+	virtual void setupRhi(QRhi* inRhi) override;
 	virtual void onTick(QRhiCommandBuffer* inCmdBuffer) override final;
 	void recompile();
 protected:
@@ -84,8 +84,8 @@ protected:
 	virtual void onUpdateAndRecyle(QRhiCommandBuffer* inCmdBuffer);
 	virtual void onCalcAndSubmitTransform(QRhiCommandBuffer* inCmdBuffer);
 private:
-	QRhiEx::Signal mSigCompile;
-	QRhiEx::Signal mSigInitIndirectBuffer;
+	QRhiSignal mSigCompile;
+	QRhiSignal mSigInitIndirectBuffer;
 	InitParams mParams;
 	int mInputSlot = 0;
 	int mOutputSlot = 1;

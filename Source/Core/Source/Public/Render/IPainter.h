@@ -1,11 +1,11 @@
 #ifndef IPainter_h__
 #define IPainter_h__
 
-#include "Render/RHI/QRhiEx.h"	
+#include "Render/RHI/QRhiHelper.h"	
 
 class IPainter {
 public:
-	void setupRhi(QRhiEx* inRhi) {
+	void setupRhi(QRhi* inRhi) {
 		mRhi = inRhi;
 	}
 	void setupRenderPassDesc(QRhiRenderPassDescriptor* desc) {
@@ -21,7 +21,7 @@ public:
 protected:
 	QRhiRenderPassDescriptor* mRenderPassDesc;
 	int mSampleCount;
-	QRhiEx* mRhi;
+	QRhi* mRhi;
 };
 
 

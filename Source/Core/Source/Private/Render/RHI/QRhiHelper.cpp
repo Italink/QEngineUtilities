@@ -1,4 +1,4 @@
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 #include <QFile>
 
 
@@ -39,26 +39,27 @@ QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def, int 
 	return *this;
 }
 
-void QRhiEx::Signal::request() {
+void QRhiSignal::request() {
 	bDirty = true;
 }
 
-bool QRhiEx::Signal::ensure()
+bool QRhiSignal::ensure()
 {
 	bool var = bDirty;
 	bDirty = false;
 	return var;
 }
 
-bool QRhiEx::Signal::peek() {
+bool QRhiSignal::peek() {
 	return bDirty;
 }
 
-QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi::Vulkan*/, QRhi::Flags inFlags /*= QRhi::Flag()*/, QWindow* inWindow /*= nullptr*/) {
-	QSharedPointer<QRhiEx> rhi;
+QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Flags inFlags, QWindow* inWindow)
+{
+	QSharedPointer<QRhi> rhi;
 	if (inBackend == QRhi::Null) {
 		QRhiNullInitParams params;
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Null, &params, inFlags)));
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::Null, &params, inFlags)));
 	}
 
 #ifndef QT_NO_OPENGL
@@ -66,7 +67,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 		QRhiGles2InitParams params;
 		params.fallbackSurface = QRhiGles2InitParams::newFallbackSurface();
 		params.window = inWindow;
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::OpenGLES2, &params, inFlags)));
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::OpenGLES2, &params, inFlags)));
 	}
 #endif
 
@@ -80,7 +81,7 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 		}
 		params.inst = vkInstance;
 		auto importedHandles = QRhiVulkanExHelper::createVulkanNativeHandles(params);
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Vulkan, &params, inFlags, &importedHandles)), [importedHandles](QRhiEx* rhi) {
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::Vulkan, &params, inFlags, &importedHandles)), [importedHandles](QRhi* rhi) {
 			delete rhi;
 			QRhiVulkanExHelper::destroyVulkanNativeHandles(importedHandles);
 		});
@@ -91,13 +92,13 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 	if (inBackend == QRhi::D3D11) {
 		QRhiD3D11InitParams params;
 		params.enableDebugLayer = true;
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::D3D11, &params, inFlags)));
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::D3D11, &params, inFlags)));
 	}
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 	if (inBackend == QRhi::D3D12) {
 		QRhiD3D12InitParams params;
 		params.enableDebugLayer = true;
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::D3D12, &params, inFlags)));
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::D3D12, &params, inFlags)));
 	}
 #endif
 
@@ -106,27 +107,28 @@ QSharedPointer<QRhiEx> QRhiEx::newRhiEx(QRhi::Implementation inBackend /*= QRhi:
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 	if (inBackend == QRhi::Metal) {
 		QRhiMetalInitParams params;
-		rhi.reset(static_cast<QRhiEx*>(QRhi::create(QRhi::Metal, &params, inFlags)));
+		rhi.reset(static_cast<QRhi*>(QRhi::create(QRhi::Metal, &params, inFlags)));
 	}
 #endif
 	return rhi;
 }
 
-QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble) {
+QShader QRhiHelper::newShaderFromCode(QRhi* rhi, QShader::Stage stage, QByteArray code, QByteArray preamble)
+{
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
 	QList<QShaderBaker::GeneratedShader> generatedShaders;
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
-	if (backend() == QRhi::Vulkan || backend() == QRhi::OpenGLES2) {
+	if (rhi->backend() == QRhi::Vulkan || rhi->backend()  == QRhi::OpenGLES2) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
 	}
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-	else if (backend() == QRhi::D3D11|| backend() == QRhi::D3D12) {
+	else if (rhi->backend()  == QRhi::D3D11 || rhi->backend()  == QRhi::D3D12) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
 		code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
 	}
 #endif
-	else if (backend() == QRhi::Metal) {
+	else if (rhi->backend()  == QRhi::Metal) {
 		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
 	}
 	baker.setGeneratedShaders(generatedShaders);
@@ -137,20 +139,27 @@ QShader QRhiEx::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteAr
 	if (!shader.isValid()) {
 		QStringList codelist = QString(code).split('\n');
 		for (int i = 0; i < codelist.size(); i++) {
-			qWarning() << i+1 << codelist[i].toLocal8Bit().data();
+			qWarning() << i + 1 << codelist[i].toLocal8Bit().data();
 		}
 		qWarning(baker.errorMessage().toLocal8Bit());
 	}
 	return shader;
 }
 
-QShader QRhiEx::newShaderFromQSBFile(const char* filename) {
+QShader QRhiHelper::newShaderFromQSBFile(const char* filename)
+{
 	QFile f(filename);
 	if (f.open(QIODevice::ReadOnly))
 		return QShader::fromSerialized(f.readAll());
 	return QShader();
 }
 
-QRhiBuffer* QRhiEx::newVkBuffer(QRhiBuffer::Type type, VkBufferUsageFlags flags, int size) {
-	return QRhiVulkanExHelper::newVkBuffer(this,type,flags,size);
+QRhiBuffer* QRhiHelper::newVkBuffer(QRhi* rhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size)
+{
+	return QRhiVulkanExHelper::newVkBuffer(rhi, type, flags, size);
+}
+
+void QRhiHelper::setShaderResources(QRhiResource* pipeline, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb, int dynamicOffsetCount, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets)
+{
+	QRhiVulkanExHelper::setShaderResources(pipeline, cb, srb, dynamicOffsetCount, dynamicOffsets);
 }

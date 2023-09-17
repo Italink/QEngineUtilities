@@ -46,7 +46,7 @@ private:
 		uint32_t size = 0;
 		float separation;
 	}mParams;
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 };
 
 #endif // QMotionBlurRenderPass_h__

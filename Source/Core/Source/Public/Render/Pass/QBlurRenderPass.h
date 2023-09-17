@@ -55,7 +55,7 @@ private:
 		uint32_t padding[3];
 		float weight[50] = { 0 };
 	}mParams;
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 
 	int mDownSampleCount = 2;
 	int mBlurIter = 2;

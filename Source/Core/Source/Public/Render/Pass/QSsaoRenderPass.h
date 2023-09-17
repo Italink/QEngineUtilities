@@ -55,7 +55,7 @@ private:
 		QVector4D samples[128];
 		QVector4D noise[16];
 	}mSsaoState;
-	QRhiEx::Signal sigUpdateSsaoState;
+	QRhiSignal sigUpdateSsaoState;
 };
 
 #endif // QSsaoRenderPass_h__

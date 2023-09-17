@@ -46,9 +46,9 @@ void QBloomRenderPass::compile() {
 			%1
 		}
 	)";
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
 
-	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 		layout (binding = 0) uniform sampler2D uSrcTexture;
 		layout (binding = 1) uniform sampler2D uBloomTexture;
 		layout (location = 0) in vec2 vUV;

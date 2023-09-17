@@ -13,10 +13,10 @@ class QENGINECORE_API QSkyRenderPass : public IRenderPass {
 		Q_BUILDER_FUNCTION_END()
 	Q_BUILDER_END_RENDER_PASS(Equirect, SkyTexture, SkyCube)
 private:
-	QRhiEx::Signal sigUploadSkyboxVertics;
-	QRhiEx::Signal sigInitResource;
-	QRhiEx::Signal sigUploadEquirectTexture;
-	QRhiEx::Signal sigComputeSkyCube;
+	QRhiSignal sigUploadSkyboxVertics;
+	QRhiSignal sigInitResource;
+	QRhiSignal sigUploadEquirectTexture;
+	QRhiSignal sigComputeSkyCube;
 	struct RTResource {
 		QScopedPointer<QRhiTexture> colorAttachment;
 		QScopedPointer<QRhiTextureRenderTarget> renderTarget;

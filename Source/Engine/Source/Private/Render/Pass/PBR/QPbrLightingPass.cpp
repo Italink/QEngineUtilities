@@ -23,14 +23,6 @@ void QPbrLightingPass::resizeAndLinkNode(const QSize& size) {
 	mPrefilteredSpecularCube.reset(mRhi->newTexture(QRhiTexture::RGBA32F, skyCube->pixelSize(), 1, QRhiTexture::CubeMap | QRhiTexture::MipMapped | QRhiTexture::UsedWithGenerateMips | QRhiTexture::UsedWithLoadStore));
 	mPrefilteredSpecularCube->create();
 
-	mPrefilteredSpecularCubeBindings.reset(mRhi->newShaderResourceBindings());
-	mPrefilteredSpecularCubeBindings->setBindings({
-		QRhiShaderResourceBinding::sampledTexture(0, QRhiShaderResourceBinding::ComputeStage, skyCube,mSampler.get()),
-		QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage,mPrefilteredSpecularCube.get(),0),
-		QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::ComputeStage,mPrefilteredSpecularCubeUniformBuffer.get()),
-	});
-	mPrefilteredSpecularCubeBindings->create();
-
 	mDiffuseIrradianceCube.reset(mRhi->newTexture(QRhiTexture::RGBA32F, QSize(kIrradianceMapSize, kIrradianceMapSize), 1, QRhiTexture::CubeMap | QRhiTexture::MipMapped | QRhiTexture::UsedWithGenerateMips | QRhiTexture::UsedWithLoadStore));
 	mDiffuseIrradianceCube->create();
 
@@ -51,17 +43,41 @@ void QPbrLightingPass::resizeAndLinkNode(const QSize& size) {
 		QRhiShaderResourceBinding::sampledTexture(6,QRhiShaderResourceBinding::FragmentStage, mDiffuseIrradianceCube.get(), mSampler.get()),
 		QRhiShaderResourceBinding::sampledTexture(7,QRhiShaderResourceBinding::FragmentStage, mBrdfLut.get(), mSampler.get()),
 		QRhiShaderResourceBinding::uniformBuffer(8,QRhiShaderResourceBinding::FragmentStage, mPbrUniformBlock.get())
-	});
+		});
 	mPbrBindings->create();
-}
 
-void QPbrLightingPass::compile() {
+	mPrefilteredSpecularCubeBindings.reset(mRhi->newShaderResourceBindings());
+	mPrefilteredSpecularCubeBindings->setBindings({
+		QRhiShaderResourceBinding::sampledTexture(0, QRhiShaderResourceBinding::ComputeStage, skyCube,mSampler.get()),
+		QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage,mPrefilteredSpecularCube.get(),0),
+		QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::ComputeStage,mPrefilteredSpecularCubeUniformBuffer.get()),
+		});
+	mPrefilteredSpecularCubeBindings->create();
+
+	mDiffuseIrradianceBindings.reset(mRhi->newShaderResourceBindings());
+	mDiffuseIrradianceBindings->setBindings({
+		QRhiShaderResourceBinding::sampledTexture(0, QRhiShaderResourceBinding::ComputeStage, mPrefilteredSpecularCube.get(),mSampler.get()),
+		QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage,mDiffuseIrradianceCube.get(),0),
+		});
+	mDiffuseIrradianceBindings->create();
+
+	mBrdfLutBindings.reset(mRhi->newShaderResourceBindings());
+	mBrdfLutBindings->setBindings({
+		QRhiShaderResourceBinding::imageStore(0, QRhiShaderResourceBinding::ComputeStage,mBrdfLut.get(),0),
+		});
+	mBrdfLutBindings->create();
+	
 	mSkyTexturePainter.reset(new TexturePainter);
 	mSkyTexturePainter->setupRhi(mRhi);
 	mSkyTexturePainter->setupSampleCount(1);
 	mSkyTexturePainter->setupRenderPassDesc(mRT.renderPassDesc.get());
 	mSkyTexturePainter->setupTexture(getTextureIn_SkyTexture());
 	mSkyTexturePainter->compile();
+
+	mSigGeneratePbrTexture.request();
+}
+
+void QPbrLightingPass::compile() {
 
 	int levels = mRhi->mipLevelsForSize(mPrefilteredSpecularCube->pixelSize());
 	mPrefilteredSpecularCubeUniformBuffer.reset(mRhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, mRhi->ubufAlignment() * (levels - 1)));
@@ -70,7 +86,7 @@ void QPbrLightingPass::compile() {
 	mPrefilteredSpecularCubePipeline.reset(mRhi->newComputePipeline());
 
 	mPrefilteredSpecularCubePipeline->setShaderResourceBindings(mPrefilteredSpecularCubeBindings.get());
-	QShader compute = mRhi->newShaderFromCode(QShader::ComputeStage, R"(#version 450
+	QShader compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
 		const float PI = 3.141592;
 		const float TwoPI = 2 * PI;
 		const float Epsilon = 0.00001;
@@ -193,14 +209,8 @@ void QPbrLightingPass::compile() {
 	mPrefilteredSpecularCubePipeline->create();
 
 	mDiffuseIrradiancePipeline.reset(mRhi->newComputePipeline());
-	mDiffuseIrradianceBindings.reset(mRhi->newShaderResourceBindings());
-	mDiffuseIrradianceBindings->setBindings({
-		QRhiShaderResourceBinding::sampledTexture(0, QRhiShaderResourceBinding::ComputeStage, mPrefilteredSpecularCube.get(),mSampler.get()),
-		QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage,mDiffuseIrradianceCube.get(),0),
-	});
-	mDiffuseIrradianceBindings->create();
 	mDiffuseIrradiancePipeline->setShaderResourceBindings(mDiffuseIrradianceBindings.get());
-	compute = mRhi->newShaderFromCode(QShader::ComputeStage, R"(#version 450
+	compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
 		const float PI = 3.141592;
 		const float TwoPI = 2 * PI;
 		const float Epsilon = 0.00001;
@@ -280,13 +290,8 @@ void QPbrLightingPass::compile() {
 	mDiffuseIrradiancePipeline->create();
 
 	mBrdfLutPipeline.reset(mRhi->newComputePipeline());
-	mBrdfLutBindings.reset(mRhi->newShaderResourceBindings());
-	mBrdfLutBindings->setBindings({
-		QRhiShaderResourceBinding::imageStore(0, QRhiShaderResourceBinding::ComputeStage,mBrdfLut.get(),0),
-		});
-	mBrdfLutBindings->create();
 	mBrdfLutPipeline->setShaderResourceBindings(mBrdfLutBindings.get());
-	compute = mRhi->newShaderFromCode(QShader::ComputeStage, R"(#version 450
+	compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
 		const float PI = 3.141592;
 		const float TwoPI = 2 * PI;
 		const float Epsilon = 0.001; // This program needs larger eps.
@@ -387,8 +392,8 @@ void QPbrLightingPass::compile() {
 			%1
 		}
 	)";
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
-	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 		layout(binding = 0) uniform sampler2D albedoTexture;
 		layout(binding = 1) uniform sampler2D positionTexture;
 		layout(binding = 2) uniform sampler2D normalTexture;
@@ -469,11 +474,10 @@ void QPbrLightingPass::compile() {
 	mPbrPipeline->setShaderResourceBindings(mPbrBindings.get());
 	mPbrPipeline->setRenderPassDescriptor(mRT.renderTarget->renderPassDescriptor());
 	mPbrPipeline->create();
-	sigInit.request();
 }
 
 void QPbrLightingPass::render(QRhiCommandBuffer* cmdBuffer) {
-	if (sigInit.ensure()) {
+	if (mSigGeneratePbrTexture.ensure()) {
 		QRhiResourceUpdateBatch* batch = mRhi->nextResourceUpdateBatch();
 		QRhiTextureCopyDescription desc;
 		for (int i = 0; i < 6; i++) {
@@ -509,13 +513,13 @@ void QPbrLightingPass::render(QRhiCommandBuffer* cmdBuffer) {
 
 		cmdBuffer->beginComputePass();
 		cmdBuffer->setComputePipeline(mDiffuseIrradiancePipeline.get());
-		cmdBuffer->setShaderResources();
+		cmdBuffer->setShaderResources(mDiffuseIrradianceBindings.get());
 		cmdBuffer->dispatch(mDiffuseIrradianceCube->pixelSize().width() / 32, mDiffuseIrradianceCube->pixelSize().height() / 32, 6);
 		cmdBuffer->endComputePass();
 
 		cmdBuffer->beginComputePass();
 		cmdBuffer->setComputePipeline(mBrdfLutPipeline.get());
-		cmdBuffer->setShaderResources();
+		cmdBuffer->setShaderResources(mBrdfLutBindings.get());
 		cmdBuffer->dispatch(mBrdfLut->pixelSize().width() / 32, mBrdfLut->pixelSize().height() / 32, 6);
 		cmdBuffer->endComputePass();
 	}

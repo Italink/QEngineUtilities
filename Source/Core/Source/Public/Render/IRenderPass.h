@@ -1,7 +1,7 @@
 ﻿#ifndef IRenderPass_h__
 #define IRenderPass_h__
 
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 #include "IRenderer.h"
 #include "IRenderComponent.h"
 #include "Utils/QObjectBuilder.h"
@@ -59,7 +59,7 @@ protected:
 	void registerInputTextureLink(const QString& inTexName, const QString& inPassName, int inSlot);
 protected:
 	IRenderer* mRenderer = nullptr;
-	QRhiEx* mRhi;
+	QRhi* mRhi;
 	QMap<int, QRhiTexture*> mOutputTexutres;
 	QMap<QString, QPair<QString, int>> mInputTextureLinks;
 private:

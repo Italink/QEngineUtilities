@@ -209,7 +209,7 @@ void ImGuiPainter::compile() {
 	mPipeline->setTargetBlends({ blendState });
 	mPipeline->setFlags(QRhiGraphicsPipeline::UsesScissor);
 	mPipeline->setSampleCount(mSampleCount);
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 440
+	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, R"(#version 440
 		layout(location = 0) in vec2 inPosition;
 		layout(location = 1) in vec2 inUV;
 		layout(location = 2) in vec4 inColor;
@@ -229,7 +229,7 @@ void ImGuiPainter::compile() {
 		}
 	)");
 
-	QShader fs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 440
+	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 440
 		layout(location = 0) in vec2 vUV;
 		layout(location = 1) in vec4 vColor;
 		layout(binding = 1) uniform sampler2D uTexture;

@@ -60,7 +60,7 @@ private:
 		float minThreshold = 0.2f;
 		float maxThreshold = 0.5f;
 	}mParams;
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 };
 
 #endif // QDilationRenderPass_h__

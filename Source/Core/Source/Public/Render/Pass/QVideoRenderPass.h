@@ -38,8 +38,8 @@ private:
 	QVideoFrame mCurrentFrame;
 	QVideoFrameFormat mFormat;
 
-	QRhiEx::Signal sigUpdateFrameTextures;
-	QRhiEx::Signal sigUploadVertextBuffer;
+	QRhiSignal sigUpdateFrameTextures;
+	QRhiSignal sigUploadVertextBuffer;
 public:
 	QVideoRenderPass();
 	void setVideoPath(const QUrl& inPath);

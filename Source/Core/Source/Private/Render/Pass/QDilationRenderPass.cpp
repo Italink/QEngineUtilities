@@ -77,7 +77,7 @@ void QDilationRenderPass::compile() {
 	mPipelineH->setDepthTest(false);
 	mPipelineH->setDepthWrite(false);
 
-	QShader vs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 450
+	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, R"(#version 450
 		layout (location = 0) out vec2 vUV;
 		out gl_PerVertex{
 			vec4 gl_Position;
@@ -93,7 +93,7 @@ void QDilationRenderPass::compile() {
 		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC())
 	);
 
-	QShader fsH = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader fsH = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 		layout (location = 0) in vec2 vUV;
 		layout (location = 0) out vec4 outFragColor;
 		layout (binding = 0) uniform sampler2D uTexture;
@@ -142,7 +142,7 @@ void QDilationRenderPass::compile() {
 	mPipelineV->setSampleCount(1);
 	mPipelineV->setDepthTest(false);
 	mPipelineV->setDepthWrite(false);
-	QShader fsV = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader fsV = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 		layout (location = 0) in vec2 vUV;
 		layout (location = 0) out vec4 outFragColor;
 		layout (binding = 0) uniform sampler2D uTexture;

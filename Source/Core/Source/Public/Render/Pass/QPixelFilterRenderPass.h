@@ -28,7 +28,7 @@ protected:
 	QScopedPointer<QRhiSampler> mSampler;
 	QScopedPointer<QRhiShaderResourceBindings> mBindings;
 	QString mFilterCode;
-	QRhiEx::Signal sigRecompile;
+	QRhiSignal sigRecompile;
 };
 
 #endif // QPixelFilterRenderPass_h__

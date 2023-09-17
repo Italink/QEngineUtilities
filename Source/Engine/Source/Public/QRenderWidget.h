@@ -16,7 +16,7 @@ class IRenderer;
 class QENGINEUTILITIES_API QRenderWidget :public QWidget {
 public:
 	friend class QInnerRhiWindow;
-	QRhiEx::Signal sigRecompileRenderer;
+	QRhiSignal sigRecompileRenderer;
 public:
 	QRenderWidget(QRhiWindow::InitParams inInitParams);
 	QCamera* setupCamera();

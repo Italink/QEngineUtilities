@@ -16,7 +16,7 @@ namespace QRhiVulkanExHelper {
 
 	QENGINECORE_API VkImageView imageViewForLevel(QVkTexture* texture, int level);
 
-	QENGINECORE_API void setShaderResources(QRhiVulkan* rhi, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb = nullptr, int dynamicOffsetCount = 0, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets = nullptr);
+	QENGINECORE_API void setShaderResources(QRhiResource* pipeline, QRhiCommandBuffer* cb, QRhiShaderResourceBindings* srb = nullptr, int dynamicOffsetCount = 0, const QRhiCommandBuffer::DynamicOffset* dynamicOffsets = nullptr);
 
 	QENGINECORE_API QRhiVulkanNativeHandles createVulkanNativeHandles(const QRhiVulkanInitParams& params);
 

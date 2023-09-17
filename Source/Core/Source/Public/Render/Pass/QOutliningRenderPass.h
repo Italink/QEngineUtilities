@@ -69,7 +69,7 @@ private:
 		int Radius = 2;
 		alignas(16) QColor4D ColorModifier = QColor4D(0.324f,0.063f,0.099f,1.0f);
 	}mParams;
-	QRhiEx::Signal sigUpdateParams;
+	QRhiSignal sigUpdateParams;
 };
 
 #endif // QOutliningRenderPass_h__

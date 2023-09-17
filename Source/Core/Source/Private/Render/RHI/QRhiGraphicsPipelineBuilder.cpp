@@ -218,12 +218,8 @@ QRhiShaderResourceBindings* QRhiGraphicsPipelineBuilder::getShaderResourceBindin
 
 void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mBlendStates.resize(inRenderComponent->getBasePass()->getRenderTargetColorAttachments().size());
-	QRhiEx* rhi = inRenderComponent->getBasePass()->getRenderer()->getRhi();
-	for (auto& state : mBlendStates) {
-		state.enable = true;
-		state.srcColor = QRhiGraphicsPipeline::SrcAlpha;
-		state.dstColor = QRhiGraphicsPipeline::OneMinusSrcAlpha;
-	}
+	QRhi* rhi = inRenderComponent->getBasePass()->getRenderer()->getRhi();
+
 	mPipeline.reset(rhi->newGraphicsPipeline());
 	mPipeline->setTopology(mTopology);
 	mPipeline->setCullMode(mCullMode);
@@ -250,7 +246,7 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 
 	QVector<QRhiShaderStage> stages;
 	for (const auto& stage : mStageInfos.asKeyValueRange()) {
-		QShader shader = rhi->newShaderFromCode((QShader::Stage)stage.first, stage.second.versionCode + stage.second.defineCode + stage.second.mainCode);
+		QShader shader = QRhiHelper::newShaderFromCode(rhi,(QShader::Stage)stage.first, stage.second.versionCode + stage.second.defineCode + stage.second.mainCode);
 		stages << QRhiShaderStage(stage.first, shader);
 	}
 	mPipeline->setShaderStages(stages.begin(), stages.end());
@@ -281,7 +277,7 @@ void QRhiGraphicsPipelineBuilder::update(QRhiResourceUpdateBatch* batch) {
 	}
 }
 
-void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRenderComponent, QRhiEx* inRhi) {
+void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRenderComponent, QRhi* inRhi) {
 	for (auto& stage : mStageInfos) {
 		stage.defineCode = QByteArray();
 	}

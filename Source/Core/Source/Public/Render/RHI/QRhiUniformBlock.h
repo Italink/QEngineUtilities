@@ -2,7 +2,7 @@
 #define QRhiUniformBlock_h__
 
 #include <QVariant>
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 #include "QList"
 #include "Type/QColor4D.h"
 
@@ -26,8 +26,8 @@ struct QENGINECORE_API UniformParamDescBase {
 	uint32_t mSizeInByte;
 	uint32_t mSizeInByteAligned;
 	bool bVisible;
-	QRhiEx::Signal sigUpdate; 
-	QRhiEx::Signal sigRecreate;
+	QRhiSignal sigUpdate; 
+	QRhiSignal sigRecreate;
 };
 
 template<typename _Ty>
@@ -58,7 +58,7 @@ public:
 	void setParamValue(const QString& mName, QVariant mValue);
 	bool renameParma(const QString& src, const QString& dst);
 	void removeParam(const QString& mName);
-	void create(QRhiEx* inRhi);
+	void create(QRhi* inRhi);
 	void updateResource(QRhiResourceUpdateBatch* batch);
 	QRhiBuffer* getUniformBlock() const { return mUniformBlock.get(); }
 	bool isEmpty()const { return mParamList.isEmpty(); }
@@ -74,7 +74,7 @@ protected:
 	uint32_t mDataByteSize;
 	QScopedPointer<QRhiBuffer> mUniformBlock;
 public:
-	QRhiEx::Signal sigRecreateBuffer;
+	QRhiSignal sigRecreateBuffer;
 };
 
 template<>

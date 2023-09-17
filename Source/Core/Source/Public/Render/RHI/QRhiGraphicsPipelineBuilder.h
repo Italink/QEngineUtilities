@@ -32,7 +32,7 @@ class QENGINECORE_API QRhiGraphicsPipelineBuilder: public QObject{
 	Q_PROPERTY(QMap<QString, QRhiTextureDesc*> Textures READ getTextures WRITE setTextures)
 public:
 	inline static QList<QRhiGraphicsPipelineBuilder*> Instances;
-	QRhiEx::Signal sigRebuild;
+	QRhiSignal sigRebuild;
 
 	struct StageInfo {
 		QList<QSharedPointer<QRhiUniformBlock>> uniformBlocks;
@@ -160,7 +160,7 @@ public:
 	QByteArray getInputFormatTypeName(QRhiVertexInputAttribute::Format inFormat);
 	QByteArray getOutputFormatTypeName(QRhiTexture::Format inFormat);
 protected:
-	void recreateShaderBindings(IRenderComponent* inRenderComponent, QRhiEx *inRhi);
+	void recreateShaderBindings(IRenderComponent* inRenderComponent, QRhi *inRhi);
 private:
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;
 	QRhiGraphicsPipeline::Topology mTopology = QRhiGraphicsPipeline::Triangles;

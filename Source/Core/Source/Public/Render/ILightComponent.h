@@ -6,7 +6,7 @@
 class QENGINECORE_API ILightRenderComponent: public ISceneRenderComponent {
 	Q_OBJECT
 public:
-	QRhiEx::Signal sigNeedUpdate;
+	QRhiSignal sigNeedUpdate;
 
 	ILightRenderComponent() {
 		sigNeedUpdate.request();

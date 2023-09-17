@@ -1,7 +1,7 @@
 ﻿#ifndef QFrameGraph_h__
 #define QFrameGraph_h__
 
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 
 class IRenderer;
 class IRenderPass;

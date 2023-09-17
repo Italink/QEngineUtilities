@@ -128,7 +128,7 @@ void QSkyRenderPass::compile() {
 	blendState.enable = false;
 	mSkyboxPipeline->setTargetBlends({ blendState });
 	mSkyboxPipeline->setSampleCount(mRT.renderTarget->sampleCount());
-	QShader skyboxVs = mRhi->newShaderFromCode(QShader::VertexStage, R"(#version 450
+	QShader skyboxVs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, R"(#version 450
 		layout(location = 0) in vec3 inPosition;
 		layout(location = 0) out vec3 vPosition;
 		layout(binding = 0) uniform UniformBlock{
@@ -140,7 +140,7 @@ void QSkyRenderPass::compile() {
 			gl_Position.z = 1.0f;
 		}
 	)");
-	QShader skyboxFs = mRhi->newShaderFromCode(QShader::FragmentStage, R"(#version 450
+	QShader skyboxFs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
 		layout(location = 0) in vec3 vPosition;
 		layout(binding  = 1) uniform samplerCube uSkyCube;
 		layout(location = 0) out vec4 outFragColor;
@@ -172,7 +172,7 @@ void QSkyRenderPass::compile() {
 	});
 	mSkyCubeBindings->create();
 	mSkyCubePipeline->setShaderResourceBindings(mSkyCubeBindings.get());
-	QShader compute = mRhi->newShaderFromCode(QShader::ComputeStage, R"(#version 450
+	QShader compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
 		layout(binding=0) uniform sampler2D inputTexture;
 		layout(binding=1, rgba32f) restrict writeonly uniform imageCube outputTexture;
 		layout(local_size_x=32, local_size_y=32, local_size_z=1) in;

@@ -2,7 +2,7 @@
 #define IRenderer_h__
 
 #include "QFrameGraph.h"
-#include "Render/RHI/QRhiEx.h"
+#include "Render/RHI/QRhiHelper.h"
 #include "Utils/QCamera.h"
 #include "QEngineCoreAPI.h"
 
@@ -13,7 +13,7 @@ class QENGINECORE_API IRenderer: public QObject {
 	Q_OBJECT
 	Q_PROPERTY(QCamera* Camera READ getCamera WRITE setCamera)
 public:
-	IRenderer(QRhiEx* inRhi,const QSize& inFrameSize);
+	IRenderer(QRhi* inRhi,const QSize& inFrameSize);
 	virtual ~IRenderer();
 	void requestComplie();
 
@@ -28,7 +28,7 @@ public:
 
 	QSize getFrameSize() const { return mFrameSize; }
 	QCamera* getCamera() const { return mCamera; }
-	QRhiEx* getRhi() { return mRhi; }
+	QRhi* getRhi() { return mRhi; }
 	QObject* getCurrentObject() const { return mCurrentObject; }
 	IRenderComponent* getComponentById(uint32_t inId);
 	QFrameGraph* getFrameGarph() const { return mFrameGraph.get(); }
@@ -42,7 +42,7 @@ protected:
 	virtual void resize(const QSize& size);
 protected:
 	QSize mFrameSize;
-	QRhiEx* mRhi;
+	QRhi* mRhi;
 	QSharedPointer<QFrameGraph> mFrameGraph;
 	QSharedPointer<TexturePainter> mOutputPainter;
 	QRhiTexture* mOutputTexture = nullptr;

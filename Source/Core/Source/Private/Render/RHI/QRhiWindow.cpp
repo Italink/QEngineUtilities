@@ -31,15 +31,12 @@ QRhiWindow::~QRhiWindow() {
 }
 
 void QRhiWindow::initializeInternal() {
-	mRhi = QRhiEx::newRhiEx(mInitParams.backend, mInitParams.rhiFlags, this);
+	mRhi = QRhiHelper::create(mInitParams.backend, mInitParams.rhiFlags, this);
 	if (!mRhi)
 		qFatal("Failed to create RHI backend");
 
 	mSwapChain.reset(mRhi->newSwapChain());
-	mDSBuffer.reset( mRhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil,
-		QSize(), 
-		mInitParams.sampleCount,
-		QRhiRenderBuffer::UsedWithSwapChainOnly));
+	mDSBuffer.reset( mRhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil,QSize(), mInitParams.sampleCount,QRhiRenderBuffer::UsedWithSwapChainOnly));
 
 	mSwapChain->setWindow(this);
 	mSwapChain->setDepthStencil(mDSBuffer.get());
