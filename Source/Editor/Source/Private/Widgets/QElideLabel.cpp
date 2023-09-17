@@ -9,7 +9,7 @@ QElideLabel::QElideLabel(const QString& inText)
 	: mText(inText)
 	, mLineEditor(new QHoverLineEdit)
 {
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	this->setMinimumHeight(25);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setContentsMargins(0, 0, 0, 0);
 	h->addWidget(mLineEditor);
@@ -37,20 +37,3 @@ void QElideLabel::paintEvent(QPaintEvent* event) {
 		painter.drawText(rect(), Qt::AlignLeft | Qt::AlignVCenter, opt.fontMetrics.elidedText(mText, Qt::ElideRight, width()));
 	}
 }
-
-QSize QElideLabel::sizeHint() const
-{
-	int w = 0, h = 0;
-	QString s(mText);
-	bool empty = s.isEmpty();
-	if (empty)
-		s = QStringLiteral("XXXX");
-	QFontMetrics fm = fontMetrics();
-	QSize sz = fm.size(Qt::TextShowMnemonic, s);
-	if (!empty || !w)
-		w += sz.width();
-	if (!empty || !h)
-		h = qMax(h, sz.height());
-	return QSize(w, h + 10);
-}
-
