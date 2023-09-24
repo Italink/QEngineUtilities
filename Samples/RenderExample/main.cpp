@@ -4,32 +4,23 @@
 #include "Render/Pass/QBasePassForward.h"
 #include "Render/Component/QStaticMeshRenderComponent.h"
 
+class MyRenderer : public IRenderer {
+	using IRenderer::IRenderer;
+protected:
+	void setupGraph(QRGBuilder& graphBuilder) override {
+		graphBuilder.addPass([&](QRhiCommandBuffer* cmdBuffer) {
+			cmdBuffer->beginPass(graphBuilder.mainRenderTarget(), QColor::fromRgbF(0.1f, 0.5f, 0.9f, 1.0f), { 1.0f, 0 });
+			cmdBuffer->endPass();
+		});
+	}
+};
+
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
-	QRhiWindow::InitParams initParams;
+	QRhiHelper::InitParams initParams;
 	initParams.backend = QRhi::Implementation::Vulkan;
-	QRenderWidget widget(initParams);
-	widget.setupCamera()
-		->setPosition(QVector3D(0, 0, 2000));
 
-	widget.setFrameGraph(
-		QFrameGraph::Begin()
-		.addPass(
-			QBasePassForward::Create("BasePass")
-			.addComponent(
-				QStaticMeshRenderComponent::Create("TextTexture")
-				.setStaticMesh(QStaticMesh::CreateFromText("TextTexture", QFont("微软雅黑", 64), Qt::white, Qt::Horizontal, 2, true))
-				.setTranslate(QVector3D(0, 100, 0))
-			)
-			.addComponent(
-				QStaticMeshRenderComponent::Create("TextMesh")
-				.setStaticMesh(QStaticMesh::CreateFromText("TextMesh", QFont("微软雅黑", 64), Qt::white, Qt::Horizontal, 2, false))
-				.setTranslate(QVector3D(0, -100, 0))
-			)
-		)
-		.end("BasePass", QBasePassForward::BaseColor)
-	);
-
+	QRenderWidget widget(new MyRenderer(initParams, {800,600}));
 	widget.showMaximized();
 	return app.exec();
 }

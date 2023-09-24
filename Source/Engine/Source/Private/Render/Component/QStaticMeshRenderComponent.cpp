@@ -73,11 +73,11 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 				%7
 			})")
 			.arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
-			.arg(getBasePass()->hasColorAttachment("Position")	? "Position = vec4(vWorldPosition  ,1);" : "")
-			.arg(getBasePass()->hasColorAttachment("Normal")	? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
-			.arg(getBasePass()->hasColorAttachment("Specular")	? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
-			.arg(getBasePass()->hasColorAttachment("Metallic")	? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
-			.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
+			.arg(hasColorAttachment("Position")	? "Position = vec4(vWorldPosition  ,1);" : "")
+			.arg(hasColorAttachment("Normal")	? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+			.arg(hasColorAttachment("Specular")	? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
+			.arg(hasColorAttachment("Metallic")	? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+			.arg(hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
 #ifdef QENGINE_WITH_EDITOR	
 			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else
@@ -137,8 +137,4 @@ void QStaticMeshRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QR
 		cmdBuffer->setVertexInput(0, 1, &vertexBindings, mIndexBuffer.get(), meshInfo.indicesOffset * sizeof(QStaticMesh::Index), QRhiCommandBuffer::IndexUInt32);
 		cmdBuffer->drawIndexed(meshInfo.indicesRange);
 	}
-}
-
-bool QStaticMeshRenderComponent::isVaild() {
-	return !mStaticMesh.isNull();
 }

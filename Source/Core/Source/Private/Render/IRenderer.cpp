@@ -1,83 +1,112 @@
-#include "Render/IRenderer.h"
-#include "Render/IRenderPass.h"
-#include "Render/Painter/TexturePainter.h"
+#include "IRenderer.h"
+#include <QWindow>
+#include "QRendererSurface.h"
+#include "RHI/QRhiHelper.h"
+#include <QMetaMethod>
 
-IRenderer::IRenderer(QRhi* inRhi, const QSize& inFrameSize)
-	: mRhi(inRhi)
-	, mFrameSize(inFrameSize)
-	, mOutputPainter(new TexturePainter)
+class QRenderThreadWorkder : public QObject {
+public:
+	QRenderThreadWorkder(IRenderer* renderer) {
+		mRenderer = renderer;
+		mThread = new QThread();
+		mThread->setObjectName("RenderThread");
+		moveToThread(mThread);
+		mThread->start();
+	}
+	void render(){
+		QRhiCommandBuffer* cmdBuffer;
+		QRhiRenderTarget* renderTarget;
+		if (!mRenderer->mSurface->beginFrame(&cmdBuffer, &renderTarget))
+			return;
+
+		const QColor clearColor = QColor::fromRgbF(0.0f, 0.0f, 1.0f, 1.0f);
+		const QRhiDepthStencilClearValue dsClearValue = { 1.0f,0 };
+
+		mRenderer->mGraphBuilder->setMainRenderTarget(renderTarget);
+		mRenderer->setupGraph(*mRenderer->mGraphBuilder.get());
+		mRenderer->mGraphBuilder->compile();
+		mRenderer->mGraphBuilder->execute(cmdBuffer);
+
+		mRenderer->mSurface->endFrame();
+
+		mCondition.wakeOne();
+	}
+
+	void initialize(){
+		mRenderer->mRhi = QRhiHelper::create(mRenderer->mInitParams.backend, mRenderer->mInitParams.rhiFlags, mRenderer->maybeWindow());
+		mRenderer->mSurface->initialize(mRenderer->mRhi.get(), mRenderer->mInitParams);
+		mRenderer->mGraphBuilder = QSharedPointer<QRGBuilder>::create(mRenderer->mRhi.get());
+		mCondition.wakeOne();
+	}
+
+	void destroy(){
+		mRenderer->mGraphBuilder.reset();
+		mRenderer->mSurface->destroy();
+		mCondition.wakeOne();
+	}
+
+public:
+	IRenderer* mRenderer = nullptr;
+	QThread* mThread = nullptr;
+	QMutex mMutex;
+	QWaitCondition mCondition;
+};
+
+IRenderer::IRenderer(QRhiHelper::InitParams params, QSize size, Type type /*= Type::Window*/)
+	:mRenderThreadWorker(new QRenderThreadWorkder(this))
 {
-	mOutputPainter->setupRhi(mRhi);
-}
-
-IRenderer::~IRenderer() {
-
-}
-
-void IRenderer::requestComplie() {
-	bRequestCompile = true;
-}
-
-void IRenderer::compile() {
-	bRequestCompile = false;
-	if (!mFrameGraph)
-		return;
-	mFrameGraph->compile(this);
-	resize(mFrameSize);
-}
-
-void IRenderer::render() {
-	if (!mFrameGraph)
-		return;
-	if (bRequestCompile) {
-		compile();
-		bRequestCompile = false;
+	mCamera = new QCamera();
+	mCamera->setParent(this);
+	if (type == Type::Window) {
+		QRendererWindowSurface* windowSurface = new QRendererWindowSurface(params.backend, size);
+		connect(windowSurface, &QRendererWindowSurface::renderRequested, mRenderThreadWorker.get(), &QRenderThreadWorkder::render);
+		connect(windowSurface, &QRendererWindowSurface::initRequested, [this]() {
+			mRenderThreadWorker->mMutex.lock();
+			QMetaObject::invokeMethod(mRenderThreadWorker.get(), &QRenderThreadWorkder::initialize);
+			mRenderThreadWorker->mCondition.wait(&mRenderThreadWorker->mMutex);
+			mRenderThreadWorker->mMutex.unlock();
+		});
+		connect(windowSurface, &QRendererWindowSurface::surfaceGoingAway,  [this]() {
+			mRenderThreadWorker->mMutex.lock();
+			QMetaObject::invokeMethod(mRenderThreadWorker.get(), &QRenderThreadWorkder::destroy);
+			mRenderThreadWorker->mCondition.wait(&mRenderThreadWorker->mMutex);
+			mRenderThreadWorker->mMutex.unlock();
+		});
+		connect(windowSurface, &QRendererWindowSurface::syncSurfaceSizeRequested, [this]() {
+			mRenderThreadWorker->mMutex.lock();
+			QMetaObject::invokeMethod(mRenderThreadWorker.get(), &QRenderThreadWorkder::render);
+			mRenderThreadWorker->mCondition.wait(&mRenderThreadWorker->mMutex);
+			mRenderThreadWorker->mMutex.unlock();
+		});
+		mSurface = QSharedPointer<IRendererSurface>(windowSurface);
+		mCamera->setupWindow(mSurface->maybeWindow());
 	}
-	mFrameGraph->render(commandBuffer());
-}
-
-void IRenderer::setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph) {
-	mFrameGraph = inFrameGraph;
-}
-
-void IRenderer::setCurrentObject(QObject* val) {
-	if (mCurrentObject != val) {
-		mCurrentObject = val;
-		Q_EMIT asCurrentObjectChanged(mCurrentObject);
+	else {
+		QRendererOffscreenSurface* offscreenSurface = new QRendererOffscreenSurface(size);
+		mSurface = QSharedPointer<IRendererSurface>(offscreenSurface, [this](IRendererSurface* surface) {
+			mRenderThreadWorker->destroy();
+			delete surface;
+		});
+		mRenderThreadWorker->initialize();
 	}
 }
 
-void IRenderer::resize(const QSize& size) {
-	mFrameSize = size;
-	if (!mFrameGraph)
-		return;
-	mOutputTexture = nullptr;
-	mFrameGraph->resize(size);
-	mOutputTexture = mFrameGraph->getOutputTexture();
-	mOutputPainter->setupSampleCount(sampleCount());
-	mOutputPainter->setupRenderPassDesc(renderTaget()->renderPassDescriptor());
-	mOutputPainter->setupTexture(mOutputTexture);
-	mOutputPainter->compile();
+QWindow* IRenderer::maybeWindow()
+{
+	return mSurface->maybeWindow();
 }
 
-void IRenderer::setCamera(QCamera* inCamera) {
-	mCamera = inCamera;
+QRhi* IRenderer::rhi()
+{
+	return mRhi.get();
 }
 
-IRenderComponent* IRenderer::getComponentById(uint32_t inId) {
-	for (const auto& component : this->findChildren<IRenderComponent*>()) {
-		if (component->getID() == inId) {
-			return component;
-		}
-	}
-	return nullptr;
+QCamera* IRenderer::getCamera()
+{
+	return mCamera;
 }
 
-QRhiTexture* IRenderer::getTexture(const QString& inPassName, int inSlot) {
-	if (mFrameGraph) {
-		return mFrameGraph->getOutputTexture(inPassName, inSlot);
-	}
-	return nullptr;
+void IRenderer::resize(const QSize& size)
+{
+	mSurface->resize(size);
 }
-
-#include <moc_IRenderer.cpp>

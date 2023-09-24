@@ -1,5 +1,6 @@
 #include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
 #include "Render/IRenderPass.h"
+#include "IRenderComponent.h"
 
 void QRhiGraphicsPipelineBuilder::setPolygonModeOverride(QRhiGraphicsPipeline::PolygonMode inMode) {
 	if (PolygonModeOverride != inMode) {
@@ -217,8 +218,8 @@ QRhiShaderResourceBindings* QRhiGraphicsPipelineBuilder::getShaderResourceBindin
 }
 
 void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
-	mBlendStates.resize(inRenderComponent->getBasePass()->getRenderTargetColorAttachments().size());
-	QRhi* rhi = inRenderComponent->getBasePass()->getRenderer()->getRhi();
+	mBlendStates.resize(inRenderComponent->getColorAttachmentCount());
+	QRhi* rhi = inRenderComponent->getRhi();
 
 	mPipeline.reset(rhi->newGraphicsPipeline());
 	mPipeline->setTopology(mTopology);
@@ -234,13 +235,13 @@ void QRhiGraphicsPipelineBuilder::create(IRenderComponent* inRenderComponent) {
 	mPipeline->setStencilBack(mStencilBackOp);
 	mPipeline->setStencilReadMask(mStencilReadMask);
 	mPipeline->setStencilWriteMask(mStencilWriteMask);
-	mPipeline->setSampleCount(inRenderComponent->getBasePass()->getSampleCount());
+	mPipeline->setSampleCount(inRenderComponent->getSampleCount());
 	mPipeline->setDepthBias(mDepthBias);
 	mPipeline->setSlopeScaledDepthBias(mSlopeScaledDepthBias);
 	mPipeline->setPatchControlPointCount(mPatchControlPointCount);
 	mPipeline->setPolygonMode(PolygonModeOverride == -1 ? mPolygonMode : (QRhiGraphicsPipeline::PolygonMode)PolygonModeOverride);
 	mPipeline->setVertexInputLayout(mVertexInputLayout);
-	mPipeline->setRenderPassDescriptor(inRenderComponent->getBasePass()->getRenderPassDescriptor());
+	mPipeline->setRenderPassDescriptor(inRenderComponent->getRenderPassDesc());
 
 	recreateShaderBindings(inRenderComponent, rhi);
 
@@ -347,10 +348,10 @@ void QRhiGraphicsPipelineBuilder::recreateShaderBindings(IRenderComponent* inRen
 		stage.second.defineCode += uniformDefineCode.toLocal8Bit();
 	}
 	QString fragOutputCode;
-	auto targetSlots = inRenderComponent->getBasePass()->getRenderTargetColorAttachments();
-	for (int i = 0; i < targetSlots.size(); i++) {
-		QByteArray slotType = getOutputFormatTypeName(targetSlots[i].first);
-		QByteArray slotName = targetSlots[i].second.toLocal8Bit();
+	for (int i = 0; i < inRenderComponent->getColorAttachmentCount(); i++) {
+		auto texture = inRenderComponent->getRenderTarget()->description().colorAttachmentAt(i)->texture();
+		QByteArray slotType = getOutputFormatTypeName(texture->format());
+		QByteArray slotName = texture->name();
 		fragOutputCode += QString::asprintf("layout(location = %d) out %s %s;\n", i, slotType.data(), slotName.data());
 	}
 	mStageInfos[QRhiShaderStage::Fragment].defineCode += fragOutputCode.toLocal8Bit();

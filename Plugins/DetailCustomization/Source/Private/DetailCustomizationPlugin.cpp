@@ -20,9 +20,8 @@ void DetailCustomizationPlugin::startup() {
 	QDetailViewManager* mgr = QDetailViewManager::Instance();
 	mgr->RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
 	mgr->RegisterCustomClassLayout<DetailCustomization_QRhiMaterialGroup>(&QRhiMaterialGroup::staticMetaObject);
-	mgr->RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
+	//mgr->RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
 	mgr->RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
-	mgr->RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
 
 	mgr->RegisterCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
 	mgr->RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
@@ -53,9 +52,8 @@ void DetailCustomizationPlugin::shutdown() {
 	QDetailViewManager* mgr = QDetailViewManager::Instance();
 	mgr->UnregisterCustomClassLayout(&QRhiUniformBlock::staticMetaObject);
 	mgr->UnregisterCustomClassLayout(&QRhiMaterialGroup::staticMetaObject);
-	mgr->UnregisterCustomClassLayout(&QGlslSandboxRenderPass::staticMetaObject);
+	//mgr->UnregisterCustomClassLayout(&QGlslSandboxRenderPass::staticMetaObject);
 	mgr->UnregisterCustomClassLayout(&QMediaPlayer::staticMetaObject);
-	mgr->UnregisterCustomClassLayout(&QGlslSandboxRenderPass::staticMetaObject);
 
 	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QRhiTextureDesc*>());
 	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QSharedPointer<QStaticMesh>>());

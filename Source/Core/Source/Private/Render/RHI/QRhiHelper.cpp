@@ -1,33 +1,13 @@
-#include "Render/RHI/QRhiHelper.h"
+#include "QRhiHelper.h"
 #include <QFile>
-
-
-#include "private/qrhivulkan_p.h"
 
 #ifndef QT_NO_OPENGL
 #include <QOffscreenSurface>
-#include "private/qrhigles2_p.h"
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 #include "rhi/qshaderbaker.h"
-#else
-#include "private/qshaderbaker_p.h"
-#include "private/qrhi_p_p.h"
-#include "private/qrhivulkanext_p.h"
-#endif
-
-#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-#include <QtGui/private/qrhimetal_p.h>
-#endif
-
-#include "QVulkanInstance"
-#include <QtGui/private/qrhinull_p.h>
-
-#include <qmath.h>
-#include <QVulkanFunctions>
-
 #include "Vulkan/QRhiVulkanExHelper.h"
+
 
 QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def) {
 	mDefinitions.append("#define " + def + "\n");

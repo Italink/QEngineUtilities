@@ -61,7 +61,7 @@ void QParticlesRenderComponent::onRebuildResource() {
 		->addParam("V", QGenericMatrix<4, 4, float>())
 		->addParam("P", QGenericMatrix<4, 4, float>());
 
-	QVector<QRhiGraphicsPipeline::TargetBlend> blendState(getBasePass()->getRenderTargetColorAttachments().size());
+	QVector<QRhiGraphicsPipeline::TargetBlend> blendState(getColorAttachmentCount());
 	for (auto& state : blendState) {
 		state.enable = true;
 		state.srcColor = QRhiGraphicsPipeline::SrcAlpha;
@@ -135,11 +135,11 @@ void QParticlesRenderComponent::onRebuildResource() {
 				%7
 			})")
 		.arg(QString("BaseColor = %1;").arg(materialDesc->getOrCreateBaseColorExpression()))
-		.arg(getBasePass()->hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
-		.arg(getBasePass()->hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
-		.arg(getBasePass()->hasColorAttachment("Specular") ? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
-		.arg(getBasePass()->hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
-		.arg(getBasePass()->hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
+		.arg(hasColorAttachment("Position") ? "Position = vec4(vWorldPosition  ,1);" : "")
+		.arg(hasColorAttachment("Normal") ? QString("Normal    = vec4(normalize(vTangentBasis * %1 ),1.0f);").arg(materialDesc->getNormalExpression()) : "")
+		.arg(hasColorAttachment("Specular") ? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
+		.arg(hasColorAttachment("Metallic") ? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
+		.arg(hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
 #ifdef QENGINE_WITH_EDITOR	
 		.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
 #else
@@ -234,8 +234,4 @@ void QParticlesRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRh
 		QVulkanInstance* vkInstance = (*(QRhiVulkan**)(mRhi))->inst;
 		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdDrawIndexedIndirect(vkCmdBufferHandle->commandBuffer, vkBuffer, 0, 1, sizeof(IndirectDrawBuffer));
 	}
-}
-
-bool QParticlesRenderComponent::isVaild() {
-	return true;
 }

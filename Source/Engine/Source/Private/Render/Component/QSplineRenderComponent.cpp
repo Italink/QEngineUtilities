@@ -156,7 +156,7 @@ void QSplineRenderComponent::onUpload(QRhiResourceUpdateBatch* batch) {
 
 void QSplineRenderComponent::onUpdate(QRhiResourceUpdateBatch* batch) {
 	mPipelineBuilder->getUniformBlock("UBO")->setParamValue("MVP", QVariant::fromValue(getMvpMatrix().toGenericMatrix<4, 4>()));
-	auto size = getBasePass()->getRenderTarget()->pixelSize();
+	auto size = getPixelSize();
 	mPipelineBuilder->getUniformBlock("UBO")->setParamValue("ScreenResolution", QVector2D(size.width(), size.height()));
 	mPipelineBuilder->update(batch);
 	if (mPipelineBuilder->sigRebuild.ensure()) {
@@ -176,8 +176,4 @@ void QSplineRenderComponent::onRender(QRhiCommandBuffer* cmdBuffer, const QRhiVi
 	};
 	cmdBuffer->setVertexInput(0, 2, vertexBindings);
 	cmdBuffer->draw(mSegmentData.size(), mPoints.size() - 1);
-}
-
-bool QSplineRenderComponent::isVaild() {
-	return true;
 }

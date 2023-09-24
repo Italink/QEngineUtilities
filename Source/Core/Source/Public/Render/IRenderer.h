@@ -1,54 +1,41 @@
-#ifndef IRenderer_h__
-#define IRenderer_h__
+#ifndef QRenderer_h__
+#define QRenderer_h__
 
-#include "QFrameGraph.h"
+#include <QObject>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include "Render/RenderGraph/QRGBuilder.h"
+#include "QCamera.h"
 #include "Render/RHI/QRhiHelper.h"
-#include "Utils/QCamera.h"
-#include "QEngineCoreAPI.h"
 
-class TexturePainter;
-class IRenderComponent;
+class IRendererSurface;
+class QRenderThreadWorkder;
 
-class QENGINECORE_API IRenderer: public QObject {
-	Q_OBJECT
-	Q_PROPERTY(QCamera* Camera READ getCamera WRITE setCamera)
+class QENGINECORE_API IRenderer : public QObject {
 public:
-	IRenderer(QRhi* inRhi,const QSize& inFrameSize);
-	virtual ~IRenderer();
-	void requestComplie();
+	friend class QRenderThreadWorkder;
+	enum class Type {
+		Window,
+		Offscreen
+	};
 
-	virtual QRhiRenderTarget* renderTaget() = 0;
-	virtual QRhiRenderPassDescriptor* renderPassDescriptor() { return renderTaget()->renderPassDescriptor(); }
-	virtual int sampleCount() = 0;
-	virtual QWindow* getWindow() { return nullptr; }
+	IRenderer(QRhiHelper::InitParams params, QSize size, Type type = Type::Window);
 
-	void setCamera(QCamera* inCamera);
-	void setFrameGraph(QSharedPointer<QFrameGraph> inFrameGraph);
-	void setCurrentObject(QObject* val);
-
-	QSize getFrameSize() const { return mFrameSize; }
-	QCamera* getCamera() const { return mCamera; }
-	QRhi* getRhi() { return mRhi; }
-	QObject* getCurrentObject() const { return mCurrentObject; }
-	IRenderComponent* getComponentById(uint32_t inId);
-	QFrameGraph* getFrameGarph() const { return mFrameGraph.get(); }
-	QRhiTexture* getTexture(const QString& inPassName, int inSlot);
-Q_SIGNALS:
-	void asCurrentObjectChanged(QObject*);
+	QWindow* maybeWindow();
+	QRhi* rhi();
+	QCamera* getCamera();
+	void resize(const QSize& size);
 protected:
-	virtual QRhiCommandBuffer* commandBuffer() = 0;
-	virtual void compile();
-	virtual void render();
-	virtual void resize(const QSize& size);
-protected:
-	QSize mFrameSize;
-	QRhi* mRhi;
-	QSharedPointer<QFrameGraph> mFrameGraph;
-	QSharedPointer<TexturePainter> mOutputPainter;
-	QRhiTexture* mOutputTexture = nullptr;
+	virtual void setupGraph(QRGBuilder& graphBuilder) {}
+private:
+	QRhiHelper::InitParams mInitParams;
 	QCamera* mCamera = nullptr;
-	bool bRequestCompile = false;
-	QObject* mCurrentObject = nullptr;
+	QSharedPointer<QRhi> mRhi;
+	QSharedPointer<QRGBuilder> mGraphBuilder;
+	QSharedPointer<IRendererSurface> mSurface;
+	QSharedPointer<QRenderThreadWorkder> mRenderThreadWorker;
 };
 
-#endif // IRenderer_h__
+
+#endif // QRenderer_h__

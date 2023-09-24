@@ -27,7 +27,6 @@ protected:
 	void onUpload(QRhiResourceUpdateBatch* batch) override;
 	void onUpdate(QRhiResourceUpdateBatch* batch) override;
 	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
-	bool isVaild() override;
 protected:
 	QSharedPointer<QSkeletalMesh> mSkeletalMesh;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;

@@ -7,11 +7,11 @@ QMatrix4x4 ISceneRenderComponent::getMvpMatrix() {
 }
 
 QMatrix4x4 ISceneRenderComponent::getViewMatrix() {
-	return getBasePass()->getRenderer()->getCamera()->getViewMatrix();
+	return mRenderer->getCamera()->getViewMatrix();
 }
 
 QMatrix4x4 ISceneRenderComponent::getProjectionMatrixWithCorr() {
-	return getBasePass()->getRenderer()->getCamera()->getProjectionMatrixWithCorr(mRhi);
+	return mRenderer->getCamera()->getProjectionMatrixWithCorr(mRhi);
 }
 
 QMatrix4x4 ISceneRenderComponent::getModelMatrix() {

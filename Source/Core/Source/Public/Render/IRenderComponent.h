@@ -3,8 +3,8 @@
 
 #include "Render/RHI/QRhiHelper.h"
 #include "Utils/QObjectBuilder.h"
-
-class IBasePass;
+#include "QEngineCoreAPI.h"
+#include "IRenderer.h"
 
 class QENGINECORE_API IRenderComponent: public QObject {
 	Q_OBJECT
@@ -13,21 +13,43 @@ public:
 	QRhiSignal mSigRebuildResource;
 	QRhiSignal mSigRebuildPipeline;
 public:
-	IRenderComponent(): mID(++IDStack){ }
+	IRenderComponent(): mID(++IDStack) { }
+
+	void initialize(IRenderer* renderer, QRhiTextureRenderTarget* renderTarget) {
+		mRhi = renderer->rhi();
+		mRenderTarget = renderTarget;
+	}
+
+	bool hasColorAttachment(const QString& name) {
+		for (int i = 0; i < mRenderTarget->description().colorAttachmentCount(); i++) {
+			auto colorAttach = mRenderTarget->description().colorAttachmentAt(i);
+			if (colorAttach->texture()->name() == name)
+				return true;
+		}
+		return false;
+	}
+
+	int getColorAttachmentCount() { return mRenderTarget->description().colorAttachmentCount(); }
+	int getSampleCount() const { return mRenderTarget->sampleCount(); }
+	QSize getPixelSize() const { return mRenderTarget->pixelSize(); }
+	QRhiRenderPassDescriptor* getRenderPassDesc() const { return mRenderTarget->renderPassDescriptor(); }
+	QRhi* getRhi() const { return mRhi; }
+	QRhiTextureRenderTarget* getRenderTarget() const { return mRenderTarget; }
+
 	uint32_t getID() const { return mID; }
-	virtual bool isVaild() { return true; }
 	virtual void onRebuildResource() {}
 	virtual void onRebuildPipeline() {}
 	virtual void onPreUpdate(QRhiCommandBuffer* cmdBuffer) {}
 	virtual void onUpload(QRhiResourceUpdateBatch* batch) {}
 	virtual void onUpdate(QRhiResourceUpdateBatch* batch) {}
 	virtual void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) = 0;
-	IBasePass* getBasePass() { return mBasePass; }
 protected:
 	QRhi* mRhi = nullptr;
-	IBasePass* mBasePass = nullptr;
-	uint32_t mID;
+	IRenderer* mRenderer = nullptr;
+	QRhiTextureRenderTarget* mRenderTarget = nullptr;
+	uint32_t mID = 0;
 	inline static uint32_t IDStack = 0;
 };
+
 
 #endif // IRenderComponent_h__
