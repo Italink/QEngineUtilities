@@ -1,7 +1,6 @@
 #include "Render/RHI/QRhiHelper.h"
 #include <QFile>
 
-
 #include "private/qrhivulkan_p.h"
 
 #ifndef QT_NO_OPENGL

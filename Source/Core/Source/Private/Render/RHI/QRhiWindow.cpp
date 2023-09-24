@@ -1,7 +1,6 @@
 #include "QGuiApplication"
 #include "Render/RHI/QRhiWindow.h"
 #include <QPlatformSurfaceEvent>
-#include "Vulkan\QRhiVulkanExHelper.h"
 
 QRhiWindow::QRhiWindow(QRhiWindow::InitParams inInitParmas)
 	: mInitParams(inInitParmas)
