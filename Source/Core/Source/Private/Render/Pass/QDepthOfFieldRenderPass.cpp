@@ -98,8 +98,8 @@
 //		}
 //	)";
 //
-//	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
-//	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
+//	QShader vs = QRhiHelper::newShaderFromCode( QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+//	QShader fs = QRhiHelper::newShaderFromCode( QShader::FragmentStage, R"(#version 450
 //		layout (binding = 0) uniform sampler2D uFocus;
 //		layout (binding = 1) uniform sampler2D uPosition;
 //		layout (binding = 2) uniform Params{

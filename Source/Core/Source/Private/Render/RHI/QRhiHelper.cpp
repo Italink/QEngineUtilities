@@ -93,24 +93,17 @@ QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Fl
 	return rhi;
 }
 
-QShader QRhiHelper::newShaderFromCode(QRhi* rhi, QShader::Stage stage, QByteArray code, QByteArray preamble)
+QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble)
 {
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
 	QList<QShaderBaker::GeneratedShader> generatedShaders;
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
-	if (rhi->backend() == QRhi::Vulkan || rhi->backend()  == QRhi::OpenGLES2) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
-	}
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-	else if (rhi->backend()  == QRhi::D3D11 || rhi->backend()  == QRhi::D3D12) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
-		code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
-	}
-#endif
-	else if (rhi->backend()  == QRhi::Metal) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
-	}
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
+	//code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
+	
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
 	baker.setGeneratedShaders(generatedShaders);
 	baker.setSourceString(code, stage);
 

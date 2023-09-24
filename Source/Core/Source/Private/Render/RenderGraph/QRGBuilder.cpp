@@ -1,10 +1,12 @@
 #include "QRGBuilder.h"
 #include "IRGPassBuilder.h"
+#include "IRenderer.h"
 
-QRGBuilder::QRGBuilder(QRhi* rhi)
+QRGBuilder::QRGBuilder(IRenderer* renderer)
 {
-	mRhi = rhi;
-	mResourcePool.reset(new QRGRhiResourcePool(rhi));
+	mRhi = renderer->rhi();
+	mRenderer = renderer;
+	mResourcePool.reset(new QRGRhiResourcePool(mRhi));
 }
 
 void QRGBuilder::setupBuffer(QRhiBufferRef& buffer, const QByteArray& name, QRhiBuffer::Type type, QRhiBuffer::UsageFlags usages, int size)
@@ -127,6 +129,11 @@ QRhi* QRGBuilder::rhi() const
 	return mRhi;
 }
 
+IRenderer* QRGBuilder::renderer() const
+{
+	return mRenderer;
+}
+
 void QRGBuilder::setMainRenderTarget(QRhiRenderTarget* renderTarget)
 {
 	mMainRenderTarget = renderTarget;
@@ -141,6 +148,7 @@ void QRGBuilder::compile()
 {
 	mResourcePool->recreateBuffers();
 	mResourcePool->recreateTextures();
+	mResourcePool->recreateRenderBuffers();
 	mResourcePool->recreateSamplers();
 	mResourcePool->recreateBindings();
 	mResourcePool->recreateRenderTargets();

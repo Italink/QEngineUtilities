@@ -6,10 +6,11 @@
 #include "QEngineCoreAPI.h"
 
 class IRGPassBuilder;
+class IRenderer;
 
 class QENGINECORE_API QRGBuilder {
 public:
-	QRGBuilder(QRhi* rhi);
+	QRGBuilder(IRenderer* renderer);
 
 	void setupBuffer(QRhiBufferRef& buffer, const QByteArray& name, QRhiBuffer::Type type, QRhiBuffer::UsageFlags usages, int size);
 
@@ -59,15 +60,16 @@ public:
 	}
 
 	QRhi* rhi() const;
-
-	void setMainRenderTarget(QRhiRenderTarget* renderTarget);
+	IRenderer* renderer() const;
 	QRhiRenderTarget* mainRenderTarget() const;
 
+	void setMainRenderTarget(QRhiRenderTarget* renderTarget);
 public:
 	void compile();
 	void execute(QRhiCommandBuffer* cmdBuffer);
 private:
 	QRhi* mRhi;
+	IRenderer* mRenderer = nullptr;
 	QRhiRenderTarget* mMainRenderTarget = nullptr;
 	QScopedPointer<QRGRhiResourcePool> mResourcePool;
 	QVector<std::function<void(QRhiCommandBuffer*)>> mExecutors;

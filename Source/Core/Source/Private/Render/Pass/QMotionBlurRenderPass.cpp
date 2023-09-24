@@ -62,7 +62,7 @@
 //	mPipeline->setTargetBlends({ blendState });
 //	mPipeline->setSampleCount(mMotionBlurRT.renderTarget->sampleCount());
 //
-//	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, R"(#version 450
+//	QShader vs = QRhiHelper::newShaderFromCode( QShader::VertexStage, R"(#version 450
 //		layout (location = 0) out vec2 vUV;
 //		out gl_PerVertex{
 //			vec4 gl_Position;
@@ -78,7 +78,7 @@
 //		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC())
 //	);
 //
-//	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
+//	QShader fs = QRhiHelper::newShaderFromCode( QShader::FragmentStage, R"(#version 450
 //		layout (location = 0) in vec2 vUV;
 //		layout (location = 0) out vec4 outFragColor;
 //		

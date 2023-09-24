@@ -35,7 +35,7 @@ public:
 	void initialize(){
 		mRenderer->mRhi = QRhiHelper::create(mRenderer->mInitParams.backend, mRenderer->mInitParams.rhiFlags, mRenderer->maybeWindow());
 		mRenderer->mSurface->initialize(mRenderer->mRhi.get(), mRenderer->mInitParams);
-		mRenderer->mGraphBuilder = QSharedPointer<QRGBuilder>::create(mRenderer->mRhi.get());
+		mRenderer->mGraphBuilder = QSharedPointer<QRGBuilder>::create(mRenderer);
 		mCondition.wakeOne();
 	}
 

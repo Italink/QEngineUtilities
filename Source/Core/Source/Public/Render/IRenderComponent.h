@@ -17,6 +17,7 @@ public:
 
 	void initialize(IRenderer* renderer, QRhiTextureRenderTarget* renderTarget) {
 		mRhi = renderer->rhi();
+		mRenderer = renderer;
 		mRenderTarget = renderTarget;
 	}
 

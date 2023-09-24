@@ -86,7 +86,7 @@
 //	mPrefilteredSpecularCubePipeline.reset(mRhi->newComputePipeline());
 //
 //	mPrefilteredSpecularCubePipeline->setShaderResourceBindings(mPrefilteredSpecularCubeBindings.get());
-//	QShader compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
+//	QShader compute = QRhiHelper::newShaderFromCode( QShader::ComputeStage, R"(#version 450
 //		const float PI = 3.141592;
 //		const float TwoPI = 2 * PI;
 //		const float Epsilon = 0.00001;
@@ -210,7 +210,7 @@
 //
 //	mDiffuseIrradiancePipeline.reset(mRhi->newComputePipeline());
 //	mDiffuseIrradiancePipeline->setShaderResourceBindings(mDiffuseIrradianceBindings.get());
-//	compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
+//	compute = QRhiHelper::newShaderFromCode( QShader::ComputeStage, R"(#version 450
 //		const float PI = 3.141592;
 //		const float TwoPI = 2 * PI;
 //		const float Epsilon = 0.00001;
@@ -291,7 +291,7 @@
 //
 //	mBrdfLutPipeline.reset(mRhi->newComputePipeline());
 //	mBrdfLutPipeline->setShaderResourceBindings(mBrdfLutBindings.get());
-//	compute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(#version 450
+//	compute = QRhiHelper::newShaderFromCode( QShader::ComputeStage, R"(#version 450
 //		const float PI = 3.141592;
 //		const float TwoPI = 2 * PI;
 //		const float Epsilon = 0.001; // This program needs larger eps.
@@ -392,8 +392,8 @@
 //			%1
 //		}
 //	)";
-//	QShader vs = QRhiHelper::newShaderFromCode(mRhi, QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
-//	QShader fs = QRhiHelper::newShaderFromCode(mRhi, QShader::FragmentStage, R"(#version 450
+//	QShader vs = QRhiHelper::newShaderFromCode( QShader::VertexStage, vsCode.arg(mRhi->isYUpInNDC() ? "	vUV.y = 1 - vUV.y;" : "").toLocal8Bit());
+//	QShader fs = QRhiHelper::newShaderFromCode( QShader::FragmentStage, R"(#version 450
 //		layout(binding = 0) uniform sampler2D albedoTexture;
 //		layout(binding = 1) uniform sampler2D positionTexture;
 //		layout(binding = 2) uniform sampler2D normalTexture;

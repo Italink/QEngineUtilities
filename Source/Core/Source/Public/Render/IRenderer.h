@@ -20,7 +20,7 @@ public:
 		Offscreen
 	};
 
-	IRenderer(QRhiHelper::InitParams params, QSize size, Type type = Type::Window);
+	IRenderer(QRhiHelper::InitParams params, QSize size = QSize(800, 600), Type type = Type::Window);
 
 	QWindow* maybeWindow();
 	QRhi* rhi();

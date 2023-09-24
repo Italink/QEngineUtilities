@@ -173,7 +173,7 @@ void QGpuParticleEmitter::recompile() {
 
 	mSpawnPipeline.reset(mRhi->newComputePipeline());
 	mSpawnPipeline->setShaderResourceBindings(mSpawnBindings[mInputSlot].get());
-	QShader spawnShader = QRhiHelper::newShaderFromCode(mRhi, QShader::Stage::ComputeStage, QString(R"(
+	QShader spawnShader = QRhiHelper::newShaderFromCode( QShader::Stage::ComputeStage, QString(R"(
 		#version 450
 		#define GPU_PARTICLE_MAX_SIZE 1000000
 		struct Particle {
@@ -232,7 +232,7 @@ void QGpuParticleEmitter::recompile() {
 
 	mUpdatePipeline.reset(mRhi->newComputePipeline());
 	mUpdatePipeline->setShaderResourceBindings(mUpdateBindings[mInputSlot].get());
-	QShader updateShader = QRhiHelper::newShaderFromCode(mRhi, QShader::Stage::ComputeStage, QString(R"(#version 450
+	QShader updateShader = QRhiHelper::newShaderFromCode( QShader::Stage::ComputeStage, QString(R"(#version 450
 		#define GPU_PARTICLE_MAX_SIZE 1000000
 		struct Particle {
 			vec3 position;
@@ -290,7 +290,7 @@ void QGpuParticleEmitter::recompile() {
 
 	mTranformComputePipline.reset(mRhi->newComputePipeline());
 	mTranformComputePipline->setShaderResourceBindings(mTranformComputeBindings[0].get());
-	QShader matrixCompute = QRhiHelper::newShaderFromCode(mRhi, QShader::ComputeStage, R"(
+	QShader matrixCompute = QRhiHelper::newShaderFromCode( QShader::ComputeStage, R"(
 		#version 450
 		#define GPU_PARTICLE_MAX_SIZE 1000000
 		struct Particle {

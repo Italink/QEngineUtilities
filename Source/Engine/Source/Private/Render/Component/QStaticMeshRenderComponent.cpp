@@ -78,11 +78,7 @@ void QStaticMeshRenderComponent::onRebuildResource() {
 			.arg(hasColorAttachment("Specular")	? QString("Specular  = %1;").arg(materialDesc->getOrCreateSpecularExpression()) : "")
 			.arg(hasColorAttachment("Metallic")	? QString("Metallic  = %1;").arg(materialDesc->getOrCreateMetallicExpression()) : "")
 			.arg(hasColorAttachment("Roughness") ? QString("Roughness = %1;").arg(materialDesc->getOrCreateRoughnessExpression()) : "")
-#ifdef QENGINE_WITH_EDITOR	
-			.arg("DebugId = " + DebugUtils::convertIdToVec4Code(getID()) + ";")
-#else
-			.arg("")
-#endif
+			.arg(hasColorAttachment("DebugId") ? QString("DebugId = %1;").arg(DebugUtils::convertIdToVec4Code(getID())) : "")
 			.toLocal8Bit()
 		);
 	}
