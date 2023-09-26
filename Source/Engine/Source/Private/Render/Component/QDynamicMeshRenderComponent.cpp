@@ -1,5 +1,4 @@
 #include "Render/Component/QDynamicMeshRenderComponent.h"
-#include "Render/IRenderPass.h"
 #include "Utils/DebugUtils.h"
 #include "Type/QColor4D.h"
 

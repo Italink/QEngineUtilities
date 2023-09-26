@@ -137,5 +137,5 @@ endforeach()
 
 add_subdirectory(Source/Engine)
 
-add_subdirectory(Samples)
+add_subdirectory(Examples)
 

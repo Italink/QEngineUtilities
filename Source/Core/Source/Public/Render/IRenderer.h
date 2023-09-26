@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include "Render/RenderGraph/QRGBuilder.h"
+#include "Render/RenderGraph/QRenderGraphBuilder.h"
 #include "QCamera.h"
 #include "Render/RHI/QRhiHelper.h"
 
@@ -27,12 +27,12 @@ public:
 	QCamera* getCamera();
 	void resize(const QSize& size);
 protected:
-	virtual void setupGraph(QRGBuilder& graphBuilder) {}
+	virtual void setupGraph(QRenderGraphBuilder& graphBuilder) {}
 private:
 	QRhiHelper::InitParams mInitParams;
 	QCamera* mCamera = nullptr;
 	QSharedPointer<QRhi> mRhi;
-	QSharedPointer<QRGBuilder> mGraphBuilder;
+	QSharedPointer<QRenderGraphBuilder> mGraphBuilder;
 	QSharedPointer<IRendererSurface> mSurface;
 	QSharedPointer<QRenderThreadWorkder> mRenderThreadWorker;
 };

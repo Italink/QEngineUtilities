@@ -1,6 +1,5 @@
 ﻿#include "Render/RHI/QRhiUniformBlock.h"
 #include "Render/IRenderComponent.h"
-#include "Render/IRenderPass.h"
 
 QRhiUniformBlock::QRhiUniformBlock(QObject* inParent)
 	: QObject(inParent)

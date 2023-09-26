@@ -1,5 +1,4 @@
 #include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
-#include "Render/IRenderPass.h"
 #include "IRenderComponent.h"
 
 void QRhiGraphicsPipelineBuilder::setPolygonModeOverride(QRhiGraphicsPipeline::PolygonMode inMode) {

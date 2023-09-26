@@ -1,5 +1,4 @@
 #include "Render/ISceneRenderComponent.h"
-#include "Render/IRenderPass.h"
 #include "Utils/MathUtils.h"
 
 QMatrix4x4 ISceneRenderComponent::getMvpMatrix() {
