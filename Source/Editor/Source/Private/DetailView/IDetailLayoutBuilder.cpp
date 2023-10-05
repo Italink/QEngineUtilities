@@ -61,6 +61,7 @@ void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
 	row->SetupPropertyHandle(InPropertyHandle);
 	QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
+	mChildren.append(rowBuilder);
 	if (customizationInstance.isNull()) {
 		customizationInstance = QDetailViewManager::Instance()->GetCustomPropertyType(InPropertyHandle->GetType());
 	}

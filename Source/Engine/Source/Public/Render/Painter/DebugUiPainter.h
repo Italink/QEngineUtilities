@@ -1,56 +1,48 @@
-//#ifdef QENGINE_WITH_EDITOR
-//
-//#ifndef DebugUiPainter_h__
-//#define DebugUiPainter_h__
-//
-//#include "Render/Painter/ImGuiPainter.h"
-//#include "Render/ISceneRenderComponent.h"
-//#include <QEvent>
-//#include <QKeyEvent>
-//#include <QApplication>
-//#include <ImGuizmo.h>
-//#include "Utils/DebugUtils.h"
-//#include "Render/IRenderPass.h"
-//#include "Render/Painter/TexturePainter.h"
-//#include "DetailView/QPropertyHandle.h"
-//#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
-//#include "GraphEditor.h"
-//#include "Render/Renderer/QWindowRenderer.h"
-//#include "QEngineUtilitiesAPI.h"
-//
-//class FrameGraphView;
-//
-//class QENGINEUTILITIES_API QDebugUIPainter :public ImGuiPainter {
-//protected:
-//	QWindowRenderer* mRenderer;
-//	ImGuiWindowFlags mViewportBarFlags;
-//	ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
-//	bool bUseLineMode = false;
-//	bool bShowFrameGraph = false;
-//	bool bShowStats = false;
-//	bool bDrawOuterline = true;
-//	QSharedPointer<FrameGraphView> mFrameGraphView;
-//public:
-//	QDebugUIPainter(QWindowRenderer* inRenderer);
-//	void setupDebugIdTexture(QRhiTexture* texture);
-//	void resourceUpdate(QRhiResourceUpdateBatch* batch) override;
-//	void compile() override;
-//	void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override;
-//protected:
-//	bool eventFilter(QObject* watched, QEvent* event) override;
-//private:
-//	QRhiTexture* mDebugIdTexture = nullptr;
-//	QRhiTexture* mOutputTexture = nullptr;
-//	QRhiReadbackResult mReadReult;
-//	QRhiReadbackDescription mReadDesc;
-//	QPoint mReadPoint;
-//	QScopedPointer<QRhiGraphicsPipeline> mOutlinePipeline;
-//	QScopedPointer<QRhiSampler> mOutlineSampler;
-//	QScopedPointer<QRhiShaderResourceBindings> mOutlineBindings;
-//	QScopedPointer<QRhiBuffer> mUniformBuffer;
-//	ImVec4 mActiveColor = ImColor(100, 150, 255);
-//};
-//
-//#endif // DebugUiPainter_h__
-//
-//#endif // QENGINE_WITH_EDITOR
+#ifdef QENGINE_WITH_EDITOR
+
+#ifndef DebugUiPainter_h__
+#define DebugUiPainter_h__
+
+#include "GraphEditor.h"
+#include "QEngineUtilitiesAPI.h"
+#include "Render/ISceneRenderComponent.h"
+#include "Render/RenderGraph/Painter/ImGuiPainter.h"
+#include "Render/QPrimitiveRenderProxy.h"
+#include "Utils/DebugUtils.h"
+#include <ImGuizmo.h>
+#include <QApplication>
+#include <QEvent>
+#include <QKeyEvent>
+
+class RenderGraphView;
+
+class QENGINEUTILITIES_API QDebugUIPainter: public ImGuiPainter {
+	Q_OBJECT
+protected:
+	ImGuiWindowFlags mViewportBarFlags;
+	ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
+	bool bUseLineMode = false;
+	bool bShowFrameGraph = false;
+	bool bShowStats = false;
+	bool bDrawOuterline = true;
+	QSharedPointer<RenderGraphView> mRenderGraphView;
+public:
+	QDebugUIPainter(IRenderer* inRenderer);
+
+	void setup(QRenderGraphBuilder& builder, QRhiRenderTarget* rt) override;
+	void resourceUpdate(QRhiResourceUpdateBatch* batch, QRhi* rhi) override;
+	void paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) override;
+Q_SIGNALS:
+	void mouseClicked(QPoint point);
+protected:
+	bool eventFilter(QObject* watched, QEvent* event) override;
+	void refreshEditor(QRhiCamera* camera, ISceneRenderComponent* comp, QMatrix4x4 compModelMatrix);
+private:
+	QRhi* mRhi = nullptr;
+	IRenderer* mRenderer = nullptr;
+	ImVec4 mActiveColor = ImColor(100, 150, 255);
+};
+
+#endif // DebugUiPainter_h__
+
+#endif // QENGINE_WITH_EDITOR

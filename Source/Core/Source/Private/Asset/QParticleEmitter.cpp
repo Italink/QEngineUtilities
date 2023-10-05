@@ -97,7 +97,7 @@ QGpuParticleEmitter::InitParams::InitParams() {
 	spawnCode = R"(		
 		outParticle.age = 0.0f;
 		outParticle.lifetime = 2.0f;
-		outParticle.scaling = vec3(1,1,1);
+		outParticle.scaling = vec3(0.1,0.1,0.1);
 		outParticle.position =  vec3(0,0,0);
 		outParticle.velocity = vec3(rand(0.72131231,-0.1,0.1),rand(0.07891,-0.1,0.1),0.2);
 	)";	

@@ -23,6 +23,8 @@ public:
 	QDetailView();
 	void SetObject(QObject* inObject);
 	void SetObjects(const QObjectList& inObjects);
+	void SelectSubObject(QObject* inObject);
+
 	void SetFlags(Flags inFlag);
 	Flags GetFlags() const;
 	void SearchByKeywords(QString inKeywords);
@@ -45,6 +47,7 @@ protected:
 	void Reset();
 	void RefreshRowsState();
 	void RefreshRowsSplitter();
+	void ForeachRows(std::function<bool(QDetailViewRow*)> inProcessor);
 private:
 	QWidget* mView = nullptr;
 	QDetailViewRow* mCurrentRow = nullptr;

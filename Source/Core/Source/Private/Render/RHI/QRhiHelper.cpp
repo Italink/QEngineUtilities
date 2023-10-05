@@ -97,18 +97,24 @@ QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, QBy
 {
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
+	baker.setSourceString(code, stage);
+	baker.setPreamble(preamble);
+
 	QList<QShaderBaker::GeneratedShader> generatedShaders;
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
-	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
-	//code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
-	
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
 	baker.setGeneratedShaders(generatedShaders);
-	baker.setSourceString(code, stage);
 
-	baker.setPreamble(preamble);
+	QShaderBaker hlslBaker;
+	hlslBaker.setGeneratedShaderVariants({ QShader::StandardShader });
+	hlslBaker.setPreamble(preamble);
+	hlslBaker.setGeneratedShaders({ QShaderBaker::GeneratedShader(QShader::Source::HlslShader,QShaderVersion(50)) });
+	code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
+	hlslBaker.setSourceString(code, stage);
+
 	QShader shader = baker.bake();
+	QShader hlslShader = hlslBaker.bake();
 	if (!shader.isValid()) {
 		QStringList codelist = QString(code).split('\n');
 		for (int i = 0; i < codelist.size(); i++) {
@@ -116,6 +122,16 @@ QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, QBy
 		}
 		qWarning(baker.errorMessage().toLocal8Bit());
 	}
+	else if (!hlslShader.isValid()) {
+		QStringList codelist = QString(code).split('\n');
+		for (int i = 0; i < codelist.size(); i++) {
+			qWarning() << i + 1 << codelist[i].toLocal8Bit().data();
+		}
+		qWarning(hlslBaker.errorMessage().toLocal8Bit());
+	}
+	//shader.setDescription(hlslShader.description());
+	shader.setResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.nativeResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
+	shader.setShader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.shader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
 	return shader;
 }
 

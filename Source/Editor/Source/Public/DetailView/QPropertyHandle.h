@@ -32,7 +32,9 @@ public:
 	QString GetName();
 	QString GetPath();
 	QString GetSubPath(const QString& inSubName);
-	QVariant GetMetaData(const QString& Hash) const;
+
+	bool HasMetaData(const QString& inName) const;
+	QVariant GetMetaData(const QString& inName) const;
 	const QVariantHash& GetMetaData() const;
 	bool IsChanged() const { return mIsChanged; }
 

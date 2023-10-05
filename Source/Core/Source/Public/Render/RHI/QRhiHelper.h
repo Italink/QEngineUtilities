@@ -36,19 +36,6 @@ struct QENGINECORE_API QRhiHelper {
 		bool enableStat = false;
 	};
 
-	struct QENGINECORE_API InitParamsBuilder {
-		InitParamsBuilder& backend(QRhi::Implementation var) { params.backend = var; return *this; }
-		InitParamsBuilder& rhiFlags(QRhi::Flags var) { params.rhiFlags = var; return *this; }
-		InitParamsBuilder& swapChainFlags(QRhiSwapChain::Flags var) { params.swapChainFlags = var; return *this; }
-		InitParamsBuilder& beginFrameFlags(QRhi::BeginFrameFlags var) { params.beginFrameFlags = var; return *this; }
-		InitParamsBuilder& endFrameFlags(QRhi::EndFrameFlags var) { params.endFrameFlags = var; return *this; }
-		InitParamsBuilder& sampleCount(int var) { params.sampleCount = var; return *this; }
-		InitParamsBuilder& enableStat(bool var) { params.enableStat = var; return *this; }
-
-		operator InitParams() { return params; }
-	private:
-		InitParams params;
-	};
 	static QSharedPointer<QRhi> create(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
 
 	static QShader newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble = QByteArray());

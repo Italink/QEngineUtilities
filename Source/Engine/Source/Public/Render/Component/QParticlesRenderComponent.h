@@ -6,7 +6,7 @@
 #include "QEngineUtilitiesAPI.h"
 #include "Render/ISceneRenderComponent.h"
 #include "Type/QColor4D.h"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 
 class QENGINEUTILITIES_API QParticlesRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
@@ -32,19 +32,15 @@ public:
 	bool getFacingCamera() const;
 	QRhiMaterialGroup* getMaterialGroup() const { return mMaterialGroup.get(); }
 protected:
+	void onPreRenderTick(QRhiCommandBuffer* cmdBuffer) override;
 	void onRebuildResource() override;
-	void onRebuildPipeline() override;
-	void onPreUpdate(QRhiCommandBuffer* cmdBuffer) override;
-	void onUpload(QRhiResourceUpdateBatch* batch) override;
-	void onUpdate(QRhiResourceUpdateBatch* batch) override;
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
 protected:
 	QSharedPointer<IParticleEmitter> mEmitter;
 	QScopedPointer<QRhiBuffer> mIndirectDrawBuffer;
 
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mIndexBuffer;
-	QSharedPointer<QRhiGraphicsPipelineBuilder> mParticlePipeline;
+	QSharedPointer<QPrimitiveRenderProxy> mRenderProxy;
 	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 
 	struct IndirectDrawBuffer {

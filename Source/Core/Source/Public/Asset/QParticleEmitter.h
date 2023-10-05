@@ -11,6 +11,7 @@ class QENGINECORE_API IParticleEmitter: public QObject{
 	friend class QParticlesRenderComponent;
 	Q_OBJECT
 	Q_PROPERTY(int NumOfSpawnPerFrame READ getNumOfSpawnPerFrame WRITE setNumOfSpawnPerFrame)
+	Q_CLASSINFO("NumOfSpawnPerFrame", "Min=0,Max=10000")
 public:
 	int getNumOfSpawnPerFrame() const;
 	void setNumOfSpawnPerFrame(int inNumOfSpawnPerFrame) ;

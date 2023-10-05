@@ -10,7 +10,7 @@
 #include "PropertyTypeCustomization_QStaticMesh.h"
 #include "PropertyTypeCustomization_TextureInfo.h"
 #include "QMediaPlayer"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
 #include "Render/RHI/QRhiUniformBlock.h"
 #include "QColor4DButton.hpp"
@@ -43,7 +43,7 @@ void DetailCustomizationPlugin::startup() {
 	});
 
 	qRegisterMetaType<QRhiTextureDesc>();
-	qRegisterMetaType<QRhiGraphicsPipelineBuilder*>();
+	qRegisterMetaType<QPrimitiveRenderProxy*>();
 	qRegisterMetaType<IStaticMeshCreator*>();
 }
 

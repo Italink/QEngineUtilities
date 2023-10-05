@@ -241,6 +241,11 @@ QString QPropertyHandle::GetSubPath(const QString& inSubName){
 	return GetPath() + "." + inSubName;
 }
 
+bool QPropertyHandle::HasMetaData(const QString& inName) const
+{
+	return mMetaData.contains(inName);
+}
+
 QVariant QPropertyHandle::GetMetaData(const QString& Hash) const {
 	return mMetaData.value(Hash);
 }

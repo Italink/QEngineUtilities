@@ -1,14 +1,16 @@
 #include "DetailView/QDetailView.h"
 #include "DetailView/QDetailViewRow.h"
-#include "QLabel"
-#include "QPushButton"
 #include "Widgets/QElideLabel.h"
 #include "DetailView/QDetailViewManager.h"
-#include "qevent.h"
 #include "DetailView/QDetailLayoutBuilder.h"
 #include "QEngineEditorStyleManager.h"
-#include "QApplication"
+#include <QApplication>
+#include <QLabel>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QQueue>
 #include "QEngineUndoStack.h"
+
 
 QDetailView::QDetailView()
 	: mView(new QWidget)
@@ -42,6 +44,28 @@ void QDetailView::SetObjects(const QObjectList& inObjects) {
 	if (mObjects != inObjects) {
 		mObjects = inObjects;
 		ForceRebuild();
+	}
+}
+
+void QDetailView::SelectSubObject(QObject* inObject)
+{
+	if (!inObject) {
+		SetCurrentRow(nullptr);
+	}
+	else {
+		QDetailViewRow* objectRow = nullptr;
+		ForeachRows([&objectRow, inObject](QDetailViewRow* row) {
+			if (QPropertyHandle* handle = row->GetPropertyHandle()) {
+				if (handle->parent() == inObject) {
+					objectRow = row;
+					return false;
+				}
+			}
+			return true;
+		});
+		if (objectRow) {
+			SetCurrentRow(objectRow);
+		}
 	}
 }
 
@@ -131,6 +155,19 @@ void QDetailView::RefreshRowsSplitter() {
 		Row->RequestRefreshSplitter();
 	}
 	update();
+}
+
+void QDetailView::ForeachRows(std::function<bool(QDetailViewRow*)> inProcessor)
+{
+	QQueue<QDetailViewRow*> queue;
+	queue << mTopLevelRows;
+	while (!queue.isEmpty()){
+		QDetailViewRow* top = queue.dequeue();
+		if (!inProcessor(top)) {
+			break;
+		}
+		queue << top->mChildren;
+	}
 }
 
 QDetailViewRow* QDetailView::AddTopLevelRow() {

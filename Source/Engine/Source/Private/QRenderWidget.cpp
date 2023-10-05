@@ -34,6 +34,7 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	hLayout->addWidget(splitter);
 	mDetailView->SetFlags(QDetailView::ShowChildren);
 	mDetailView->SetObject(mRenderer);
+	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, &QDetailView::SelectSubObject);
 #else
 	hLayout->addWidget(mViweport);
 #endif

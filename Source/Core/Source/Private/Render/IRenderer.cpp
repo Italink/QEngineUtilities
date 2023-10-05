@@ -3,6 +3,9 @@
 #include "QRendererSurface.h"
 #include "RHI/QRhiHelper.h"
 #include <QMetaMethod>
+#include "QRhiCamera.h"
+#include "IRenderComponent.h"
+#include "Render/RenderGraph/QRenderGraphBuilder.h"
 
 class QRenderThreadWorkder : public QObject {
 public:
@@ -16,12 +19,12 @@ public:
 	void render(){
 		QRhiCommandBuffer* cmdBuffer;
 		QRhiRenderTarget* renderTarget;
+
 		if (!mRenderer->mSurface->beginFrame(&cmdBuffer, &renderTarget))
 			return;
 
 		const QColor clearColor = QColor::fromRgbF(0.0f, 0.0f, 1.0f, 1.0f);
 		const QRhiDepthStencilClearValue dsClearValue = { 1.0f,0 };
-
 		mRenderer->mGraphBuilder->setMainRenderTarget(renderTarget);
 		mRenderer->setupGraph(*mRenderer->mGraphBuilder.get());
 		mRenderer->mGraphBuilder->compile();
@@ -29,13 +32,15 @@ public:
 
 		mRenderer->mSurface->endFrame();
 
+		mRenderer->mGraphBuilder->clear();
 		mCondition.wakeOne();
 	}
 
 	void initialize(){
 		mRenderer->mRhi = QRhiHelper::create(mRenderer->mInitParams.backend, mRenderer->mInitParams.rhiFlags, mRenderer->maybeWindow());
+		mRenderer->mCamera->setupRhi(mRenderer->mRhi.get());
 		mRenderer->mSurface->initialize(mRenderer->mRhi.get(), mRenderer->mInitParams);
-		mRenderer->mGraphBuilder = QSharedPointer<QRGBuilder>::create(mRenderer);
+		mRenderer->mGraphBuilder = QSharedPointer<QRenderGraphBuilder>::create(mRenderer);
 		mCondition.wakeOne();
 	}
 
@@ -53,9 +58,10 @@ public:
 };
 
 IRenderer::IRenderer(QRhiHelper::InitParams params, QSize size, Type type /*= Type::Window*/)
-	:mRenderThreadWorker(new QRenderThreadWorkder(this))
+	: mRenderThreadWorker(new QRenderThreadWorkder(this))
+	, mInitParams(params)
 {
-	mCamera = new QCamera();
+	mCamera = new QRhiCamera();
 	mCamera->setParent(this);
 	if (type == Type::Window) {
 		QRendererWindowSurface* windowSurface = new QRendererWindowSurface(params.backend, size);
@@ -91,6 +97,11 @@ IRenderer::IRenderer(QRhiHelper::InitParams params, QSize size, Type type /*= Ty
 	}
 }
 
+QThread* IRenderer::renderThread()
+{
+	return mRenderThreadWorker->mThread;
+}
+
 QWindow* IRenderer::maybeWindow()
 {
 	return mSurface->maybeWindow();
@@ -101,12 +112,52 @@ QRhi* IRenderer::rhi()
 	return mRhi.get();
 }
 
-QCamera* IRenderer::getCamera()
+QRhiCamera* IRenderer::getCamera()
 {
 	return mCamera;
+}
+
+void IRenderer::setCurrentObject(QObject* val)
+{
+	if (mCurrentObject != val) {
+		mCurrentObject = val;
+		Q_EMIT currentObjectChanged(val);
+	}
 }
 
 void IRenderer::resize(const QSize& size)
 {
 	mSurface->resize(size);
+}
+
+const QVector<IRenderComponent*>& IRenderer::getRenderComponents()
+{
+	return mRenderComponents;
+}
+
+void IRenderer::addComponent(IRenderComponent* inRenderComponent)
+{
+	Q_ASSERT(inRenderComponent);
+	inRenderComponent->setParent(this);
+	mRenderComponents << inRenderComponent;
+}
+
+void IRenderer::removeComponent(IRenderComponent* inRenderComponent)
+{
+	mRenderComponents.removeAll(inRenderComponent);
+}
+
+const QVector<QPrimitiveRenderProxy*>& IRenderer::getRenderProxies()
+{
+	return mRenderProxies;
+}
+
+void IRenderer::registerPipeline(QPrimitiveRenderProxy* inProxy)
+{
+	mRenderProxies << inProxy;
+}
+
+void IRenderer::unregisterPipeline(QPrimitiveRenderProxy* inProxy)
+{
+	mRenderProxies.removeOne(inProxy);
 }

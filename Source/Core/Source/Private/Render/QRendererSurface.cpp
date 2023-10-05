@@ -148,10 +148,7 @@ bool QRendererWindowSurface::beginFrame(QRhiCommandBuffer** outCmdBuffer, QRhiRe
 void QRendererWindowSurface::endFrame()
 {
 	mRhi->endFrame(mSwapChain.get(), mEndFrameFlags);
-	if (!mSwapChain->flags().testFlag(QRhiSwapChain::NoVSync))
-		requestUpdate();
-	else
-		QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+	QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
 }
 
 QRendererOffscreenSurface::QRendererOffscreenSurface(QSize size)

@@ -43,7 +43,7 @@ void QRhiMaterialGroup::addMaterial(QSharedPointer<QMaterial> inMaterial) {
 			textureDesc->GlslTypeName = "sampler2D";
 			textureDesc->MagFilter = QRhiSampler::Filter::Linear;
 			textureDesc->MinFilter = QRhiSampler::Filter::Nearest;
-			textureDesc->MipmapMode = QRhiSampler::Filter::Linear;
+			textureDesc->MipmapMode = QRhiSampler::Filter::None;
 			textureDesc->AddressU = QRhiSampler::AddressMode::Mirror;
 			textureDesc->AddressV = QRhiSampler::AddressMode::Mirror;
 			textureDesc->AddressW = QRhiSampler::AddressMode::Mirror;

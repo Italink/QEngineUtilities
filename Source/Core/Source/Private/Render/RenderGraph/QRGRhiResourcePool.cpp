@@ -229,7 +229,7 @@ QRhiBufferRef QRGRhiResourcePool::findOrNew(QRhiBuffer::Type type, QRhiBuffer::U
 	}
 	QRhiBufferRef newRes(mRhi->newBuffer(type, usage, size));
 	mBufferPool.insert(hashCode, newRes);
-	mBufferToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -244,7 +244,7 @@ QRhiTextureRef QRGRhiResourcePool::findOrNew(QRhiTexture::Format format, const Q
 	}
 	QRhiTextureRef newRes(mRhi->newTexture(format, pixelSize, sampleCount, flags));
 	mTexturePool.insert(hashCode, newRes);
-	mTextureToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -259,7 +259,7 @@ QRhiSamplerRef QRGRhiResourcePool::findOrNew(QRhiSampler::Filter magFilter, QRhi
 	}
 	QRhiSamplerRef newRes(mRhi->newSampler(magFilter, minFilter, mipmapMode, addressU, addressV, addressW));
 	mSamplerPool.insert(hashCode, newRes);
-	mSamplerToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -275,7 +275,7 @@ QRhiShaderResourceBindingsRef QRGRhiResourcePool::findOrNew(QVector<QRhiShaderRe
 	QRhiShaderResourceBindingsRef newRes(mRhi->newShaderResourceBindings());
 	newRes->setBindings(bindings.begin(),bindings.end());
 	mBindingsPool.insert(hashCode, newRes);
-	mBindingsToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -290,7 +290,7 @@ QRhiRenderBufferRef QRGRhiResourcePool::findOrNew(QRhiRenderBuffer::Type type, c
 	}
 	QRhiRenderBufferRef newRes(mRhi->newRenderBuffer(type, pixelSize, sampleCount, flags, backingFormatHint));
 	mRenderBufferPool.insert(hashCode, newRes);
-	mRenderBufferToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -306,7 +306,9 @@ QRhiTextureRenderTargetRef QRGRhiResourcePool::findOrNew(const QRhiTextureRender
 	QRhiTextureRenderTargetRef newRes(mRhi->newTextureRenderTarget(desc, flags));
 	newRes->setRenderPassDescriptor((QRhiRenderPassDescriptor*)newRes.get());
 	mRenderTargetPool.insert(hashCode, newRes);
-	mRenderTargetToRecreate.push_back(newRes.get());
+	mRenderPassDescPool[newRes.get()].reset(newRes->newCompatibleRenderPassDescriptor());
+	newRes->setRenderPassDescriptor(mRenderPassDescPool[newRes.get()].get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -322,7 +324,7 @@ QRhiGraphicsPipelineRef QRGRhiResourcePool::findOrNew(const QRhiGraphicsPipeline
 	QRhiGraphicsPipelineRef newRes(mRhi->newGraphicsPipeline());
 	state.assignTo(newRes.get());
 	mGraphicsPipelinePool.insert(hashCode, newRes);
-	mGraphicsPipelineToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
@@ -338,12 +340,12 @@ QRhiComputePipelineRef QRGRhiResourcePool::findOrNew(const QRhiComputePipelineSt
 	QRhiComputePipelineRef newRes(mRhi->newComputePipeline());
 	state.assignTo(newRes.get());
 	mComputePipelinePool.insert(hashCode, newRes);
-	mComputePipelineToRecreate.push_back(newRes.get());
+	newRes->create();
 	mRhiHashMap[newRes.get()] = hashCode;
 	return newRes;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiBufferRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiBufferRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -351,10 +353,12 @@ void QRGRhiResourcePool::checkValidity(QRhiBufferRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mBufferToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiTextureRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiTextureRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -362,10 +366,12 @@ void QRGRhiResourcePool::checkValidity(QRhiTextureRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mTextureToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiSamplerRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiSamplerRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -373,10 +379,12 @@ void QRGRhiResourcePool::checkValidity(QRhiSamplerRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mSamplerToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiShaderResourceBindingsRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiShaderResourceBindingsRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -385,10 +393,54 @@ void QRGRhiResourcePool::checkValidity(QRhiShaderResourceBindingsRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mBindingsToRecreate.push_back(res.get());
+		return false;
 	}
+	else {
+		bool bNeedRecreate = false;
+		for (auto& binding : bindings) {
+			QRhiShaderResourceBinding::Data* data = (QRhiShaderResourceBinding::Data*)&binding;
+			if (data->type == QRhiShaderResourceBinding::SampledTexture 
+				|| data->type == QRhiShaderResourceBinding::Texture 
+				|| data->type == QRhiShaderResourceBinding::Sampler) {
+				QRhiTexture* refTexture = data->u.stex.texSamplers->tex;
+				QRhiSampler* refSampler = data->u.stex.texSamplers->sampler;
+				if (mTextureToRecreate.contains(refTexture))
+				{
+					bNeedRecreate = true;
+					break;
+				}
+			}
+			else if (data->type == QRhiShaderResourceBinding::UniformBuffer
+				|| data->type == QRhiShaderResourceBinding::BufferLoad
+				|| data->type == QRhiShaderResourceBinding::BufferLoadStore
+				|| data->type == QRhiShaderResourceBinding::BufferStore) 
+			{
+				QRhiBuffer* refBuffer = data->u.sbuf.buf;
+				if (mBufferToRecreate.contains(refBuffer)) {
+					bNeedRecreate = true;
+					break;
+				}
+			}
+			else if (data->type == QRhiShaderResourceBinding::ImageLoad
+				|| data->type == QRhiShaderResourceBinding::ImageStore
+				|| data->type == QRhiShaderResourceBinding::ImageLoadStore)
+			{
+				QRhiTexture* refImage = data->u.simage.tex;
+				if (mTextureToRecreate.contains(refImage)) {
+					bNeedRecreate = true;
+					break;
+				}
+			}
+		}
+		if (bNeedRecreate) {
+			mBindingsToRecreate.push_back(res.get());
+			return false;
+		}
+	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiRenderBufferRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiRenderBufferRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -396,10 +448,12 @@ void QRGRhiResourcePool::checkValidity(QRhiRenderBufferRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mRenderBufferToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiTextureRenderTargetRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiTextureRenderTargetRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -407,10 +461,12 @@ void QRGRhiResourcePool::checkValidity(QRhiTextureRenderTargetRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mRenderTargetToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiGraphicsPipelineRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiGraphicsPipelineRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -418,10 +474,12 @@ void QRGRhiResourcePool::checkValidity(QRhiGraphicsPipelineRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mGraphicsPipelineToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
-void QRGRhiResourcePool::checkValidity(QRhiComputePipelineRef res)
+bool QRGRhiResourcePool::checkValidity(QRhiComputePipelineRef res)
 {
 	Q_ASSERT(res);
 	size_t lastHash = mRhiHashMap.value(res.get());
@@ -429,7 +487,9 @@ void QRGRhiResourcePool::checkValidity(QRhiComputePipelineRef res)
 	if (lastHash != currHash) {
 		fixupResHash(res.get(), currHash);
 		mComputePipelineToRecreate.push_back(res.get());
+		return false;
 	}
+	return true;
 }
 
 void QRGRhiResourcePool::recreateBuffers()
@@ -482,9 +542,6 @@ void QRGRhiResourcePool::recreateRenderTargets()
 	for (auto res : mRenderTargetToRecreate) {
 		Q_ASSERT(res);
 		mRenderPassDescPool[res].reset(res->newCompatibleRenderPassDescriptor());
-		if (res->renderPassDescriptor() == (QRhiRenderPassDescriptor*)res) {
-			mRenderPassDescToRedirect.insert(res->renderPassDescriptor(), mRenderPassDescPool[res].get());
-		}
 		res->setRenderPassDescriptor(mRenderPassDescPool[res].get());
 		res->create();
 	}
@@ -495,12 +552,6 @@ void QRGRhiResourcePool::recreateGraphicsPipelines()
 {
 	for (auto res : mGraphicsPipelineToRecreate) {
 		Q_ASSERT(res);
-		auto redirectRenderPassDesc = mRenderPassDescToRedirect.value(res->renderPassDescriptor(), nullptr);
-		if (redirectRenderPassDesc) {
-			res->setRenderPassDescriptor(redirectRenderPassDesc);
-			size_t currHash = hash(QRhiGraphicsPipelineState::createFrom(res));
-			fixupResHash(res, currHash);
-		}
 		res->create();
 	}
 	mGraphicsPipelineToRecreate.clear();
@@ -513,7 +564,6 @@ void QRGRhiResourcePool::recreateComputePipelines()
 		res->create();
 	}
 	mComputePipelineToRecreate.clear();
-	mRenderPassDescToRedirect.empty();
 }
 
 bool QRGRhiResourcePool::fixupResHash(QRhiResource* res, size_t newHash)

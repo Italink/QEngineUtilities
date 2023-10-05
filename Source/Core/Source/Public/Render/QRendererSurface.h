@@ -2,7 +2,7 @@
 #define QRendererSurface_h__
 
 #include <QWindow>
-#include "RenderGraph/QRGBuilder.h"
+#include "RenderGraph/QRenderGraphBuilder.h"
 #include "IRenderer.h"
 
 class IRendererSurface {

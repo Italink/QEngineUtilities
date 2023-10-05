@@ -74,14 +74,14 @@ public:
 	QRhiGraphicsPipelineRef findOrNew(const QRhiGraphicsPipelineState& state);
 	QRhiComputePipelineRef findOrNew(const QRhiComputePipelineState& state);
 
-	void checkValidity(QRhiBufferRef res);
-	void checkValidity(QRhiTextureRef res);
-	void checkValidity(QRhiSamplerRef res);
-	void checkValidity(QRhiShaderResourceBindingsRef res);
-	void checkValidity(QRhiRenderBufferRef res);
-	void checkValidity(QRhiTextureRenderTargetRef res);
-	void checkValidity(QRhiGraphicsPipelineRef res);
-	void checkValidity(QRhiComputePipelineRef res);
+	bool checkValidity(QRhiBufferRef res);
+	bool checkValidity(QRhiTextureRef res);
+	bool checkValidity(QRhiSamplerRef res);
+	bool checkValidity(QRhiShaderResourceBindingsRef res);
+	bool checkValidity(QRhiRenderBufferRef res);
+	bool checkValidity(QRhiTextureRenderTargetRef res);
+	bool checkValidity(QRhiGraphicsPipelineRef res);
+	bool checkValidity(QRhiComputePipelineRef res);
 
 	void recreateBuffers();
 	void recreateTextures();
@@ -91,6 +91,7 @@ public:
 	void recreateRenderTargets();
 	void recreateGraphicsPipelines();
 	void recreateComputePipelines();
+
 private:
 	bool fixupResHash(QRhiResource* res, size_t newHashCode);
 protected:
@@ -114,7 +115,7 @@ protected:
 	QList<QRhiTextureRenderTarget*> mRenderTargetToRecreate;
 	QList<QRhiGraphicsPipeline*> mGraphicsPipelineToRecreate;
 	QList<QRhiComputePipeline*> mComputePipelineToRecreate;
-	QHash<QRhiRenderPassDescriptor*, QRhiRenderPassDescriptor*> mRenderPassDescToRedirect;
+	//QHash<QRhiRenderPassDescriptor*, QRhiRenderPassDescriptor*> mRenderPassDescToRedirect;
 };
 
 #endif // QRGRhiResourcePool_h__

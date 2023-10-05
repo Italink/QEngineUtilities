@@ -42,7 +42,9 @@ void QObjectPropertyHandleImpl::RefreshObjectPtr() {
 			mObjectPtr = objectPtr;
 			mOwnerObject = objectPtr;
 			if (mOwnerObject) {
-				mOwnerObject->installEventFilter(mHandle);
+				QMetaObject::invokeMethod(mOwnerObject, std::bind(&QObject::moveToThread, mOwnerObject, mHandle->thread()));
+				QMetaObject::invokeMethod(mOwnerObject, std::bind(&QObject::installEventFilter, mOwnerObject, mHandle));
+				//mOwnerObject->installEventFilter(mHandle);
 			}
 		}
 		else {
