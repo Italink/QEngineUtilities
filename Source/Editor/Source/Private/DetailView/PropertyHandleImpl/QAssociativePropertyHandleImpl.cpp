@@ -25,6 +25,9 @@ void QAssociativePropertyHandleImpl::GenerateChildrenRow(QRowLayoutBuilder* Buil
 }
 
 QWidget* QAssociativePropertyHandleImpl::GenerateValueWidget() {
+	if (mHandle->HasMetaData("FixedSize")) {
+		return IPropertyHandleImpl::GenerateValueWidget();
+	}
 	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
 	btAppend->setFixedSize(20, 20);
 	QObject::connect(btAppend, &QPushButton::clicked, [this](){
@@ -55,29 +58,31 @@ QPropertyHandle* QAssociativePropertyHandleImpl::CreateChildHandle(const QString
 		mMetaAssociation.mappedMetaType(),
 		mHandle->GetSubPath(inKey),
 		[this, inKey]() {
-		QVariant varMap = mHandle->GetValue();
-		QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
-		return iterable.value(inKey);
-	},
+			QVariant varMap = mHandle->GetValue();
+			QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
+			return iterable.value(inKey);
+		},
 		[this, inKey](QVariant var) {
-		QVariant varMap = mHandle->GetValue();
-		QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
-		QtPrivate::QVariantTypeCoercer keyCoercer;
-		QtPrivate::QVariantTypeCoercer mappedCoercer;
-		void* containterPtr = const_cast<void*>(iterable.constIterable());
-		const void* dataPtr = mappedCoercer.coerce(var, var.metaType());
-		mMetaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, mMetaAssociation.keyMetaType()), dataPtr);
-		mHandle->SetValue(varMap);
+			QVariant varMap = mHandle->GetValue();
+			QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
+			QtPrivate::QVariantTypeCoercer keyCoercer;
+			QtPrivate::QVariantTypeCoercer mappedCoercer;
+			void* containterPtr = const_cast<void*>(iterable.constIterable());
+			const void* dataPtr = mappedCoercer.coerce(var, var.metaType());
+			mMetaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, mMetaAssociation.keyMetaType()), dataPtr);
+			mHandle->SetValue(varMap);
 		}
-		);
-	handle->SetAttachButtonWidgetCallback([inKey, this](QHBoxLayout* Layout) {
-		QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
-		deleteButton->setFixedSize(20, 20);
-		Layout->addWidget(deleteButton);
-		QObject::connect(deleteButton, &QSvgButton::clicked, [inKey, this]() {
-			RemoveItem(inKey);
-		});
-	});
+	);
+	if (!mHandle->HasMetaData("FixedSize")) {
+		handle->SetAttachButtonWidgetCallback([inKey, this](QHBoxLayout* Layout) {
+			QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
+			deleteButton->setFixedSize(20, 20);
+			Layout->addWidget(deleteButton);
+			QObject::connect(deleteButton, &QSvgButton::clicked, [inKey, this]() {
+				RemoveItem(inKey);
+				});
+			});
+	}
 	return handle;
 }
 

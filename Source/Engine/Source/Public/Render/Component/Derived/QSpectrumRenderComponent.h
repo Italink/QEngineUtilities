@@ -2,6 +2,7 @@
 #define QSpectrumRenderComponent_h__
 
 #include "Render/Component/QDynamicMeshRenderComponent.h"
+#include "QTimer"
 #include "Utils/QAudioProvider.h"
 #include "QEngineUtilitiesAPI.h"
 
@@ -31,7 +32,9 @@ public:
 	QSpectrumRenderComponent();
 
 	QString getAudio();
-	void setAudio(QString inAudio);
+	void setAudio(QString inAudio, bool bAutoPlay = true);
+
+	void play();
 
 	QAudioProvider::WindowFunction getWindowFunction() { return mAudioProvider->getWindowFunction(); }
 	void setWindowFunction(QAudioProvider::WindowFunction inVar) { mAudioProvider->setWindowFunction(inVar); }
@@ -53,7 +56,9 @@ protected:
 private:
 	QSharedPointer<QAudioProvider> mAudioProvider;
 	QSharedPointer<QSpectrumProvider> mSpectruomProvider;
-	QVector<float> data;
+	QVector<float> mSpectrum;
+	QTimer* mTimer;
+	QMutex mMutex;
 };
 
 #endif // QSpectrumRenderComponent_h__

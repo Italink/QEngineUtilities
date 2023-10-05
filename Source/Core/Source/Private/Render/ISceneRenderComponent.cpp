@@ -1,18 +1,6 @@
 #include "Render/ISceneRenderComponent.h"
-#include "Render/IRenderPass.h"
 #include "Utils/MathUtils.h"
-
-QMatrix4x4 ISceneRenderComponent::getMvpMatrix() {
-	return  getProjectionMatrixWithCorr() * getViewMatrix () * getModelMatrix();
-}
-
-QMatrix4x4 ISceneRenderComponent::getViewMatrix() {
-	return getBasePass()->getRenderer()->getCamera()->getViewMatrix();
-}
-
-QMatrix4x4 ISceneRenderComponent::getProjectionMatrixWithCorr() {
-	return getBasePass()->getRenderer()->getCamera()->getProjectionMatrixWithCorr(mRhi);
-}
+#include "QRhiCamera.h"
 
 QMatrix4x4 ISceneRenderComponent::getModelMatrix() {
 	return mTransform;

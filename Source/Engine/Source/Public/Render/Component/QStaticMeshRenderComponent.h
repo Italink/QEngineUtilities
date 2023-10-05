@@ -2,7 +2,7 @@
 #define QStaticMeshRenderComponent_h__
 
 #include "Render/ISceneRenderComponent.h"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
 #include "Asset/QStaticMesh.h"
 #include "QEngineUtilitiesAPI.h"
@@ -22,17 +22,11 @@ public:
 	QRhiMaterialGroup* getMaterialGroup();
 protected:
 	void onRebuildResource() override;
-	void onRebuildPipeline() override;
-	void onUpload(QRhiResourceUpdateBatch* batch) override;
-	void onUpdate(QRhiResourceUpdateBatch* batch) override;
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
-	bool isVaild() override;
 protected:
 	QSharedPointer<QStaticMesh> mStaticMesh;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mIndexBuffer;
-
-	QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> mPipelines;
+	QVector<QSharedPointer<QPrimitiveRenderProxy>> mProxies;
 	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 };
 

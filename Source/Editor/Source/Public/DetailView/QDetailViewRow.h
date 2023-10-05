@@ -43,6 +43,7 @@ public:
 	void RequestRefreshSplitter();
 
 	QWidget* GetWidget();
+	QPropertyHandle* GetPropertyHandle() const { return mHandle; }
 private:
 	void FixupSplitter();
 	void RefreshSplitter();

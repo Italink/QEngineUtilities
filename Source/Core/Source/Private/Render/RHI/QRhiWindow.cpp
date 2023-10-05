@@ -3,7 +3,7 @@
 #include <QPlatformSurfaceEvent>
 #include "Vulkan\QRhiVulkanExHelper.h"
 
-QRhiWindow::QRhiWindow(QRhiWindow::InitParams inInitParmas)
+QRhiWindow::QRhiWindow(QRhiHelper::InitParams inInitParmas)
 	: mInitParams(inInitParmas)
 {
 	switch (mInitParams.backend) {

@@ -12,7 +12,7 @@ public:
 		sigNeedUpdate.request();
 	}
 protected:
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override {}
+	//void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override {}
 };
 
 #endif // ILightRenderComponent_h__

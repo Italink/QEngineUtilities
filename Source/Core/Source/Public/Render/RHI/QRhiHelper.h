@@ -26,9 +26,19 @@ private:
 };
 
 struct QENGINECORE_API QRhiHelper {
+	struct QENGINECORE_API InitParams {
+		QRhi::Implementation backend = QRhi::Vulkan;
+		QRhi::Flags rhiFlags = QRhi::Flag();
+		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::NoVSync;
+		QRhi::BeginFrameFlags beginFrameFlags;
+		QRhi::EndFrameFlags endFrameFlags;
+		int sampleCount = 1;
+		bool enableStat = false;
+	};
+
 	static QSharedPointer<QRhi> create(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
 
-	static QShader newShaderFromCode(QRhi* rhi, QShader::Stage stage, QByteArray code, QByteArray preamble = QByteArray());
+	static QShader newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble = QByteArray());
 
 	static QShader newShaderFromQSBFile(const char* filename);
 

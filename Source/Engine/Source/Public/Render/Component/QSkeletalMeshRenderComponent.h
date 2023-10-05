@@ -2,7 +2,7 @@
 #define QSkeletalMeshRenderComponent_h__
 
 #include "Render/ISceneRenderComponent.h"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 #include "Asset/QSkeletalMesh.h"
 #include "QEngineUtilitiesAPI.h"
 
@@ -23,17 +23,12 @@ public:
 	QRhiMaterialGroup* getMaterialGroup() { return mMaterialGroup.get(); }
 protected:
 	void onRebuildResource() override;
-	void onRebuildPipeline() override;
-	void onUpload(QRhiResourceUpdateBatch* batch) override;
-	void onUpdate(QRhiResourceUpdateBatch* batch) override;
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
-	bool isVaild() override;
 protected:
 	QSharedPointer<QSkeletalMesh> mSkeletalMesh;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 	QScopedPointer<QRhiBuffer> mIndexBuffer;
 	QSharedPointer<QRhiUniformBlock> mUniformBlock;
-	QVector<QSharedPointer<QRhiGraphicsPipelineBuilder>> mPipelines;
+	QVector<QSharedPointer<QPrimitiveRenderProxy>> mPipelines;
 	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 };
 

@@ -5,18 +5,8 @@
 #include "QRhiHelper.h"
 
 class QENGINECORE_API QRhiWindow :public QWindow {
-	friend class QWindowRenderer;
 public:
-	struct InitParams {
-		QRhi::Implementation backend = QRhi::Vulkan;
-		QRhi::Flags rhiFlags = QRhi::Flag();
-		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::NoVSync;
-		QRhi::BeginFrameFlags beginFrameFlags;
-		QRhi::EndFrameFlags endFrameFlags;
-		int sampleCount = 1;
-		bool enableStat = false;
-	};
-	QRhiWindow(QRhiWindow::InitParams inInitParmas);
+	QRhiWindow(QRhiHelper::InitParams inInitParmas);
 	~QRhiWindow();
 	QRhi* getRhi() const { return mRhi.get(); }
 	int getFps() { return mFps; }
@@ -34,7 +24,7 @@ protected:
 	void exposeEvent(QExposeEvent*) override;
 	bool event(QEvent*) override;
 private:
-	InitParams mInitParams;
+	QRhiHelper::InitParams mInitParams;
 
 	bool mRunning = false;
 	bool mNotExposed = false;

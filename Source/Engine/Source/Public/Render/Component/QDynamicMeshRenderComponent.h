@@ -2,7 +2,7 @@
 #define QDynamicMeshRenderComponent_h__
 
 #include "Render/ISceneRenderComponent.h"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 #include "QEngineUtilitiesAPI.h"
 
 class QENGINEUTILITIES_API QDynamicMeshRenderComponent :public ISceneRenderComponent {
@@ -22,15 +22,10 @@ protected:
 	};
 	virtual void onUpdateVertices(QVector<Vertex>& vertices) = 0;
 	void onRebuildResource() override;
-	void onRebuildPipeline() override;
-	void onUpload(QRhiResourceUpdateBatch* batch) override;
-	void onUpdate(QRhiResourceUpdateBatch* batch) override;
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
-	bool isVaild() override;
 protected:
 	QVector<Vertex> mVertices;
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
-	QSharedPointer<QRhiGraphicsPipelineBuilder> mPipeline;
+	QSharedPointer<QPrimitiveRenderProxy> mRenderProxy;
 	QScopedPointer<QRhiMaterialGroup> mMaterialGroup;
 };
 

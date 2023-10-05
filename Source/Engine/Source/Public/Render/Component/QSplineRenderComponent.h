@@ -2,7 +2,7 @@
 #define QSplineRenderComponent_h__
 
 #include "Render/ISceneRenderComponent.h"
-#include "Render/RHI/QRhiGraphicsPipelineBuilder.h"
+#include "Render/QPrimitiveRenderProxy.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
 #include "QEngineUtilitiesAPI.h"
 
@@ -41,10 +41,6 @@ class QENGINEUTILITIES_API QSplineRenderComponent :public ISceneRenderComponent 
 
 	Q_CLASSINFO("LineWidth", "Min=0,Max=1000")
 	Q_CLASSINFO("SubdivisionAmount", "Min=0,Max=64")
-
-	Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QSplineRenderComponent)
-		Q_BUILDER_ATTRIBUTE(QList<QSplinePoint>, Points)
-	Q_BUILDER_END()
 public:
 	QSplineRenderComponent();
 
@@ -58,13 +54,9 @@ public:
 	void setSubdivisionAmount(int val);
 protected:
 	void onRebuildResource() override;
-	void onRebuildPipeline() override;
-	void onUpload(QRhiResourceUpdateBatch* batch) override;
-	void onUpdate(QRhiResourceUpdateBatch* batch) override;
-	void onRender(QRhiCommandBuffer* cmdBuffer, const QRhiViewport& viewport) override;
-	bool isVaild() override;
 protected:
 	int mSubdivisionAmount = 16;
+	float mLineWidth = 5.0f;
 
 	QList<QSplinePoint> mPoints;
 	QList<QVector4D> mSegmentData;
@@ -73,7 +65,7 @@ protected:
 	QScopedPointer<QRhiBuffer> mVertexBuffer;
 
 	QScopedPointer<QRhiShaderResourceBindings> mShaderBindings;
-	QScopedPointer<QRhiGraphicsPipelineBuilder> mPipelineBuilder;
+	QSharedPointer<QPrimitiveRenderProxy> mRenderProxy;
 };
 
 #endif // QSplineRenderComponent_h__

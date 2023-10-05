@@ -1,33 +1,13 @@
-#include "Render/RHI/QRhiHelper.h"
+#include "QRhiHelper.h"
 #include <QFile>
-
-
-#include "private/qrhivulkan_p.h"
 
 #ifndef QT_NO_OPENGL
 #include <QOffscreenSurface>
-#include "private/qrhigles2_p.h"
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 #include "rhi/qshaderbaker.h"
-#else
-#include "private/qshaderbaker_p.h"
-#include "private/qrhi_p_p.h"
-#include "private/qrhivulkanext_p.h"
-#endif
-
-#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-#include <QtGui/private/qrhimetal_p.h>
-#endif
-
-#include "QVulkanInstance"
-#include <QtGui/private/qrhinull_p.h>
-
-#include <qmath.h>
-#include <QVulkanFunctions>
-
 #include "Vulkan/QRhiVulkanExHelper.h"
+
 
 QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def) {
 	mDefinitions.append("#define " + def + "\n");
@@ -113,29 +93,28 @@ QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Fl
 	return rhi;
 }
 
-QShader QRhiHelper::newShaderFromCode(QRhi* rhi, QShader::Stage stage, QByteArray code, QByteArray preamble)
+QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble)
 {
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
+	baker.setSourceString(code, stage);
+	baker.setPreamble(preamble);
+
 	QList<QShaderBaker::GeneratedShader> generatedShaders;
 	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
-	if (rhi->backend() == QRhi::Vulkan || rhi->backend()  == QRhi::OpenGLES2) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
-	}
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-	else if (rhi->backend()  == QRhi::D3D11 || rhi->backend()  == QRhi::D3D12) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::HlslShader,QShaderVersion(50) };
-		code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
-	}
-#endif
-	else if (rhi->backend()  == QRhi::Metal) {
-		generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
-	}
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
 	baker.setGeneratedShaders(generatedShaders);
-	baker.setSourceString(code, stage);
 
-	baker.setPreamble(preamble);
+	QShaderBaker hlslBaker;
+	hlslBaker.setGeneratedShaderVariants({ QShader::StandardShader });
+	hlslBaker.setPreamble(preamble);
+	hlslBaker.setGeneratedShaders({ QShaderBaker::GeneratedShader(QShader::Source::HlslShader,QShaderVersion(50)) });
+	code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
+	hlslBaker.setSourceString(code, stage);
+
 	QShader shader = baker.bake();
+	QShader hlslShader = hlslBaker.bake();
 	if (!shader.isValid()) {
 		QStringList codelist = QString(code).split('\n');
 		for (int i = 0; i < codelist.size(); i++) {
@@ -143,6 +122,16 @@ QShader QRhiHelper::newShaderFromCode(QRhi* rhi, QShader::Stage stage, QByteArra
 		}
 		qWarning(baker.errorMessage().toLocal8Bit());
 	}
+	else if (!hlslShader.isValid()) {
+		QStringList codelist = QString(code).split('\n');
+		for (int i = 0; i < codelist.size(); i++) {
+			qWarning() << i + 1 << codelist[i].toLocal8Bit().data();
+		}
+		qWarning(hlslBaker.errorMessage().toLocal8Bit());
+	}
+	//shader.setDescription(hlslShader.description());
+	shader.setResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.nativeResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
+	shader.setShader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.shader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
 	return shader;
 }
 
