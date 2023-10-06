@@ -684,7 +684,11 @@ static bool DrawNode(ImDrawList* drawList,
                             nodeTemplate.mHeaderColor, options.mRounding);
 
     drawList->PushClipRect(titleRect.Min,titleRect.Max, true);
-    drawList->AddText(titleRect.Min + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName.data());
+
+	const float textureNameFontSize = 24.0f;
+	drawList->AddText(NULL, textureNameFontSize, titleRect.Min + ImVec2(2, 2), ImGui::GetColorU32(ImGuiCol_Text), node.mName.data());
+
+    //drawList->AddText(titleRect.Min + ImVec2(2, 2), IM_COL32(0, 0, 0, 255), node.mName.data());
     drawList->PopClipRect();
 
     ImRect customDrawRect(nodeRectangleMin,nodeRectangleMax);

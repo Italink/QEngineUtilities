@@ -51,8 +51,8 @@ void QMousePickingPassBuilder::setup(QRenderGraphBuilder& builder)
 void QMousePickingPassBuilder::execute(QRhiCommandBuffer* cmdBuffer)
 {
 	for (auto& pipeline : mRenderer->getRenderProxies()) {
-		if (!pipeline->hasEmployee("DebugId")) {
-			pipeline->createEmployee("DebugId", mRenderTarget.get(), [](QRhiGraphicsPipeline* pipeline) {
+		if (!pipeline->hasSubPipeline("DebugId")) {
+			pipeline->createSubPipeline("DebugId", mRenderTarget.get(), [](QRhiGraphicsPipeline* pipeline) {
 				pipeline->setFlags(QRhiGraphicsPipeline::Flag::UsesStencilRef);
 				pipeline->setStencilTest(true);
 				QRhiGraphicsPipeline::StencilOpState stencil;
@@ -80,7 +80,7 @@ void QMousePickingPassBuilder::execute(QRhiCommandBuffer* cmdBuffer)
 	auto pipelines = mRenderer->getRenderProxies();
 	auto components = mRenderer->getRenderComponents();
 	for (int i = 0; i < pipelines.size(); i++) {
-		QRhiGraphicsPipeline* employee = pipelines[i]->gerEmployee("DebugId");
+		QRhiGraphicsPipeline* employee = pipelines[i]->gerSubPipeline("DebugId");
 		cmdBuffer->setGraphicsPipeline(employee);
 		cmdBuffer->setViewport(viewport);
 		cmdBuffer->setShaderResources();

@@ -50,7 +50,7 @@ public:
 		QMatrix4x4 projectionMatrixWithCorr;
 	};
 
-	struct Employee {
+	struct SubPipeline {
 		QSharedPointer<QRhiGraphicsPipeline> pipeline;
 		QRhiTextureRenderTarget* renderTarget = nullptr;
 		std::function<void(QRhiGraphicsPipeline*)> postSetup;
@@ -177,11 +177,11 @@ public:
 	void update(QRhiResourceUpdateBatch* batch,const UpdateContext& ctx);
 	void draw(QRhiCommandBuffer* cmdBuffer);
 
-	bool hasEmployee(const QString& inName); 
-	QRhiGraphicsPipeline* gerEmployee(const QString& inName);
-	QRhiGraphicsPipeline* createEmployee(const QString& inName, QRhiTextureRenderTarget* renderTarget, std::function<void(QRhiGraphicsPipeline*)> postSetup);
+	bool hasSubPipeline(const QString& inName); 
+	QRhiGraphicsPipeline* gerSubPipeline(const QString& inName);
+	QRhiGraphicsPipeline* createSubPipeline(const QString& inName, QRhiTextureRenderTarget* renderTarget, std::function<void(QRhiGraphicsPipeline*)> postSetup);
 private:
-	void recreateEmployee(Employee& inEmployee);
+	void recreateSubPipeline(SubPipeline& inSubPipeline);
 
 	QByteArray getInputFormatTypeName(QRhiVertexInputAttribute::Format inFormat);
 	QByteArray getOutputFormatTypeName(QRhiTexture::Format inFormat);
@@ -220,7 +220,7 @@ private:
 	std::function<void(QRhiResourceUpdateBatch* batch, const UniformBlocks&, const UpdateContext&)> mUpdateCallback;
 	std::function<void(QRhiCommandBuffer* cmdBuffer)> mDrawCallback;
 
-	QMap<QString, Employee> mEmployeeMap;
+	QMap<QString, SubPipeline> mSubPipelineMap;
 };
 
 Q_DECLARE_METATYPE(QPrimitiveRenderProxy*);

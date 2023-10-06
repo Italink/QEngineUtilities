@@ -261,8 +261,8 @@ void QPrimitiveRenderProxy::tryCreate(QRhiTextureRenderTarget* renderTarget)
 		mPipeline->setShaderResourceBindings(mShaderBindings.get());
 		mPipeline->create();
 
-		for (auto& employee : mEmployeeMap) {
-			recreateEmployee(employee);
+		for (auto& employee : mSubPipelineMap) {
+			recreateSubPipeline(employee);
 		}
 
 		for (const auto& stage : mStageInfos) {
@@ -307,64 +307,64 @@ void QPrimitiveRenderProxy::draw(QRhiCommandBuffer* cmdBuffer)
 		mDrawCallback(cmdBuffer);
 }
 
-bool QPrimitiveRenderProxy::hasEmployee(const QString& inName)
+bool QPrimitiveRenderProxy::hasSubPipeline(const QString& inName)
 {
-	return mEmployeeMap.contains(inName);
+	return mSubPipelineMap.contains(inName);
 }
 
-QRhiGraphicsPipeline* QPrimitiveRenderProxy::gerEmployee(const QString& inName)
+QRhiGraphicsPipeline* QPrimitiveRenderProxy::gerSubPipeline(const QString& inName)
 {
-	return mEmployeeMap.value(inName).pipeline.get();
+	return mSubPipelineMap.value(inName).pipeline.get();
 }
 
-QRhiGraphicsPipeline* QPrimitiveRenderProxy::createEmployee(const QString& inName, QRhiTextureRenderTarget* renderTarget, std::function<void(QRhiGraphicsPipeline*)> postSetup)
+QRhiGraphicsPipeline* QPrimitiveRenderProxy::createSubPipeline(const QString& inName, QRhiTextureRenderTarget* renderTarget, std::function<void(QRhiGraphicsPipeline*)> postSetup)
 {
-	Employee employee;
+	SubPipeline employee;
 	employee.renderTarget = renderTarget;
 	employee.postSetup = postSetup;
 	employee.pipeline.reset(mRenderComponent->getRhi()->newGraphicsPipeline());
-	recreateEmployee(employee);
-	mEmployeeMap.insert(inName, employee);
+	recreateSubPipeline(employee);
+	mSubPipelineMap.insert(inName, employee);
 	return employee.pipeline.get();
 }
 
-void QPrimitiveRenderProxy::recreateEmployee(Employee& inEmployee)
+void QPrimitiveRenderProxy::recreateSubPipeline(SubPipeline& inSubPipeline)
 {
-	QRhi* rhi = inEmployee.renderTarget->rhi();
-	inEmployee.pipeline.reset(rhi->newGraphicsPipeline());
-	inEmployee.pipeline->setTopology(mTopology);
-	inEmployee.pipeline->setCullMode(mCullMode);
-	inEmployee.pipeline->setFrontFace(mFrontFace);
-	inEmployee.pipeline->setLineWidth(mLineWidth);
+	QRhi* rhi = inSubPipeline.renderTarget->rhi();
+	inSubPipeline.pipeline.reset(rhi->newGraphicsPipeline());
+	inSubPipeline.pipeline->setTopology(mTopology);
+	inSubPipeline.pipeline->setCullMode(mCullMode);
+	inSubPipeline.pipeline->setFrontFace(mFrontFace);
+	inSubPipeline.pipeline->setLineWidth(mLineWidth);
 
-	QVector<QRhiGraphicsPipeline::TargetBlend> blendStates(inEmployee.renderTarget->description().colorAttachmentCount());
-	inEmployee.pipeline->setTargetBlends(blendStates.begin(), blendStates.end());
-	inEmployee.pipeline->setDepthTest(bEnableDepthTest);
-	inEmployee.pipeline->setDepthWrite(bEnableDepthWrite);
-	inEmployee.pipeline->setDepthOp(mDepthTestOp);
-	inEmployee.pipeline->setStencilTest(bEnableStencilTest);
-	inEmployee.pipeline->setStencilFront(mStencilFrontOp);
-	inEmployee.pipeline->setStencilBack(mStencilBackOp);
-	inEmployee.pipeline->setStencilReadMask(mStencilReadMask);
-	inEmployee.pipeline->setStencilWriteMask(mStencilWriteMask);
-	inEmployee.pipeline->setSampleCount(inEmployee.renderTarget->sampleCount());
-	inEmployee.pipeline->setDepthBias(mDepthBias);
-	inEmployee.pipeline->setSlopeScaledDepthBias(mSlopeScaledDepthBias);
-	inEmployee.pipeline->setPatchControlPointCount(mPatchControlPointCount);
-	inEmployee.pipeline->setPolygonMode(mPolygonMode);
-	inEmployee.pipeline->setVertexInputLayout(mVertexInputLayout);
-	inEmployee.pipeline->setRenderPassDescriptor(inEmployee.renderTarget->renderPassDescriptor());
+	QVector<QRhiGraphicsPipeline::TargetBlend> blendStates(inSubPipeline.renderTarget->description().colorAttachmentCount());
+	inSubPipeline.pipeline->setTargetBlends(blendStates.begin(), blendStates.end());
+	inSubPipeline.pipeline->setDepthTest(bEnableDepthTest);
+	inSubPipeline.pipeline->setDepthWrite(bEnableDepthWrite);
+	inSubPipeline.pipeline->setDepthOp(mDepthTestOp);
+	inSubPipeline.pipeline->setStencilTest(bEnableStencilTest);
+	inSubPipeline.pipeline->setStencilFront(mStencilFrontOp);
+	inSubPipeline.pipeline->setStencilBack(mStencilBackOp);
+	inSubPipeline.pipeline->setStencilReadMask(mStencilReadMask);
+	inSubPipeline.pipeline->setStencilWriteMask(mStencilWriteMask);
+	inSubPipeline.pipeline->setSampleCount(inSubPipeline.renderTarget->sampleCount());
+	inSubPipeline.pipeline->setDepthBias(mDepthBias);
+	inSubPipeline.pipeline->setSlopeScaledDepthBias(mSlopeScaledDepthBias);
+	inSubPipeline.pipeline->setPatchControlPointCount(mPatchControlPointCount);
+	inSubPipeline.pipeline->setPolygonMode(mPolygonMode);
+	inSubPipeline.pipeline->setVertexInputLayout(mVertexInputLayout);
+	inSubPipeline.pipeline->setRenderPassDescriptor(inSubPipeline.renderTarget->renderPassDescriptor());
 
 	QVector<QRhiShaderStage> stages(mPipeline->shaderStageCount());
 	for (int i = 0; i < mPipeline->shaderStageCount(); i++) {
 		stages[i] = *mPipeline->shaderStageAt(i);
 	}
-	inEmployee.pipeline->setShaderStages(stages.cbegin(),stages.cend());
-	inEmployee.pipeline->setShaderResourceBindings(mShaderBindings.get());
+	inSubPipeline.pipeline->setShaderStages(stages.cbegin(),stages.cend());
+	inSubPipeline.pipeline->setShaderResourceBindings(mShaderBindings.get());
 
-	inEmployee.postSetup(inEmployee.pipeline.get());
+	inSubPipeline.postSetup(inSubPipeline.pipeline.get());
 
-	inEmployee.pipeline->create();
+	inSubPipeline.pipeline->create();
 }
 
 void QPrimitiveRenderProxy::recreateShaderBindings(QRhiTextureRenderTarget* inRenderTarget, QRhi* inRhi) {
