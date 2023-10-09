@@ -8,10 +8,10 @@ class QColor4DButton :public QHoverWidget {
 	Q_OBJECT
 public:
 	QColor4DButton(QColor4D color = QColor4D());
-	void SetColor(QColor4D color);
+	void setColor(QColor4D color);
 	QColor4D GetColor() const;
 Q_SIGNALS:
-	void AsColorChanged(QColor4D color);
+	void asColorChanged(QColor4D color);
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 	virtual void mousePressEvent(QMouseEvent* event) override;

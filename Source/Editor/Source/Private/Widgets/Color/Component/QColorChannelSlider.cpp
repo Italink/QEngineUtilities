@@ -19,8 +19,8 @@ QColorChannelSlider::QColorChannelSlider(QString inName, float inDefault, float 
 	v->addWidget(&mValueBox);
 	v->addSpacing(5);
 
-	connect(&mValueBox, &QNumberBox::AsValueChanged, this, [this](QVariant var) {
-		Q_EMIT AsValueChanged(var.toFloat());
+	connect(&mValueBox, &QNumberBox::asValueChanged, this, [this](QVariant var) {
+		Q_EMIT asValueChanged(var.toFloat());
 	});
 }
 
@@ -32,7 +32,7 @@ void QColorChannelSlider::SetGradientStops(const QGradientStops& inStops)
 
 void QColorChannelSlider::SetChannelValue(float inValue)
 {
-	mValueBox.SetVar(inValue);
+	mValueBox.setVar(inValue);
 }
 
 void QColorChannelSlider::paintEvent(QPaintEvent* event)

@@ -47,7 +47,7 @@ class  HueSlider : public GradientSlider
 		/**
 		 * \brief Color with corresponding color* components
 		 */
-		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged)
+		Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY OnColorChanged)
 
 		/**
 		 * \brief Normalized Hue, as indicated from the slider
@@ -73,7 +73,7 @@ public Q_SLOTS:
 	/**
 	 * \brief Set Hue Saturation and ColorValue, ignoring alpha
 	 */
-	void SetColor(const QColor& color);
+	void setColor(const QColor& color);
 	/**
 	 * \brief Set Hue Saturation, ColorValue and Alpha
 	 */

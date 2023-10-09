@@ -20,7 +20,7 @@ QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString in
 {
 	setParent(inParent);
 	setObjectName(inPropertyPath);
-	ResloveMetaData();
+	resloveMetaData();
 	mInitialValue = inGetter();
 	if (QMetaType::canConvert(inType, QMetaType::fromType<QVariantList>())
 		&& !QMetaType::canConvert(inType, QMetaType::fromType<QString>())
@@ -58,9 +58,9 @@ QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString in
 	}
 }
 
-void QPropertyHandle::ResloveMetaData() {
+void QPropertyHandle::resloveMetaData() {
 	auto metaObj = parent()->metaObject();
-	auto firstField = GetPath().split(".").first();
+	auto firstField = getPath().split(".").first();
 	for (int i = 0; i < metaObj->classInfoCount(); i++) {
 		auto metaClassInfo = metaObj->classInfo(i);
 		if (metaClassInfo.name() == firstField) {
@@ -86,7 +86,7 @@ bool QPropertyHandle::eventFilter(QObject* object, QEvent* event)
 	if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved) {
 		QChildEvent* childEvent = static_cast<QChildEvent*>(event);
 		if(childEvent)
-			Q_EMIT AsChildEvent(childEvent);
+			Q_EMIT asChildEvent(childEvent);
 	}
 	return QObject::eventFilter(object, event);
 }
@@ -94,7 +94,7 @@ bool QPropertyHandle::eventFilter(QObject* object, QEvent* event)
 QPropertyHandle* QPropertyHandle::Find(const QObject* inParent, const QString& inPropertyPath) {
 	for (QObject* child : inParent->children()) {
 		QPropertyHandle* handler = qobject_cast<QPropertyHandle*>(child);
-		if (handler && handler->GetPath() == inPropertyPath) {
+		if (handler && handler->getPath() == inPropertyPath) {
 			return handler;
 		}
 	}
@@ -125,9 +125,9 @@ QPropertyHandle* QPropertyHandle::FindOrCreate(QObject* inObject, const QString&
 	}
 	while (currIndex < pathList.size()) {
 		const QString& currPropName = pathList[currIndex++];
-		QPropertyHandle* childHandle = handle->FindChildHandle(currPropName);
+		QPropertyHandle* childHandle = handle->findChildHandle(currPropName);
 		if(!childHandle){
-			childHandle = handle->CreateChildHandle(currPropName);
+			childHandle = handle->createChildHandle(currPropName);
 		}
 		if(childHandle){
 			handle = childHandle;
@@ -195,8 +195,8 @@ protected:
 	QPropertyHandle* mHandle = nullptr;
 };
 
-void QPropertyHandle::SetValue(QVariant inValue, QString isPushUndoStackWithDesc){
-	QVariant last = GetValue();
+void QPropertyHandle::setValue(QVariant inValue, QString isPushUndoStackWithDesc){
+	QVariant last = getValue();
 	if (last != inValue) {
 		QPropertyHandle::Setter AssignSetter = [this](QVariant inVar) {
 			if (mInitialValue.metaType().flags().testFlag(QMetaType::IsEnumeration))
@@ -205,76 +205,76 @@ void QPropertyHandle::SetValue(QVariant inValue, QString isPushUndoStackWithDesc
 				mIsChanged = !(inVar == mInitialValue);
 			}
 			mSetter(inVar);
-			RefreshBinder();
-			Q_EMIT AsValueChanged();
+			refreshBinder();
+			Q_EMIT asValueChanged();
 		};
 		if (!isPushUndoStackWithDesc.isEmpty())
-			mUndoEntry->Push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter, this));
+			mUndoEntry->push(new QPropertyAssignCommand(isPushUndoStackWithDesc, last, inValue, AssignSetter, this));
 		else
 			AssignSetter(inValue);
 	}
 }
 
-QVariant QPropertyHandle::GetValue(){
+QVariant QPropertyHandle::getValue(){
 	return mGetter();
 }
 
-void QPropertyHandle::ResetValue() {
+void QPropertyHandle::resetValue() {
 	if (mIsChanged) {
-		SetValue(mInitialValue, "Reset: " + GetPath());
+		setValue(mInitialValue, "Reset: " + getPath());
 	}
 }
 
-QMetaType QPropertyHandle::GetType() {
+QMetaType QPropertyHandle::getType() {
 	return mType;
 }
 
-QString QPropertyHandle::GetName() {
-	return GetPath().split(".").back();
+QString QPropertyHandle::getName() {
+	return getPath().split(".").back();
 }
 
-QString QPropertyHandle::GetPath() {
+QString QPropertyHandle::getPath() {
 	return objectName();
 }
 
-QString QPropertyHandle::GetSubPath(const QString& inSubName){
-	return GetPath() + "." + inSubName;
+QString QPropertyHandle::getSubPath(const QString& inSubName){
+	return getPath() + "." + inSubName;
 }
 
-bool QPropertyHandle::HasMetaData(const QString& inName) const
+bool QPropertyHandle::hasMetaData(const QString& inName) const
 {
 	return mMetaData.contains(inName);
 }
 
-QVariant QPropertyHandle::GetMetaData(const QString& Hash) const {
+QVariant QPropertyHandle::getMetaData(const QString& Hash) const {
 	return mMetaData.value(Hash);
 }
 
-const QVariantHash& QPropertyHandle::GetMetaData() const {
+const QVariantHash& QPropertyHandle::getMetaData() const {
 	return mMetaData;
 }
 
-QPropertyHandle* QPropertyHandle::FindChildHandle(const QString& inSubName) {
-	return mImpl->FindChildHandle(inSubName);
+QPropertyHandle* QPropertyHandle::findChildHandle(const QString& inSubName) {
+	return mImpl->findChildHandle(inSubName);
 }
 
-QPropertyHandle* QPropertyHandle::CreateChildHandle(const QString& inSubName) {
-	return mImpl->CreateChildHandle(inSubName);
+QPropertyHandle* QPropertyHandle::createChildHandle(const QString& inSubName) {
+	return mImpl->createChildHandle(inSubName);
 }
 
-QWidget* QPropertyHandle::GenerateNameWidget() {
-	return mImpl->GenerateNameWidget();
+QWidget* QPropertyHandle::generateNameWidget() {
+	return mImpl->generateNameWidget();
 }
 
-QWidget* QPropertyHandle::GenerateValueWidget() {
-	return mImpl->GenerateValueWidget();
+QWidget* QPropertyHandle::generateValueWidget() {
+	return mImpl->generateValueWidget();
 }
 
-void QPropertyHandle::GenerateChildrenRow(QRowLayoutBuilder* Builder) {
-	mImpl->GenerateChildrenRow(Builder);
+void QPropertyHandle::generateChildrenRow(QRowLayoutBuilder* Builder) {
+	mImpl->generateChildrenRow(Builder);
 }
 
-void QPropertyHandle::GenerateAttachButtonWidget(QHBoxLayout* Layout) {
+void QPropertyHandle::generateAttachButtonWidget(QHBoxLayout* Layout) {
 	if(mAttachButtonWidgetCallback){
 		mAttachButtonWidgetCallback(Layout);
 	}
@@ -305,8 +305,8 @@ struct ExternalRefCountWithMetaType: public QtSharedPointer::ExternalRefCountDat
 	}
 };
 
-void QPropertyHandle::RefreshBinder() {
-	QVariant mVar = GetValue();
+void QPropertyHandle::refreshBinder() {
+	QVariant mVar = getValue();
 	for (auto& binder : mBinderMap.values()) {
 		QVariant var = binder.mGetter();
 		if (var != mVar) {
@@ -315,7 +315,7 @@ void QPropertyHandle::RefreshBinder() {
 	}
 }
 
-QVariant QPropertyHandle::CreateNewVariant(QMetaType inOutputType, QMetaType inRealType){
+QVariant QPropertyHandle::createNewVariant(QMetaType inOutputType, QMetaType inRealType){
 	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(inOutputType.name());
 	QStringList matchTexts = match.capturedTexts();

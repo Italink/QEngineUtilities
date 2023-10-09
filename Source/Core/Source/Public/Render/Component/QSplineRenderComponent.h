@@ -4,9 +4,8 @@
 #include "Render/ISceneRenderComponent.h"
 #include "Render/QPrimitiveRenderProxy.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
-#include "QEngineUtilitiesAPI.h"
 
-struct QENGINEUTILITIES_API QSplinePoint{
+struct QENGINECORE_API QSplinePoint{
 	Q_GADGET
 	Q_PROPERTY(QVector3D Point READ getPoint WRITE setPoint)
 	Q_PROPERTY(QColor4D Color READ getColor WRITE setColor)
@@ -33,7 +32,7 @@ public:
 	QColor4D mColor;
 };
 
-class QENGINEUTILITIES_API QSplineRenderComponent :public ISceneRenderComponent {
+class QENGINECORE_API QSplineRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(float LineWidth READ getLineWidth WRITE setLineWidth)
 	Q_PROPERTY(int SubdivisionAmount READ getSubdivisionAmount WRITE setSubdivisionAmount)

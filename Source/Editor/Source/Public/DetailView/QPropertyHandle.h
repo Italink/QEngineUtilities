@@ -24,56 +24,56 @@ public:
 	static QPropertyHandle* FindOrCreate(QObject* inObject, const QString& inPropertyPath);
 	static QPropertyHandle* FindOrCreate(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter);
 
-	void SetValue(QVariant inValue,QString bIsPushUndoStackAndWithDesc = QString());
-	QVariant GetValue();
-	void ResetValue();
+	void setValue(QVariant inValue,QString bIsPushUndoStackAndWithDesc = QString());
+	QVariant getValue();
+	void resetValue();
 
-	QMetaType GetType();
-	QString GetName();
-	QString GetPath();
-	QString GetSubPath(const QString& inSubName);
+	QMetaType getType();
+	QString getName();
+	QString getPath();
+	QString getSubPath(const QString& inSubName);
 
-	bool HasMetaData(const QString& inName) const;
-	QVariant GetMetaData(const QString& inName) const;
-	const QVariantHash& GetMetaData() const;
-	bool IsChanged() const { return mIsChanged; }
+	bool hasMetaData(const QString& inName) const;
+	QVariant getMetaData(const QString& inName) const;
+	const QVariantHash& getMetaData() const;
+	bool isChanged() const { return mIsChanged; }
 
-	QPropertyHandle* FindChildHandle(const QString& inSubName);
-	QPropertyHandle* CreateChildHandle(const QString& inSubName);
-	QWidget* GenerateNameWidget();
-	QWidget* GenerateValueWidget();
-	void GenerateChildrenRow(QRowLayoutBuilder* Builder);
-	void GenerateAttachButtonWidget(QHBoxLayout* Layout);
+	QPropertyHandle* findChildHandle(const QString& inSubName);
+	QPropertyHandle* createChildHandle(const QString& inSubName);
+	QWidget* generateNameWidget();
+	QWidget* generateValueWidget();
+	void generateChildrenRow(QRowLayoutBuilder* Builder);
+	void generateAttachButtonWidget(QHBoxLayout* Layout);
 	struct QPropertyBinder {
 		Getter mGetter;
 		Setter mSetter;
 	};
 	template<typename OObjectType, typename... T>
-	void Bind(OObjectType* inAdjuster, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
-		inSetter(GetValue());
+	void bind(OObjectType* inAdjuster, void (OObjectType::* inNotify)(T...), Getter inGetter, Setter inSetter) {
+		inSetter(getValue());
 		connect(inAdjuster, inNotify, this, [this, inGetter]() {
-			SetValue(inGetter(), "Assign: " + GetPath());
+			setValue(inGetter(), "Assign: " + getPath());
 		});
 		mBinderMap[inAdjuster] = QPropertyBinder{ inGetter,inSetter };
 		connect(inAdjuster, &QObject::destroyed, this, [this, inAdjuster]() {
 			mBinderMap.remove(inAdjuster);
 		});
 	}
-	void RefreshBinder();
+	void refreshBinder();
 
-	QEngineUndoEntry* GetUndoEntry() const { return mUndoEntry; }
+	QEngineUndoEntry* getUndoEntry() const { return mUndoEntry; }
 
-	static QVariant CreateNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
+	static QVariant createNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
 
-	void SetAttachButtonWidgetCallback(std::function<void(QHBoxLayout*)> val) { mAttachButtonWidgetCallback = val; }
+	void setAttachButtonWidgetCallback(std::function<void(QHBoxLayout*)> val) { mAttachButtonWidgetCallback = val; }
 
 Q_SIGNALS:
-	void AsValueChanged();
-	void AsRequestRebuildRow();
-	void AsChildEvent(QChildEvent*);
+	void asValueChanged();
+	void asRequestRebuildRow();
+	void asChildEvent(QChildEvent*);
 protected:
 	QPropertyHandle(QObject* inParent, QMetaType inType, QString inPropertyPath, Getter inGetter, Setter inSetter);
-	void ResloveMetaData();
+	void resloveMetaData();
 	bool eventFilter(QObject* object, QEvent* event) override;
 protected:
 	QSharedPointer<IPropertyHandleImpl> mImpl;

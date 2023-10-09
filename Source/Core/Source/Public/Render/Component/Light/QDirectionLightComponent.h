@@ -2,9 +2,8 @@
 #define QDirectionLightComponent_h__
 
 #include "Render/ILightComponent.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QDirectionLightComponent : public ILightRenderComponent {
+class QENGINECORE_API QDirectionLightComponent : public ILightRenderComponent {
 	Q_OBJECT
 		Q_PROPERTY(QVector3D Radiance READ getRadiance WRITE setRadiance)
 		Q_PROPERTY(QVector3D Direction READ getDirection WRITE setDirection)

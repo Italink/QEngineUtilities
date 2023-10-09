@@ -7,7 +7,7 @@ class QRhiMaterialGroup;
 
 class DetailCustomization_QRhiMaterialGroup : public IDetailCustomization {
 protected:
-	void CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
+	void customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
 };
 
 #endif // DetailCustomization_QRhiMaterialGroup_h__

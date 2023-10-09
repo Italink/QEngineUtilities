@@ -4,38 +4,38 @@
 QHoverTextEdit::QHoverTextEdit(QString inText)
 	: mTextEdit(new QTextEdit(inText))
 {
-	connect(mTextEdit, &QTextEdit::textChanged, this, &QHoverTextEdit::AsTextChanged);
+	connect(mTextEdit, &QTextEdit::textChanged, this, &QHoverTextEdit::asTextChanged);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->addWidget(mTextEdit);
 	h->setContentsMargins(2, 2, 2, 2);
 }
 
-void QHoverTextEdit::SetText(QString inText)
+void QHoverTextEdit::setDisplayText(QString inText)
 {
 	mTextEdit->setText(inText);
 }
 
-QString QHoverTextEdit::GetText() const
+QString QHoverTextEdit::getDisplayText() const
 {
 	return mTextEdit->toPlainText();
 }
 
-QColor QHoverTextEdit::GetPlaceholdColor() const
+QColor QHoverTextEdit::getPlaceholdColor() const
 {
 	return mPlaceholdColor;
 }
 
-void QHoverTextEdit::SetPlaceholdColor(QColor val)
+void QHoverTextEdit::setPlaceholdColor(QColor val)
 {
 	mPlaceholdColor = val;
 }
 
-QString QHoverTextEdit::GetPlaceholdText() const
+QString QHoverTextEdit::getPlaceholdText() const
 {
 	return mPlaceholdText;
 }
 
-void QHoverTextEdit::SetPlaceholdText(QString val)
+void QHoverTextEdit::setPlaceholdText(QString val)
 {
 	mPlaceholdText = val;
 }

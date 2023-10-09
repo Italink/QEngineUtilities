@@ -6,15 +6,15 @@ QEngineUndoStack* QEngineUndoStack::Instance() {
 	return &ins;
 }
 
-void QEngineUndoStack::AddEntry(QEngineUndoEntry* entry)
+void QEngineUndoStack::addEntry(QEngineUndoEntry* entry)
 {
 	mEntryList << entry;
 	connect(entry, &QObject::destroyed, this, [this,entry]() {
-		this->RemoveEntry(entry);
+		this->removeEntry(entry);
 	});
 }
 
-void QEngineUndoStack::RemoveEntry(QEngineUndoEntry* entry)
+void QEngineUndoStack::removeEntry(QEngineUndoEntry* entry)
 {
 	if (entry == nullptr)
 		return;
@@ -27,56 +27,56 @@ void QEngineUndoStack::RemoveEntry(QEngineUndoEntry* entry)
 	mEntryList.removeOne(entry);
 }
 
-void QEngineUndoStack::Push(QEngineUndoEntry* entry, QUndoCommand* cmd)
+void QEngineUndoStack::push(QEngineUndoEntry* entry, QUndoCommand* cmd)
 {
-	push(cmd);
+	QUndoStack::push(cmd);
 	mCommandToEntry[cmd] = entry;
 }
 
-void QEngineUndoStack::Undo()
+void QEngineUndoStack::undo()
 {
 	if (canUndo()) {
 		QNotification::ShowMessage("Undo", undoText(), 2000);
 		undo();
 		QEngineUndoEntry* entry = mCommandToEntry.value(command(index()));
 		if (entry) {
-			entry->AsUndo();
+			entry->asUndo();
 		}
 	}
 }
 
-void QEngineUndoStack::Redo()
+void QEngineUndoStack::redo()
 {
 	if (canRedo()) {
 		QNotification::ShowMessage("Redo", undoText(), 2000);
 		QEngineUndoEntry* entry = mCommandToEntry.value(command(index()));
 		redo();
 		if (entry) {
-			entry->AsRedo();
+			entry->asRedo();
 		}
 	}
 }
 
 QEngineUndoEntry::QEngineUndoEntry(QObject* inParent /*= nullptr*/) {
-	QEngineUndoStack::Instance()->AddEntry(this);
+	QEngineUndoStack::Instance()->addEntry(this);
 	setParent(inParent);
 }
 
 QEngineUndoEntry::~QEngineUndoEntry() {
-	QEngineUndoStack::Instance()->RemoveEntry(this);
+	QEngineUndoStack::Instance()->removeEntry(this);
 }
 
-void QEngineUndoEntry::BeginMacro(const QString& text)
+void QEngineUndoEntry::beginMacro(const QString& text)
 {
 	QEngineUndoStack::Instance()->beginMacro(text);
 }
 
-void QEngineUndoEntry::Push(QUndoCommand* cmd)
+void QEngineUndoEntry::push(QUndoCommand* cmd)
 {
-	QEngineUndoStack::Instance()->Push(this, cmd);
+	QEngineUndoStack::Instance()->push(this, cmd);
 }
 
-void QEngineUndoEntry::EndMacro()
+void QEngineUndoEntry::endMacro()
 {
 	QEngineUndoStack::Instance()->endMacro();
 }

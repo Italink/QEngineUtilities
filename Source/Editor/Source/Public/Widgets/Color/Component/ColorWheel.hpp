@@ -35,7 +35,7 @@ class QENGINEEDITOR_API ColorWheel : public QWidget
 {
 	Q_OBJECT
 
-		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged DESIGNABLE true STORED false)
+		Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY OnColorChanged DESIGNABLE true STORED false)
 		Q_PROPERTY(qreal hue READ hue WRITE setHue DESIGNABLE false)
 		Q_PROPERTY(qreal saturation READ saturation WRITE setSaturation DESIGNABLE false)
 		Q_PROPERTY(qreal value READ value WRITE setValue DESIGNABLE false)
@@ -103,7 +103,7 @@ public:
 public Q_SLOTS:
 
 	/// Set current color
-	void SetColor(QColor c);
+	void setColor(QColor c);
 
 	/**
 	 * @param h Hue [0-1]

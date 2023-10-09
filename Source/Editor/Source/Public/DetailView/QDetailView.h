@@ -15,39 +15,39 @@ class QENGINEEDITOR_API QDetailView: public QScrollArea {
 	friend class IDetailLayoutBuilder;
 public:
 	enum Flag {
-		ShowChildren = 0x1
+		isChildrenVisible = 0x1
 	};
 	Q_DECLARE_FLAGS(Flags, Flag)
 
 public:
 	QDetailView();
-	void SetObject(QObject* inObject);
-	void SetObjects(const QObjectList& inObjects);
-	void SelectSubObject(QObject* inObject);
+	void setObject(QObject* inObject);
+	void setObjects(const QObjectList& inObjects);
+	void selectSubObject(QObject* inObject);
 
-	void SetFlags(Flags inFlag);
-	Flags GetFlags() const;
-	void SearchByKeywords(QString inKeywords);
-	void Undo();
-	void Redo();
-	void ForceRebuild();
-	QDetailViewRow* AddTopLevelRow();
+	void setFlags(Flags inFlag);
+	Flags getFlags() const;
+	void searchByKeywords(QString inKeywords);
+	void undo();
+	void redo();
+	void forceRebuild();
+	QDetailViewRow* addTopLevelRow();
 
-	QDetailViewRow* GetCurrentRow() const;
-	void SetCurrentRow(QDetailViewRow* val);
-	const QSet<QMetaType>& GetIgnoreMetaTypes() const;
-	void SetIgnoreMetaTypes(QSet<QMetaType> val);
-	const QSet<const QMetaObject*>& GetIgnoreMetaObjects() const;
-	void SetIgnoreMetaObjects(QSet<const QMetaObject*> val);
+	QDetailViewRow* getCurrentRow() const;
+	void setCurrentRow(QDetailViewRow* val);
+	const QSet<QMetaType>& getIgnoredTypes() const;
+	void setIgnoredTypes(QSet<QMetaType> val);
+	const QSet<const QMetaObject*>& getIgnoredObjects() const;
+	void setIgnoreObjects(QSet<const QMetaObject*> val);
 Q_SIGNALS: 
-	void AsCurrentRowChanged(QDetailViewRow* NewRow);
+	void asCurrentRowChanged(QDetailViewRow* NewRow);
 protected:
 	void resizeEvent(QResizeEvent* event) override;
-	void SetPage(QWidget* inPage);
-	void Reset();
-	void RefreshRowsState();
-	void RefreshRowsSplitter();
-	void ForeachRows(std::function<bool(QDetailViewRow*)> inProcessor);
+	void setPage(QWidget* inPage);
+	void reset();
+	void refreshRowsState();
+	void refreshRowsSplitter();
+	void foreachRows(std::function<bool(QDetailViewRow*)> inProcessor);
 private:
 	QWidget* mView = nullptr;
 	QDetailViewRow* mCurrentRow = nullptr;

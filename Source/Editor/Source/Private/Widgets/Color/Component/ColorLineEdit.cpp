@@ -63,7 +63,7 @@ ColorLineEdit::ColorLineEdit(QWidget* parent)
 	: QLineEdit(parent), p(new Private)
 {
 	p->background.setTexture(QPixmap(QStringLiteral(":/Resources/Icons/alphaback")));
-	SetColor(Qt::white);
+	setColor(Qt::white);
 	/// \todo determine if having this connection might be useful
 	/*connect(this, &QLineEdit::textChanged, [this](const QString& text){
 		QColor color = p->colorFromString(text);
@@ -108,7 +108,7 @@ QColor ColorLineEdit::color() const
 	return p->color;
 }
 
-void ColorLineEdit::SetColor(const QColor& color)
+void ColorLineEdit::setColor(const QColor& color)
 {
 	if (color != p->color)
 	{
@@ -155,7 +155,7 @@ void ColorLineEdit::dropEvent(QDropEvent* event)
 
 	if (event->mimeData()->hasColor())
 	{
-		SetColor(event->mimeData()->colorData().value<QColor>());
+		setColor(event->mimeData()->colorData().value<QColor>());
 		event->accept();
 	}
 	else if (event->mimeData()->hasText())
@@ -163,7 +163,7 @@ void ColorLineEdit::dropEvent(QDropEvent* event)
 		QColor col = colorFromString(event->mimeData()->text(), p->show_alpha);
 		if (col.isValid())
 		{
-			SetColor(col);
+			setColor(col);
 			event->accept();
 		}
 	}

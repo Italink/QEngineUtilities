@@ -6,8 +6,8 @@
 
 QObjectPropertyHandleImpl::QObjectPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
-	mObjectHolder = mHandle->GetValue();
-	QMetaType metaType = mHandle->GetType();
+	mObjectHolder = mHandle->getValue();
+	QMetaType metaType = mHandle->getType();
 	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(metaType.name());
 	QStringList matchTexts = match.capturedTexts();
@@ -31,8 +31,8 @@ QObjectPropertyHandleImpl::QObjectPropertyHandleImpl(QPropertyHandle* InHandle)
 	mOwnerObject = mHandle->parent();
 }
 
-void QObjectPropertyHandleImpl::RefreshObjectPtr() {
-	mObjectHolder = mHandle->GetValue();
+void QObjectPropertyHandleImpl::refreshObjectPtr() {
+	mObjectHolder = mHandle->getValue();
 	if (mObjectHolder.isValid()) {
 		if (mMetaObject->inherits(&QObject::staticMetaObject)) {
 			QObject* objectPtr = mObjectHolder.value<QObject*>();
@@ -56,29 +56,29 @@ void QObjectPropertyHandleImpl::RefreshObjectPtr() {
 	}
 }
 
-QPropertyHandle* QObjectPropertyHandleImpl::FindChildHandle(const QString& inSubName) {
+QPropertyHandle* QObjectPropertyHandleImpl::findChildHandle(const QString& inSubName) {
 	return QPropertyHandle::Find(mHandle->parent(), inSubName);
 }
 
-QWidget* QObjectPropertyHandleImpl::GenerateValueWidget() {
-	return IPropertyHandleImpl::GenerateValueWidget();
+QWidget* QObjectPropertyHandleImpl::generateValueWidget() {
+	return IPropertyHandleImpl::generateValueWidget();
 }
 
-void QObjectPropertyHandleImpl::GenerateChildrenRow(QRowLayoutBuilder* Builder) {
-	RefreshObjectPtr();
+void QObjectPropertyHandleImpl::generateChildrenRow(QRowLayoutBuilder* Builder) {
+	refreshObjectPtr();
 	IDetailLayoutBuilder::ObjectContext Context;
 	Context.MetaObject = mMetaObject;
 	Context.ObjectPtr = mObjectPtr;
 	Context.OwnerObject = mHandle->parent();
-	Context.PrePath = mHandle->GetPath();
-	Builder->AddObject(Context);
+	Context.PrePath = mHandle->getPath();
+	Builder->addObject(Context);
 }
 
-QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inSubName) {
+QPropertyHandle* QObjectPropertyHandleImpl::createChildHandle(const QString& inSubName) {
 	QPropertyHandle* handle = nullptr;
 	if (mObjectPtr == nullptr)
 		return handle;
-	QString propertyPath = mMetaObject->inherits(&QObject::staticMetaObject) ? inSubName : mHandle->GetSubPath(inSubName);
+	QString propertyPath = mMetaObject->inherits(&QObject::staticMetaObject) ? inSubName : mHandle->getSubPath(inSubName);
 	for(int i = 0;i< mMetaObject->propertyCount();i++){
 		QMetaProperty prop = mMetaObject->property(i);
 		if(prop.name() == inSubName){
@@ -105,8 +105,8 @@ QPropertyHandle* QObjectPropertyHandleImpl::CreateChildHandle(const QString& inS
 					},
 					[this, prop](QVariant var) {
 						prop.writeOnGadget(mObjectPtr, var);
-						mHandle->SetValue(mObjectHolder);
-						RefreshObjectPtr();
+						mHandle->setValue(mObjectHolder);
+						refreshObjectPtr();
 					}
 					);
 			}

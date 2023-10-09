@@ -12,10 +12,10 @@ class QENGINEEDITOR_API QFilePathBox :public QWidget
 	Q_OBJECT
 public:
 	QFilePathBox(QString inPath = QString());
-	void SetFilePath(QString inPath);
-	QString GetFilePath();
+	void setFilePath(QString inPath);
+	QString getFilePath();
 Q_SIGNALS:
-	void AsPathChanged(QString);
+	void asPathChanged(QString);
 private:
 	QHoverLineEdit* mLePath;
 	QPushButton* mPbOpen;

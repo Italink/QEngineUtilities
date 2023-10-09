@@ -7,10 +7,10 @@ QColor4DButton::QColor4DButton(QColor4D color)
 	: mColor(color) {
 	setMinimumWidth(100);
 	setFixedHeight(20);
-	SetColor(color);
+	setColor(color);
 }
 
-void QColor4DButton::SetColor(QColor4D color) {
+void QColor4DButton::setColor(QColor4D color) {
 	mColor = color;
 	update();
 }
@@ -33,9 +33,9 @@ void QColor4DButton::mousePressEvent(QMouseEvent* event) {
 	QRect geom = rect();
 	geom.moveTopLeft(mapToGlobal(QPoint(0, 0)));
 	QColor4DDialog::CreateAndShow(mColor, geom);
-	QColor4DDialog::Current->setStyleSheet(QEngineEditorStyleManager::Instance()->GetStylesheet());
-	QObject::connect(QColor4DDialog::Current, &QColor4DDialog::AsColorChanged, this, [&](const QColor& color) {
-		SetColor(color);
-		Q_EMIT AsColorChanged(mColor);
+	QColor4DDialog::Current->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+	QObject::connect(QColor4DDialog::Current, &QColor4DDialog::asColorChanged, this, [&](const QColor& color) {
+		setColor(color);
+		Q_EMIT asColorChanged(mColor);
 	});
 }

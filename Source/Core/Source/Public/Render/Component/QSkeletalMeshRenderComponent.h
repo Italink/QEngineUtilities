@@ -4,9 +4,8 @@
 #include "Render/ISceneRenderComponent.h"
 #include "Render/QPrimitiveRenderProxy.h"
 #include "Asset/QSkeletalMesh.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QSkeletalMeshRenderComponent :public ISceneRenderComponent {
+class QENGINECORE_API QSkeletalMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QSharedPointer<QSkeletalMesh> SkeletalMesh READ getSkeletalMesh WRITE setSkeletalMesh)
 	Q_PROPERTY(QRhiMaterialGroup* MaterialGroup READ getMaterialGroup)

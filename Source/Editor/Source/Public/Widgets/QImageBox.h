@@ -8,11 +8,11 @@ class QENGINEEDITOR_API QImageBox : public QHoverWidget {
 	Q_OBJECT
 public:
 	QImageBox(QImage value = QImage());
-	QImage GetImage();
-	void SetImage(const QImage& inImage);
-	void OpenFileSelector();
+	QImage getImage();
+	void setImage(const QImage& inImage);
+	void openFileSelector();
 
-	Q_SIGNAL void AsImageChanged(const QImage&);
+	Q_SIGNAL void asImageChanged(const QImage&);
 protected:
 	void paintEvent(QPaintEvent* event) override;
 private:	

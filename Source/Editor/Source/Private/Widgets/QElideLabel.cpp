@@ -15,13 +15,13 @@ QElideLabel::QElideLabel(const QString& inText)
 	h->addWidget(mLineEditor);
 	mLineEditor->setVisible(false);
 	connect(mLineEditor, &QHoverLineEdit::AsEditingFinished, this, [this]() {
-		mText = mLineEditor->GetText();
-		Q_EMIT AsNameChanged(mLineEditor->GetText());
+		mText = mLineEditor->getDisplayText();
+		Q_EMIT asNameChanged(mLineEditor->getDisplayText());
 		mLineEditor->setVisible(false);
 	});
 }
 
-void QElideLabel::ShowRenameEditor() {
+void QElideLabel::showRenameEditor() {
 	mLineEditor->setVisible(true);
 	mLineEditor->GetQLineEdit()->selectAll();
 	mLineEditor->GetQLineEdit()->activateWindow();

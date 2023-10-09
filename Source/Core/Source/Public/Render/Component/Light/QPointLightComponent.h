@@ -2,9 +2,8 @@
 #define QPointLightComponent_h__
 
 #include "Render/ILightComponent.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QPointLightComponent : public ILightRenderComponent {
+class QENGINECORE_API QPointLightComponent : public ILightRenderComponent {
 	Q_OBJECT
 		Q_PROPERTY(QVector3D Radiance READ getRadiance WRITE setRadiance)
 		Q_PROPERTY(float Distance READ getDistance WRITE setDistance)

@@ -9,19 +9,19 @@ class QColor4DChannelValueBox :public QHoverWidget {
 	Q_OBJECT
 public:
 	QColor4DChannelValueBox(float inValue){
-		CreateUI();
-		ConnectUI();
+		createUI();
+		connectUI();
 	}
-	void SetEditEnabled(bool enable);
-	bool GetEditEnabled();
-	QString GetText();
-	float GetVar();
-	void SetVar(float var);
+	void setEditEnabled(bool enable);
+	bool getEditEnabled();
+	QString getDisplayText();
+	float getVar();
+	void setVar(float var);
 Q_SIGNALS:
-	void AsValueChanged(float);
+	void asValueChanged(float);
 protected:
-	void CreateUI();
-	void ConnectUI();
+	void createUI();
+	void connectUI();
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -48,7 +48,7 @@ protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 
 Q_SIGNALS:
-	void AsValueChanged(float);
+	void asValueChanged(float);
 
 private:
 	QLabel mLbName;

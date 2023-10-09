@@ -4,9 +4,8 @@
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 #include "Render/RenderGraph/Painter/TexturePainter.h"
 #include "Render/RHI/QRhiHelper.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QPbrLightingPassBuilder : public IRenderPassBuilder {
+class QENGINECORE_API QPbrLightingPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QPbrLightingPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColor);
 		QRP_INPUT_ATTR(QRhiTextureRef, Position);

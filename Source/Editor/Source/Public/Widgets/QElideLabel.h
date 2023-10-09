@@ -12,10 +12,10 @@ public:
 	using QWidget = QWidget;
 
 	QElideLabel(const QString& inText = QString() );
-	QString GetText() const { return mText; }
-	void SetText(QString val) { mText = val; update(); }
-	void ShowRenameEditor();
-	Q_SIGNAL void AsNameChanged(QString);
+	QString getDisplayText() const { return mText; }
+	void setDisplayText(QString val) { mText = val; update(); }
+	void showRenameEditor();
+	Q_SIGNAL void asNameChanged(QString);
 private:
 	QString mText;
 	QHoverLineEdit* mLineEditor;

@@ -26,7 +26,7 @@ public:
 	void setColor(QColor val);
 
 	static void setIconColor(QColor color);
-	static QColor GetIconColor();
+	static QColor getIconColor();
 private:
 	void updateIcon();
 private:

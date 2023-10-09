@@ -4,7 +4,7 @@
 #include "qevent.h"
 #include "QValidator"
 
-void QNumberBox::CreateUI(){
+void QNumberBox::createUI(){
 	setAttribute(Qt::WA_StyledBackground);
 	setFixedHeight(20);
 	setStyleSheet("QLineEdit{background-color:transparent; font-size:11px;}");
@@ -23,31 +23,31 @@ void QNumberBox::CreateUI(){
 	mLeValue->setValidator(new QDoubleValidator);
 	mLeValue->setAlignment(Qt::AlignLeft);
 	mLeValue->setMinimumWidth(50);
-	mLeValue->setText(mNumberAdaptor->GetText());
-	SetEditEnabled(false);
+	mLeValue->setText(mNumberAdaptor->getDisplayText());
+	setEditEnabled(false);
 }
 
-void QNumberBox::ConnectUI()
+void QNumberBox::connectUI()
 {
 	connect(mLeValue, &QLineEdit_HasFocusSignal::loseFocus, this, [this]() {
-		SetEditEnabled(false);
+		setEditEnabled(false);
 	});
 	connect(mLeValue, &QLineEdit::editingFinished, this, [this]() {
-		QVariant lastVar = mNumberAdaptor->GetVar();
-		mNumberAdaptor->SetText(mLeValue->text());
-		if (mNumberAdaptor->GetText() != mLeValue->text()) {
-			mLeValue->setText(mNumberAdaptor->GetText());
+		QVariant lastVar = mNumberAdaptor->getVar();
+		mNumberAdaptor->setDisplayText(mLeValue->text());
+		if (mNumberAdaptor->getDisplayText() != mLeValue->text()) {
+			mLeValue->setText(mNumberAdaptor->getDisplayText());
 		}
 		else{
-			QVariant currentVar = mNumberAdaptor->GetVar();
+			QVariant currentVar = mNumberAdaptor->getVar();
 			if (lastVar != currentVar) {
-				Q_EMIT AsValueChanged(currentVar);
+				Q_EMIT asValueChanged(currentVar);
 			}
 		}
 	});
 }
 
-void QNumberBox::SetEditEnabled(bool enable)
+void QNumberBox::setEditEnabled(bool enable)
 {
 	if (enable) {
 		mLeValue->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
@@ -66,33 +66,33 @@ void QNumberBox::SetEditEnabled(bool enable)
 	}
 }
 
-bool QNumberBox::GetEditEnabled()
+bool QNumberBox::getEditEnabled()
 {
 	return mLeValue->focusPolicy() == Qt::FocusPolicy::StrongFocus;
 }
 
-QString QNumberBox::GetText()
+QString QNumberBox::getDisplayText()
 {
 	return mLeValue->text();
 }
 
-QVariant QNumberBox::GetVar()
+QVariant QNumberBox::getVar()
 {
-	return mNumberAdaptor->GetVar();
+	return mNumberAdaptor->getVar();
 }
 
-void QNumberBox::SetVar(QVariant var)
+void QNumberBox::setVar(QVariant var)
 {
-	mNumberAdaptor->SetVar(var);
-	mLeValue->setText(mNumberAdaptor->GetText());
+	mNumberAdaptor->setVar(var);
+	mLeValue->setText(mNumberAdaptor->getDisplayText());
 }
 
 void QNumberBox::mousePressEvent(QMouseEvent* event)
 {
 	if (event->buttons() & Qt::LeftButton) {
 		mClickPosition = event->pos();
-		if (GetEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
-			SetEditEnabled(false);
+		if (getEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
+			setEditEnabled(false);
 		}
 	}
 }
@@ -104,25 +104,25 @@ void QNumberBox::mouseReleaseEvent(QMouseEvent* event)
 			setCursor(Qt::CursorShape::SizeHorCursor);
 			mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 		}
-		else if (mClickPosition == event->pos() && !GetEditEnabled() && this->cursor() != Qt::BlankCursor) {
-			SetEditEnabled(true);
+		else if (mClickPosition == event->pos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
+			setEditEnabled(true);
 		}
 	}
 }
 
 void QNumberBox::mouseMoveEvent(QMouseEvent* event)
 {
-	if (!GetEditEnabled() && event->buttons() & Qt::LeftButton) {
+	if (!getEditEnabled() && event->buttons() & Qt::LeftButton) {
 		setCursor(Qt::BlankCursor);
 		mLbArrow->setCursor(Qt::CursorShape::BlankCursor);
 		QPointF offset = event->position() - mClickPosition;
-		QVariant lastVar = mNumberAdaptor->GetVar();
-		mNumberAdaptor->MoveOffset(offset);
-		QVariant currentVar = mNumberAdaptor->GetVar();
+		QVariant lastVar = mNumberAdaptor->getVar();
+		mNumberAdaptor->moveOffset(offset);
+		QVariant currentVar = mNumberAdaptor->getVar();
 		if (lastVar!= currentVar) {
-			Q_EMIT AsValueChanged(mNumberAdaptor->GetVar());
+			Q_EMIT asValueChanged(mNumberAdaptor->getVar());
 		}
-		mLeValue->setText(mNumberAdaptor->GetText());
+		mLeValue->setText(mNumberAdaptor->getDisplayText());
 		QCursor::setPos(mapToGlobal(mClickPosition.toPoint()));
 	}
 }
@@ -131,9 +131,9 @@ void QNumberBox::paintEvent(QPaintEvent* event)
 {
 	QHoverWidget::paintEvent(event);
 	QPainter painter(this);
-	if (mNumberAdaptor->GetLimitedFactor() > 0) {
+	if (mNumberAdaptor->getLimitedFactor() > 0) {
 		QRect overRect = rect().adjusted(3, 3, -3, -3);
-		overRect.setWidth(overRect.width() * mNumberAdaptor->GetLimitedFactor());
+		overRect.setWidth(overRect.width() * mNumberAdaptor->getLimitedFactor());
 		painter.fillRect(overRect, mHoverd ? mHoverColor : QColor(100, 100, 100, 50));
 	}
 }

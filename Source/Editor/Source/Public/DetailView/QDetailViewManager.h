@@ -13,32 +13,32 @@ public:
 
 	static QDetailViewManager* Instance();
 	template<typename IDetailCustomizationType>
-	void RegisterCustomClassLayout(const QMetaObject* InMetaObject)
+	void registerCustomClassLayout(const QMetaObject* InMetaObject)
 	{
 		mCustomClassLayoutMap.insert(InMetaObject, []() {
 			return QSharedPointer<IDetailCustomizationType>::create();
 		});
 	}
-	void UnregisterCustomClassLayout(const QMetaObject* InMetaObject);
+	void unregisterCustomClassLayout(const QMetaObject* InMetaObject);
 
 	template<typename MetaType, typename IPropertyTypeCustomizationType>
-	void RegisterCustomPropertyTypeLayout(){
+	void registerCustomPropertyTypeLayout(){
 		mCustomPropertyTypeLayoutMap.insert(QMetaType::fromType<MetaType>(), []() {
 			return QSharedPointer<IPropertyTypeCustomizationType>::create();
 		});
 	}
-	void UnregisterCustomClassLayout(const QMetaType& InMetaType);
+	void unregisterCustomClassLayout(const QMetaType& InMetaType);
 
 
-	void RegisterCustomPropertyValueWidgetCreator(const QMetaType& InMetaType, CustomPropertyValueWidgetCreator Creator);
-	void UnregisterCustomPropertyValueWidgeCreator(const QMetaType& InMetaType);
+	void registerCustomPropertyValueWidgetCreator(const QMetaType& InMetaType, CustomPropertyValueWidgetCreator Creator);
+	void unregisterCustomPropertyValueWidgeCreator(const QMetaType& InMetaType);
 
-	QSharedPointer<IDetailCustomization> GetCustomDetailLayout(const QMetaObject* InMetaObject);
-	QSharedPointer<IPropertyTypeCustomization> GetCustomPropertyType(const QMetaType& InMetaType);
-	QWidget* GetCustomPropertyValueWidget(QPropertyHandle* InHandler);
+	QSharedPointer<IDetailCustomization> getCustomDetailLayout(const QMetaObject* InMetaObject);
+	QSharedPointer<IPropertyTypeCustomization> getCustomPropertyType(const QMetaType& InMetaType);
+	QWidget* getCustomPropertyValueWidget(QPropertyHandle* InHandler);
 protected:
 	QDetailViewManager();
-	void RegisterBuiltIn();
+	void registerBuiltIn();
 private:
 	QHash<const QMetaObject*, CustomClassLayoutCreator> mCustomClassLayoutMap;
 	QHash<QMetaType, CustomPropertyTypeLayoutCreator  > mCustomPropertyTypeLayoutMap;

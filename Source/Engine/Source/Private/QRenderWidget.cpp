@@ -2,7 +2,7 @@
 #include "QBoxLayout"
 #include "QSplitter"
 #include "qevent.h"
-#include "QEngineCoreEntry.h"
+#include "QEngineCoreSignals.h"
 #include "Render/IRenderer.h"
 #include <QWindow>
 
@@ -32,9 +32,9 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	splitter->setSizes({ 700,300 });
 	renderer->maybeWindow()->installEventFilter(this);
 	hLayout->addWidget(splitter);
-	mDetailView->SetFlags(QDetailView::ShowChildren);
-	mDetailView->SetObject(mRenderer);
-	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, &QDetailView::SelectSubObject);
+	mDetailView->setFlags(QDetailView::isChildrenVisible);
+	mDetailView->setObject(mRenderer);
+	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, &QDetailView::selectSubObject);
 #else
 	hLayout->addWidget(mViweport);
 #endif
@@ -45,13 +45,13 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier) ) {
 		if (event->key() == Qt::Key_Z) {
-			QEngineUndoStack::Instance()->Undo();
+			QEngineUndoStack::Instance()->undo();
 		}
 		else if (event->key() == Qt::Key_Y) {
-			QEngineUndoStack::Instance()->Redo();
+			QEngineUndoStack::Instance()->redo();
 		}
 	}
-	Q_EMIT QEngineCoreEntry::Instance()->asViewportKeyPressEvent(event);
+	Q_EMIT QEngineCoreSignals::Instance()->asViewportKeyPressEvent(event);
 }
 
 bool QRenderWidget::eventFilter(QObject* obj, QEvent* event) {

@@ -19,10 +19,10 @@ void QNotification::ShowMessage(const QString& inTitle, const QString& inContent
 
 void QNotification::PushNewBlock(QNotificationBlock* inBlock)
 {
-	QNotification::Instance()->mAnimation.AddNewBlock(inBlock);
+	QNotification::Instance()->mAnimation.addNewBlock(inBlock);
 }
 
-void QNotification::PushBlock(QNotificationBlock* inBlock)
+void QNotification::pushBlock(QNotificationBlock* inBlock)
 {
 	QPropertyAnimation* Anim = new QPropertyAnimation;
 	Anim->setTargetObject(inBlock);
@@ -33,11 +33,11 @@ void QNotification::PushBlock(QNotificationBlock* inBlock)
 	Anim->start(QAbstractAnimation::DeleteWhenStopped);
 	QObject::connect(Anim, &QPropertyAnimation::finished, inBlock, [this, inBlock]() {
 		mBlockList << inBlock;
-		inBlock->Active();
+		inBlock->active();
 	});
 }
 
-void QNotification::PopBlock(QNotificationBlock* inBlock)
+void QNotification::popBlock(QNotificationBlock* inBlock)
 {
 	QPropertyAnimation* Anim = new QPropertyAnimation;
 	Anim->setTargetObject(inBlock);
@@ -49,7 +49,7 @@ void QNotification::PopBlock(QNotificationBlock* inBlock)
 	QObject::connect(Anim, &QPropertyAnimation::finished, inBlock, [this, inBlock]() {
 		mBlockList.removeOne(inBlock);
 		inBlock->deleteLater();
-		mAnimation.Start();
+		mAnimation.start();
 	});
 }
 
@@ -57,22 +57,22 @@ QNotificationAnimation::QNotificationAnimation()
 {
 	QObject::connect(this, &QAbstractAnimation::finished, [this]() {
 		for (auto* Block : mNewBlockList) {
-			QNotification::Instance()->PushBlock(Block);
+			QNotification::Instance()->pushBlock(Block);
 		}
 		mNewBlockList.clear();
 	});
 }
 
-void QNotificationAnimation::AddNewBlock(QNotificationBlock* inBlock)
+void QNotificationAnimation::addNewBlock(QNotificationBlock* inBlock)
 {
 	mNewBlockList << inBlock;
 	inBlock->setFixedWidth(BlockFixedWidth);
 	inBlock->show();
 	inBlock->setWindowOpacity(0);
-	Start();
+	start();
 }
 
-void QNotificationAnimation::Start()
+void QNotificationAnimation::start()
 {
 	updateCacheGeomtry();
 	if (state() != QAbstractAnimation::Running) {
@@ -126,13 +126,13 @@ void QNotificationAnimation::updateCacheGeomtry()
 QNotificationBlock::QNotificationBlock()
 {
 	setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
-	//setStyleSheet(QDetailWidgetStyleManager::Instance()->GetStylesheet());
+	//setStyleSheet(QDetailWidgetStyleManager::Instance()->getStylesheet());
 	//setAttribute(Qt::WA_TranslucentBackground);
 }
 
-void QNotificationBlock::RequestObsolete()
+void QNotificationBlock::requestObsolete()
 {
-	QNotification::Instance()->PopBlock(this);
+	QNotification::Instance()->popBlock(this);
 }
 
 QNotificationBlock_Message::QNotificationBlock_Message(const QString& inTitle, const QString& inContent, float inDuration)
@@ -143,7 +143,7 @@ QNotificationBlock_Message::QNotificationBlock_Message(const QString& inTitle, c
 	mDuration = inDuration;
 }
 
-void QNotificationBlock_Message::Active()
+void QNotificationBlock_Message::active()
 {
-	QTimer::singleShot(mDuration, this, &QNotificationBlock_Message::RequestObsolete);
+	QTimer::singleShot(mDuration, this, &QNotificationBlock_Message::requestObsolete);
 }

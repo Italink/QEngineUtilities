@@ -10,11 +10,11 @@
 class HeaderRowBuilder: public IHeaderRowBuilder{
 public:
 	HeaderRowBuilder(QDetailViewRow* inRow): mHeaderRow(inRow){}
-	void AsNameValueWidget(QWidget* InName, QWidget* InValue) override {
-		mHeaderRow->SetupNameValueWidget(InName, InValue);
+	void setNameValueWidget(QWidget* InName, QWidget* InValue) override {
+		mHeaderRow->setupNameValueWidget(InName, InValue);
 	}
-	void AsWholeContent(QWidget* InContent) override {
-		mHeaderRow->SetupContentWidget(InContent);
+	void setWholeContent(QWidget* InContent) override {
+		mHeaderRow->setupContentWidget(InContent);
 	}
 protected:
 	QDetailViewRow* mHeaderRow;
@@ -26,98 +26,98 @@ IDetailLayoutBuilder::IDetailLayoutBuilder(QDetailView* InDetailView)
 {
 }
 
-void IDetailLayoutBuilder::SetPage(QWidget* InPage) {
-	mDetailView->SetPage(InPage);
+void IDetailLayoutBuilder::setPage(QWidget* InPage) {
+	mDetailView->setPage(InPage);
 }
 
-IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByWholeContent(QWidget* Wdiget)
+IDetailLayoutBuilder* IDetailLayoutBuilder::addRowByWholeContent(QWidget* Wdiget)
 {
-	QDetailViewRow* row = NewChildRow();
-	row->SetupContentWidget(Wdiget);
+	QDetailViewRow* row = newChildRow();
+	row->setupContentWidget(Wdiget);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	return rowBuilder.get();
 }
 
-IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByNameValueWidget(QWidget* InName, QWidget* InValue)
+IDetailLayoutBuilder* IDetailLayoutBuilder::addRowByNameValueWidget(QWidget* InName, QWidget* InValue)
 {
-	QDetailViewRow* row = NewChildRow();
-	row->SetupNameValueWidget(InName, InValue);
+	QDetailViewRow* row = newChildRow();
+	row->setupNameValueWidget(InName, InValue);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	return rowBuilder.get();
 }
 
-IDetailLayoutBuilder* IDetailLayoutBuilder::AddRowByNameValueWidget(const QString& inName, QWidget* InValue) {
-	QDetailViewRow* row = NewChildRow();
-	row->SetupNameValueWidget(new QElideLabel(inName), InValue);
+IDetailLayoutBuilder* IDetailLayoutBuilder::addRowByNameValueWidget(const QString& inName, QWidget* InValue) {
+	QDetailViewRow* row = newChildRow();
+	row->setupNameValueWidget(new QElideLabel(inName), InValue);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	return rowBuilder.get();
 }
 
-void IDetailLayoutBuilder::AddProperty(QPropertyHandle* InPropertyHandle) {
-	QDetailViewRow* row = NewChildRow();
-	row->SetupPropertyHandle(InPropertyHandle);
+void IDetailLayoutBuilder::addProperty(QPropertyHandle* InPropertyHandle) {
+	QDetailViewRow* row = newChildRow();
+	row->setupPropertyHandle(InPropertyHandle);
 	QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 	const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(rowBuilder);
 	if (customizationInstance.isNull()) {
-		customizationInstance = QDetailViewManager::Instance()->GetCustomPropertyType(InPropertyHandle->GetType());
+		customizationInstance = QDetailViewManager::Instance()->getCustomPropertyType(InPropertyHandle->getType());
 	}
 	if (!customizationInstance.isNull()) {
 		HeaderRowBuilder headerBuilder(row);
-		customizationInstance->CustomizeHeader(InPropertyHandle, &headerBuilder);
-		customizationInstance->CustomizeChildren(InPropertyHandle, rowBuilder.get());
+		customizationInstance->customizeHeader(InPropertyHandle, &headerBuilder);
+		customizationInstance->customizeChildren(InPropertyHandle, rowBuilder.get());
 		mPropertyTypeCustomizationMap.insert(InPropertyHandle, customizationInstance);
 	}
 	else{
-		row->SetupNameValueWidget(InPropertyHandle->GenerateNameWidget(), InPropertyHandle->GenerateValueWidget());
-		InPropertyHandle->GenerateChildrenRow(rowBuilder.get());
+		row->setupNameValueWidget(InPropertyHandle->generateNameWidget(), InPropertyHandle->generateValueWidget());
+		InPropertyHandle->generateChildrenRow(rowBuilder.get());
 	}
-	QObject::connect(InPropertyHandle, &QPropertyHandle::AsRequestRebuildRow, row, [this, row, InPropertyHandle]() {
-		row->DeleteChildren();
+	QObject::connect(InPropertyHandle, &QPropertyHandle::asRequestRebuildRow, row, [this, row, InPropertyHandle]() {
+		row->clear();
 		QSharedPointer<IPropertyTypeCustomization> customizationInstance = mPropertyTypeCustomizationMap.value(InPropertyHandle);
 		const auto rowBuilder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 		if (customizationInstance.isNull()) {
-			customizationInstance = QDetailViewManager::Instance()->GetCustomPropertyType(InPropertyHandle->GetType());
+			customizationInstance = QDetailViewManager::Instance()->getCustomPropertyType(InPropertyHandle->getType());
 		}
 		if (!customizationInstance.isNull()) {
 			HeaderRowBuilder headerBuilder(row);
-			customizationInstance->CustomizeHeader(InPropertyHandle, &headerBuilder);
-			customizationInstance->CustomizeChildren(InPropertyHandle, rowBuilder.get());
+			customizationInstance->customizeHeader(InPropertyHandle, &headerBuilder);
+			customizationInstance->customizeChildren(InPropertyHandle, rowBuilder.get());
 			mPropertyTypeCustomizationMap.insert(InPropertyHandle, customizationInstance);
 		}
 		else {
-			row->SetupNameValueWidget(InPropertyHandle->GenerateNameWidget(), InPropertyHandle->GenerateValueWidget());
-			InPropertyHandle->GenerateChildrenRow(rowBuilder.get());
+			row->setupNameValueWidget(InPropertyHandle->generateNameWidget(), InPropertyHandle->generateValueWidget());
+			InPropertyHandle->generateChildrenRow(rowBuilder.get());
 		}
-		row->Refresh();
-		row->RequestRefreshSplitter();
+		row->refresh();
+		row->requestRefreshSplitter();
 	});
 }
 
-void IDetailLayoutBuilder::AddObject(QObject* InObject, QString InPrePath /*= QString()*/) {
+void IDetailLayoutBuilder::addObject(QObject* InObject, QString InPrePath /*= QString()*/) {
 	if (InObject) {
 		IDetailLayoutBuilder::ObjectContext Context;
 		Context.MetaObject = InObject->metaObject();
 		Context.ObjectPtr = InObject;
 		Context.OwnerObject = InObject;
 		Context.PrePath = InPrePath;
-		AddObject(Context);
+		addObject(Context);
 	}
 	else {
 		qWarning() << "IDetailLayoutBuilder::AddObject: QObject is nullptr";
 	}
 }
 
-void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context) {
+void IDetailLayoutBuilder::addObject(IDetailLayoutBuilder::ObjectContext Context) {
 	QSharedPointer<IDetailCustomization> customizationInstance = mClassCustomizationMap.value(Context.ObjectPtr);
 	if (customizationInstance.isNull()) {
-		customizationInstance = QDetailViewManager::Instance()->GetCustomDetailLayout(Context.MetaObject);
+		customizationInstance = QDetailViewManager::Instance()->getCustomDetailLayout(Context.MetaObject);
 	}
 	if (!customizationInstance.isNull()) {
-		customizationInstance->CustomizeDetails(Context, this);
+		customizationInstance->customizeDetails(Context, this);
 		mClassCustomizationMap.insert(Context.ObjectPtr, customizationInstance);
 	}
 	else{
@@ -129,7 +129,7 @@ void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context
 			}
 			QPropertyHandle* handler = QPropertyHandle::FindOrCreate(Context.OwnerObject, propertyPath);
 			if (handler) 
-				AddProperty(handler);
+				addProperty(handler);
 			else 
 				qWarning() << "property handle is null";
 		}
@@ -137,24 +137,24 @@ void IDetailLayoutBuilder::AddObject(IDetailLayoutBuilder::ObjectContext Context
 }
 
 
-bool IDetailLayoutBuilder::ShowChildren() const
+bool IDetailLayoutBuilder::isChildrenVisible() const
 {
-	return mDetailView->GetFlags().testFlag(QDetailView::ShowChildren);
+	return mDetailView->getFlags().testFlag(QDetailView::isChildrenVisible);
 }
 
 
-bool IDetailLayoutBuilder::IsIgnoreMetaObject(const QMetaObject* inMetaObj)
+bool IDetailLayoutBuilder::isIgnoredType(const QMetaObject* inMetaObj)
 {
 	return mDetailView->mIgnoreMetaObjects.contains(inMetaObj);
 }
 
-IDetailLayoutBuilder* IDetailLayoutBuilder::FindOrAddCategory(const QString& InName){
+IDetailLayoutBuilder* IDetailLayoutBuilder::findOrAddCategory(const QString& InName){
 	QSharedPointer<IDetailLayoutBuilder> builder = mCategoryMap.value(InName);
 	if (builder)
 		return builder.get();
-	QDetailViewRow* row = NewChildRow();
-	row->MarkIsCategory();
-	row->SetupContentWidget(new QElideLabel(InName));
+	QDetailViewRow* row = newChildRow();
+	row->markIsCategory();
+	row->setupContentWidget(new QElideLabel(InName));
 	builder = QSharedPointer<QRowLayoutBuilder>::create(mDetailView, row);
 	mChildren.append(builder);
 	mCategoryMap[InName] = builder;

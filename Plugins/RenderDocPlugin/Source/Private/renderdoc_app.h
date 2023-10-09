@@ -577,7 +577,7 @@ typedef enum RENDERDOC_Version {
 //
 // 1.0.0 - initial release
 // 1.0.1 - Bugfix: IsFrameCapturing() was returning false for captures that were triggered
-//         by keypress or TriggerCapture, instead of Start/EndFrameCapture.
+//         by keypress or TriggerCapture, instead of start/EndFrameCapture.
 // 1.0.2 - Refactor: Renamed eRENDERDOC_Option_DebugDeviceMode to eRENDERDOC_Option_APIValidation
 // 1.1.0 - Add feature: TriggerMultiFrameCapture(). Backwards compatible with 1.0.x since the new
 //         function pointer is added to the end of the struct, the original layout is identical

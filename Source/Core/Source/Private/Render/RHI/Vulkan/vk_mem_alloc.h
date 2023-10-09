@@ -5894,7 +5894,7 @@ data about its regions (aka suballocations, #VmaAllocation), assigned and free.
 
 Thread-safety:
 - Access to m_pMetadata must be externally synchronized.
-- Map, Unmap, Bind* are synchronized internally.
+- Map, Unmap, bind* are synchronized internally.
 */
 class VmaDeviceMemoryBlock
 {
@@ -6012,11 +6012,11 @@ public:
         void* pMappedData,
         VkDeviceSize size);
 
-    ALLOCATION_TYPE GetType() const { return (ALLOCATION_TYPE)m_Type; }
+    ALLOCATION_TYPE getType() const { return (ALLOCATION_TYPE)m_Type; }
     VkDeviceSize GetAlignment() const { return m_Alignment; }
     VkDeviceSize GetSize() const { return m_Size; }
     void* GetUserData() const { return m_pUserData; }
-    const char* GetName() const { return m_pName; }
+    const char* getName() const { return m_pName; }
     VmaSuballocationType GetSuballocationType() const { return (VmaSuballocationType)m_SuballocationType; }
 
     VmaDeviceMemoryBlock* GetBlock() const { VMA_ASSERT(m_Type == ALLOCATION_TYPE_BLOCK); return m_BlockAllocation.m_Block; }
@@ -6093,22 +6093,22 @@ struct VmaDedicatedAllocationListItemTraits
 
     static ItemType* GetPrev(const ItemType* item)
     {
-        VMA_HEAVY_ASSERT(item->GetType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
+        VMA_HEAVY_ASSERT(item->getType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
         return item->m_DedicatedAllocation.m_Prev;
     }
     static ItemType* GetNext(const ItemType* item)
     {
-        VMA_HEAVY_ASSERT(item->GetType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
+        VMA_HEAVY_ASSERT(item->getType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
         return item->m_DedicatedAllocation.m_Next;
     }
     static ItemType*& AccessPrev(ItemType* item)
     {
-        VMA_HEAVY_ASSERT(item->GetType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
+        VMA_HEAVY_ASSERT(item->getType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
         return item->m_DedicatedAllocation.m_Prev;
     }
     static ItemType*& AccessNext(ItemType* item)
     {
-        VMA_HEAVY_ASSERT(item->GetType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
+        VMA_HEAVY_ASSERT(item->getType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
         return item->m_DedicatedAllocation.m_Next;
     }
 };
@@ -6416,7 +6416,7 @@ void VmaBlockMetadata::DebugLogAllocation(VkDeviceSize offset, VkDeviceSize size
         VmaAllocation allocation = reinterpret_cast<VmaAllocation>(userData);
 
         userData = allocation->GetUserData();
-        const char* name = allocation->GetName();
+        const char* name = allocation->getName();
 
 #if VMA_STATS_STRING_ENABLED
         VMA_DEBUG_LOG("UNFREED ALLOCATION; Offset: %llu; Size: %llu; UserData: %p; Name: %s; Type: %s; Usage: %u",
@@ -7304,7 +7304,7 @@ bool VmaBlockMetadata_Generic::CheckAllocation(
         return false;
     }
 
-    // Start from offset equal to beginning of this suballocation.
+    // start from offset equal to beginning of this suballocation.
     VkDeviceSize offset = suballoc.offset + (suballocItem == m_Suballocations.cbegin() ? 0 : GetDebugMargin());
 
     // Apply debugMargin from the end of previous alloc.
@@ -8956,7 +8956,7 @@ bool VmaBlockMetadata_Linear::CreateAllocationRequest_LowerAddress(
             resultBaseOffset = lastSuballoc.offset + lastSuballoc.size + debugMargin;
         }
 
-        // Start from offset equal to beginning of free space.
+        // start from offset equal to beginning of free space.
         VkDeviceSize resultOffset = resultBaseOffset;
 
         // Apply alignment.
@@ -9037,7 +9037,7 @@ bool VmaBlockMetadata_Linear::CreateAllocationRequest_LowerAddress(
             resultBaseOffset = lastSuballoc.offset + lastSuballoc.size + debugMargin;
         }
 
-        // Start from offset equal to beginning of free space.
+        // start from offset equal to beginning of free space.
         VkDeviceSize resultOffset = resultBaseOffset;
 
         // Apply alignment.
@@ -9144,7 +9144,7 @@ bool VmaBlockMetadata_Linear::CreateAllocationRequest_UpperAddress(
         }
     }
 
-    // Start from offset equal to end of free space.
+    // start from offset equal to end of free space.
     VkDeviceSize resultOffset = resultBaseOffset;
 
     const VkDeviceSize debugMargin = GetDebugMargin();
@@ -11101,7 +11101,7 @@ public:
     uint32_t GetId() const { return m_Id; }
     void SetId(uint32_t id) { VMA_ASSERT(m_Id == 0); m_Id = id; }
 
-    const char* GetName() const { return m_Name; }
+    const char* getName() const { return m_Name; }
     void SetName(const char* pName);
 
 #if VMA_STATS_STRING_ENABLED
@@ -11932,7 +11932,7 @@ VkResult VmaDeviceMemoryBlock::BindBufferMemory(
     VkBuffer hBuffer,
     const void* pNext)
 {
-    VMA_ASSERT(hAllocation->GetType() == VmaAllocation_T::ALLOCATION_TYPE_BLOCK &&
+    VMA_ASSERT(hAllocation->getType() == VmaAllocation_T::ALLOCATION_TYPE_BLOCK &&
         hAllocation->GetBlock() == this);
     VMA_ASSERT(allocationLocalOffset < hAllocation->GetSize() &&
         "Invalid allocationLocalOffset. Did you forget that this offset is relative to the beginning of the allocation, not the whole memory block?");
@@ -11949,7 +11949,7 @@ VkResult VmaDeviceMemoryBlock::BindImageMemory(
     VkImage hImage,
     const void* pNext)
 {
-    VMA_ASSERT(hAllocation->GetType() == VmaAllocation_T::ALLOCATION_TYPE_BLOCK &&
+    VMA_ASSERT(hAllocation->getType() == VmaAllocation_T::ALLOCATION_TYPE_BLOCK &&
         hAllocation->GetBlock() == this);
     VMA_ASSERT(allocationLocalOffset < hAllocation->GetSize() &&
         "Invalid allocationLocalOffset. Did you forget that this offset is relative to the beginning of the allocation, not the whole memory block?");
@@ -12152,7 +12152,7 @@ void* VmaAllocation_T::GetMappedData() const
 
 void VmaAllocation_T::BlockAllocMap()
 {
-    VMA_ASSERT(GetType() == ALLOCATION_TYPE_BLOCK);
+    VMA_ASSERT(getType() == ALLOCATION_TYPE_BLOCK);
     VMA_ASSERT(IsMappingAllowed() && "Mapping is not allowed on this allocation! Please use one of the new VMA_ALLOCATION_CREATE_HOST_ACCESS_* flags when creating it.");
 
     if (m_MapCount < 0xFF)
@@ -12167,7 +12167,7 @@ void VmaAllocation_T::BlockAllocMap()
 
 void VmaAllocation_T::BlockAllocUnmap()
 {
-    VMA_ASSERT(GetType() == ALLOCATION_TYPE_BLOCK);
+    VMA_ASSERT(getType() == ALLOCATION_TYPE_BLOCK);
 
     if (m_MapCount > 0)
     {
@@ -12181,7 +12181,7 @@ void VmaAllocation_T::BlockAllocUnmap()
 
 VkResult VmaAllocation_T::DedicatedAllocMap(VmaAllocator hAllocator, void** ppData)
 {
-    VMA_ASSERT(GetType() == ALLOCATION_TYPE_DEDICATED);
+    VMA_ASSERT(getType() == ALLOCATION_TYPE_DEDICATED);
     VMA_ASSERT(IsMappingAllowed() && "Mapping is not allowed on this allocation! Please use one of the new VMA_ALLOCATION_CREATE_HOST_ACCESS_* flags when creating it.");
 
     if (m_MapCount != 0 || IsPersistentMap())
@@ -12219,7 +12219,7 @@ VkResult VmaAllocation_T::DedicatedAllocMap(VmaAllocator hAllocator, void** ppDa
 
 void VmaAllocation_T::DedicatedAllocUnmap(VmaAllocator hAllocator)
 {
-    VMA_ASSERT(GetType() == ALLOCATION_TYPE_DEDICATED);
+    VMA_ASSERT(getType() == ALLOCATION_TYPE_DEDICATED);
 
     if (m_MapCount > 0)
     {
@@ -15100,7 +15100,7 @@ void VmaAllocator_T::FreeMemory(
 
             allocation->FreeName(this);
 
-            switch (allocation->GetType())
+            switch (allocation->getType())
             {
             case VmaAllocation_T::ALLOCATION_TYPE_BLOCK:
             {
@@ -15245,7 +15245,7 @@ void VmaAllocator_T::GetAllocationInfo(VmaAllocation hAllocation, VmaAllocationI
     pAllocationInfo->size = hAllocation->GetSize();
     pAllocationInfo->pMappedData = hAllocation->GetMappedData();
     pAllocationInfo->pUserData = hAllocation->GetUserData();
-    pAllocationInfo->pName = hAllocation->GetName();
+    pAllocationInfo->pName = hAllocation->getName();
 }
 
 VkResult VmaAllocator_T::CreatePool(const VmaPoolCreateInfo* pCreateInfo, VmaPool* pPool)
@@ -15537,7 +15537,7 @@ VkResult VmaAllocator_T::BindVulkanImage(
 
 VkResult VmaAllocator_T::Map(VmaAllocation hAllocation, void** ppData)
 {
-    switch (hAllocation->GetType())
+    switch (hAllocation->getType())
     {
     case VmaAllocation_T::ALLOCATION_TYPE_BLOCK:
     {
@@ -15561,7 +15561,7 @@ VkResult VmaAllocator_T::Map(VmaAllocation hAllocation, void** ppData)
 
 void VmaAllocator_T::Unmap(VmaAllocation hAllocation)
 {
-    switch (hAllocation->GetType())
+    switch (hAllocation->getType())
     {
     case VmaAllocation_T::ALLOCATION_TYPE_BLOCK:
     {
@@ -15585,7 +15585,7 @@ VkResult VmaAllocator_T::BindBufferMemory(
     const void* pNext)
 {
     VkResult res = VK_SUCCESS;
-    switch (hAllocation->GetType())
+    switch (hAllocation->getType())
     {
     case VmaAllocation_T::ALLOCATION_TYPE_DEDICATED:
         res = BindVulkanBuffer(hAllocation->GetMemory(), allocationLocalOffset, hBuffer, pNext);
@@ -15610,7 +15610,7 @@ VkResult VmaAllocator_T::BindImageMemory(
     const void* pNext)
 {
     VkResult res = VK_SUCCESS;
-    switch (hAllocation->GetType())
+    switch (hAllocation->getType())
     {
     case VmaAllocation_T::ALLOCATION_TYPE_DEDICATED:
         res = BindVulkanImage(hAllocation->GetMemory(), allocationLocalOffset, hImage, pNext);
@@ -15697,7 +15697,7 @@ VkResult VmaAllocator_T::FlushOrInvalidateAllocations(
 
 void VmaAllocator_T::FreeDedicatedMemory(const VmaAllocation allocation)
 {
-    VMA_ASSERT(allocation && allocation->GetType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
+    VMA_ASSERT(allocation && allocation->getType() == VmaAllocation_T::ALLOCATION_TYPE_DEDICATED);
 
     const uint32_t memTypeIndex = allocation->GetMemoryTypeIndex();
     VmaPool parentPool = allocation->GetParentPool();
@@ -15795,7 +15795,7 @@ bool VmaAllocator_T::GetFlushOrInvalidateRange(
         outRange.pNext = VMA_NULL;
         outRange.memory = allocation->GetMemory();
 
-        switch (allocation->GetType())
+        switch (allocation->getType())
         {
         case VmaAllocation_T::ALLOCATION_TYPE_DEDICATED:
             outRange.offset = VmaAlignDown(offset, nonCoherentAtomSize);
@@ -15975,10 +15975,10 @@ void VmaAllocator_T::PrintDetailedMap(VmaJsonWriter& json)
                             json.WriteString("Name");
                             json.BeginString();
                             json.ContinueString_Size(index++);
-                            if (pool->GetName())
+                            if (pool->getName())
                             {
                                 json.ContinueString(" - ");
-                                json.ContinueString(pool->GetName());
+                                json.ContinueString(pool->getName());
                             }
                             json.EndString();
 
@@ -16497,7 +16497,7 @@ VMA_CALL_PRE void VMA_CALL_POST vmaGetPoolName(
 
     VMA_DEBUG_GLOBAL_MUTEX_LOCK
 
-        * ppName = pool->GetName();
+        * ppName = pool->getName();
 }
 
 VMA_CALL_PRE void VMA_CALL_POST vmaSetPoolName(
@@ -17053,7 +17053,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateBuffer(
 
         if (res >= 0)
         {
-            // 3. Bind buffer with memory.
+            // 3. bind buffer with memory.
             if ((pAllocationCreateInfo->flags & VMA_ALLOCATION_CREATE_DONT_BIND_BIT) == 0)
             {
                 res = allocator->BindBufferMemory(*pAllocation, 0, *pBuffer, VMA_NULL);
@@ -17148,7 +17148,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateBufferWithAlignment(
 
         if (res >= 0)
         {
-            // 3. Bind buffer with memory.
+            // 3. bind buffer with memory.
             if ((pAllocationCreateInfo->flags & VMA_ALLOCATION_CREATE_DONT_BIND_BIT) == 0)
             {
                 res = allocator->BindBufferMemory(*pAllocation, 0, *pBuffer, VMA_NULL);
@@ -17214,7 +17214,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateAliasingBuffer(
             pBuffer);
     if (res >= 0)
     {
-        // 2. Bind buffer with memory.
+        // 2. bind buffer with memory.
         res = allocator->BindBufferMemory(allocation, 0, *pBuffer, VMA_NULL);
         if (res >= 0)
         {
@@ -17313,7 +17313,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateImage(
 
         if (res >= 0)
         {
-            // 3. Bind image with memory.
+            // 3. bind image with memory.
             if ((pAllocationCreateInfo->flags & VMA_ALLOCATION_CREATE_DONT_BIND_BIT) == 0)
             {
                 res = allocator->BindImageMemory(*pAllocation, 0, *pImage, VMA_NULL);
@@ -17377,7 +17377,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateAliasingImage(
             pImage);
     if (res >= 0)
     {
-        // 2. Bind image with memory.
+        // 2. bind image with memory.
         res = allocator->BindImageMemory(allocation, 0, *pImage, VMA_NULL);
         if (res >= 0)
         {

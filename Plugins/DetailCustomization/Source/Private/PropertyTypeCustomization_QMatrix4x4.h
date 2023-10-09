@@ -5,8 +5,8 @@
 
 class PropertyTypeCustomization_QMatrix4x4 :public IPropertyTypeCustomization {
 public:
-	void CustomizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
-	void CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) override;
+	void customizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
+	void customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) override;
 };
 
 #endif // PropertyTypeCustomization_QMatrix4x4_h__

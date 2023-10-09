@@ -8,17 +8,17 @@ class QENGINEEDITOR_API QObjectTreeView : public QTreeWidget {
 	Q_OBJECT
 public:
 	QObjectTreeView();
-	void SetObjects(QObjectList InObjects);
-	void SelectObjects(QObjectList InObjects);
+	void setObjects(QObjectList InObjects);
+	void selectObjects(QObjectList InObjects);
 protected:
 	void drawRow(QPainter* painter, const QStyleOptionViewItem& options, const QModelIndex& index) const override;
-	void AddItemInternal(QTreeWidgetItem* inParentItem, QObject* inParentInstance);
-	QTreeWidgetItem* CreateItemForInstance(QObject* inInstance);
-	void ForceRefresh();
+	void addItemInternal(QTreeWidgetItem* inParentItem, QObject* inParentInstance);
+	QTreeWidgetItem* createItemForInstance(QObject* inInstance);
+	void forceRefresh();
 	bool eventFilter(QObject* object, QEvent* event) override;
-	bool IsIgnoreObject(QObject* inObject);
+	bool isIgnoreObject(QObject* inObject);
 Q_SIGNALS:
-	void AsObjecteSelected(QObject*);
+	void asObjecteSelected(QObject*);
 private:
 	QVector<QObject*> mTopLevelObjects;
 	QMap<QTreeWidgetItem*, QObject*> mItemMap;

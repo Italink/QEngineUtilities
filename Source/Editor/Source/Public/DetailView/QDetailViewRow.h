@@ -17,38 +17,38 @@ class QENGINEEDITOR_API QDetailViewRow : public QObject{
 public:
 	QDetailViewRow(QDetailView* inView);
 
-	void SetupContentWidget(QWidget* inContent);
-	void SetupNameValueWidget(QWidget* inNameWidget,QWidget* inValueWidget);
-	void SetupPropertyHandle(QPropertyHandle* val);
+	void setupContentWidget(QWidget* inContent);
+	void setupNameValueWidget(QWidget* inNameWidget,QWidget* inValueWidget);
+	void setupPropertyHandle(QPropertyHandle* val);
 
-	int ChildCount() const;
-	QDetailViewRow* ChildAt(int inIndex);
-	QDetailViewRow* AddChildRow();
+	int childrenCount() const;
+	QDetailViewRow* childAt(int inIndex);
+	QDetailViewRow* addChildRow();
 
-	void DeleteChild(QDetailViewRow* inChild);
-	void DeleteChildren();
+	void removeChild(QDetailViewRow* inChild);
+	void clear();
 
-	void SetVisible(bool inVisiable);
-	bool IsVisible() const;
+	void setVisible(bool inVisiable);
+	bool isVisible() const;
 
-	bool IsCurrent() const;
+	bool isCurrent() const;
 
-	void SetExpanded(bool inExpanded, bool bRecursive = false);
-	bool IsExpanded() const;
+	void setExpanded(bool inExpanded, bool bRecursive = false);
+	bool isExpanded() const;
 
-	void UpdateWidget();
-	void Refresh();
-	void MarkIsCategory();
-	bool IsCategory();
-	void RequestRefreshSplitter();
+	void updateWidget();
+	void refresh();
+	void markIsCategory();
+	bool isCategory();
+	void requestRefreshSplitter();
 
-	QWidget* GetWidget();
-	QPropertyHandle* GetPropertyHandle() const { return mHandle; }
+	QWidget* getWidget();
+	QPropertyHandle* getPropertyHandle() const { return mHandle; }
 private:
-	void FixupSplitter();
-	void RefreshSplitter();
+	void fixupSplitter();
+	void refreshSplitter();
 Q_SIGNALS:
-	void RequestRebuildView();
+	void requestRebuildView();
 protected:
 	QDetailView* mView = nullptr;
 	QDetailViewRowWidget* mWidget = nullptr;

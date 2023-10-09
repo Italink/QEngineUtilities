@@ -232,7 +232,7 @@ void ColorWheel::resizeEvent(QResizeEvent*)
 	p->render_inner_selector();
 }
 
-void ColorWheel::SetColor(QColor c)
+void ColorWheel::setColor(QColor c)
 {
 	qreal oldh = p->hue;
 	p->set_color(c);
@@ -345,7 +345,7 @@ void ColorWheel::dropEvent(QDropEvent* event)
 {
 	if (event->mimeData()->hasColor())
 	{
-		SetColor(event->mimeData()->colorData().value<QColor>());
+		setColor(event->mimeData()->colorData().value<QColor>());
 		event->accept();
 	}
 	else if (event->mimeData()->hasText())
@@ -353,7 +353,7 @@ void ColorWheel::dropEvent(QDropEvent* event)
 		QColor col(event->mimeData()->text());
 		if (col.isValid())
 		{
-			SetColor(col);
+			setColor(col);
 			event->accept();
 		}
 	}

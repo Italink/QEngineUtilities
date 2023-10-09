@@ -16,18 +16,18 @@ QColor4DDialog::QColor4DDialog()
 	, mPbOk(new QPushButton("OK"))
 	, mPbCancel(new QPushButton("Cancel"))
 	, mLeHex(new ColorLineEdit()) {
-	CreateUI();
-	ConnectUI();
+	createUI();
+	connectUI();
 }
 
 QColor4DDialog::~QColor4DDialog() {
 	Current = nullptr;
 }
 
-void QColor4DDialog::SetColor(QColor4D color) {
+void QColor4DDialog::setColor(QColor4D color) {
 	mLastColor = color;
 	mColorPreview->setComparisonColor(color);
-	SetCurrentColorInternal(color);
+	setCurrentColorInternal(color);
 }
 
 int QColor4DDialog::CreateAndShow(QColor4D color, QRect inButtonGemotry) {
@@ -38,8 +38,8 @@ int QColor4DDialog::CreateAndShow(QColor4D color, QRect inButtonGemotry) {
 		QColor4DDialog::Current = dialog;
 	}
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
-	dialog->SetCloseWhenLoseFocus(true);
-	dialog->SetColor(color);
+	dialog->setCloseWhenLoseFocus(true);
+	dialog->setColor(color);
 	dialog->show();
 	dialog->activateWindow();
 	dialog->setFocus();
@@ -54,7 +54,7 @@ int QColor4DDialog::CreateAndShow(QColor4D color, QRect inButtonGemotry) {
 	return 0;
 }
 
-void QColor4DDialog::CreateUI() {
+void QColor4DDialog::createUI() {
 	setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
 	setFocusPolicy(Qt::NoFocus);
 	mColorWheel->setSelectorShape(ColorWheel::ShapeSquare);
@@ -106,9 +106,9 @@ void QColor4DDialog::CreateUI() {
 	mPbCancel->setFocusPolicy(Qt::NoFocus);
 }
 
-void QColor4DDialog::ConnectUI() {
+void QColor4DDialog::connectUI() {
 	connect(mColorWheel, &ColorWheel::OnColorChanged, this, [this](QColor color) {
-		SetCurrentColorInternal(color);
+		setCurrentColorInternal(color);
 	});
 
 	connect(mPbPick, &QPushButton::clicked, this, [this]() {
@@ -119,7 +119,7 @@ void QColor4DDialog::ConnectUI() {
 		}
 		QColor color = QColorPicker::Pick();
 		if (color.isValid()) {
-			SetCurrentColorInternal(color);
+			setCurrentColorInternal(color);
 		}
 		this->activateWindow();
 		this->setFocus();
@@ -129,57 +129,57 @@ void QColor4DDialog::ConnectUI() {
 	});
 
 	connect(mLeHex, &ColorLineEdit::OnColorChanged, this, [this](QColor color) {
-		SetCurrentColorInternal(color);
+		setCurrentColorInternal(color);
 	});
 
-	connect(mRedBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mRedBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = mCurrentColor;
 		next.setRedF(var);
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
-	connect(mGreenBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mGreenBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = mCurrentColor;
 		next.setGreenF(var);
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
-	connect(mBlueBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mBlueBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = mCurrentColor;
 		next.setBlueF(var);
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
-	connect(mAlphaBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mAlphaBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = mCurrentColor;
 		next.setAlphaF(var);
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
 
-	connect(mHueBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mHueBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = QColor4D::fromHsvF(var, mCurrentColor.hsvSaturationF(), mCurrentColor.valueF());
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
-	connect(mSaturationBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mSaturationBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = QColor4D::fromHsvF(mCurrentColor.hsvHueF(), var, mCurrentColor.valueF());
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
-	connect(mValueBox, &QColor4DChannelSlider::AsValueChanged, this, [this](float var) {
+	connect(mValueBox, &QColor4DChannelSlider::asValueChanged, this, [this](float var) {
 		QColor4D next = QColor4D::fromHsvF(mCurrentColor.hsvHueF(), mCurrentColor.hsvSaturationF(), var);
-		SetCurrentColorInternal(next);
+		setCurrentColorInternal(next);
 	});
 
 	connect(mPbOk, &QPushButton::clicked, this, [this]() {
 		close();
 	});
 	connect(mPbCancel, &QPushButton::clicked, this, [this]() {
-		SetCurrentColorInternal(mLastColor);
+		setCurrentColorInternal(mLastColor);
 		close();
 	});
 }
 
-void QColor4DDialog::SetCurrentColorInternal(QColor4D color) {
+void QColor4DDialog::setCurrentColorInternal(QColor4D color) {
 	if (mCurrentColor == color)
 		return;
 	mCurrentColor = color;
-	RefleshChannelGradiant();
+	refleshChannelGradiant();
 
 	mColorWheel->blockSignals(true);
 	mColorPreview->blockSignals(true);
@@ -192,9 +192,9 @@ void QColor4DDialog::SetCurrentColorInternal(QColor4D color) {
 	mValueBox->blockSignals(true);
 	mLeHex->blockSignals(true);
 
-	mColorWheel->SetColor(color.toQColor());
-	mColorPreview->SetColor(color.toQColor());
-	mLeHex->SetColor(color.toQColor());
+	mColorWheel->setColor(color.toQColor());
+	mColorPreview->setColor(color.toQColor());
+	mLeHex->setColor(color.toQColor());
 
 	mRedBox->SetChannelValue(color.redF());
 	mGreenBox->SetChannelValue(color.greenF());
@@ -215,10 +215,10 @@ void QColor4DDialog::SetCurrentColorInternal(QColor4D color) {
 	mValueBox->blockSignals(false);
 	mLeHex->blockSignals(false);
 
-	Q_EMIT AsColorChanged(mCurrentColor);
+	Q_EMIT asColorChanged(mCurrentColor);
 }
 
-void QColor4DDialog::RefleshChannelGradiant() {
+void QColor4DDialog::refleshChannelGradiant() {
 	QGradientStops stops;
 	QColor begin = mCurrentColor.toQColor();
 	QColor end = mCurrentColor.toQColor();

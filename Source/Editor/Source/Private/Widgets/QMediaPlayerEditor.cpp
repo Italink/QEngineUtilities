@@ -2,12 +2,12 @@
 #include "QBoxLayout"
 #include "qevent.h"
 
-void QMediaPlayerProgressBox::UpdateProgress(qint64 InProgress) {
+void QMediaPlayerProgressBox::updateProgress(qint64 InProgress) {
 	mProgress = InProgress;
 	update();
 }
 
-void QMediaPlayerProgressBox::SetDuration(qint64 InDuration) {
+void QMediaPlayerProgressBox::setDuration(qint64 InDuration) {
 	mDuration = InDuration;
 	update();
 }
@@ -38,7 +38,7 @@ void QMediaPlayerProgressBox::mouseMoveEvent(QMouseEvent* event) {
 	if (event->buttons() & Qt::LeftButton) {
 		qint64 newProgress = qBound((qint64)0, (qint64)(mDuration * event->position().x() /(double) width()), mDuration);
 		if (newProgress != mProgress) {
-			Q_EMIT AsProgressChangedByDrag(newProgress);
+			Q_EMIT asProgressChangedByDrag(newProgress);
 		}
 	}
 }
@@ -58,20 +58,20 @@ QMediaPlayerProgressBox::QMediaPlayerProgressBox() {
 }
 
 QMediaPlayerEditor::QMediaPlayerEditor() {
-	CreateUI();
+	createUI();
 }
 
-void QMediaPlayerEditor::SetupPlayer(QMediaPlayer* InPlayer) {
+void QMediaPlayerEditor::setupPlayer(QMediaPlayer* InPlayer) {
 	mPlayer = InPlayer;
 	mProgressBox->disconnect();
-	mProgressBox->UpdateProgress(mPlayer->position());
-	mProgressBox->SetDuration(mPlayer->duration());
-	mSourceBox->SetFilePath(mPlayer->source().toString());
-	OnPlaybackStateChanged(mPlayer->playbackState());
-	connect(mPlayer, &QMediaPlayer::positionChanged, this, &QMediaPlayerEditor::OnProgressChanged);
-	connect(mPlayer, &QMediaPlayer::durationChanged, this, &QMediaPlayerEditor::OnDurationChanged);
-	connect(mPlayer, &QMediaPlayer::playbackStateChanged, this, &QMediaPlayerEditor::OnPlaybackStateChanged);
-	connect(mProgressBox, &QMediaPlayerProgressBox::AsProgressChangedByDrag, this, [this](qint64 InProgress) {
+	mProgressBox->updateProgress(mPlayer->position());
+	mProgressBox->setDuration(mPlayer->duration());
+	mSourceBox->setFilePath(mPlayer->source().toString());
+	onPlaybackStateChanged(mPlayer->playbackState());
+	connect(mPlayer, &QMediaPlayer::positionChanged, this, &QMediaPlayerEditor::onProgressChanged);
+	connect(mPlayer, &QMediaPlayer::durationChanged, this, &QMediaPlayerEditor::onDurationChanged);
+	connect(mPlayer, &QMediaPlayer::playbackStateChanged, this, &QMediaPlayerEditor::onPlaybackStateChanged);
+	connect(mProgressBox, &QMediaPlayerProgressBox::asProgressChangedByDrag, this, [this](qint64 InProgress) {
 		mPlayer->pause();
 		mPlayer->setPosition(InProgress);
 	});
@@ -87,12 +87,12 @@ void QMediaPlayerEditor::SetupPlayer(QMediaPlayer* InPlayer) {
 			mPlayer->play();
 		}
 	});
-	connect(mSourceBox, &QFilePathBox::AsPathChanged, this, [this](QString InPath) {
+	connect(mSourceBox, &QFilePathBox::asPathChanged, this, [this](QString InPath) {
 		mPlayer->setSource(QUrl::fromLocalFile(InPath));
 	});
 }
 
-void QMediaPlayerEditor::CreateUI() {
+void QMediaPlayerEditor::createUI() {
 	mSourceBox = new QFilePathBox();
 	mProgressBox = new QMediaPlayerProgressBox;
 	mProgressLable = new QElideLabel;
@@ -112,23 +112,23 @@ void QMediaPlayerEditor::CreateUI() {
 	vLayout->addLayout(hLayout);
 }
 
-void QMediaPlayerEditor::OnDurationChanged(qint64 InDuration) {
-	mProgressBox->SetDuration(InDuration);
-	OnRefreshProgressLabel(mPlayer->position(),InDuration);
+void QMediaPlayerEditor::onDurationChanged(qint64 InDuration) {
+	mProgressBox->setDuration(InDuration);
+	onRefreshProgressLabel(mPlayer->position(),InDuration);
 }
 
-void QMediaPlayerEditor::OnProgressChanged(qint64 InProgress) {
-	mProgressBox->UpdateProgress(InProgress);
-	OnRefreshProgressLabel(InProgress,mPlayer->duration());
+void QMediaPlayerEditor::onProgressChanged(qint64 InProgress) {
+	mProgressBox->updateProgress(InProgress);
+	onRefreshProgressLabel(InProgress,mPlayer->duration());
 }
 
-void QMediaPlayerEditor::OnRefreshProgressLabel(qint64 InProgress, qint64 InDuration) {
-	mProgressLable->SetText(QString("%1 / %2")
+void QMediaPlayerEditor::onRefreshProgressLabel(qint64 InProgress, qint64 InDuration) {
+	mProgressLable->setDisplayText(QString("%1 / %2")
 		.arg(ConvertMsToString(InProgress))
 		.arg(ConvertMsToString(InDuration)));
 }
 
-void QMediaPlayerEditor::OnPlaybackStateChanged(QMediaPlayer::PlaybackState InState) {
+void QMediaPlayerEditor::onPlaybackStateChanged(QMediaPlayer::PlaybackState InState) {
 	if (InState == QMediaPlayer::PlaybackState::PlayingState) {
 		mBtPlay->setIconPath(":/Resources/pause.png");
 	}

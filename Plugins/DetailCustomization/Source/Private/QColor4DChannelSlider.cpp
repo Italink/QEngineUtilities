@@ -4,7 +4,7 @@
 #include "QValidator"
 #include "qevent.h"
 
-void QColor4DChannelValueBox::CreateUI() {
+void QColor4DChannelValueBox::createUI() {
 	setAttribute(Qt::WA_StyledBackground);
 	setFixedHeight(20);
 	setStyleSheet("QLineEdit{background-color:transparent; font-size:11px;}");
@@ -24,23 +24,23 @@ void QColor4DChannelValueBox::CreateUI() {
 	mLeValue->setAlignment(Qt::AlignLeft);
 	mLeValue->setMinimumWidth(50);
 	mLeValue->setText(QString::number(mValue));
-	SetEditEnabled(false);
+	setEditEnabled(false);
 }
 
-void QColor4DChannelValueBox::ConnectUI() {
+void QColor4DChannelValueBox::connectUI() {
 	connect(mLeValue, &QLineEdit_HasFocusSignal::loseFocus, this, [this]() {
-		SetEditEnabled(false);
+		setEditEnabled(false);
 	});
 	connect(mLeValue, &QLineEdit::editingFinished, this, [this]() {
 		float currValue = mLeValue->text().toFloat();
 		if (currValue != mValue) {
 			mValue = qMax(0.0f, currValue);
-			Q_EMIT AsValueChanged(mValue);
+			Q_EMIT asValueChanged(mValue);
 		}
 	});
 }
 
-void QColor4DChannelValueBox::SetEditEnabled(bool enable) {
+void QColor4DChannelValueBox::setEditEnabled(bool enable) {
 	if (enable) {
 		mLeValue->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 		mLeValue->setAttribute(Qt::WA_TransparentForMouseEvents, false);
@@ -58,19 +58,19 @@ void QColor4DChannelValueBox::SetEditEnabled(bool enable) {
 	}
 }
 
-bool QColor4DChannelValueBox::GetEditEnabled() {
+bool QColor4DChannelValueBox::getEditEnabled() {
 	return mLeValue->focusPolicy() == Qt::FocusPolicy::StrongFocus;
 }
 
-QString QColor4DChannelValueBox::GetText() {
+QString QColor4DChannelValueBox::getDisplayText() {
 	return mLeValue->text();
 }
 
-float QColor4DChannelValueBox::GetVar() {
+float QColor4DChannelValueBox::getVar() {
 	return mValue;
 }
 
-void QColor4DChannelValueBox::SetVar(float var) {
+void QColor4DChannelValueBox::setVar(float var) {
 	mValue = var;
 	mLeValue->setText(QString::number(mValue));
 }
@@ -78,8 +78,8 @@ void QColor4DChannelValueBox::SetVar(float var) {
 void QColor4DChannelValueBox::mousePressEvent(QMouseEvent* event) {
 	if (event->buttons() & Qt::LeftButton) {
 		mClickPosition = event->pos();
-		if (GetEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
-			SetEditEnabled(false);
+		if (getEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
+			setEditEnabled(false);
 		}
 	}
 }
@@ -90,21 +90,21 @@ void QColor4DChannelValueBox::mouseReleaseEvent(QMouseEvent* event) {
 			setCursor(Qt::CursorShape::SizeHorCursor);
 			mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 		}
-		else if (mClickPosition == event->pos() && !GetEditEnabled() && this->cursor() != Qt::BlankCursor) {
-			SetEditEnabled(true);
+		else if (mClickPosition == event->pos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
+			setEditEnabled(true);
 		}
 	}
 }
 
 void QColor4DChannelValueBox::mouseMoveEvent(QMouseEvent* event) {
-	if (!GetEditEnabled() && event->buttons() & Qt::LeftButton) {
+	if (!getEditEnabled() && event->buttons() & Qt::LeftButton) {
 		setCursor(Qt::BlankCursor);
 		mLbArrow->setCursor(Qt::CursorShape::BlankCursor);
 		QPointF offset = event->position() - mClickPosition;
 		float newValue = mValue + offset.x() * 0.001f;
 		if (newValue != mValue) {
 			mValue = qMax(0.0f, newValue);
-			Q_EMIT AsValueChanged(mValue);
+			Q_EMIT asValueChanged(mValue);
 		}
 		mLeValue->setText(QString::number(mValue));
 		QCursor::setPos(mapToGlobal(mClickPosition.toPoint()));
@@ -142,8 +142,8 @@ QColor4DChannelSlider::QColor4DChannelSlider(QString inName, float inDefault)
 	v->addWidget(&mValueBox);
 	v->addSpacing(5);
 
-	connect(&mValueBox, &QColor4DChannelValueBox::AsValueChanged, this, [this](float var) {
-		Q_EMIT AsValueChanged(var);
+	connect(&mValueBox, &QColor4DChannelValueBox::asValueChanged, this, [this](float var) {
+		Q_EMIT asValueChanged(var);
 	});
 }
 
@@ -155,7 +155,7 @@ void QColor4DChannelSlider::SetGradientStops(const QGradientStops& inStops)
 
 void QColor4DChannelSlider::SetChannelValue(float inValue)
 {
-	mValueBox.SetVar(inValue);
+	mValueBox.setVar(inValue);
 }
 
 void QColor4DChannelSlider::paintEvent(QPaintEvent* event)

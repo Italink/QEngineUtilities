@@ -1,5 +1,4 @@
 #include "Render/Component/QStaticMeshRenderComponent.h"
-#include "Utils/DebugUtils.h"
 #include "Utils/MathUtils.h"
 
 QStaticMeshRenderComponent::QStaticMeshRenderComponent() {

@@ -8,15 +8,15 @@
 
 class QENGINEEDITOR_API IHeaderRowBuilder{
 public:
-	virtual void AsNameValueWidget(QWidget* InName, QWidget* InValue) = 0;
-	virtual void AsWholeContent(QWidget* InContent) = 0;
+	virtual void setNameValueWidget(QWidget* InName, QWidget* InValue) = 0;
+	virtual void setWholeContent(QWidget* InContent) = 0;
 };
 
 class IPropertyTypeCustomization :public  QEnableSharedFromThis<IPropertyTypeCustomization>
 {
 public:
-	virtual void CustomizeHeader(QPropertyHandle* PropertyHandle , IHeaderRowBuilder* Builder) = 0;
+	virtual void customizeHeader(QPropertyHandle* PropertyHandle , IHeaderRowBuilder* Builder) = 0;
 
-	virtual void CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {}
+	virtual void customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {}
 };
 #endif // IPROPERTYTYPECUSTOMIZATION_H

@@ -2,56 +2,56 @@
 #include "QMatrix4x4"
 #include "Utils/MathUtils.h"
 
-void PropertyTypeCustomization_QMatrix4x4::CustomizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) {
-	Builder->AsNameValueWidget(PropertyHandle->GenerateNameWidget(), PropertyHandle->GenerateValueWidget());
+void PropertyTypeCustomization_QMatrix4x4::customizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) {
+	Builder->setNameValueWidget(PropertyHandle->generateNameWidget(), PropertyHandle->generateValueWidget());
 }
 
-void PropertyTypeCustomization_QMatrix4x4::CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {
+void PropertyTypeCustomization_QMatrix4x4::customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {
 	QPropertyHandle* position = QPropertyHandle::FindOrCreate(
 		PropertyHandle->parent(),
 		QMetaType::fromType<QVector3D>(),
-		PropertyHandle->GetSubPath("Position"),
+		PropertyHandle->getSubPath("Position"),
 		[PropertyHandle]() {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			return MathUtils::getMatTranslate(Mat);
 		},
 		[PropertyHandle](QVariant var) {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			MathUtils::setMatTranslate(Mat, var.value<QVector3D>());
-			PropertyHandle->SetValue(Mat);
+			PropertyHandle->setValue(Mat);
 		}
 	);
-	Builder->AddProperty(position);
+	Builder->addProperty(position);
 
 	QPropertyHandle* rotation = QPropertyHandle::FindOrCreate(
 		PropertyHandle->parent(),
 		QMetaType::fromType<QVector3D>(),
-		PropertyHandle->GetSubPath("Rotation"),
+		PropertyHandle->getSubPath("Rotation"),
 		[PropertyHandle]() {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			return MathUtils::getMatRotation(Mat);
 		},
 		[PropertyHandle](QVariant var) {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			MathUtils::setMatRotation(Mat, var.value<QVector3D>());
-			PropertyHandle->SetValue(Mat);
+			PropertyHandle->setValue(Mat);
 		}
 		);
-	Builder->AddProperty(rotation);
+	Builder->addProperty(rotation);
 
 	QPropertyHandle* scale = QPropertyHandle::FindOrCreate(
 		PropertyHandle->parent(),
 		QMetaType::fromType<QVector3D>(),
-		PropertyHandle->GetSubPath("Scale"),
+		PropertyHandle->getSubPath("Scale"),
 		[PropertyHandle]() {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			return MathUtils::getMatScale3D(Mat);
 		},
 		[PropertyHandle](QVariant var) {
-			QMatrix4x4 Mat = PropertyHandle->GetValue().value<QMatrix4x4>();
+			QMatrix4x4 Mat = PropertyHandle->getValue().value<QMatrix4x4>();
 			MathUtils::setMatScale3D(Mat, var.value<QVector3D>());
-			PropertyHandle->SetValue(Mat);
+			PropertyHandle->setValue(Mat);
 		}
 		);
-	Builder->AddProperty(scale);
+	Builder->addProperty(scale);
 }

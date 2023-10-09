@@ -26,39 +26,39 @@ QHoverLineEdit::QHoverLineEdit(QString inText)
 
 {
 	mLineEdit->setText(inText);
-	connect(mLineEdit, &QLineEdit::textChanged, this, &QHoverLineEdit::AsTextChanged);
+	connect(mLineEdit, &QLineEdit::textChanged, this, &QHoverLineEdit::asTextChanged);
 	connect(mLineEdit, &QLineEdit::editingFinished, this, &QHoverLineEdit::AsEditingFinished);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->addWidget(mLineEdit);
 	h->setContentsMargins(2, 2, 2, 2);
 }
 
-void QHoverLineEdit::SetText(QString inText)
+void QHoverLineEdit::setDisplayText(QString inText)
 {
 	mLineEdit->setText(inText);
 }
 
-QString QHoverLineEdit::GetText() const
+QString QHoverLineEdit::getDisplayText() const
 {
 	return mLineEdit->text();
 }
 
-QColor QHoverLineEdit::GetPlaceholdColor() const
+QColor QHoverLineEdit::getPlaceholdColor() const
 {
 	return mLineEdit->GetPlaceholderColor();
 }
 
-void QHoverLineEdit::SetPlaceholdColor(QColor val)
+void QHoverLineEdit::setPlaceholdColor(QColor val)
 {
 	mLineEdit->SetPlaceholderColor(val);
 }
 
-QString QHoverLineEdit::GetPlaceholdText() const
+QString QHoverLineEdit::getPlaceholdText() const
 {
 	return mLineEdit->GetPlaceholderText();
 }
 
-void QHoverLineEdit::SetPlaceholdText(QString val)
+void QHoverLineEdit::setPlaceholdText(QString val)
 {
 	mLineEdit->SetPlaceholderText(val);
 }

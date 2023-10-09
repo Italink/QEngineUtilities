@@ -4,27 +4,27 @@
 #include "QBoxLayout"
 #include "Widgets/QElideLabel.h"
 
-QPropertyHandle* IPropertyHandleImpl::FindChildHandle(const QString& inSubName) {
-	return QPropertyHandle::Find(mHandle->parent(), mHandle->GetSubPath(inSubName));
+QPropertyHandle* IPropertyHandleImpl::findChildHandle(const QString& inSubName) {
+	return QPropertyHandle::Find(mHandle->parent(), mHandle->getSubPath(inSubName));
 }
 
-QPropertyHandle* IPropertyHandleImpl::CreateChildHandle(const QString& inSubName) {
+QPropertyHandle* IPropertyHandleImpl::createChildHandle(const QString& inSubName) {
 	return nullptr;
 }
 
-QWidget* IPropertyHandleImpl::GenerateNameWidget() {
-	return new QElideLabel(mHandle->GetName());
+QWidget* IPropertyHandleImpl::generateNameWidget() {
+	return new QElideLabel(mHandle->getName());
 }
 
-QWidget* IPropertyHandleImpl::GenerateValueWidget() {
+QWidget* IPropertyHandleImpl::generateValueWidget() {
 	QWidget* valueContent = new QWidget;
 	valueContent->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
 	QHBoxLayout* valueContentLayout = new QHBoxLayout(valueContent);
 	valueContentLayout->setAlignment(Qt::AlignLeft);
 	valueContentLayout->setContentsMargins(10, 2, 10, 2);
 	valueContentLayout->setSpacing(2);
-	valueContentLayout->addWidget(QDetailViewManager::Instance()->GetCustomPropertyValueWidget(mHandle));
-	mHandle->GenerateAttachButtonWidget(valueContentLayout);
+	valueContentLayout->addWidget(QDetailViewManager::Instance()->getCustomPropertyValueWidget(mHandle));
+	mHandle->generateAttachButtonWidget(valueContentLayout);
 	return valueContent;
 }
 

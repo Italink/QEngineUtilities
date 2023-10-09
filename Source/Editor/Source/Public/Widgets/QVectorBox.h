@@ -10,12 +10,12 @@ class QENGINEEDITOR_API QVector4DBox : public QWidget{
 	Q_OBJECT
 public:
 	QVector4DBox(QVector4D vec = QVector4D());
-	void SetValue(QVector4D vec);
-	QVector4D GetValue();
+	void setValue(QVector4D vec);
+	QVector4D getValue();
 Q_SIGNALS:
-	void AsValueChanged(QVector4D);
+	void asValueChanged(QVector4D);
 protected:
-	void EmitValueChanged(QVariant);
+	void emitValueChanged(QVariant);
 	virtual void paintEvent(QPaintEvent* event) override;
 private:
 	QNumberBox mX;
@@ -28,12 +28,12 @@ class QVector3DBox : public QWidget {
 	Q_OBJECT
 public:
 	QVector3DBox(QVector3D vec = QVector3D());
-	void SetValue(QVector3D vec);
-	QVector3D GetValue();
+	void setValue(QVector3D vec);
+	QVector3D getValue();
 Q_SIGNALS:
-	void AsValueChanged(QVector3D);
+	void asValueChanged(QVector3D);
 protected:
-	void EmitValueChanged(QVariant);
+	void emitValueChanged(QVariant);
 	virtual void paintEvent(QPaintEvent* event) override;
 private:
 	QNumberBox mX;
@@ -45,12 +45,12 @@ class QVector2DBox : public QWidget {
 	Q_OBJECT
 public:
 	QVector2DBox(QVector2D vec = QVector2D());
-	void SetValue(QVector2D vec);
-	QVector2D GetValue();
+	void setValue(QVector2D vec);
+	QVector2D getValue();
 Q_SIGNALS:
-	void AsValueChanged(QVector2D);
+	void asValueChanged(QVector2D);
 protected:
-	void EmitValueChanged(QVariant);
+	void emitValueChanged(QVariant);
 	virtual void paintEvent(QPaintEvent* event) override;
 private:
 	QNumberBox mX;

@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 	TestObject obj;
 	QDetailView widget;
 	widget.setMinimumSize(200, 200);
-	widget.SetObject(&obj);
+	widget.setObject(&obj);
 	widget.show();
 	return app.exec();
 }

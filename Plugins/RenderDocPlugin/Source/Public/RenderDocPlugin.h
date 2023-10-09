@@ -9,7 +9,7 @@ protected:
 	void startup() override;
 	void shutdown() override;
 private:
-	QLibrary renderdoc{ "renderdoc.dll" };
+	QLibrary renderdoc{ "C:/Program Files/RenderDoc/renderdoc.dll" };
 };
 
 #endif // RenderDocPlugin_h__

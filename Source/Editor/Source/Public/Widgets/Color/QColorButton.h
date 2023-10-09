@@ -8,10 +8,10 @@ class QENGINEEDITOR_API QColorButton :public QHoverWidget {
 	Q_OBJECT
 public:
 	QColorButton(QColor color = Qt::red);
-	void SetColor(QColor color);
+	void setColor(QColor color);
 	QColor GetColor() const;
 Q_SIGNALS:
-	void AsColorChanged(QColor color);
+	void asColorChanged(QColor color);
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 	virtual void mousePressEvent(QMouseEvent* event) override;

@@ -18,25 +18,25 @@
 void DetailCustomizationPlugin::startup() {
 	qDebug() << "DetailCustomizationPlugin::startup";
 	QDetailViewManager* mgr = QDetailViewManager::Instance();
-	mgr->RegisterCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
-	mgr->RegisterCustomClassLayout<DetailCustomization_QRhiMaterialGroup>(&QRhiMaterialGroup::staticMetaObject);
-	//mgr->RegisterCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
-	mgr->RegisterCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
+	mgr->registerCustomClassLayout<DetailCustomization_QRhiUniformBlock>(&QRhiUniformBlock::staticMetaObject);
+	mgr->registerCustomClassLayout<DetailCustomization_QRhiMaterialGroup>(&QRhiMaterialGroup::staticMetaObject);
+	//mgr->registerCustomClassLayout<DetailCustomization_QGlslSandboxRenderPass>(&QGlslSandboxRenderPass::staticMetaObject);
+	mgr->registerCustomClassLayout<DetailCustomization_QMediaPlayer>(&QMediaPlayer::staticMetaObject);
 
-	mgr->RegisterCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
-	mgr->RegisterCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
-	mgr->RegisterCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
+	mgr->registerCustomPropertyTypeLayout<QRhiTextureDesc*, PropertyTypeCustomization_TextureInfo>();
+	mgr->registerCustomPropertyTypeLayout<QSharedPointer<QStaticMesh>, PropertyTypeCustomization_QStaticMesh>();
+	mgr->registerCustomPropertyTypeLayout<QMatrix4x4, PropertyTypeCustomization_QMatrix4x4>();
 
-	mgr->RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor4D>(), [](QPropertyHandle* InHandler) {
+	mgr->registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor4D>(), [](QPropertyHandle* InHandler) {
 		QColor4DButton* colorButton = new QColor4DButton();
-		InHandler->Bind(
+		InHandler->bind(
 			colorButton, 
-			&QColor4DButton::AsColorChanged,
+			&QColor4DButton::asColorChanged,
 			[colorButton]() {
 				return QVariant::fromValue<QColor4D>(colorButton->GetColor());
 			},
 			[colorButton](QVariant var) {
-				colorButton->SetColor(var.value<QColor4D>());
+				colorButton->setColor(var.value<QColor4D>());
 			}
 		);
 		return colorButton;
@@ -50,15 +50,15 @@ void DetailCustomizationPlugin::startup() {
 void DetailCustomizationPlugin::shutdown() {
 	qDebug() << "DetailCustomizationPlugin::shutdown";
 	QDetailViewManager* mgr = QDetailViewManager::Instance();
-	mgr->UnregisterCustomClassLayout(&QRhiUniformBlock::staticMetaObject);
-	mgr->UnregisterCustomClassLayout(&QRhiMaterialGroup::staticMetaObject);
-	//mgr->UnregisterCustomClassLayout(&QGlslSandboxRenderPass::staticMetaObject);
-	mgr->UnregisterCustomClassLayout(&QMediaPlayer::staticMetaObject);
+	mgr->unregisterCustomClassLayout(&QRhiUniformBlock::staticMetaObject);
+	mgr->unregisterCustomClassLayout(&QRhiMaterialGroup::staticMetaObject);
+	//mgr->unregisterCustomClassLayout(&QGlslSandboxRenderPass::staticMetaObject);
+	mgr->unregisterCustomClassLayout(&QMediaPlayer::staticMetaObject);
 
-	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QRhiTextureDesc*>());
-	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QSharedPointer<QStaticMesh>>());
-	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QMatrix4x4>());
-	mgr->UnregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QColor4D>());
+	mgr->unregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QRhiTextureDesc*>());
+	mgr->unregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QSharedPointer<QStaticMesh>>());
+	mgr->unregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QMatrix4x4>());
+	mgr->unregisterCustomPropertyValueWidgeCreator(QMetaType::fromType<QColor4D>());
 }
 
 QENGINE_IMPLEMENT_PLUGIN(DetailCustomizationPlugin, DetailCustomization)

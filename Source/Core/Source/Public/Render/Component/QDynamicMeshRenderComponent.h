@@ -3,9 +3,8 @@
 
 #include "Render/ISceneRenderComponent.h"
 #include "Render/QPrimitiveRenderProxy.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QDynamicMeshRenderComponent :public ISceneRenderComponent {
+class QENGINECORE_API QDynamicMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)
 public:

@@ -5,18 +5,18 @@ QImageBox::QImageBox(QImage value /*= QImage()*/) {
 	mImage = value;
 }
 
-QImage QImageBox::GetImage() {
+QImage QImageBox::getImage() {
 	return mImage;
 }
 
-void QImageBox::SetImage(const QImage& inImage) {
+void QImageBox::setImage(const QImage& inImage) {
 	if (mImage != inImage) {
 		mImage = inImage;
-		Q_EMIT AsImageChanged(mImage);
+		Q_EMIT asImageChanged(mImage);
 	}
 }
 
-void QImageBox::OpenFileSelector() {
+void QImageBox::openFileSelector() {
 
 }
 

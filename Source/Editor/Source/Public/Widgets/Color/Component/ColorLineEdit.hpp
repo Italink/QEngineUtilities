@@ -43,7 +43,7 @@
 class QENGINEEDITOR_API ColorLineEdit : public QLineEdit
 {
 	Q_OBJECT
-		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged)
+		Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY OnColorChanged)
 		/**
 		 * \brief Whether the widget displays and edits the alpha channel
 		 */
@@ -62,7 +62,7 @@ public:
 	bool previewColor() const;
 
 public Q_SLOTS:
-	void SetColor(const QColor& color);
+	void setColor(const QColor& color);
 	void setShowAlpha(bool showAlpha);
 	void setPreviewColor(bool previewColor);
 

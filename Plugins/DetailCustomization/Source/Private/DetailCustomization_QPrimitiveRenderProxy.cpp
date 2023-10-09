@@ -4,12 +4,12 @@
 #include "DetailView/QDetailViewManager.h"
 #include "Render/QPrimitiveRenderProxy.h"
 
-void DetailCustomization_QPrimitiveRenderProxy::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
+void DetailCustomization_QPrimitiveRenderProxy::customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QPrimitiveRenderProxy* pipeline = (QPrimitiveRenderProxy*) Context.ObjectPtr;
 	QPropertyHandle* uniformblocksHandle = QPropertyHandle::FindOrCreate(pipeline, "UniformBlocks");
 	for (auto uniformblock : pipeline->getUniformBlocks().keys()) {
 		if(uniformblock != "Transform")
-			Builder->AddProperty(uniformblocksHandle->CreateChildHandle(uniformblock));
+			Builder->addProperty(uniformblocksHandle->createChildHandle(uniformblock));
 	}
 	for (auto texture : pipeline->getTextures().asKeyValueRange()) {
 		QString path = "Textures." + texture.first;
@@ -24,6 +24,6 @@ void DetailCustomization_QPrimitiveRenderProxy::CustomizeDetails(const IDetailLa
 				textureInfo->ImageCache = var.value<QImage>();
 			}
 		);
-		Builder->AddProperty(handler);
+		Builder->addProperty(handler);
 	}
 }

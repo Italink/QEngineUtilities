@@ -7,30 +7,30 @@
 
 QSequentialPropertyHandleImpl::QSequentialPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
-	QVariant varList = mHandle->GetValue();
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
 	mMetaSequence = iterable.metaContainer();
 }
 
 
-void QSequentialPropertyHandleImpl::GenerateChildrenRow(QRowLayoutBuilder* Builder) {
-	QVariant varList = mHandle->GetValue();
+void QSequentialPropertyHandleImpl::generateChildrenRow(QRowLayoutBuilder* Builder) {
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
-	for(int index = 0 ; index < ItemCount() ; index++){
-		QString path = mHandle->GetSubPath(QString::number(index));
+	for(int index = 0 ; index < itemCount() ; index++){
+		QString path = mHandle->getSubPath(QString::number(index));
 		QPropertyHandle* handle = QPropertyHandle::FindOrCreate(mHandle->parent(), path);
 		if(handle){
-			Builder->AddProperty(handle);
+			Builder->addProperty(handle);
 		}
 	}
 }
 
-QWidget* QSequentialPropertyHandleImpl::GenerateValueWidget() {
+QWidget* QSequentialPropertyHandleImpl::generateValueWidget() {
 	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
 	btAppend->setFixedSize(20, 20);
 	QObject::connect(btAppend, &QPushButton::clicked, [this](){
-		QVariant var = QPropertyHandle::CreateNewVariant(mMetaSequence.valueMetaType());
-		this->AppendItem(var);
+		QVariant var = QPropertyHandle::createNewVariant(mMetaSequence.valueMetaType());
+		this->appendItem(var);
 	});
 	QWidget* valueContent = new QWidget;
 	valueContent->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
@@ -39,39 +39,39 @@ QWidget* QSequentialPropertyHandleImpl::GenerateValueWidget() {
 	valueContentLayout->setContentsMargins(10, 2, 10, 2);
 	valueContentLayout->setSpacing(2);
 	valueContentLayout->addWidget(btAppend);
-	mHandle->GenerateAttachButtonWidget(valueContentLayout);
+	mHandle->generateAttachButtonWidget(valueContentLayout);
 	return valueContent;
 }
 
-QPropertyHandle* QSequentialPropertyHandleImpl::CreateChildHandle(const QString& inSubName) {
+QPropertyHandle* QSequentialPropertyHandleImpl::createChildHandle(const QString& inSubName) {
 	int index = inSubName.toInt();
 	QPropertyHandle* handle = new QPropertyHandle(
 		mHandle->parent(),
 		mMetaSequence.valueMetaType(),
-		mHandle->GetSubPath(inSubName),
+		mHandle->getSubPath(inSubName),
 		[this, index]() {
-			QVariant varList = mHandle->GetValue();
+			QVariant varList = mHandle->getValue();
 			QSequentialIterable iterable = varList.value<QSequentialIterable>();
 			return iterable.at(index);
 		},
 		[this, index](QVariant var) {
-			QVariant varList = mHandle->GetValue();
+			QVariant varList = mHandle->getValue();
 			QSequentialIterable iterable = varList.value<QSequentialIterable>();
 			const QMetaSequence metaSequence = iterable.metaContainer();
 			void* containterPtr = const_cast<void*>(iterable.constIterable());
 			QtPrivate::QVariantTypeCoercer coercer;
 			const void* dataPtr = coercer.coerce(var, var.metaType());
 			metaSequence.setValueAtIndex(containterPtr, index, dataPtr);
-			mHandle->SetValue(varList);
+			mHandle->setValue(varList);
 		}
 	);
-	handle->SetAttachButtonWidgetCallback([this,index](QHBoxLayout* Layout) {
-		int count = ItemCount();
+	handle->setAttachButtonWidgetCallback([this,index](QHBoxLayout* Layout) {
+		int count = itemCount();
 		if (index != 0) {
 			QSvgButton* moveUp = new QSvgButton(":/Resources/up.png");
 			moveUp->setFixedSize(20, 20);
 			QObject::connect(moveUp, &QSvgButton::clicked,  [index, this]() {
-				MoveItem(index, index - 1);
+				moveItem(index, index - 1);
 			});
 			Layout->addWidget(moveUp);
 		}
@@ -82,7 +82,7 @@ QPropertyHandle* QSequentialPropertyHandleImpl::CreateChildHandle(const QString&
 			QSvgButton* moveDown = new QSvgButton(":/Resources/down.png");
 			moveDown->setFixedSize(20, 20);
 			QObject::connect(moveDown, &QSvgButton::clicked, [index, this]() {
-				MoveItem(index, index + 1);
+				moveItem(index, index + 1);
 			});
 			Layout->addWidget(moveDown);
 		}
@@ -92,33 +92,33 @@ QPropertyHandle* QSequentialPropertyHandleImpl::CreateChildHandle(const QString&
 		QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
 		deleteButton->setFixedSize(20, 20);
 		QObject::connect(deleteButton, &QSvgButton::clicked, [index, this]() {
-			RemoveItem(index);
+			removeItem(index);
 		});
 		Layout->addWidget(deleteButton);
 	});
 	return handle;
 }
 
-int QSequentialPropertyHandleImpl::ItemCount() {
-	QVariant varList = mHandle->GetValue();
+int QSequentialPropertyHandleImpl::itemCount() {
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
 	return iterable.size();
 }
 
-void QSequentialPropertyHandleImpl::AppendItem( QVariant InVar) {
-	QVariant varList = mHandle->GetValue();
+void QSequentialPropertyHandleImpl::appendItem( QVariant InVar) {
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
 	const void* dataPtr = coercer.coerce(InVar, InVar.metaType());
 	metaSequence.addValue(containterPtr, dataPtr);
-	mHandle->SetValue(varList, QString("%1 Append: %2").arg(mHandle->GetPath()).arg(metaSequence.size(containterPtr) - 1));
-	Q_EMIT mHandle->AsRequestRebuildRow();
+	mHandle->setValue(varList, QString("%1 Append: %2").arg(mHandle->getPath()).arg(metaSequence.size(containterPtr) - 1));
+	Q_EMIT mHandle->asRequestRebuildRow();
 }
 
-void QSequentialPropertyHandleImpl::MoveItem(int InSrcIndex, int InDstIndex) {
-	QVariant varList = mHandle->GetValue();
+void QSequentialPropertyHandleImpl::moveItem(int InSrcIndex, int InDstIndex) {
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
@@ -127,12 +127,12 @@ void QSequentialPropertyHandleImpl::MoveItem(int InSrcIndex, int InDstIndex) {
 	QVariant dstVar = iterable.at(InDstIndex);
 	metaSequence.setValueAtIndex(containterPtr, InDstIndex, coercer.coerce(srcVar, srcVar.metaType()));
 	metaSequence.setValueAtIndex(containterPtr, InSrcIndex, coercer.coerce(dstVar, dstVar.metaType()));
-	mHandle->SetValue(varList, QString("%1 Move: %2->%3").arg(mHandle->GetPath()).arg(InSrcIndex).arg(InDstIndex));
-	Q_EMIT mHandle->AsRequestRebuildRow();
+	mHandle->setValue(varList, QString("%1 Move: %2->%3").arg(mHandle->getPath()).arg(InSrcIndex).arg(InDstIndex));
+	Q_EMIT mHandle->asRequestRebuildRow();
 }
 
-void QSequentialPropertyHandleImpl::RemoveItem(int InIndex) {
-	QVariant varList = mHandle->GetValue();
+void QSequentialPropertyHandleImpl::removeItem(int InIndex) {
+	QVariant varList = mHandle->getValue();
 	QSequentialIterable iterable = varList.value<QSequentialIterable>();
 	const QMetaSequence metaSequence = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
@@ -142,6 +142,6 @@ void QSequentialPropertyHandleImpl::RemoveItem(int InIndex) {
 		metaSequence.setValueAtIndex(containterPtr, InIndex, coercer.coerce(nextVar, nextVar.metaType()));
 	}
 	metaSequence.removeValueAtEnd(containterPtr);
-	mHandle->SetValue(varList, QString("%1 Remove: %2").arg(mHandle->GetPath()).arg(InIndex));
-	Q_EMIT mHandle->AsRequestRebuildRow();
+	mHandle->setValue(varList, QString("%1 Remove: %2").arg(mHandle->getPath()).arg(InIndex));
+	Q_EMIT mHandle->asRequestRebuildRow();
 }
