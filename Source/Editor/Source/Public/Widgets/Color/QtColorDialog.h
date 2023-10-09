@@ -15,16 +15,16 @@ class QENGINEEDITOR_API QtColorDialog :public QDialog {
 public:
 	QtColorDialog();
 	~QtColorDialog();
-	void SetColor(QColor color);
+	void setColor(QColor color);
 	static int CreateAndShow(QColor color,QRect inButtonGemotry);
-	void SetCloseWhenLoseFocus(bool val) { bCloseWhenLoseFocus = val; }
+	void setCloseWhenLoseFocus(bool val) { bCloseWhenLoseFocus = val; }
 private:
-	void CreateUI();
-	void ConnectUI();
-	void SetCurrentColorInternal(QColor color);
-	void RefleshChannelGradiant();
+	void createUI();
+	void connectUI();
+	void setCurrentColorInternal(QColor color);
+	void refleshChannelGradiant();
 Q_SIGNALS:
-	void AsColorChanged(QColor);
+	void asColorChanged(QColor);
 private:
 	ColorWheel* mColorWheel;
 	ColorPreview* mColorPreview;

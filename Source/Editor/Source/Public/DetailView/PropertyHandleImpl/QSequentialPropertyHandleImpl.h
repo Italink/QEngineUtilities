@@ -10,14 +10,15 @@ class QSequentialPropertyHandleImpl: public IPropertyHandleImpl
 public:
 	QSequentialPropertyHandleImpl(QPropertyHandle* InHandle);
 
-	int ItemCount();
-	void AppendItem(QVariant InVar);
-	void MoveItem(int InSrcIndex, int InDstIndex);
-	void RemoveItem(int InIndex);
+	int itemCount();
+	void appendItem(QVariant InVar);
+	void moveItem(int InSrcIndex, int InDstIndex);
+	void removeItem(int InIndex);
+
 protected:
-	void GenerateChildrenRow(QRowLayoutBuilder* Builder)  override;
-	QWidget* GenerateValueWidget() override;
-	QPropertyHandle* CreateChildHandle(const QString& inSubName) override;
+	void generateChildrenRow(QRowLayoutBuilder* Builder)  override;
+	QWidget* generateValueWidget() override;
+	QPropertyHandle* createChildHandle(const QString& inSubName) override;
 private:
 	QMetaSequence mMetaSequence;
 };

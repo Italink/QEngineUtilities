@@ -22,24 +22,24 @@ public:
 		QString PrePath;
 	};
 
-	void SetPage(QWidget* InPage);
-	IDetailLayoutBuilder* AddRowByWholeContent(QWidget* InContent);
-	IDetailLayoutBuilder* AddRowByNameValueWidget(QWidget* InName, QWidget* InValue);
-	IDetailLayoutBuilder* AddRowByNameValueWidget(const QString& inName, QWidget* InValue);
+	void setPage(QWidget* InPage);
+	IDetailLayoutBuilder* addRowByWholeContent(QWidget* InContent);
+	IDetailLayoutBuilder* addRowByNameValueWidget(QWidget* InName, QWidget* InValue);
+	IDetailLayoutBuilder* addRowByNameValueWidget(const QString& inName, QWidget* InValue);
 
-	void AddProperty(QPropertyHandle* InPropertyHandle);
-	void AddObject(QObject* InObject, QString InPrePath = QString());
-	void AddObject(IDetailLayoutBuilder::ObjectContext Context);
+	void addProperty(QPropertyHandle* InPropertyHandle);
+	void addObject(QObject* InObject, QString InPrePath = QString());
+	void addObject(IDetailLayoutBuilder::ObjectContext Context);
 
-	bool ShowChildren() const;
-	bool IsIgnoreMetaObject(const QMetaObject* inMetaObj);
+	bool isChildrenVisible() const;
+	bool isIgnoredType(const QMetaObject* inMetaObj);
 
-	IDetailLayoutBuilder* FindOrAddCategory(const QString& InName);
+	IDetailLayoutBuilder* findOrAddCategory(const QString& InName);
 
-	virtual QDetailViewRow* Row() { return nullptr; }
+	virtual QDetailViewRow* row() { return nullptr; }
 protected:
 	IDetailLayoutBuilder(QDetailView* InDetailView);
-	virtual QDetailViewRow* NewChildRow() = 0;
+	virtual QDetailViewRow* newChildRow() = 0;
 protected:
 	QDetailView* mDetailView = nullptr;
 	QList<QSharedPointer<IDetailLayoutBuilder>> mChildren;

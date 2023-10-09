@@ -7,7 +7,7 @@ class QPrimitiveRenderProxy;
 
 class DetailCustomization_QPrimitiveRenderProxy : public IDetailCustomization {
 protected:
-	void CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
+	void customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
 };
 
 #endif // DetailCustomization_QPrimitiveRenderProxy_h__

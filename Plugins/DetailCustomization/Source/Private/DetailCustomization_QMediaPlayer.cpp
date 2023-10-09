@@ -4,9 +4,9 @@
 #include "Widgets/QMediaPlayerEditor.h"
 
 
-void DetailCustomization_QMediaPlayer::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
+void DetailCustomization_QMediaPlayer::customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QMediaPlayer* player = (QMediaPlayer*)Context.ObjectPtr;
 	QMediaPlayerEditor* editor = new QMediaPlayerEditor;
-	editor->SetupPlayer(player);
-	Builder->AddRowByWholeContent(editor);
+	editor->setupPlayer(player);
+	Builder->addRowByWholeContent(editor);
 }

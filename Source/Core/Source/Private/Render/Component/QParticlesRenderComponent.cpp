@@ -1,7 +1,6 @@
 #include "Render/Component/QParticlesRenderComponent.h"
 #include "QVulkanInstance"
 #include "qvulkanfunctions.h"
-#include "Utils/DebugUtils.h"
 
 static float ParticleShape[] = {
 	 0.01f,   0.01f,

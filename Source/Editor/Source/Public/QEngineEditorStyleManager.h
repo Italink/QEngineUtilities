@@ -27,35 +27,35 @@ private:
 public:
 	static QEngineEditorStyleManager* Instance();
 
-	void SetStyle(QDetailWidgetStyle inStyle);
-	QByteArray GetStylesheet();
+	void setStyle(QDetailWidgetStyle inStyle);
+	QByteArray getStylesheet();
 
-	QColor GetGridLineColor() const;
-	void SetGridLineColor(QColor val);
+	QColor getGridLineColor() const;
+	void setGridLineColor(QColor val);
 
-	QColor GetShadowColor() const;
-	void SetShadowColor(QColor val);
+	QColor getShadowColor() const;
+	void setShadowColor(QColor val);
 
-	QColor GetCategoryColor() const;
-	void SetCategoryColor(QColor val);
+	QColor getCategoryColor() const;
+	void setCategoryColor(QColor val);
 
-	QColor GetHoveredColor() const;
-	void SetHoveredColor(QColor val);
+	QColor getHoveredColor() const;
+	void setHoveredColor(QColor val);
 
-	QColor GetIconColor() const;
-	void SetIconColor(QColor val);
+	QColor getIconColor() const;
+	void setIconColor(QColor val);
 
-	QColor GetArrowColor() const { return mArrowColor; }
-	void SetArrowColor(QColor val) { mArrowColor = val; }
+	QColor getArrowColor() const { return mArrowColor; }
+	void setArrowColor(QColor val) { mArrowColor = val; }
 
-	QColor GetSelectedColor() const { return mSelectedColor; }
-	void SetSelectedColor(QColor val) { mSelectedColor = val; }
+	QColor getSelectedColor() const { return mSelectedColor; }
+	void setSelectedColor(QColor val) { mSelectedColor = val; }
 
-	QString GetFontFilePath() const { return mFontFilePath; }
-	void SetFontFilePath(QString val) { mFontFilePath = val; }
+	QString getFontFilePath() const { return mFontFilePath; }
+	void setFontFilePath(QString val) { mFontFilePath = val; }
 
-	QFont GetFont() const { return mFont; }
-	void SetFont(QFont val) { mFont = val; }
+	QFont getFont() const { return mFont; }
+	void setFont(QFont val) { mFont = val; }
 };
 
 #endif // QDetailWidgetStyleManager_h__

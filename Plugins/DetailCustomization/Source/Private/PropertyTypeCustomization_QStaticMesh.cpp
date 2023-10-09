@@ -7,7 +7,7 @@
 
 QSharedPointer<IStaticMeshCreator> PropertyTypeCustomization_QStaticMesh::mCreator;
 
-void PropertyTypeCustomization_QStaticMesh::CustomizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) {
+void PropertyTypeCustomization_QStaticMesh::customizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) {
 	CurrComboBox = new QComboBox();
 	static QMap<QString, const QMetaObject*> CreatorMap = {
 		{"None",nullptr},
@@ -28,7 +28,7 @@ void PropertyTypeCustomization_QStaticMesh::CustomizeHeader(QPropertyHandle* Pro
 			}
 		}
 		QObject::connect(mCreator.get(), &IStaticMeshCreator::AsCreateMesh, [PropertyHandle](QSharedPointer<QStaticMesh> mesh) {
-			PropertyHandle->SetValue(QVariant::fromValue<>(mesh), "Create Static Mesh");
+			PropertyHandle->setValue(QVariant::fromValue<>(mesh), "Create Static Mesh");
 		});
 	}
 	else {
@@ -38,25 +38,25 @@ void PropertyTypeCustomization_QStaticMesh::CustomizeHeader(QPropertyHandle* Pro
 		const QMetaObject* metaObj = CreatorMap.value(text);
 		if (metaObj) {
 			mCreator.reset((IStaticMeshCreator*)metaObj->newInstance());
-			PropertyHandle->SetValue(QVariant::fromValue<>(mCreator->create()),"Create Static Mesh");
+			PropertyHandle->setValue(QVariant::fromValue<>(mCreator->create()),"Create Static Mesh");
 		}
 		else {
 			mCreator.reset();
 		}
-		Q_EMIT PropertyHandle->AsRequestRebuildRow();
+		Q_EMIT PropertyHandle->asRequestRebuildRow();
 	});
 
-	Builder->AsNameValueWidget(PropertyHandle->GenerateNameWidget(), CurrComboBox);
+	Builder->setNameValueWidget(PropertyHandle->generateNameWidget(), CurrComboBox);
 }
 
-void PropertyTypeCustomization_QStaticMesh::CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {
-	Builder->AddObject(mCreator.get());
+void PropertyTypeCustomization_QStaticMesh::customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {
+	Builder->addObject(mCreator.get());
 	//QFilePathBox* FilePathBox = new QFilePathBox;
-	//auto FilePathRow = Builder->AddRowByNameValueWidget("Path", FilePathBox)->Row();
+	//auto FilePathRow = Builder->addRowByNameValueWidget("Path", FilePathBox)->row();
 	//FilePathBox->setSizePolicy(QSizePolicy::Policy::Ignored, QSizePolicy::Expanding);
-	//FilePathRow->GetWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	//FilePathRow->getWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	//QObject::connect(CurrComboBox, &QComboBox::currentTextChanged, [FilePathRow](const QString& mode) {
-	//	FilePathRow->SetVisible(mode == "File");
+	//	FilePathRow->setVisible(mode == "File");
 	//});
 }
 

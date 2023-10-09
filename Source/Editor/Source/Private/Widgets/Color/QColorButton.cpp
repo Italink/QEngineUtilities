@@ -8,10 +8,10 @@ QColorButton::QColorButton(QColor color)
 {
 	setMinimumWidth(100);
 	setFixedHeight(20);
-	SetColor(color);
+	setColor(color);
 }
 
-void QColorButton::SetColor(QColor color)
+void QColorButton::setColor(QColor color)
 {
 	mColor = color;
 	update();
@@ -37,9 +37,9 @@ void QColorButton::mousePressEvent(QMouseEvent* event) {
 	QRect geom = rect();
 	geom.moveTopLeft(mapToGlobal(QPoint(0, 0)));
 	QtColorDialog::CreateAndShow(mColor, geom);
-	//QtColorDialog::Current->setStyleSheet(QDetailWidgetStyleManager::Instance()->GetStylesheet());
-	QObject::connect(QtColorDialog::Current, &QtColorDialog::AsColorChanged, this, [&](const QColor& color) {
-		SetColor(color);
-		Q_EMIT AsColorChanged(mColor);
+	//QtColorDialog::Current->setStyleSheet(QDetailWidgetStyleManager::Instance()->getStylesheet());
+	QObject::connect(QtColorDialog::Current, &QtColorDialog::asColorChanged, this, [&](const QColor& color) {
+		setColor(color);
+		Q_EMIT asColorChanged(mColor);
 	});
 }

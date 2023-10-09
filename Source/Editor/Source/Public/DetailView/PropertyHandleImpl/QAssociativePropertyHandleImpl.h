@@ -8,13 +8,13 @@ class QAssociativePropertyHandleImpl: public IPropertyHandleImpl {
 public:
 	QAssociativePropertyHandleImpl(QPropertyHandle* InHandle);
 
-	void AppendItem(QString inKey, QVariant inValue);
-	bool RenameItem(QString inSrc, QString inDst);
-	void RemoveItem(QString inKey);
+	void appendItem(QString inKey, QVariant inValue);
+	bool renameItem(QString inSrc, QString inDst);
+	void removeItem(QString inKey);
 protected:
-	void GenerateChildrenRow(QRowLayoutBuilder* Builder)  override;
-	QWidget* GenerateValueWidget() override;
-	QPropertyHandle* CreateChildHandle(const QString& inSubName) override;
+	void generateChildrenRow(QRowLayoutBuilder* Builder)  override;
+	QWidget* generateValueWidget() override;
+	QPropertyHandle* createChildHandle(const QString& inSubName) override;
 private:
 	QMetaAssociation mMetaAssociation;
 };

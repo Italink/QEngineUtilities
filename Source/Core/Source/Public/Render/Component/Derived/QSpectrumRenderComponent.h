@@ -4,9 +4,8 @@
 #include "Render/Component/QDynamicMeshRenderComponent.h"
 #include "QTimer"
 #include "Utils/QAudioProvider.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
+class QENGINECORE_API QSpectrumRenderComponent :public QDynamicMeshRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QString Audio READ getAudio WRITE setAudio)
 	Q_PROPERTY(QAudioProvider::WindowFunction WindowFunction READ getWindowFunction WRITE setWindowFunction)

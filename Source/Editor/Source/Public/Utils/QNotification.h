@@ -11,8 +11,8 @@ class QNotificationBlock;
 class QENGINEEDITOR_API QNotificationAnimation : public QAbstractAnimation {
 public:
 	QNotificationAnimation();
-	void AddNewBlock(QNotificationBlock* inBlock);
-	void Start();
+	void addNewBlock(QNotificationBlock* inBlock);
+	void start();
 protected:
 	virtual int duration() const override { return 200; }
 	virtual void updateCurrentTime(int currentTime) override;
@@ -33,8 +33,8 @@ public:
 private:
 	static void PushNewBlock(QNotificationBlock* inBlock);
 
-	void PushBlock(QNotificationBlock* inBlock);
-	void PopBlock(QNotificationBlock* inBlock);
+	void pushBlock(QNotificationBlock* inBlock);
+	void popBlock(QNotificationBlock* inBlock);
 	QNotification() {};
 	QList<QNotificationBlock*> mBlockList;
 	QNotificationAnimation mAnimation;
@@ -47,16 +47,16 @@ public:
 	QNotificationBlock();
 	using QWidget::QWidget;
 private:
-	virtual void Active() = 0;
+	virtual void active() = 0;
 protected:
-	void RequestObsolete();
+	void requestObsolete();
 };
 
 class QENGINEEDITOR_API QNotificationBlock_Message : public QNotificationBlock {
 public:
 	QNotificationBlock_Message(const QString& inTitle,const QString& inContent ,float inDuration);
 private:
-	virtual void Active() override;
+	virtual void active() override;
 	int mDuration = 0;
 };
 

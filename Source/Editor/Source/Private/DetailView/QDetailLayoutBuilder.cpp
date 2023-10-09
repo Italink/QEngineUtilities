@@ -3,10 +3,10 @@
 #include "DetailView/QDetailViewRow.h"
 
 
-QDetailViewRow* QDetailLayoutBuilder::NewChildRow() {
-	return mDetailView->AddTopLevelRow();
+QDetailViewRow* QDetailLayoutBuilder::newChildRow() {
+	return mDetailView->addTopLevelRow();
 }
 
-QDetailViewRow* QRowLayoutBuilder::NewChildRow() {
-	return mRow->AddChildRow();
+QDetailViewRow* QRowLayoutBuilder::newChildRow() {
+	return mRow->addChildRow();
 }

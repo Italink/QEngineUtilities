@@ -4,15 +4,15 @@
 #include "DetailView/QDetailViewManager.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
 
-void DetailCustomization_QRhiMaterialGroup::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
+void DetailCustomization_QRhiMaterialGroup::customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QRhiMaterialGroup* group = (QRhiMaterialGroup*) Context.ObjectPtr;
 	if (!group) {
 		return;
 	}
 	int index = 0;
 	for (auto materialDesc : group->getDescList()) {
-		auto rowBuilder = Builder->AddRowByNameValueWidget(QString::number(index++), nullptr);
-		rowBuilder->AddObject(materialDesc->uniformBlock.get());
+		auto rowBuilder = Builder->addRowByNameValueWidget(QString::number(index++), nullptr);
+		rowBuilder->addObject(materialDesc->uniformBlock.get());
 		for (auto textureDesc : materialDesc->textureDescs) {
 			QString path = "Textures." + textureDesc->Name;
 			QPropertyHandle* handler = QPropertyHandle::FindOrCreate(
@@ -26,7 +26,7 @@ void DetailCustomization_QRhiMaterialGroup::CustomizeDetails(const IDetailLayout
 					textureInfo->ImageCache = var.value<QImage>();
 				}
 			);
-			rowBuilder->AddProperty(handler);
+			rowBuilder->addProperty(handler);
 		}
 	}
 }

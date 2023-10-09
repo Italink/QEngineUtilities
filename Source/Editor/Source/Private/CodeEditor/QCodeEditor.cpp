@@ -72,7 +72,7 @@ void QCodeEditor::showEvent(QShowEvent* event)
 	mLexer->setColor(textColor.darker(10), 10);
 	mLexer->setColor(textColor, 11);
 	mLexer->setColor(textColor, 4);
-	mLexer->setColor(QEngineEditorStyleManager::Instance()->GetSelectedColor(), 5);
+	mLexer->setColor(QEngineEditorStyleManager::Instance()->getSelectedColor(), 5);
 }
 
 void QCodeEditor::resizeEvent(QResizeEvent* e)

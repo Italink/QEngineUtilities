@@ -11,20 +11,20 @@ QObjectTreeView::QObjectTreeView() {
 	connect(this, &QTreeWidget::itemSelectionChanged, this, [this]() {
 		auto items = selectedItems();
 		if (items.size() == 1) {
-			Q_EMIT AsObjecteSelected(mItemMap[items.first()]);
+			Q_EMIT asObjecteSelected(mItemMap[items.first()]);
 		}
 	});
-	QFont font = QEngineEditorStyleManager::Instance()->GetFont();
+	QFont font = QEngineEditorStyleManager::Instance()->getFont();
 	font.setPointSize(14);
 	setFont(font);
 }
 
-void QObjectTreeView::SetObjects(QObjectList InObjects) {
+void QObjectTreeView::setObjects(QObjectList InObjects) {
 	mTopLevelObjects = InObjects;
-	ForceRefresh();
+	forceRefresh();
 }
 
-void QObjectTreeView::SelectObjects(QObjectList InObjects) {
+void QObjectTreeView::selectObjects(QObjectList InObjects) {
 	this->blockSignals(true);
 	this->clearSelection();
 	for (auto object : InObjects) {
@@ -60,18 +60,18 @@ void QObjectTreeView::drawRow(QPainter* painter, const QStyleOptionViewItem& opt
 	hasChildren = item->childCount() > 0;
 	isExpanded = item->isExpanded();
 	painter->save();
-	painter->fillRect(options.rect.adjusted(level * indentation(), 0, 0, 0), QEngineEditorStyleManager::Instance()->GetCategoryColor());
-	QPen pen(QEngineEditorStyleManager::Instance()->GetGridLineColor());
+	painter->fillRect(options.rect.adjusted(level * indentation(), 0, 0, 0), QEngineEditorStyleManager::Instance()->getCategoryColor());
+	QPen pen(QEngineEditorStyleManager::Instance()->getGridLineColor());
 	pen.setWidth(1);
 	painter->setPen(pen);
 	if (hovered)
-		painter->setBrush(QEngineEditorStyleManager::Instance()->GetHoveredColor());
+		painter->setBrush(QEngineEditorStyleManager::Instance()->getHoveredColor());
 	if (seleted) {
-		painter->setBrush(QEngineEditorStyleManager::Instance()->GetSelectedColor());
+		painter->setBrush(QEngineEditorStyleManager::Instance()->getSelectedColor());
 	}
 	painter->drawRect(options.rect);
 	if (hasChildren) {
-		QColor arrowColor = QEngineEditorStyleManager::Instance()->GetArrowColor();
+		QColor arrowColor = QEngineEditorStyleManager::Instance()->getArrowColor();
 		if (hovered)
 			arrowColor = arrowColor.lighter();
 		QPolygonF arrow;
@@ -89,7 +89,7 @@ void QObjectTreeView::drawRow(QPainter* painter, const QStyleOptionViewItem& opt
 	}
 	QRect shadowRect(options.rect.x(), options.rect.y(), 6, options.rect.height());
 	QLinearGradient shadowColor;
-	QColor mShadowColor = QEngineEditorStyleManager::Instance()->GetShadowColor();
+	QColor mShadowColor = QEngineEditorStyleManager::Instance()->getShadowColor();
 	shadowColor.setColorAt(0, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue(), 0));
 	shadowColor.setColorAt(1, QColor(mShadowColor.red(), mShadowColor.green(), mShadowColor.blue()));
 
@@ -106,22 +106,22 @@ void QObjectTreeView::drawRow(QPainter* painter, const QStyleOptionViewItem& opt
 	itemDelegateForIndex(index)->paint(painter, opt, index);
 }
 
-void QObjectTreeView::AddItemInternal(QTreeWidgetItem* inParentItem, QObject* inParentInstance) {
+void QObjectTreeView::addItemInternal(QTreeWidgetItem* inParentItem, QObject* inParentInstance) {
 	if (inParentInstance->metaObject()->inherits(QObject::metaObject())) {
 		QObject* Object = inParentInstance;
 		for (auto& child : Object->children()) {
-			if (IsIgnoreObject(child)) {
+			if (isIgnoreObject(child)) {
 				continue;
 			}
-			QTreeWidgetItem* item = CreateItemForInstance(child);
+			QTreeWidgetItem* item = createItemForInstance(child);
 			mItemMap[item] = child;
 			inParentItem->addChild(item);
-			AddItemInternal(item, child);
+			addItemInternal(item, child);
 		}
 	}
 }
 
-QTreeWidgetItem* QObjectTreeView::CreateItemForInstance(QObject* InInstance) {
+QTreeWidgetItem* QObjectTreeView::createItemForInstance(QObject* InInstance) {
 	QString name = InInstance->objectName();
 	if (name.isEmpty()) {
 		name = InInstance->metaObject()->className();
@@ -133,7 +133,7 @@ QTreeWidgetItem* QObjectTreeView::CreateItemForInstance(QObject* InInstance) {
 	return item;
 }
 
-void QObjectTreeView::ForceRefresh() {
+void QObjectTreeView::forceRefresh() {
 	clear();
 	mItemMap.clear();
 	if (mTopLevelObjects.isEmpty())
@@ -141,10 +141,10 @@ void QObjectTreeView::ForceRefresh() {
 	for (auto& instance : mTopLevelObjects) {
 		if (!instance)
 			continue;
-		QTreeWidgetItem* topItem = CreateItemForInstance(instance);
+		QTreeWidgetItem* topItem = createItemForInstance(instance);
 		mItemMap[topItem] = instance;
 		addTopLevelItem(topItem);
-		AddItemInternal(topItem, instance);
+		addItemInternal(topItem, instance);
 	}
 	expandAll();
 }
@@ -152,13 +152,13 @@ void QObjectTreeView::ForceRefresh() {
 bool QObjectTreeView::eventFilter(QObject* object, QEvent* event) {
 	if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved) {
 		QChildEvent* childEvent = static_cast<QChildEvent*>(event);
-		if (!IsIgnoreObject(childEvent->child()))
-			ForceRefresh();
+		if (!isIgnoreObject(childEvent->child()))
+			forceRefresh();
 	}
 	return QTreeWidget::eventFilter(object, event);
 }
 
-bool QObjectTreeView::IsIgnoreObject(QObject* inObject) {
+bool QObjectTreeView::isIgnoreObject(QObject* inObject) {
 	return inObject == nullptr
 		|| inObject->metaObject() == &QObject::staticMetaObject
 		|| inObject->metaObject()->inherits(&QPropertyHandle::staticMetaObject)

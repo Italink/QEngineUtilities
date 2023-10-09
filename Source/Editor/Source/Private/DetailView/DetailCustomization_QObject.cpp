@@ -3,12 +3,12 @@
 #include "DetailView/QDetailLayoutBuilder.h"
 #include "DetailView/QDetailViewManager.h"
 
-void DetailCustomization_QObject::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context ,IDetailLayoutBuilder* Builder) {
+void DetailCustomization_QObject::customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context ,IDetailLayoutBuilder* Builder) {
 	//bool bCategoryEnabled = metaData->mClassMetaData.value("CategoryEnabled").toBool();
 	//if(bCategoryEnabled){
 	//	for(const auto& category : metaData->mCategories.asKeyValueRange()){
 	//		if (!category.second)
-	//			Builder->FindOrAddCategory(category.first);
+	//			Builder->findOrAddCategory(category.first);
 	//	}
 	//}
 	for (int i = 1; i < Context.MetaObject->propertyCount(); i++) {
@@ -20,24 +20,24 @@ void DetailCustomization_QObject::CustomizeDetails(const IDetailLayoutBuilder::O
 		QPropertyHandle* handler = QPropertyHandle::FindOrCreate(Context.OwnerObject, propertyPath);
 		if(handler){
 			//if (bCategoryEnabled){
-			//	QString category = handler->GetMetaData("Category").toString();
+			//	QString category = handler->getMetaData("Category").toString();
 			//	if (category.isEmpty())
 			//		category = "Other";
-			//	Builder->FindOrAddCategory(category)->AddProperty(handler);
+			//	Builder->findOrAddCategory(category)->addProperty(handler);
 			//}
 			//else{
-				Builder->AddProperty(handler);
+				Builder->addProperty(handler);
 			//}
 		}
 		else{
 			qWarning() << "property handle is null " << propertyPath;
 		}
 	}
-	if (Builder->ShowChildren() && Context.OwnerObject == Context.ObjectPtr) {
+	if (Builder->isChildrenVisible() && Context.OwnerObject == Context.ObjectPtr) {
 		auto children = Context.OwnerObject->children();
 		for (int i = 0; i < children.size(); i++) {
 			QObject* child = children[i];
-			if (!Builder->IsIgnoreMetaObject(child->metaObject())) {
+			if (!Builder->isIgnoredType(child->metaObject())) {
 				QString name = QString("%1 [%2]").arg(child->objectName()).arg(child->metaObject()->className());
 				
 				QPropertyHandle* handler = QPropertyHandle::FindOrCreate(
@@ -50,7 +50,7 @@ void DetailCustomization_QObject::CustomizeDetails(const IDetailLayoutBuilder::O
 					[child](QVariant var) {
 					}
 				);
-				Builder->AddProperty(handler);
+				Builder->addProperty(handler);
 			}
 		}
 	}

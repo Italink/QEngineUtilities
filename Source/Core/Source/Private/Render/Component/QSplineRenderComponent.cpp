@@ -1,5 +1,4 @@
 #include "Render/Component/QSplineRenderComponent.h"
-#include "Utils/DebugUtils.h"
 #include "Utils/MathUtils.h"
 
 QSplineRenderComponent::QSplineRenderComponent() {

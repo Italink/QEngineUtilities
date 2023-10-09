@@ -3,7 +3,7 @@
 #include "DetailView/QPropertyHandle.h"
 #include "DetailView/QDetailViewManager.h"
 
-void DetailCustomization_QRhiUniformBlock::CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
+void DetailCustomization_QRhiUniformBlock::customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) {
 	QRhiUniformBlock* uniformBlock = (QRhiUniformBlock*)Context.ObjectPtr;
 	for (const QSharedPointer<UniformParamDescBase>& param : uniformBlock->getParamList()) {
 		if(!param->bVisible)
@@ -19,6 +19,6 @@ void DetailCustomization_QRhiUniformBlock::CustomizeDetails(const IDetailLayoutB
 				weakParam.lock()->setValue(var);
 			}
 		);
-		Builder->AddProperty(handler);
+		Builder->addProperty(handler);
 	}
 }

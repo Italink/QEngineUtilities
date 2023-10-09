@@ -27,7 +27,7 @@ QDetailView::QDetailView()
 	mLayout->setSpacing(0);
 	mLayout->setContentsMargins(0, 0, 0, 0);
 	mLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-	qApp->setStyleSheet(QEngineEditorStyleManager::Instance()->GetStylesheet());
+	qApp->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
 
 	mIgnoreMetaObjects = {
 		&QPropertyHandle::staticMetaObject,
@@ -36,26 +36,26 @@ QDetailView::QDetailView()
 	};
 }
 
-void QDetailView::SetObject(QObject* inObject) {
-	SetObjects({ inObject });
+void QDetailView::setObject(QObject* inObject) {
+	setObjects({ inObject });
 }
 
-void QDetailView::SetObjects(const QObjectList& inObjects) {
+void QDetailView::setObjects(const QObjectList& inObjects) {
 	if (mObjects != inObjects) {
 		mObjects = inObjects;
-		ForceRebuild();
+		forceRebuild();
 	}
 }
 
-void QDetailView::SelectSubObject(QObject* inObject)
+void QDetailView::selectSubObject(QObject* inObject)
 {
 	if (!inObject) {
-		SetCurrentRow(nullptr);
+		setCurrentRow(nullptr);
 	}
 	else {
 		QDetailViewRow* objectRow = nullptr;
-		ForeachRows([&objectRow, inObject](QDetailViewRow* row) {
-			if (QPropertyHandle* handle = row->GetPropertyHandle()) {
+		foreachRows([&objectRow, inObject](QDetailViewRow* row) {
+			if (QPropertyHandle* handle = row->getPropertyHandle()) {
 				if (handle->parent() == inObject) {
 					objectRow = row;
 					return false;
@@ -64,45 +64,45 @@ void QDetailView::SelectSubObject(QObject* inObject)
 			return true;
 		});
 		if (objectRow) {
-			SetCurrentRow(objectRow);
+			setCurrentRow(objectRow);
 		}
 	}
 }
 
-void QDetailView::SetFlags(Flags inFlag)
+void QDetailView::setFlags(Flags inFlag)
 {
 	mFlags = inFlag;
 }
 
-QDetailView::Flags QDetailView::GetFlags() const
+QDetailView::Flags QDetailView::getFlags() const
 {
 	return mFlags;
 }
 
-void QDetailView::SearchByKeywords(QString inKeywords) {
+void QDetailView::searchByKeywords(QString inKeywords) {
 
 }
 
-void QDetailView::Undo() {
+void QDetailView::undo() {
 
 }
 
-void QDetailView::Redo() {
+void QDetailView::redo() {
 
 }
 
-void QDetailView::ForceRebuild() {
-	Reset();
+void QDetailView::forceRebuild() {
+	reset();
 	mObjects.removeAll(nullptr);
 	setWidget(mView);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	for(auto& object:mObjects){
-		mLayoutBuilder->AddObject(object);
+		mLayoutBuilder->addObject(object);
 	}
-	RefreshRowsState();
+	refreshRowsState();
 }
 
-void QDetailView::SetPage(QWidget* inPage) {
+void QDetailView::setPage(QWidget* inPage) {
 	takeWidget();
 	setWidget(inPage);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -112,17 +112,17 @@ void QDetailView::resizeEvent(QResizeEvent* event) {
 	QScrollArea::resizeEvent(event);
 	if (mValueWidgetWidth == 0) {
 		mValueWidgetWidth = event->size().width() / 2;
-		RefreshRowsSplitter();
+		refreshRowsSplitter();
 		return;
 	}
 	float factor = event->size().width() / (float)event->oldSize().width();
 	if (factor > 0) {
 		mValueWidgetWidth *= factor;
-		RefreshRowsSplitter();
+		refreshRowsSplitter();
 	}
 }
 
-void QDetailView::Reset() {
+void QDetailView::reset() {
 	for (auto row : mTopLevelRows) {
 		row->setParent(nullptr);
 		row->deleteLater();
@@ -139,25 +139,25 @@ void QDetailView::Reset() {
 	}
 }
 
-void QDetailView::RefreshRowsState() {
-	RefreshRowsSplitter();
-;	for (auto Row : mTopLevelRows) {
-		Row->SetExpanded(true, true);
-		Row->Refresh();
+void QDetailView::refreshRowsState() {
+	refreshRowsSplitter();
+;	for (auto row : mTopLevelRows) {
+		row->setExpanded(true, true);
+		row->refresh();
 	}
 }
 
-void QDetailView::RefreshRowsSplitter() {
-	for (auto Row : mTopLevelRows) {
-		Row->FixupSplitter();
+void QDetailView::refreshRowsSplitter() {
+	for (auto row : mTopLevelRows) {
+		row->fixupSplitter();
 	}
-	for (auto Row : mTopLevelRows) {
-		Row->RequestRefreshSplitter();
+	for (auto row : mTopLevelRows) {
+		row->requestRefreshSplitter();
 	}
 	update();
 }
 
-void QDetailView::ForeachRows(std::function<bool(QDetailViewRow*)> inProcessor)
+void QDetailView::foreachRows(std::function<bool(QDetailViewRow*)> inProcessor)
 {
 	QQueue<QDetailViewRow*> queue;
 	queue << mTopLevelRows;
@@ -170,42 +170,42 @@ void QDetailView::ForeachRows(std::function<bool(QDetailViewRow*)> inProcessor)
 	}
 }
 
-QDetailViewRow* QDetailView::AddTopLevelRow() {
+QDetailViewRow* QDetailView::addTopLevelRow() {
 	QDetailViewRow* row = new QDetailViewRow(this);
 	mTopLevelRows << row;
 	mLayout->addWidget((QWidget*)row->mWidget, 0, Qt::AlignTop);
 	return row;
 }
 
-QDetailViewRow* QDetailView::GetCurrentRow() const{
+QDetailViewRow* QDetailView::getCurrentRow() const{
 	return mCurrentRow;
 }
 
-void QDetailView::SetCurrentRow(QDetailViewRow* val){
+void QDetailView::setCurrentRow(QDetailViewRow* val){
 	if (mCurrentRow != val) {
 		auto LastRow = mCurrentRow;
 		mCurrentRow = val;
 		if (mCurrentRow) 
-			mCurrentRow->UpdateWidget();	
+			mCurrentRow->updateWidget();	
 		if (LastRow) 
-			LastRow->UpdateWidget();
-		Q_EMIT AsCurrentRowChanged(mCurrentRow);
+			LastRow->updateWidget();
+		Q_EMIT asCurrentRowChanged(mCurrentRow);
 	}
 }
 
-const QSet<QMetaType>& QDetailView::GetIgnoreMetaTypes() const{
+const QSet<QMetaType>& QDetailView::getIgnoredTypes() const{
 	return mIgnoreMetaTypes;
 }
 
-void QDetailView::SetIgnoreMetaTypes(QSet<QMetaType> val){
+void QDetailView::setIgnoredTypes(QSet<QMetaType> val){
 	mIgnoreMetaTypes = val;
 }
 
-const QSet<const QMetaObject*>& QDetailView::GetIgnoreMetaObjects() const{
+const QSet<const QMetaObject*>& QDetailView::getIgnoredObjects() const{
 	return mIgnoreMetaObjects;
 }
 
-void QDetailView::SetIgnoreMetaObjects(QSet<const QMetaObject*> val){
+void QDetailView::setIgnoreObjects(QSet<const QMetaObject*> val){
 	mIgnoreMetaObjects = val;
 	mIgnoreMetaObjects 
 		<< &QPropertyHandle::staticMetaObject

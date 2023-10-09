@@ -7,21 +7,21 @@
 
 QEnumPropertyHandleImpl::QEnumPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
-	const QMetaObject* metaObj = mHandle->GetType().metaObject();
+	const QMetaObject* metaObj = mHandle->getType().metaObject();
 	if (metaObj){
-		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->indexOfEnumerator(QString(mHandle->GetType().name()).split("::").last().toLocal8Bit()));
+		const QMetaEnum& metaEnum = metaObj->enumerator(metaObj->indexOfEnumerator(QString(mHandle->getType().name()).split("::").last().toLocal8Bit()));
 		for (int i = 0; i < metaEnum.keyCount(); i++) {
 			mNameToValueMap[metaEnum.key(i)] = metaEnum.value(i);
 		}
 	}
 }
 
-QWidget* QEnumPropertyHandleImpl::GenerateValueWidget() {
+QWidget* QEnumPropertyHandleImpl::generateValueWidget() {
 	QComboBox* comboBox = new QComboBox();
 	for(auto enumPair :mNameToValueMap.asKeyValueRange()){
 		comboBox->addItem(enumPair.first);
 	}
-	mHandle->Bind(
+	mHandle->bind(
 		comboBox,
 		&QComboBox::currentTextChanged,
 		[comboBox, this]() {
@@ -38,6 +38,6 @@ QWidget* QEnumPropertyHandleImpl::GenerateValueWidget() {
 	valueContentLayout->setContentsMargins(10, 2, 10, 2);
 	valueContentLayout->setSpacing(2);
 	valueContentLayout->addWidget(comboBox);
-	mHandle->GenerateAttachButtonWidget(valueContentLayout);
+	mHandle->generateAttachButtonWidget(valueContentLayout);
 	return valueContent;
 }

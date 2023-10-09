@@ -10,22 +10,22 @@ class QLineEditOverride;
 class QENGINEEDITOR_API QHoverLineEdit : public QHoverWidget
 {
 	Q_OBJECT
-	Q_PROPERTY(QColor PlaceholdColor READ GetPlaceholdColor WRITE SetPlaceholdColor)
+	Q_PROPERTY(QColor PlaceholdColor READ getPlaceholdColor WRITE setPlaceholdColor)
 public:
 	QHoverLineEdit(QString inText = "");
 
-	void SetText(QString inText);
-	QString GetText() const;
+	void setDisplayText(QString inText);
+	QString getDisplayText() const;
 
-	QColor GetPlaceholdColor() const;
-	void SetPlaceholdColor(QColor val);
+	QColor getPlaceholdColor() const;
+	void setPlaceholdColor(QColor val);
 	
-	QString GetPlaceholdText() const;
-	void SetPlaceholdText(QString val);
+	QString getPlaceholdText() const;
+	void setPlaceholdText(QString val);
 
 	QLineEdit* GetQLineEdit() const;
 Q_SIGNALS:
-	void AsTextChanged(QString);
+	void asTextChanged(QString);
 	void AsEditingFinished();
 private:
 	QLineEditOverride* mLineEdit = nullptr;

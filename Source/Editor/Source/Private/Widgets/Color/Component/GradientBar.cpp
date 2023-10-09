@@ -97,7 +97,7 @@ QColor GradientBar::getCurrentColor() const
 void GradientBar::setCurrentColor(QColor color)
 {
 	if (p->currentItem != nullptr)
-		p->currentItem->SetColor(color);
+		p->currentItem->setColor(color);
 	flushGradinetBar();
 }
 

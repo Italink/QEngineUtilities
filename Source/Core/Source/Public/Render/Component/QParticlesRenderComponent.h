@@ -3,12 +3,11 @@
 
 #include "Asset/QParticleEmitter.h"
 #include "Asset/QStaticMesh.h"
-#include "QEngineUtilitiesAPI.h"
 #include "Render/ISceneRenderComponent.h"
 #include "Type/QColor4D.h"
 #include "Render/QPrimitiveRenderProxy.h"
 
-class QENGINEUTILITIES_API QParticlesRenderComponent :public ISceneRenderComponent {
+class QENGINECORE_API QParticlesRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 		Q_PROPERTY(QSharedPointer<QStaticMesh> ParticleShape READ getParticleShape WRITE setParticleShape)
 		Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)

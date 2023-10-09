@@ -38,30 +38,30 @@ QFontBox::QFontBox(QFont value /*= QFont()*/)
 	mComboBox->setCurrentFont(value);
 
 	connect(mComboBox, &QFontComboBox::currentFontChanged, this, [this](const QFont& font) {
-		emit AsFontChanged(GetFont());
+		emit asFontChanged(getFont());
 	});
-	connect(mPointSize, &QNumberBox::AsValueChanged, this, [this](QVariant) {
-		emit AsFontChanged(GetFont());
+	connect(mPointSize, &QNumberBox::asValueChanged, this, [this](QVariant) {
+		emit asFontChanged(getFont());
 	});
-	connect(mWeight, &QNumberBox::AsValueChanged, this, [this](QVariant) {
-		emit AsFontChanged(GetFont());
+	connect(mWeight, &QNumberBox::asValueChanged, this, [this](QVariant) {
+		emit asFontChanged(getFont());
 	});
 	connect(mItalic, &QCheckBox::stateChanged, this, [this](int) {
-		emit AsFontChanged(GetFont());
+		emit asFontChanged(getFont());
 	});
 }
 
-QFont QFontBox::GetFont() {
+QFont QFontBox::getFont() {
 	QFont font = mComboBox->currentFont();
-	font.setPointSize(mPointSize->GetVar().toInt());
-	font.setLegacyWeight(mWeight->GetVar().toInt());
+	font.setPointSize(mPointSize->getVar().toInt());
+	font.setLegacyWeight(mWeight->getVar().toInt());
 	font.setItalic(mItalic->isChecked());
 	return font;
 }
 
-void QFontBox::SetFont(const QFont& inFont) {
+void QFontBox::setFont(const QFont& inFont) {
 	if (mComboBox->currentFont() != inFont) {
 		mComboBox->setCurrentFont(inFont);
-		Q_EMIT AsFontChanged(inFont);
+		Q_EMIT asFontChanged(inFont);
 	}
 }

@@ -8,7 +8,7 @@ QVector4DBox::QVector4DBox(QVector4D vec)
 	, mZ(0.0f)
 	, mW(0.0f)
 {
-	SetValue(vec);
+	setValue(vec);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setSpacing(5);
 	h->setContentsMargins(4, 0, 0, 0);
@@ -17,36 +17,36 @@ QVector4DBox::QVector4DBox(QVector4D vec)
 	h->addWidget(&mZ,0, Qt::AlignLeft);
 	h->addWidget(&mW,0, Qt::AlignLeft);
 
-	connect(&mX, &QNumberBox::AsValueChanged, this, &QVector4DBox::EmitValueChanged);
-	connect(&mY, &QNumberBox::AsValueChanged, this, &QVector4DBox::EmitValueChanged);
-	connect(&mZ, &QNumberBox::AsValueChanged, this, &QVector4DBox::EmitValueChanged);
-	connect(&mW, &QNumberBox::AsValueChanged, this, &QVector4DBox::EmitValueChanged);
+	connect(&mX, &QNumberBox::asValueChanged, this, &QVector4DBox::emitValueChanged);
+	connect(&mY, &QNumberBox::asValueChanged, this, &QVector4DBox::emitValueChanged);
+	connect(&mZ, &QNumberBox::asValueChanged, this, &QVector4DBox::emitValueChanged);
+	connect(&mW, &QNumberBox::asValueChanged, this, &QVector4DBox::emitValueChanged);
 }
 
-void QVector4DBox::SetValue(QVector4D vec)
+void QVector4DBox::setValue(QVector4D vec)
 {
 	blockSignals(true);
-	mX.SetVar(vec.x());
-	mY.SetVar(vec.y());
-	mZ.SetVar(vec.z());
-	mW.SetVar(vec.w());
+	mX.setVar(vec.x());
+	mY.setVar(vec.y());
+	mZ.setVar(vec.z());
+	mW.setVar(vec.w());
 	blockSignals(false);
-	EmitValueChanged(QVariant());
+	emitValueChanged(QVariant());
 }
 
-QVector4D QVector4DBox::GetValue()
+QVector4D QVector4DBox::getValue()
 {
 	return QVector4D(
-		mX.GetVar().toFloat(),
-		mY.GetVar().toFloat(),
-		mZ.GetVar().toFloat(),
-		mW.GetVar().toFloat()
+		mX.getVar().toFloat(),
+		mY.getVar().toFloat(),
+		mZ.getVar().toFloat(),
+		mW.getVar().toFloat()
 	);
 }
 
-void QVector4DBox::EmitValueChanged(QVariant)
+void QVector4DBox::emitValueChanged(QVariant)
 {
-	Q_EMIT AsValueChanged(GetValue());
+	Q_EMIT asValueChanged(getValue());
 }
 
 void QVector4DBox::paintEvent(QPaintEvent* event) {
@@ -68,7 +68,7 @@ QVector3DBox::QVector3DBox(QVector3D vec)
 	, mY(0.0f)
 	, mZ(0.0f)
 {
-	SetValue(vec);
+	setValue(vec);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setSpacing(5);
 	h->setContentsMargins(4, 0, 0, 0);
@@ -76,33 +76,33 @@ QVector3DBox::QVector3DBox(QVector3D vec)
 	h->addWidget(&mY,0, Qt::AlignLeft);
 	h->addWidget(&mZ,0, Qt::AlignLeft);
 
-	connect(&mX, &QNumberBox::AsValueChanged, this, &QVector3DBox::EmitValueChanged);
-	connect(&mY, &QNumberBox::AsValueChanged, this, &QVector3DBox::EmitValueChanged);
-	connect(&mZ, &QNumberBox::AsValueChanged, this, &QVector3DBox::EmitValueChanged);
+	connect(&mX, &QNumberBox::asValueChanged, this, &QVector3DBox::emitValueChanged);
+	connect(&mY, &QNumberBox::asValueChanged, this, &QVector3DBox::emitValueChanged);
+	connect(&mZ, &QNumberBox::asValueChanged, this, &QVector3DBox::emitValueChanged);
 }
 
-void QVector3DBox::SetValue(QVector3D vec)
+void QVector3DBox::setValue(QVector3D vec)
 {
 	blockSignals(true);
-	mX.SetVar(vec.x());
-	mY.SetVar(vec.y());
-	mZ.SetVar(vec.z());
+	mX.setVar(vec.x());
+	mY.setVar(vec.y());
+	mZ.setVar(vec.z());
 	blockSignals(false);
-	EmitValueChanged(QVariant());
+	emitValueChanged(QVariant());
 }
 
-QVector3D QVector3DBox::GetValue()
+QVector3D QVector3DBox::getValue()
 {
 	return QVector3D(
-		mX.GetVar().toFloat(),
-		mY.GetVar().toFloat(),
-		mZ.GetVar().toFloat()
+		mX.getVar().toFloat(),
+		mY.getVar().toFloat(),
+		mZ.getVar().toFloat()
 	);
 }
 
-void QVector3DBox::EmitValueChanged(QVariant)
+void QVector3DBox::emitValueChanged(QVariant)
 {
-	Q_EMIT AsValueChanged(GetValue());
+	Q_EMIT asValueChanged(getValue());
 }
 
 void QVector3DBox::paintEvent(QPaintEvent* event) {
@@ -121,37 +121,37 @@ QVector2DBox::QVector2DBox(QVector2D vec)
 	: mX(0.0f)
 	, mY(0.0f)
 {
-	SetValue(vec);
+	setValue(vec);
 	QHBoxLayout* h = new QHBoxLayout(this);
 	h->setSpacing(5);
 	h->setContentsMargins(4, 0, 0, 0);
 	h->addWidget(&mX, 0, Qt::AlignLeft);
 	h->addWidget(&mY ,0, Qt::AlignLeft);
 
-	connect(&mX, &QNumberBox::AsValueChanged, this,&QVector2DBox::EmitValueChanged);
-	connect(&mY, &QNumberBox::AsValueChanged, this,&QVector2DBox::EmitValueChanged);
+	connect(&mX, &QNumberBox::asValueChanged, this,&QVector2DBox::emitValueChanged);
+	connect(&mY, &QNumberBox::asValueChanged, this,&QVector2DBox::emitValueChanged);
 }
 
-void QVector2DBox::SetValue(QVector2D vec)
+void QVector2DBox::setValue(QVector2D vec)
 {
 	blockSignals(true);
-	mX.SetVar(vec.x());
-	mY.SetVar(vec.y());
+	mX.setVar(vec.x());
+	mY.setVar(vec.y());
 	blockSignals(false);
-	EmitValueChanged(QVariant());
+	emitValueChanged(QVariant());
 }
 
-QVector2D QVector2DBox::GetValue()
+QVector2D QVector2DBox::getValue()
 {
 	return QVector2D(
-		mX.GetVar().toFloat(),
-		mY.GetVar().toFloat()
+		mX.getVar().toFloat(),
+		mY.getVar().toFloat()
 	);
 }
 
-void QVector2DBox::EmitValueChanged(QVariant)
+void QVector2DBox::emitValueChanged(QVariant)
 {
-	Q_EMIT AsValueChanged(GetValue());
+	Q_EMIT asValueChanged(getValue());
 }
 
 void QVector2DBox::paintEvent(QPaintEvent* event) {

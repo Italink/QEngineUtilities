@@ -5,9 +5,6 @@
 #include "QDateTime"
 #include "QFile"
 #include "ImGuiPainter.h"
-#ifdef QENGINE_WITH_EDITOR
-#include "QEngineEditorStyleManager.h"
-#endif
 
 const int64_t IMGUI_VERTEX_BUFFER_SIZE = 100000;
 const int64_t IMGUI_INDEX_BUFFER_SIZE = 100000;
@@ -301,9 +298,9 @@ void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderT
 		return;
 	int64_t vertexBufferOffset = 0;
 	int64_t indexBufferOffset = 0;
+	cmdBuffer->setGraphicsPipeline(mPipeline.get());
 	for (int i = 0; i < draw_data->CmdListsCount; i++) {
 		const ImDrawList* cmd_list = draw_data->CmdLists[i];
-		cmdBuffer->setGraphicsPipeline(mPipeline.get());
 		cmdBuffer->setViewport(QRhiViewport(0, 0, renderTarget->pixelSize().width(), renderTarget->pixelSize().height()));
 		const QRhiCommandBuffer::VertexInput VertexInput(mVertexBuffer.get(), vertexBufferOffset);
 		cmdBuffer->setVertexInput(0, 1, &VertexInput, mIndexBuffer.get(), indexBufferOffset, sizeof(ImDrawIdx) == 2 ? QRhiCommandBuffer::IndexUInt16 : QRhiCommandBuffer::IndexUInt32);
@@ -339,10 +336,9 @@ void ImGuiPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderT
 				pcmd->UserCallback(cmd_list, pcmd);
 			}
 			else {
-				QRect rect0(pcmd->ClipRect.x, pcmd->ClipRect.y, pcmd->ClipRect.z, pcmd->ClipRect.w);
-				QRhiScissor scissor(pcmd->ClipRect.x, renderTarget->pixelSize().height() - pcmd->ClipRect.y - pcmd->ClipRect.w, pcmd->ClipRect.z, pcmd->ClipRect.w);
-				QRect rect1(pcmd->ClipRect.x, pcmd->ClipRect.y, pcmd->ClipRect.z, pcmd->ClipRect.w);
-				cmdBuffer->setScissor(scissor);
+				QPoint scissorPos = QPointF(pcmd->ClipRect.x, renderTarget->pixelSize().height() - pcmd->ClipRect.w).toPoint();
+				QSize scissorSize = QSizeF(pcmd->ClipRect.z - pcmd->ClipRect.x, pcmd->ClipRect.w - pcmd->ClipRect.y).toSize();
+				cmdBuffer->setScissor({ scissorPos.x(), scissorPos.y(), scissorSize.width(), scissorSize.height() });
 				cmdBuffer->drawIndexed(pcmd->ElemCount, 1, pcmd->IdxOffset, pcmd->VtxOffset, 0);
 			}
 		}

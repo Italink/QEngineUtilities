@@ -92,8 +92,8 @@ public:
 
 class PropertyTypeCustomization_QStaticMesh :public IPropertyTypeCustomization {
 public:
-	void CustomizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
-	void CustomizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) override;
+	void customizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
+	void customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) override;
 private:
 	QComboBox* CurrComboBox = nullptr;
 	static QSharedPointer<IStaticMeshCreator> mCreator;

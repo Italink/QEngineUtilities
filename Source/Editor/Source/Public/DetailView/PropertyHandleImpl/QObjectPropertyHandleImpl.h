@@ -8,11 +8,11 @@ class QObjectPropertyHandleImpl : public IPropertyHandleImpl {
 public:
 	QObjectPropertyHandleImpl(QPropertyHandle* InHandle);
 protected:
-	QPropertyHandle* FindChildHandle(const QString& inSubName) override;
-	QWidget* GenerateValueWidget() override;
-	void GenerateChildrenRow(QRowLayoutBuilder* Builder)  override;
-	QPropertyHandle* CreateChildHandle(const QString& inSubName) override;
-	void RefreshObjectPtr();
+	QPropertyHandle* findChildHandle(const QString& inSubName) override;
+	QWidget* generateValueWidget() override;
+	void generateChildrenRow(QRowLayoutBuilder* Builder)  override;
+	QPropertyHandle* createChildHandle(const QString& inSubName) override;
+	void refreshObjectPtr();
 private:
 	QVariant mObjectHolder;
 	void* mObjectPtr = nullptr;

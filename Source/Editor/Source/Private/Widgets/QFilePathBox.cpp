@@ -12,22 +12,22 @@ QFilePathBox::QFilePathBox(QString inPath)
 	h->addWidget(mLePath);
 	h->addWidget(mPbOpen);
 	h->setContentsMargins(0, 0, 0, 0);
-	mLePath->SetText(inPath);
+	mLePath->setDisplayText(inPath);
 	mLePath->GetQLineEdit()-> setReadOnly(true);
-	connect(mLePath, &QHoverLineEdit::AsTextChanged, this, &QFilePathBox::AsPathChanged);
+	connect(mLePath, &QHoverLineEdit::asTextChanged, this, &QFilePathBox::asPathChanged);
 	connect(mPbOpen, &QPushButton::clicked, this, [this]() {
 		QString path = QFileDialog::getOpenFileName(nullptr);
 		if (!path.isEmpty())
-			mLePath->SetText(path);
+			mLePath->setDisplayText(path);
 	});
 }
 
-void QFilePathBox::SetFilePath(QString inPath)
+void QFilePathBox::setFilePath(QString inPath)
 {
-	mLePath->SetText(inPath);
+	mLePath->setDisplayText(inPath);
 }
 
-QString QFilePathBox::GetFilePath()
+QString QFilePathBox::getFilePath()
 {
-	return mLePath->GetText();
+	return mLePath->getDisplayText();
 }

@@ -6,7 +6,7 @@
 
 class DetailCustomization_QMediaPlayer : public IDetailCustomization {
 protected:
-	void CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
+	void customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) override;
 };
 
 #endif // DetailCustomization_QMediaPlayer_h__

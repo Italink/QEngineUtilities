@@ -138,7 +138,7 @@ void ColorPreview::paint(QPainter& painter, QRect rect) const
 	painter.fillRect(w, 0, w, h, c2);
 }
 
-void ColorPreview::SetColor(const QColor& c)
+void ColorPreview::setColor(const QColor& c)
 {
 	p->col = c;
 	update();

@@ -19,7 +19,7 @@ protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 
 Q_SIGNALS:
-	void AsValueChanged(float);
+	void asValueChanged(float);
 
 private:
 	QLabel mLbName;

@@ -51,7 +51,7 @@ protected:
 		else if (mState == Unexpand) {
 			UnexpandIcon.getIcon().paint(&painter, iconRect);
 		}
-		QColor shadowColor = QEngineEditorStyleManager::Instance()->GetShadowColor();
+		QColor shadowColor = QEngineEditorStyleManager::Instance()->getShadowColor();
 		QRect shadowRect(0, 0, INDENT_WIDTH, rect().height());
 		if(mLevel > 0){
 			QLinearGradient shadowLinearGradient;
@@ -110,7 +110,7 @@ Q_SIGNALS:
 protected:
 	void mousePressEvent(QMouseEvent* event) override {
 		if (event->button() == Qt::LeftButton) {
-			mRow->mView->SetCurrentRow(mRow);
+			mRow->mView->setCurrentRow(mRow);
 		}
 	}
 
@@ -120,23 +120,23 @@ protected:
 	}
 	void paintEvent(QPaintEvent *event){
 		QPainter painter(this);
-		if(mRow->IsCategory()){
-			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->GetCategoryColor());
+		if(mRow->isCategory()){
+			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->getCategoryColor());
 		}
-		else if (mRow->IsCurrent()) {
-			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->GetSelectedColor());
+		else if (mRow->isCurrent()) {
+			painter.fillRect(rect(), QEngineEditorStyleManager::Instance()->getSelectedColor());
 		}
-		QPen pen(QEngineEditorStyleManager::Instance()->GetGridLineColor());
+		QPen pen(QEngineEditorStyleManager::Instance()->getGridLineColor());
 		pen.setWidth(1);
 		painter.setPen(pen);
 		if (mHoverd)
-			painter.setBrush(QEngineEditorStyleManager::Instance()->GetHoveredColor());
+			painter.setBrush(QEngineEditorStyleManager::Instance()->getHoveredColor());
 		else
 			painter.setBrush(Qt::NoBrush);
 		painter.drawRect(rect());
 
 		if (mRow->bNeedRefreshSplitter) {
-			mRow->RefreshSplitter();
+			mRow->refreshSplitter();
 			mRow->bNeedRefreshSplitter = false;
 			update();
 		}
@@ -159,27 +159,27 @@ QDetailViewRow::QDetailViewRow(QDetailView* inView)
 	, mWidget(new QDetailViewRowWidget(this))
 {
 	connect(mWidget, &QDetailViewRowWidget::AsToggledExpand, this, [this]() {
-		SetExpanded(!bExpanded);
+		setExpanded(!bExpanded);
 	});
 	connect(mWidget, &QDetailViewRowWidget::AsShowEvent, this, [this]() {
-		RequestRefreshSplitter();
+		requestRefreshSplitter();
 	});
 }
 
-void QDetailViewRow::SetupContentWidget(QWidget* inContent) {
+void QDetailViewRow::setupContentWidget(QWidget* inContent) {
 	mWidget->SetContentWidget(inContent);
 	if (mView->isVisible()) {
 		inContent->show();
 	}
 }
 
-void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValueWidget) {
+void QDetailViewRow::setupNameValueWidget(QWidget* inNameWidget, QWidget* inValueWidget) {
 	QSplitter* content = new QSplitter;
 	content->setHandleWidth(2);
 	content->setChildrenCollapsible(false);
 	QObject::connect(content, &QSplitter::splitterMoved,this, [this, content](int pos, int index) {
 		mView->mValueWidgetWidth = qMax(1, content->width() - content->handleWidth() - pos);
-		mView->RefreshRowsSplitter();
+		mView->refreshRowsSplitter();
 	});
 	if (inNameWidget) {
 		inNameWidget->setAttribute(Qt::WA_TranslucentBackground);
@@ -192,39 +192,39 @@ void QDetailViewRow::SetupNameValueWidget(QWidget* inNameWidget, QWidget* inValu
 		inValueWidget->setAttribute(Qt::WA_TranslucentBackground);
 		content->addWidget(inValueWidget);
 	}
-	SetupContentWidget(content);
+	setupContentWidget(content);
 }
 
-void QDetailViewRow::SetupPropertyHandle(QPropertyHandle* val)
+void QDetailViewRow::setupPropertyHandle(QPropertyHandle* val)
 {
 	mHandle = val;
 	if (mHandle) {
-		connect(mHandle, &QPropertyHandle::AsChildEvent, this, [this](QChildEvent* event) {
-			if (!mView->GetIgnoreMetaObjects().contains(event->child()->metaObject()))
-				mHandle->AsRequestRebuildRow();
+		connect(mHandle, &QPropertyHandle::asChildEvent, this, [this](QChildEvent* event) {
+			if (!mView->getIgnoredObjects().contains(event->child()->metaObject()))
+				mHandle->asRequestRebuildRow();
 		});
 	}
 }
 
-int QDetailViewRow::ChildCount() const {
+int QDetailViewRow::childrenCount() const {
 	return mChildren.count();
 }
 
-QDetailViewRow* QDetailViewRow::ChildAt(int inIndex) {
+QDetailViewRow* QDetailViewRow::childAt(int inIndex) {
 	return mChildren.value(inIndex);
 }
 
 int CountChildrenRow(QDetailViewRow* Root) {
-	if (Root->ChildCount() == 0)
+	if (Root->childrenCount() == 0)
 		return 0;
-	int counter = Root->ChildCount();
-	for (int i = 0; i < Root->ChildCount(); i++) {
-		counter += CountChildrenRow(Root->ChildAt(i));
+	int counter = Root->childrenCount();
+	for (int i = 0; i < Root->childrenCount(); i++) {
+		counter += CountChildrenRow(Root->childAt(i));
 	}
 	return counter;
 }
 
-QDetailViewRow* QDetailViewRow::AddChildRow() {
+QDetailViewRow* QDetailViewRow::addChildRow() {
 	QDetailViewRow* row = new QDetailViewRow(mView);
 	int parentIndex = mView->mLayout->indexOf(mWidget);
 	int childCount = CountChildrenRow(this);
@@ -233,99 +233,99 @@ QDetailViewRow* QDetailViewRow::AddChildRow() {
 	return row;
 }
 
-void QDetailViewRow::DeleteChild(QDetailViewRow* inChild) {
+void QDetailViewRow::removeChild(QDetailViewRow* inChild) {
 	mChildren.removeOne(inChild);
-	inChild->DeleteChildren();
+	inChild->clear();
 	mView->mLayout->removeWidget(inChild->mWidget);
 	inChild->mWidget->deleteLater();
 }
 
-void QDetailViewRow::DeleteChildren() {
+void QDetailViewRow::clear() {
 	for (auto child : mChildren) {
-		child->DeleteChildren();
+		child->clear();
 		mView->mLayout->removeWidget(child->mWidget);
 		child->mWidget->deleteLater();
 	}
 	mChildren.clear();
 }
 
-void QDetailViewRow::SetVisible(bool inVisiable) {
+void QDetailViewRow::setVisible(bool inVisiable) {
 	mWidget->setVisible(inVisiable);
-	RequestRefreshSplitter();
-	if (IsExpanded()) {
+	requestRefreshSplitter();
+	if (isExpanded()) {
 		for (auto Child : mChildren) {
-			Child->SetVisible(inVisiable);
+			Child->setVisible(inVisiable);
 		}	
 	}
 }
 
-bool QDetailViewRow::IsVisible() const {
+bool QDetailViewRow::isVisible() const {
 	return mWidget->isVisible();
 }
 
-bool QDetailViewRow::IsCurrent() const
+bool QDetailViewRow::isCurrent() const
 {
-	return mView->GetCurrentRow() == this;
+	return mView->getCurrentRow() == this;
 }
 
-void QDetailViewRow::SetExpanded(bool inExpanded, bool bRecursive) {
+void QDetailViewRow::setExpanded(bool inExpanded, bool bRecursive) {
 	bExpanded = inExpanded;
 	mWidget->mIndentWidget->RefreshState(mChildren.count(), bExpanded);
 	for (auto Child : mChildren) {
-		Child->SetVisible(inExpanded);
+		Child->setVisible(inExpanded);
 		if (bRecursive) {
-			Child->SetExpanded(inExpanded, bRecursive);
+			Child->setExpanded(inExpanded, bRecursive);
 		}
 	}
 }
 
-bool QDetailViewRow::IsExpanded() const {
+bool QDetailViewRow::isExpanded() const {
 	return bExpanded;
 }
 
-void QDetailViewRow::UpdateWidget()
+void QDetailViewRow::updateWidget()
 {
 	mWidget->update();
 }
 
-void QDetailViewRow::Refresh() {
+void QDetailViewRow::refresh() {
 	mWidget->mIndentWidget->FixupWidth();
-	SetExpanded(bExpanded);
+	setExpanded(bExpanded);
 	for (auto Child : mChildren) {
 		Child->mWidget->mIndentWidget->mLevel = mWidget->mIndentWidget->mLevel + 1;
-		Child->SetVisible(bExpanded);
-		Child->Refresh();
+		Child->setVisible(bExpanded);
+		Child->refresh();
 	}
 }
 
-void QDetailViewRow::MarkIsCategory() {
+void QDetailViewRow::markIsCategory() {
 	bIsCategory = true;
 }
 
-bool QDetailViewRow::IsCategory() {
+bool QDetailViewRow::isCategory() {
 	return bIsCategory;
 }
 
-QWidget* QDetailViewRow::GetWidget() {
+QWidget* QDetailViewRow::getWidget() {
 	return mWidget;
 }
 
-void QDetailViewRow::RequestRefreshSplitter() {
+void QDetailViewRow::requestRefreshSplitter() {
 	bNeedRefreshSplitter = true;
 }
 
-void QDetailViewRow::RefreshSplitter() {
+void QDetailViewRow::refreshSplitter() {
 	if (QSplitter* splitter = qobject_cast<QSplitter*>(mWidget->mContentWidget)) {
 		int nameWidgetWidth = splitter->width() - mView->mValueWidgetWidth - splitter->handleWidth();
 		splitter->setSizes({ nameWidgetWidth ,mView->mValueWidgetWidth });
 	}
 	for (auto Child : mChildren) {
-		Child->RequestRefreshSplitter();
+		Child->requestRefreshSplitter();
 	}
 }
 
-void QDetailViewRow::FixupSplitter() {
-	if (!IsVisible())
+void QDetailViewRow::fixupSplitter() {
+	if (!isVisible())
 		return;
 	if (QSplitter* splitter = qobject_cast<QSplitter*>(mWidget->mContentWidget)) {
 		int nameWidgetWidth = splitter->width() - mView->mValueWidgetWidth - splitter->handleWidth();
@@ -334,7 +334,7 @@ void QDetailViewRow::FixupSplitter() {
 		}
 	}
 	for (auto Child : mChildren) {
-		Child->FixupSplitter();
+		Child->fixupSplitter();
 	}
 }
 

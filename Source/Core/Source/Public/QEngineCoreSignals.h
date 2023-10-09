@@ -1,18 +1,18 @@
-#ifndef QEngineCoreEntry_h__
-#define QEngineCoreEntry_h__
+#ifndef QEngineCoreSignals_h__
+#define QEngineCoreSignals_h__
 
 #include <QObject>
 #include <QKeyEvent>
 #include "QEngineCoreAPI.h"
 
-class QENGINECORE_API QEngineCoreEntry: public QObject {
+class QENGINECORE_API QEngineCoreSignals: public QObject {
 	Q_OBJECT
 public:
-	static QEngineCoreEntry* Instance();
+	static QEngineCoreSignals* Instance();
 Q_SIGNALS:
 	void asStartRendering();
 	void asStopRendering();
 	void asViewportKeyPressEvent(QKeyEvent* event);
 };
 
-#endif // QEngineCoreEntry_h__
+#endif // QEngineCoreSignals_h__

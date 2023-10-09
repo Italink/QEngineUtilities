@@ -281,6 +281,9 @@ void RenderGraphView::CustomDraw(ImDrawList* drawList, ImRect rectangle, GraphEd
 		if (nodeIndex == mCurrentNodeIndex && i == mCurrentNodeSlotIndex) {
 			drawList->AddRect(min, max, IM_COL32(79, 110, 242, 255), 0, 0, 3);
 		}
+		else {
+			drawList->AddRect(min, max, IM_COL32(200, 200, 200, 255), 0, 0, 1);
+		}
 	}
 }
 

@@ -14,16 +14,16 @@ class QColor4DDialog :public QDialog {
 public:
 	QColor4DDialog();
 	~QColor4DDialog();
-	void SetColor(QColor4D color);
+	void setColor(QColor4D color);
 	static int CreateAndShow(QColor4D color, QRect inButtonGemotry);
-	void SetCloseWhenLoseFocus(bool val) { bCloseWhenLoseFocus = val; }
+	void setCloseWhenLoseFocus(bool val) { bCloseWhenLoseFocus = val; }
 private:
-	void CreateUI();
-	void ConnectUI();
-	void SetCurrentColorInternal(QColor4D color);
-	void RefleshChannelGradiant();
+	void createUI();
+	void connectUI();
+	void setCurrentColorInternal(QColor4D color);
+	void refleshChannelGradiant();
 Q_SIGNALS:
-	void AsColorChanged(QColor4D);
+	void asColorChanged(QColor4D);
 private:
 	ColorWheel* mColorWheel;
 	ColorPreview* mColorPreview;

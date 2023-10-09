@@ -1,7 +1,7 @@
 #include "RenderDocPlugin.h"
 #include <QDebug>
 #include "renderdoc_app.h"
-#include "QEngineCoreEntry.h"
+#include "QEngineCoreSignals.h"
 
 RENDERDOC_API_1_1_2* rdoc_api = nullptr;
 
@@ -17,7 +17,7 @@ void RenderDocPlugin::startup() {
 		rdoc_api->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowVSync, 0);
 		rdoc_api->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowFullscreen, 1);
 		rdoc_api->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_DebugOutputMute, 0);
-		QObject::connect(QEngineCoreEntry::Instance(), &QEngineCoreEntry::asViewportKeyPressEvent, [this](QKeyEvent* event) {
+		QObject::connect(QEngineCoreSignals::Instance(), &QEngineCoreSignals::asViewportKeyPressEvent, [this](QKeyEvent* event) {
 			if (event->key() == Qt::Key_C) {
 				rdoc_api->TriggerCapture();
 				if (!rdoc_api->IsTargetControlConnected())

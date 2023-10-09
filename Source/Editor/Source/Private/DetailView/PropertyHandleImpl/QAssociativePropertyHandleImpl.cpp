@@ -7,39 +7,39 @@
 
 QAssociativePropertyHandleImpl::QAssociativePropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
-	QVariant varMap = mHandle->GetValue();
+	QVariant varMap = mHandle->getValue();
 	QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 	mMetaAssociation = iterable.metaContainer();
 }
 
-void QAssociativePropertyHandleImpl::GenerateChildrenRow(QRowLayoutBuilder* Builder) {
-	QVariant varMap = mHandle->GetValue();
+void QAssociativePropertyHandleImpl::generateChildrenRow(QRowLayoutBuilder* Builder) {
+	QVariant varMap = mHandle->getValue();
 	QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 	for (auto iter = iterable.begin(); iter != iterable.end(); ++iter) {
-		QString path = mHandle->GetSubPath(iter.key().toString());
+		QString path = mHandle->getSubPath(iter.key().toString());
 		QPropertyHandle* handle = QPropertyHandle::FindOrCreate(mHandle->parent(), path);
 		if (handle) {
-			Builder->AddProperty(handle);
+			Builder->addProperty(handle);
 		}
 	}
 }
 
-QWidget* QAssociativePropertyHandleImpl::GenerateValueWidget() {
-	if (mHandle->HasMetaData("FixedSize")) {
-		return IPropertyHandleImpl::GenerateValueWidget();
+QWidget* QAssociativePropertyHandleImpl::generateValueWidget() {
+	if (mHandle->hasMetaData("FixedSize")) {
+		return IPropertyHandleImpl::generateValueWidget();
 	}
 	QSvgButton* btAppend = new QSvgButton(":/Resources/plus.png");
 	btAppend->setFixedSize(20, 20);
 	QObject::connect(btAppend, &QPushButton::clicked, [this](){
-		QVariant varList = mHandle->GetValue();
+		QVariant varList = mHandle->getValue();
 		QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
 		QString newKey = "Item0";
 		int index = 0;
 		while (iterable.containsKey(newKey)) {
 			newKey = "Item" + QString::number(++index);
 		}
-		QVariant newValue = QPropertyHandle::CreateNewVariant(mMetaAssociation.mappedMetaType());
-		AppendItem(newKey, newValue);
+		QVariant newValue = QPropertyHandle::createNewVariant(mMetaAssociation.mappedMetaType());
+		appendItem(newKey, newValue);
 	});
 	QWidget* valueContent = new QWidget;
 	valueContent->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
@@ -48,47 +48,47 @@ QWidget* QAssociativePropertyHandleImpl::GenerateValueWidget() {
 	valueContentLayout->setContentsMargins(10, 2, 10, 2);
 	valueContentLayout->setSpacing(2);
 	valueContentLayout->addWidget(btAppend);
-	mHandle->GenerateAttachButtonWidget(valueContentLayout);
+	mHandle->generateAttachButtonWidget(valueContentLayout);
 	return valueContent;
 }
 
-QPropertyHandle* QAssociativePropertyHandleImpl::CreateChildHandle(const QString& inKey) {
+QPropertyHandle* QAssociativePropertyHandleImpl::createChildHandle(const QString& inKey) {
 	QPropertyHandle* handle = new QPropertyHandle(
 		mHandle->parent(),
 		mMetaAssociation.mappedMetaType(),
-		mHandle->GetSubPath(inKey),
+		mHandle->getSubPath(inKey),
 		[this, inKey]() {
-			QVariant varMap = mHandle->GetValue();
+			QVariant varMap = mHandle->getValue();
 			QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 			return iterable.value(inKey);
 		},
 		[this, inKey](QVariant var) {
-			QVariant varMap = mHandle->GetValue();
+			QVariant varMap = mHandle->getValue();
 			QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 			QtPrivate::QVariantTypeCoercer keyCoercer;
 			QtPrivate::QVariantTypeCoercer mappedCoercer;
 			void* containterPtr = const_cast<void*>(iterable.constIterable());
 			const void* dataPtr = mappedCoercer.coerce(var, var.metaType());
 			mMetaAssociation.setMappedAtKey(containterPtr, keyCoercer.coerce(inKey, mMetaAssociation.keyMetaType()), dataPtr);
-			mHandle->SetValue(varMap);
+			mHandle->setValue(varMap);
 		}
 	);
-	if (!mHandle->HasMetaData("FixedSize")) {
-		handle->SetAttachButtonWidgetCallback([inKey, this](QHBoxLayout* Layout) {
+	if (!mHandle->hasMetaData("FixedSize")) {
+		handle->setAttachButtonWidgetCallback([inKey, this](QHBoxLayout* Layout) {
 			QSvgButton* deleteButton = new QSvgButton(":/Resources/delete.png");
 			deleteButton->setFixedSize(20, 20);
 			Layout->addWidget(deleteButton);
 			QObject::connect(deleteButton, &QSvgButton::clicked, [inKey, this]() {
-				RemoveItem(inKey);
+				removeItem(inKey);
 				});
 			});
 	}
 	return handle;
 }
 
-bool QAssociativePropertyHandleImpl::RenameItem(QString inSrc, QString inDst) {
+bool QAssociativePropertyHandleImpl::renameItem(QString inSrc, QString inDst) {
 	bool canRename = false;
-	QVariant varMap = mHandle->GetValue();
+	QVariant varMap = mHandle->getValue();
 	QAssociativeIterable iterable = varMap.value<QAssociativeIterable>();
 	if (iterable.containsKey(inSrc) && !iterable.containsKey(inDst)) {
 		canRename = true;
@@ -103,14 +103,14 @@ bool QAssociativePropertyHandleImpl::RenameItem(QString inSrc, QString inDst) {
 			keyCoercer.coerce(inDst, QMetaType::fromType<QString>()),
 			mappedCoercer.coerce(var, var.metaType())
 		);
-		mHandle->SetValue(varMap, QString("Rename: %1 -> %2").arg(inSrc).arg(inDst));
-		Q_EMIT mHandle->AsRequestRebuildRow();
+		mHandle->setValue(varMap, QString("Rename: %1 -> %2").arg(inSrc).arg(inDst));
+		Q_EMIT mHandle->asRequestRebuildRow();
 	}
 	return canRename;
 }
 
-void QAssociativePropertyHandleImpl::AppendItem(QString inKey, QVariant inValue) {
-	QVariant varList = mHandle->GetValue();
+void QAssociativePropertyHandleImpl::appendItem(QString inKey, QVariant inValue) {
+	QVariant varList = mHandle->getValue();
 	QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
 	QtPrivate::QVariantTypeCoercer coercer;
@@ -119,12 +119,12 @@ void QAssociativePropertyHandleImpl::AppendItem(QString inKey, QVariant inValue)
 	const void* valueDataPtr = coercer.coerce(inValue, inValue.metaType());
 	//metaAssociation.insertKey(containterPtr, keyDataPtr);
 	mMetaAssociation.setMappedAtKey(containterPtr, keyDataPtr, valueDataPtr);
-	mHandle->SetValue(varList, QString("%1 Insert: %2").arg(mHandle->GetPath()).arg(inKey));
-	Q_EMIT mHandle->AsRequestRebuildRow();
+	mHandle->setValue(varList, QString("%1 Insert: %2").arg(mHandle->getPath()).arg(inKey));
+	Q_EMIT mHandle->asRequestRebuildRow();
 }
 
-void QAssociativePropertyHandleImpl::RemoveItem(QString inKey) {
-	QVariant varList = mHandle->GetValue();
+void QAssociativePropertyHandleImpl::removeItem(QString inKey) {
+	QVariant varList = mHandle->getValue();
 	QAssociativeIterable iterable = varList.value<QAssociativeIterable>();
 	const QMetaAssociation metaAssociation = iterable.metaContainer();
 	void* containterPtr = const_cast<void*>(iterable.constIterable());
@@ -132,7 +132,7 @@ void QAssociativePropertyHandleImpl::RemoveItem(QString inKey) {
 	QVariant key(inKey);
 	const void* keyDataPtr = coercer.coerce(key, key.metaType());
 	metaAssociation.removeKey(containterPtr, keyDataPtr);
-	mHandle->SetValue(varList, QString("%1 Remove: %2").arg(mHandle->GetPath()).arg(inKey));
-	Q_EMIT mHandle->AsRequestRebuildRow();
+	mHandle->setValue(varList, QString("%1 Remove: %2").arg(mHandle->getPath()).arg(inKey));
+	Q_EMIT mHandle->asRequestRebuildRow();
 }
 

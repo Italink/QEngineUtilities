@@ -11,7 +11,7 @@ public:
 	explicit GradientBarItem(QGradientStop stop, QWidget* parent = 0);
 	~GradientBarItem();
 	QColor getColor() const;
-	void SetColor(QColor val);
+	void setColor(QColor val);
 	qreal getPos() const;
 	bool setPos(qreal val);
 	bool isHighlight() const { return highlight; }

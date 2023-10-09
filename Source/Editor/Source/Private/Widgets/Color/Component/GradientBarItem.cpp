@@ -19,7 +19,7 @@ QColor GradientBarItem::getColor() const
 	return gradientStop.second;
 }
 
-void GradientBarItem::SetColor(QColor val)
+void GradientBarItem::setColor(QColor val)
 {
 	gradientStop.second = val;
 	update();

@@ -8,7 +8,7 @@ class QENGINEEDITOR_API IDetailCustomization :public  QEnableSharedFromThis<IDet
 public:
 	virtual ~IDetailCustomization(){}
 
-	virtual void CustomizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) = 0;
+	virtual void customizeDetails(const IDetailLayoutBuilder::ObjectContext& Context, IDetailLayoutBuilder* Builder) = 0;
 };
 
 #endif // IDETAILCUSTOMIZATION_H

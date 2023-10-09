@@ -28,24 +28,25 @@ QDebugUIPainter::QDebugUIPainter(IRenderer* inRenderer)
 
 	ImGui::SetCurrentContext(mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
-	QFile file(QEngineEditorStyleManager::Instance()->GetFontFilePath());
+	QFile file(QEngineEditorStyleManager::Instance()->getFontFilePath());
 	if (file.open(QIODevice::ReadOnly)) {
 		QByteArray fontData = file.readAll();
 		ImFontConfig config;
-		config.OversampleH = 5;
-		config.OversampleV = 5;
-		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(), 23, &config);
+		config.OversampleH = 8;
+		config.OversampleV = 8;
+		io.Fonts->AddFontFromMemoryTTF(fontData.data(), fontData.size(), 16, &config);
 		io.Fonts->Build();
 	}
+	const QSize iconSize(30, 30);
 
-	registerImage("select", QImage(":/Resources/mouse-arrow.png"));
-	registerImage("translate", QImage(":/Resources/translate.png"));
-	registerImage("rotate", QImage(":/Resources/rotate.png"));
-	registerImage("scale", QImage(":/Resources/scale.png"));
-	registerImage("stats", QImage(":/Resources/stats.png"));
-	registerImage("polygon", QImage(":/Resources/polygon.png"));
-	registerImage("camera", QImage(":/Resources/camera.png"));
-	registerImage("graph", QImage(":/Resources/graph.png"));
+	registerImage("select", QImage(":/Resources/mouse-arrow.png").scaled(iconSize,Qt::IgnoreAspectRatio,Qt::TransformationMode::SmoothTransformation));
+	registerImage("translate", QImage(":/Resources/translate.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("rotate", QImage(":/Resources/rotate.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("scale", QImage(":/Resources/scale.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("stats", QImage(":/Resources/stats.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("polygon", QImage(":/Resources/polygon.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("camera", QImage(":/Resources/camera.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+	registerImage("graph", QImage(":/Resources/graph.png").scaled(iconSize, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
 	registerImage("tips", QImage(":/Resources/tips.png"));
 
 	setupWindow(mRenderer->maybeWindow());
@@ -251,19 +252,19 @@ void QDebugUIPainter::refreshEditor(QRhiCamera* camera, ISceneRenderComponent* c
 {
 	if (camera) {
 		if (QPropertyHandle* position = QPropertyHandle::Find(camera, "Position"))
-			position->RefreshBinder();
+			position->refreshBinder();
 		if (QPropertyHandle* rotation = QPropertyHandle::Find(camera, "Rotation"))
-			rotation->RefreshBinder();
+			rotation->refreshBinder();
 	}
 	if (comp) {
 		if(QPropertyHandle* transform = QPropertyHandle::FindOrCreate(comp, "Transform"))
-			transform->SetValue(compModelMatrix, "Move");
+			transform->setValue(compModelMatrix, "Move");
 		if (QPropertyHandle* position = QPropertyHandle::Find(comp, "Transform.Position"))
-			position->RefreshBinder();
+			position->refreshBinder();
 		if (QPropertyHandle* rotation = QPropertyHandle::Find(comp, "Transform.Rotation"))
-			rotation->RefreshBinder();
+			rotation->refreshBinder();
 		if (QPropertyHandle* scale = QPropertyHandle::Find(comp, "Transform.Scale"))
-			scale->RefreshBinder();
+			scale->refreshBinder();
 	}
 }
 

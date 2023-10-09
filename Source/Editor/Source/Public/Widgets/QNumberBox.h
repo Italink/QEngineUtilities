@@ -9,27 +9,27 @@
 
 class QENGINEEDITOR_API QNumberBoxAdaptorBase {
 public:
-	virtual QString GetText() = 0;
-	virtual QVariant GetVar() = 0;
-	virtual void SetVar(QVariant var) = 0;
-	virtual void SetText(QString text) = 0;
-	virtual void MoveOffset(QPointF offset) = 0;
-	virtual double GetLimitedFactor() = 0;
+	virtual QString getDisplayText() = 0;
+	virtual QVariant getVar() = 0;
+	virtual void setVar(QVariant var) = 0;
+	virtual void setDisplayText(QString text) = 0;
+	virtual void moveOffset(QPointF offset) = 0;
+	virtual double getLimitedFactor() = 0;
 };
 
 template<typename NumericType>
 class QNumberBoxAdaptor: public QNumberBoxAdaptorBase {
 public:
-	virtual QString GetText() override{
+	virtual QString getDisplayText() override{
 		if (std::is_floating_point<NumericType>::value) {
 			return QString::number(mValue);
 		}
 		return QString::number(mValue);
 	}
 
-	virtual void SetText(QString inText) override{
+	virtual void setDisplayText(QString inText) override{
 		NumericType number = QVariant(inText).value<NumericType>();
-		SetValue(number);
+		setValue(number);
 	}
 
 	struct Limited{
@@ -38,7 +38,7 @@ public:
 		NumericType max;
 	};
 
-	void SetValue(NumericType value) {
+	void setValue(NumericType value) {
 		if (mLimited.enabled) {
 			mValue = qBound(mLimited.min, value, mLimited.max);
 		}
@@ -47,7 +47,7 @@ public:
 		}
 	}
 
-	NumericType GetValue() {
+	NumericType getValue() {
 		return mValue;
 	}
 
@@ -59,41 +59,41 @@ public:
 		mLimited.max = max;
 	}
 
-	virtual double GetLimitedFactor() override {
+	virtual double getLimitedFactor() override {
 		if (mLimited.enabled) {
 			return (mValue - mLimited.min) / (double)(mLimited.max - mLimited.min);
 		}
 		return 0;
 	}
 
-	virtual QVariant GetVar() override
+	virtual QVariant getVar() override
 	{
 		return mValue;
 	}
 
-	virtual void SetVar(QVariant var) override
+	virtual void setVar(QVariant var) override
 	{
-		SetValue(var.value<NumericType>());
+		setValue(var.value<NumericType>());
 	}
 
-	virtual void MoveOffset(QPointF offset) override
+	virtual void moveOffset(QPointF offset) override
 	{
 		if (mLimited.enabled) {
 			if (std::is_integral<NumericType>::value) {
-				SetValue(GetValue() + offset.x() * qMax((NumericType)1, (mLimited.max - mLimited.min) / (NumericType)2000));
+				setValue(getValue() + offset.x() * qMax((NumericType)1, (mLimited.max - mLimited.min) / (NumericType)2000));
 			}
 			else {
-				SetValue(GetValue() + offset.x() *(mLimited.max - mLimited.min) /(NumericType)1000.0);
+				setValue(getValue() + offset.x() *(mLimited.max - mLimited.min) /(NumericType)1000.0);
 			}
 		}
 		else {
 			if (std::is_integral<NumericType>::value) {
-				SetValue(GetValue() + offset.x() * qMax(qAbs(GetValue() /(NumericType) 200.0), (NumericType)1.0));
+				setValue(getValue() + offset.x() * qMax(qAbs(getValue() /(NumericType) 200.0), (NumericType)1.0));
 			}
 			else {
-				double adjuster = GetValue() + offset.x() * qMax(qAbs(GetValue() /(NumericType) 200.0), (NumericType)0.01);
+				double adjuster = getValue() + offset.x() * qMax(qAbs(getValue() /(NumericType) 200.0), (NumericType)0.01);
 				adjuster = int(adjuster * 100) / 100.0;
-				SetValue(adjuster);
+				setValue(adjuster);
 			}
 		}
 	}
@@ -110,22 +110,22 @@ public:
 	QNumberBox(NumericType inValue, bool inLimitedEnabled = false, NumericType inMin = 0, NumericType inMax = 100) {
 		QSharedPointer<QNumberBoxAdaptor<NumericType>> adaptor = QSharedPointer<QNumberBoxAdaptor<NumericType>>::create();
 		adaptor->SetLimited(inLimitedEnabled, inMin, inMax);
-		adaptor->SetValue(inValue);
+		adaptor->setValue(inValue);
 		mNumberAdaptor = adaptor;
-		CreateUI();
-		ConnectUI();
+		createUI();
+		connectUI();
 	}
-	void SetEditEnabled(bool enable);
-	bool GetEditEnabled();
+	void setEditEnabled(bool enable);
+	bool getEditEnabled();
 
-	QString GetText();
-	QVariant GetVar();
-	void SetVar(QVariant var);
+	QString getDisplayText();
+	QVariant getVar();
+	void setVar(QVariant var);
 Q_SIGNALS:
-	void AsValueChanged(QVariant);
+	void asValueChanged(QVariant);
 protected:
-	void CreateUI();
-	void ConnectUI();
+	void createUI();
+	void connectUI();
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;

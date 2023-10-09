@@ -14,10 +14,10 @@ class QENGINEEDITOR_API QFontBox : public QWidget{
 public:
 	QFontBox(QFont value = QFont());
 
-	QFont GetFont();
-	void SetFont(const QFont& inFont);
+	QFont getFont();
+	void setFont(const QFont& inFont);
 
-	Q_SIGNAL void AsFontChanged(const QFont&);
+	Q_SIGNAL void asFontChanged(const QFont&);
 private:	
 	QFontComboBox* mComboBox;
 	QNumberBox* mPointSize;

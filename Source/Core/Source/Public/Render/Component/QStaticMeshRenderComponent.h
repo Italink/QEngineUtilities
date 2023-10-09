@@ -5,9 +5,8 @@
 #include "Render/QPrimitiveRenderProxy.h"
 #include "Render/RHI/QRhiMaterialGroup.h"
 #include "Asset/QStaticMesh.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QStaticMeshRenderComponent :public ISceneRenderComponent {
+class QENGINECORE_API QStaticMeshRenderComponent :public ISceneRenderComponent {
 	Q_OBJECT
 	Q_PROPERTY(QSharedPointer<QStaticMesh> StaticMesh READ getStaticMesh WRITE setStaticMesh)
 	Q_PROPERTY(QRhiMaterialGroup* Materials READ getMaterialGroup)

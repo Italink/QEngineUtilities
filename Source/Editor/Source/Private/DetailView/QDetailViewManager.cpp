@@ -18,23 +18,23 @@ QDetailViewManager* QDetailViewManager::Instance()
 	return &ins;
 }
 
-void QDetailViewManager::UnregisterCustomClassLayout(const QMetaObject* InMetaObject) {
+void QDetailViewManager::unregisterCustomClassLayout(const QMetaObject* InMetaObject) {
 	mCustomClassLayoutMap.remove(InMetaObject);
 }
 
-void QDetailViewManager::UnregisterCustomClassLayout(const QMetaType& InMetaType) {
+void QDetailViewManager::unregisterCustomClassLayout(const QMetaType& InMetaType) {
 	mCustomPropertyTypeLayoutMap.remove(InMetaType);
 }
 
-void QDetailViewManager::RegisterCustomPropertyValueWidgetCreator(const QMetaType& InMetaType, CustomPropertyValueWidgetCreator Creator) {
+void QDetailViewManager::registerCustomPropertyValueWidgetCreator(const QMetaType& InMetaType, CustomPropertyValueWidgetCreator Creator) {
 	mCustomPropertyValueWidgetMap.insert(InMetaType, Creator);
 }
 
-void QDetailViewManager::UnregisterCustomPropertyValueWidgeCreator(const QMetaType& InMetaType) {
+void QDetailViewManager::unregisterCustomPropertyValueWidgeCreator(const QMetaType& InMetaType) {
 	mCustomPropertyValueWidgetMap.remove(InMetaType);
 }
 
-QSharedPointer<IDetailCustomization> QDetailViewManager::GetCustomDetailLayout(const QMetaObject* InMetaObject)
+QSharedPointer<IDetailCustomization> QDetailViewManager::getCustomDetailLayout(const QMetaObject* InMetaObject)
 {
 	for(const auto& It: mCustomClassLayoutMap.asKeyValueRange()){
 		if (It.first == InMetaObject){
@@ -49,7 +49,7 @@ QSharedPointer<IDetailCustomization> QDetailViewManager::GetCustomDetailLayout(c
 	return nullptr;
 }
 
-QSharedPointer<IPropertyTypeCustomization> QDetailViewManager::GetCustomPropertyType(const QMetaType& InMetaType) {
+QSharedPointer<IPropertyTypeCustomization> QDetailViewManager::getCustomPropertyType(const QMetaType& InMetaType) {
 	for (const auto& It : mCustomPropertyTypeLayoutMap.asKeyValueRange()) {
 		if (It.first == InMetaType) {
 			return It.second();
@@ -65,39 +65,39 @@ QSharedPointer<IPropertyTypeCustomization> QDetailViewManager::GetCustomProperty
 	return nullptr;
 }
 
-QWidget* QDetailViewManager::GetCustomPropertyValueWidget(QPropertyHandle* InHandler) {
-	if(mCustomPropertyValueWidgetMap.contains(InHandler->GetType())){
-		return mCustomPropertyValueWidgetMap[InHandler->GetType()](InHandler);
+QWidget* QDetailViewManager::getCustomPropertyValueWidget(QPropertyHandle* InHandler) {
+	if(mCustomPropertyValueWidgetMap.contains(InHandler->getType())){
+		return mCustomPropertyValueWidgetMap[InHandler->getType()](InHandler);
 	}
 	return new QWidget;
 }
 
 QDetailViewManager::QDetailViewManager()
 {
-	RegisterBuiltIn();
+	registerBuiltIn();
 }
 
 #define  REGISTER_NUMERIC_TYPE(TypeName) \
-		RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<TypeName>(), [](QPropertyHandle* InHandler) { \
-			TypeName min = InHandler->GetMetaData("Min").toDouble();\
-			TypeName max = InHandler->GetMetaData("Max").toDouble();\
+		registerCustomPropertyValueWidgetCreator(QMetaType::fromType<TypeName>(), [](QPropertyHandle* InHandler) { \
+			TypeName min = InHandler->getMetaData("Min").toDouble();\
+			TypeName max = InHandler->getMetaData("Max").toDouble();\
 			QNumberBox* numberBox = new QNumberBox((TypeName)0.0, min < max, min, max);\
-			InHandler->Bind(numberBox, &QNumberBox::AsValueChanged,\
+			InHandler->bind(numberBox, &QNumberBox::asValueChanged,\
 				[numberBox]() {\
-				return numberBox->GetVar();\
+				return numberBox->getVar();\
 			},\
 			[numberBox](QVariant var) {\
-				numberBox->SetVar(var);\
+				numberBox->setVar(var);\
 			});\
 			return numberBox;\
 		});
 
-void QDetailViewManager::RegisterBuiltIn() {
-	RegisterCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
+void QDetailViewManager::registerBuiltIn() {
+	registerCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;
-		InHandler->Bind(checkBox, &QCheckBox::stateChanged,
+		InHandler->bind(checkBox, &QCheckBox::stateChanged,
 			[checkBox]() {
 			return checkBox->checkState() == Qt::Checked;
 		},
@@ -108,41 +108,41 @@ void QDetailViewManager::RegisterBuiltIn() {
 		return checkBox;
 	});
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QImage>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QImage>(), [](QPropertyHandle* InHandler) {
 		QImageBox* imageBox = new QImageBox;
-		InHandler->Bind(imageBox, &QImageBox::AsImageChanged,
+		InHandler->bind(imageBox, &QImageBox::asImageChanged,
 			[imageBox]() {
-			return imageBox->GetImage();
+			return imageBox->getImage();
 		},
 			[imageBox](QVariant var) {
-			imageBox->SetImage(var.value<QImage>());
+			imageBox->setImage(var.value<QImage>());
 		}
 		);
 		return imageBox;
 	});
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QFont>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QFont>(), [](QPropertyHandle* InHandler) {
 		QFontBox* fontBox = new QFontBox;
-		InHandler->Bind(fontBox, &QFontBox::AsFontChanged,
+		InHandler->bind(fontBox, &QFontBox::asFontChanged,
 			[fontBox]() {
-				return fontBox->GetFont();
+				return fontBox->getFont();
 			},
 			[fontBox](QVariant var) {
-				fontBox->SetFont(var.value<QFont>());
+				fontBox->setFont(var.value<QFont>());
 			}
 		);
 		return fontBox;
 	});
 
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QColor>(), [](QPropertyHandle* InHandler) {
 		QColorButton* colorButton = new QColorButton();
-		InHandler->Bind(colorButton, &QColorButton::AsColorChanged,
+		InHandler->bind(colorButton, &QColorButton::asColorChanged,
 			[colorButton]() {
 				return colorButton->GetColor();
 			},
 			[colorButton](QVariant var) {
-				colorButton->SetColor(var.value<QColor>());
+				colorButton->setColor(var.value<QColor>());
 			}
 		);
 		return colorButton;
@@ -152,53 +152,53 @@ void QDetailViewManager::RegisterBuiltIn() {
 	REGISTER_NUMERIC_TYPE(float);
 	REGISTER_NUMERIC_TYPE(double);
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QString>(), [](QPropertyHandle* InHandler)->QWidget* {
-		const QString& type = InHandler->GetMetaData("Type").toString();
-		const QString& placeholderText = InHandler->GetMetaData("PlaceholderText").toString();
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QString>(), [](QPropertyHandle* InHandler)->QWidget* {
+		const QString& type = InHandler->getMetaData("Type").toString();
+		const QString& placeholderText = InHandler->getMetaData("PlaceholderText").toString();
 		if (type.isEmpty() || type == "Line") {
 			QHoverLineEdit* lineEdit = new QHoverLineEdit();
-			lineEdit->SetPlaceholdText(placeholderText);
-			InHandler->Bind(lineEdit, &QHoverLineEdit::AsTextChanged,
+			lineEdit->setPlaceholdText(placeholderText);
+			InHandler->bind(lineEdit, &QHoverLineEdit::asTextChanged,
 				[lineEdit]() {
-				return  lineEdit->GetText();
+				return  lineEdit->getDisplayText();
 			},
 				[lineEdit](QVariant var) {
-				lineEdit->SetText(var.toString());
+				lineEdit->setDisplayText(var.toString());
 			});
 			return lineEdit;
 		}
 		else if (type == "MultiLine") {
-			const double height = InHandler->GetMetaData("Height").toDouble();
+			const double height = InHandler->getMetaData("Height").toDouble();
 			QHoverTextEdit* textEdit = new QHoverTextEdit();
-			InHandler->Bind(textEdit, &QHoverTextEdit::AsTextChanged,
+			InHandler->bind(textEdit, &QHoverTextEdit::asTextChanged,
 				[textEdit]() {
-				return  textEdit->GetText();
+				return  textEdit->getDisplayText();
 			},
 				[textEdit](QVariant var) {
-				textEdit->SetText(var.toString());
+				textEdit->setDisplayText(var.toString());
 			});
-			textEdit->SetPlaceholdText(placeholderText);
+			textEdit->setPlaceholdText(placeholderText);
 			textEdit->setFixedHeight(height);
 			return textEdit;
 		}
 		else if (type == "FilePath") {
 			QFilePathBox* filePathBox = new QFilePathBox("");
-			InHandler->Bind(filePathBox, &QFilePathBox::AsPathChanged,
+			InHandler->bind(filePathBox, &QFilePathBox::asPathChanged,
 				[filePathBox]() {
-				return  filePathBox->GetFilePath();
+				return  filePathBox->getFilePath();
 			},
 				[filePathBox](QVariant var) {
-				filePathBox->SetFilePath(var.toString());
+				filePathBox->setFilePath(var.toString());
 			});
 			return filePathBox;
 		}
 		else if (type == "Combo") {
 			QComboBox* comboBox = new QComboBox();
-			QStringList comboList = InHandler->GetMetaData("ComboList").toStringList();
+			QStringList comboList = InHandler->getMetaData("ComboList").toStringList();
 ;			for (auto item : comboList) {
 				comboBox->addItem(item);
 			}
-			InHandler->Bind(comboBox, &QComboBox::currentTextChanged,
+			InHandler->bind(comboBox, &QComboBox::currentTextChanged,
 				[comboBox]() {
 				return comboBox->currentText();
 			},
@@ -211,36 +211,36 @@ void QDetailViewManager::RegisterBuiltIn() {
 		return nullptr;
 	});
 
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector2D>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector2D>(), [](QPropertyHandle* InHandler) {
 		QVector2DBox* vec2Box = new QVector2DBox();
-		InHandler->Bind(vec2Box, &QVector2DBox::AsValueChanged,
+		InHandler->bind(vec2Box, &QVector2DBox::asValueChanged,
 			[vec2Box]() {
-			return vec2Box->GetValue();
+			return vec2Box->getValue();
 		},
 			[vec2Box](QVariant var) {
-			vec2Box->SetValue(var.value<QVector2D>());
+			vec2Box->setValue(var.value<QVector2D>());
 		});
 		return vec2Box;
 	});
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector3D>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector3D>(), [](QPropertyHandle* InHandler) {
 		QVector3DBox* vec3Box = new QVector3DBox();
-		InHandler->Bind(vec3Box, &QVector3DBox::AsValueChanged,
+		InHandler->bind(vec3Box, &QVector3DBox::asValueChanged,
 			[vec3Box]() {
-			return vec3Box->GetValue();
+			return vec3Box->getValue();
 		},
 			[vec3Box](QVariant var) {
-			vec3Box->SetValue(var.value<QVector3D>());
+			vec3Box->setValue(var.value<QVector3D>());
 		});
 		return vec3Box;
 	});
-	RegisterCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector4D>(), [](QPropertyHandle* InHandler) {
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector4D>(), [](QPropertyHandle* InHandler) {
 		QVector4DBox* vec4Box = new QVector4DBox();
-		InHandler->Bind(vec4Box, &QVector4DBox::AsValueChanged,
+		InHandler->bind(vec4Box, &QVector4DBox::asValueChanged,
 			[vec4Box]() {
-			return vec4Box->GetValue();
+			return vec4Box->getValue();
 		},
 			[vec4Box](QVariant var) {
-			vec4Box->SetValue(var.value<QVector4D>());
+			vec4Box->setValue(var.value<QVector4D>());
 		});
 		return vec4Box;
 	});

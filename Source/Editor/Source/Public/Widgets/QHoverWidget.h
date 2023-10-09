@@ -7,17 +7,16 @@
 
 class QENGINEEDITOR_API QHoverWidget :public QWidget {
 	Q_OBJECT
-	Q_PROPERTY(QColor HoverColor READ GetHoverColor WRITE SetHoverColor)
+	Q_PROPERTY(QColor HoverColor READ getHoverColor WRITE setHoverColor)
 public:
 	using QWidget::QWidget;
-	QColor GetHoverColor() const { return mHoverColor; }
-	void SetHoverColor(QColor val) { mHoverColor = val; }
+	QColor getHoverColor() const { return mHoverColor; }
+	void setHoverColor(QColor val) { mHoverColor = val; }
 
-	bool GetHoverEnabled() const { return mHoverEnabled; }
-
-	void SetHoverEnabled(bool val) { mHoverEnabled = val; }
+	bool isHoverEnabled() const { return mHoverEnabled; }
+	void setHoverEnabled(bool val) { mHoverEnabled = val; }
 protected:
-	virtual void SetHoverd(bool hoverd) {
+	virtual void setHoverd(bool hoverd) {
 		if (hoverd != mHoverd) {
 			mHoverd = hoverd;
 			update();
@@ -26,10 +25,10 @@ protected:
 
 	virtual void enterEvent(QEnterEvent* event) override {
 		QWidget::enterEvent(event);
-		SetHoverd(true);
+		setHoverd(true);
 	}
 	virtual void leaveEvent(QEvent* event) override {
-		SetHoverd(false);
+		setHoverd(false);
 	}
 
 	void paintEvent(QPaintEvent* event) override {
@@ -43,7 +42,7 @@ protected:
 	}
 	void focusOutEvent(QFocusEvent* event) override {
 		QWidget::focusOutEvent(event);
-		SetHoverd(false);
+		setHoverd(false);
 	}
 protected:
 	QColor mHoverColor;

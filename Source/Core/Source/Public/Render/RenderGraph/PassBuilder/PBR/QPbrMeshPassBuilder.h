@@ -2,9 +2,8 @@
 #define QPbrMeshPassBuilder_h__
 
 #include "Render/RenderGraph/PassBuilder/IMeshPassBuilder.h"
-#include "QEngineUtilitiesAPI.h"
 
-class QENGINEUTILITIES_API QPbrMeshPassBuilder : public IMeshPassBuilder {
+class QENGINECORE_API QPbrMeshPassBuilder : public IMeshPassBuilder {
 	friend class QRenderGraphBuilder;
 public:
 	QRP_INPUT_BEGIN(QPbrMeshPassBuilder)

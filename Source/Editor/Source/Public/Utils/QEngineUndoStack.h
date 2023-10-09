@@ -12,11 +12,11 @@ class QENGINEEDITOR_API QEngineUndoStack : public QUndoStack {
 	Q_OBJECT
 public:
 	static QEngineUndoStack* Instance();
-	void AddEntry(QEngineUndoEntry* entry);
-	void RemoveEntry(QEngineUndoEntry* entry);
-	void Push(QEngineUndoEntry* entry, QUndoCommand* cmd);
-	void Undo();
-	void Redo();
+	void addEntry(QEngineUndoEntry* entry);
+	void removeEntry(QEngineUndoEntry* entry);
+	void push(QEngineUndoEntry* entry, QUndoCommand* cmd);
+	void undo();
+	void redo();
 private:
 	QList<QEngineUndoEntry*> mEntryList;
 	QMap<const QUndoCommand*, QEngineUndoEntry*> mCommandToEntry;
@@ -28,12 +28,12 @@ class QENGINEEDITOR_API QEngineUndoEntry: public QObject {
 public:
 	QEngineUndoEntry(QObject *inParent = nullptr);
 	~QEngineUndoEntry();
-	void BeginMacro(const QString& text);
-	void Push(QUndoCommand* cmd);
-	void EndMacro();
+	void beginMacro(const QString& text);
+	void push(QUndoCommand* cmd);
+	void endMacro();
 Q_SIGNALS:
-	void AsUndo();
-	void AsRedo();
+	void asUndo();
+	void asRedo();
 };
 
 #endif // QEngineUndoStack_h__

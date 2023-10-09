@@ -7,7 +7,7 @@ class QEnumPropertyHandleImpl: public IPropertyHandleImpl {
 public:
 	QEnumPropertyHandleImpl(QPropertyHandle* InHandle);
 protected:
-	QWidget* GenerateValueWidget() override;
+	QWidget* generateValueWidget() override;
 private:
 	QHash<QString, int> mNameToValueMap;
 };

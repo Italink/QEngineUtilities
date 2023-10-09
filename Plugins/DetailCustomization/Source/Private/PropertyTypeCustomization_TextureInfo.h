@@ -5,7 +5,7 @@
 
 class PropertyTypeCustomization_TextureInfo :public IPropertyTypeCustomization{
 public:
-	void CustomizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
+	void customizeHeader(QPropertyHandle* PropertyHandle, IHeaderRowBuilder* Builder) override;
 };
 
 #endif // PropertyTypeCustomization_TextureInfo_h__

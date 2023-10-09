@@ -32,7 +32,7 @@
 class QENGINEEDITOR_API ColorPreview : public QWidget
 {
 	Q_OBJECT
-		Q_PROPERTY(QColor color READ color WRITE SetColor NOTIFY OnColorChanged DESIGNABLE true)
+		Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY OnColorChanged DESIGNABLE true)
 		Q_PROPERTY(QColor comparisonColor READ comparisonColor WRITE setComparisonColor NOTIFY comparisonColorChanged DESIGNABLE true)
 		Q_PROPERTY(DisplayMode display_mode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged DESIGNABLE true)
 		Q_PROPERTY(QBrush background READ background WRITE setBackground NOTIFY backgroundChanged DESIGNABLE true)
@@ -80,7 +80,7 @@ public:
 
 public Q_SLOTS:
 	/// Set current color
-	void SetColor(const QColor& c);
+	void setColor(const QColor& c);
 
 	/// Set the comparison color
 	void setComparisonColor(const QColor& c);

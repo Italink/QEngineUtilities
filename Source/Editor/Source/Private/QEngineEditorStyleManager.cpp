@@ -14,54 +14,54 @@ QEngineEditorStyleManager::QEngineEditorStyleManager()
 	QStringList families = QFontDatabase::applicationFontFamilies(id);
 	mFont = QFont(families.first(), 12);
 	qApp->setFont(mFont);
-	SetStyle(mCurrentStyle);
+	setStyle(mCurrentStyle);
 }
 
-QByteArray QEngineEditorStyleManager::GetStylesheet() {
+QByteArray QEngineEditorStyleManager::getStylesheet() {
 	return mStyleSheet;
 }
 
-QColor QEngineEditorStyleManager::GetGridLineColor() const {
+QColor QEngineEditorStyleManager::getGridLineColor() const {
 	return mGridLineColor;
 }
 
-void QEngineEditorStyleManager::SetGridLineColor(QColor val) {
+void QEngineEditorStyleManager::setGridLineColor(QColor val) {
 	mGridLineColor = val;
 }
 
-QColor QEngineEditorStyleManager::GetShadowColor() const {
+QColor QEngineEditorStyleManager::getShadowColor() const {
 	return mShadowColor;
 }
 
-void QEngineEditorStyleManager::SetShadowColor(QColor val) {
+void QEngineEditorStyleManager::setShadowColor(QColor val) {
 	mShadowColor = val;
 }
 
-QColor QEngineEditorStyleManager::GetCategoryColor() const {
+QColor QEngineEditorStyleManager::getCategoryColor() const {
 	return mCategoryColor;
 }
 
-void QEngineEditorStyleManager::SetCategoryColor(QColor val) {
+void QEngineEditorStyleManager::setCategoryColor(QColor val) {
 	mCategoryColor = val;
 }
 
-QColor QEngineEditorStyleManager::GetHoveredColor() const {
+QColor QEngineEditorStyleManager::getHoveredColor() const {
 	return mHoveredColor;
 }
 
-void QEngineEditorStyleManager::SetHoveredColor(QColor val) {
+void QEngineEditorStyleManager::setHoveredColor(QColor val) {
 	mHoveredColor = val;
 }
 
-QColor QEngineEditorStyleManager::GetIconColor() const {
-	return QSvgIcon::GetIconColor();
+QColor QEngineEditorStyleManager::getIconColor() const {
+	return QSvgIcon::getIconColor();
 }
 
-void QEngineEditorStyleManager::SetIconColor(QColor val) {
+void QEngineEditorStyleManager::setIconColor(QColor val) {
 	QSvgIcon::setIconColor(val);
 }
 
-void QEngineEditorStyleManager::SetStyle(QDetailWidgetStyle inStyle) {
+void QEngineEditorStyleManager::setStyle(QDetailWidgetStyle inStyle) {
 	if (inStyle == QDetailWidgetStyle::Unreal) {
 		mShadowColor = QColor(5, 5, 5);
 		mGridLineColor = QColor(5, 5, 5);

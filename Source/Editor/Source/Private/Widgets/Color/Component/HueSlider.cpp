@@ -111,7 +111,7 @@ QColor HueSlider::color() const
 	return QColor::fromHsvF(colorHue(), p->saturation, p->value, p->alpha);
 }
 
-void HueSlider::SetColor(const QColor& color)
+void HueSlider::setColor(const QColor& color)
 {
 	p->saturation = color.saturationF();
 	p->value = color.valueF();
@@ -124,7 +124,7 @@ void HueSlider::SetColor(const QColor& color)
 void HueSlider::setFullColor(const QColor& color)
 {
 	p->alpha = color.alphaF();
-	SetColor(color);
+	setColor(color);
 	Q_EMIT colorAlphaChanged(p->alpha);
 }
 

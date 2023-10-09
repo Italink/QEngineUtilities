@@ -48,7 +48,7 @@ void QSvgIcon::setIconColor(QColor color) {
 	}
 }
 
-QColor QSvgIcon::GetIconColor()
+QColor QSvgIcon::getIconColor()
 {
 	return mDefaultColor;
 }

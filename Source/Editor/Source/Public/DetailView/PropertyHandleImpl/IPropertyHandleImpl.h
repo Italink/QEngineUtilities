@@ -10,11 +10,11 @@ protected:
 	IPropertyHandleImpl(QPropertyHandle* InHandle){
 		mHandle = InHandle;
 	}
-	virtual QPropertyHandle* FindChildHandle(const QString& inSubName);
-	virtual QPropertyHandle* CreateChildHandle(const QString& inSubName);
-	virtual QWidget* GenerateNameWidget();
-	virtual QWidget* GenerateValueWidget();
-	virtual void GenerateChildrenRow(QRowLayoutBuilder* Builder) {}
+	virtual QPropertyHandle* findChildHandle(const QString& inSubName);
+	virtual QPropertyHandle* createChildHandle(const QString& inSubName);
+	virtual QWidget* generateNameWidget();
+	virtual QWidget* generateValueWidget();
+	virtual void generateChildrenRow(QRowLayoutBuilder* Builder) {}
 protected:
 	QPropertyHandle* mHandle;
 };
