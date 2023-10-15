@@ -4,17 +4,19 @@
 QEngineApplication::QEngineApplication(int& argc, char** argv)
 	: QApplication(argc,argv)
 {
-	//QEnginePluginManager::Get().loadConfig(QENGINE_PLUGINS_JSON_FILE);
-	QEnginePluginManager::Get().startupPlugins("Runtime");
-#ifdef QENGINE_WITH_EDITOR
-	QEnginePluginManager::Get().startupPlugins("Editor");
+	QEnginePluginManager::Get().loadPlugins();
+	for (auto& pluginInfo : QEnginePluginManager::Get().getPluginMap()) {
+#ifndef QENGINE_WITH_EDITOR
+		if (pluginInfo.plugin->type() == IEnginePlugin::Core)
 #endif
+		pluginInfo.startup();
+	}
 }
 
 QEngineApplication::~QEngineApplication() {
-	QEnginePluginManager::Get().shutdownPlugins("Runtime");
-#ifdef QENGINE_WITH_EDITOR
-	QEnginePluginManager::Get().shutdownPlugins("Editor");
-#endif
+	for (auto& pluginInfo : QEnginePluginManager::Get().getPluginMap()) {
+		pluginInfo.shutdown();
+	}
+	QEnginePluginManager::TearDown();
 }
 

@@ -6,6 +6,7 @@
 
 class RenderDocPlugin: public IEnginePlugin {
 protected:
+	Type type() override { return IEnginePlugin::Editor; }
 	void startup() override;
 	void shutdown() override;
 private:

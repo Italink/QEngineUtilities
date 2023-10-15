@@ -9,9 +9,23 @@
 
 
 struct QENGINECORE_API QEnginePluginInfo {
-	QString type;
+	bool bAlreadyStarted = false;
 	QSharedPointer<QLibrary> handle;
 	QSharedPointer<IEnginePlugin> plugin;
+
+	void startup() {
+		if (!bAlreadyStarted) {
+			bAlreadyStarted = true;
+			plugin->startup();
+		}
+	}
+
+	void shutdown() {
+		if (bAlreadyStarted) {
+			plugin->shutdown();
+			bAlreadyStarted = false;
+		}
+	}
 };
 
 class QENGINECORE_API QEnginePluginManager {
@@ -19,13 +33,9 @@ public:
 	static QEnginePluginManager& Get();
 	static void TearDown();
 
-	void loadConfig(const QString& inConfigJsonFilename);
+	void loadPlugins();
 
-	void startupPlugins(const QString& inType);
-	void shutdownPlugins(const QString& inType);
-
-	void startupPlugin(const QString& inName);
-	void shutdownPlugin(const QString& inName);
+	QMap<QString, QEnginePluginInfo>& getPluginMap();
 private:
 	static QSharedPointer<QEnginePluginManager>& GetSingleton();
 private:

@@ -5,7 +5,13 @@
 
 class QENGINECORE_API IEnginePlugin {
 public:
+	enum Type {
+		Core,
+		Editor
+	};
+
 	virtual ~IEnginePlugin(){}
+	virtual Type type() = 0;
 	virtual void startup() {}
 	virtual void shutdown() {}
 };

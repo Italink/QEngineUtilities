@@ -66,8 +66,8 @@ endmacro()
 
 macro(qengine_add_target TARGET_NAME)
     set(prefix QENGINE)
-    set(options ENABLE_MOC)
-    set(one_value_keywords SOURCE_GROUP QRC_FILE PLUGIN_TYPE)
+    set(options ENABLE_MOC QENGINE_PLUGIN)
+    set(one_value_keywords SOURCE_GROUP QRC_FILE)
     set(multi_value_keywords PUBLIC_DEPENDENCY PRIVATE_DEPENDENCY PUBLIC_INCLUDE PRIVATE_INCLUDE PUBLIC_DEFINITIONS PRIVATE_DEFINITIONS)
     cmake_parse_arguments(${prefix} "${options}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
     
@@ -93,10 +93,15 @@ macro(qengine_add_target TARGET_NAME)
     endif()
 
     if(NOT QENGINE_SOURCE_GROUP)
-        if(QENGINE_PLUGIN_TYPE)
-            set(QENGINE_SOURCE_GROUP "${QENGINE_SOURCE_GROUP_PREFIX}/Plugins")
+        if(QENGINE_QENGINE_PLUGIN)
+            set_target_properties(${TARGET_NAME} PROPERTIES 
+                QENGINE_PLUGIN TRUE
+                FOLDER "${QENGINE_SOURCE_GROUP_PREFIX}/Plugins"
+            )
         else()
-            set(QENGINE_SOURCE_GROUP "${QENGINE_SOURCE_GROUP_PREFIX}")
+            set_target_properties(${TARGET_NAME} PROPERTIES 
+                FOLDER "${QENGINE_SOURCE_GROUP_PREFIX}"
+            )
         endif()
     endif()
     set_property(GLOBAL APPEND PROPERTY QENGINE_TARGET_LIST "${TARGET_NAME}")
@@ -107,30 +112,27 @@ macro(qengine_add_target TARGET_NAME)
     target_link_libraries(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEPENDENCY})
     target_compile_definitions(${TARGET_NAME} PUBLIC ${QENGINE_PUBLIC_DEFINITIONS})
     target_compile_definitions(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEFINITIONS})
-    set_target_properties(${TARGET_NAME} PROPERTIES 
-        FOLDER ${QENGINE_SOURCE_GROUP}
-    )
     qengine_generate_export_header(${TARGET_NAME})
 endmacro()
 
-macro(qengine_copy_dll TARGET_NAME)
-    get_property(QENGINE_TARGET_LIST GLOBAL PROPERTY QENGINE_TARGET_LIST)
 
+macro(qengine_copy_dll TARGET_NAME)
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E 
         make_directory ${CMAKE_CURRENT_BINARY_DIR}/Plugins/)
-
+    get_property(QENGINE_TARGET_LIST GLOBAL PROPERTY QENGINE_TARGET_LIST)
     foreach(QENGINE_TARGET ${QENGINE_TARGET_LIST})
-        get_target_property(PLUGIN_TYPE ${QENGINE_TARGET} PLUGIN_TYPE)
-        if(PLUGIN_TYPE)
+        get_target_property(TARGET_FILE_NAME ${QENGINE_TARGET} TARGET_FILE)
+        get_target_property(QENGINE_PLUGIN ${QENGINE_TARGET} QENGINE_PLUGIN)
+        if(QENGINE_PLUGIN)
             add_dependencies(${TARGET_NAME} ${QENGINE_TARGET})
             add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-              COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
+              COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
               COMMAND_EXPAND_LISTS
             )
         else()
             add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-              COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}
+              COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}
               COMMAND_EXPAND_LISTS
             )
         endif()

@@ -4,7 +4,8 @@
 #include "Plugin/IEnginePlugin.h"
 
 class CorePlugin: public IEnginePlugin {
-protected:
+protected:	
+	Type type() override { return IEnginePlugin::Core; }
 	void startup() override;
 	void shutdown() override;
 };

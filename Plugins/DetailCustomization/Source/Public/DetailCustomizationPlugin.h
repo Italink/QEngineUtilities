@@ -4,7 +4,8 @@
 #include "Plugin/IEnginePlugin.h"
 
 class DetailCustomizationPlugin : public IEnginePlugin {
-protected:
+protected:	
+	Type type() override { return IEnginePlugin::Editor; }
 	void startup() override;
 	void shutdown() override;
 };

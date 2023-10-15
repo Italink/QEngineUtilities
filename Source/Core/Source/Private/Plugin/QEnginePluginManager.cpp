@@ -2,6 +2,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
+#include <QDir>
 
 typedef IEnginePlugin* (*InitializePluginFunc)();
 
@@ -13,55 +14,33 @@ void QEnginePluginManager::TearDown() {
 	GetSingleton().reset();
 }
 
-void QEnginePluginManager::loadConfig(const QString& inConfigJsonFilename) {
-	QFile file(inConfigJsonFilename);
-	file.open(QFile::ReadOnly);
-	auto config = QJsonDocument::fromJson(file.readAll()).object();
-	for (auto pluginName : config.keys()) {
-		QEnginePluginInfo info;
-		auto value = config[pluginName].toObject();
-		info.type = value["Type"].toString();
-		info.handle.reset(new QLibrary(pluginName + ".dll"));
-		if (info.handle->load()) {
-			InitializePluginFunc InitializePlugin = (InitializePluginFunc)info.handle->resolve("InitializePlugin");
-			if (InitializePlugin) {
-				info.plugin.reset(InitializePlugin());
-				qDebug() << QString("Load %1 Success").arg(info.handle->fileName()).toLatin1().constData();
+void QEnginePluginManager::loadPlugins() {
+	//const QString PATH(QLatin1StringView(qgetenv("PATH")));
+	//QStringList pathList = PATH.split(u';', Qt::SkipEmptyParts);
+	//qDebug() << pathList;
+	QDir pluginDir("./Plugins");
+	for (const QFileInfo& fileInfo : pluginDir.entryInfoList(QDir::Files, QDir::IgnoreCase)) {
+		if (fileInfo.suffix().compare("dll", Qt::CaseInsensitive) == 0) {
+			QEnginePluginInfo info;
+			info.handle.reset(new QLibrary(fileInfo.filePath()));
+			if (info.handle->load()) {
+				InitializePluginFunc InitializePlugin = (InitializePluginFunc)info.handle->resolve("InitializePlugin");
+				if (InitializePlugin) {
+					info.plugin.reset(InitializePlugin());
+					mPluginMap[fileInfo.baseName()] = info;
+					qDebug() << QString("-Load %1 Success").arg(info.handle->fileName()).toLatin1().constData();
+				}
+				else {
+					qDebug() << QString("-Load %1 Failed").arg(info.handle->fileName()).toLatin1().constData();
+				}
 			}
-			else {
-				qDebug() << QString("Load %1 Failed").arg(info.handle->fileName()).toLatin1().constData();
-			}
-		}
-		mPluginMap.insert(pluginName, info);
-	}
-}
-
-void QEnginePluginManager::startupPlugins(const QString& inType) {
-	for (const auto& plugin : mPluginMap) {
-		if (inType.contains(plugin.type) && plugin.plugin != nullptr) {
-			plugin.plugin->startup();
 		}
 	}
 }
 
-void QEnginePluginManager::shutdownPlugins(const QString& inType) {
-	for (const auto& plugin : mPluginMap) {
-		if (inType.contains(plugin.type) && plugin.plugin != nullptr) {
-			plugin.plugin->shutdown();
-		}
-	}
-}
-
-void QEnginePluginManager::startupPlugin(const QString& inName) {
-	if (mPluginMap.contains(inName)) {
-		mPluginMap.value(inName).plugin->startup();
-	}
-}
-
-void QEnginePluginManager::shutdownPlugin(const QString& inName) {
-	if (mPluginMap.contains(inName)) {
-		mPluginMap.value(inName).plugin->shutdown();
-	}
+QMap<QString, QEnginePluginInfo>& QEnginePluginManager::getPluginMap()
+{
+	return mPluginMap;
 }
 
 QSharedPointer<QEnginePluginManager>& QEnginePluginManager::GetSingleton() {
