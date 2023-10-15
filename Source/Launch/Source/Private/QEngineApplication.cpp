@@ -4,7 +4,7 @@
 QEngineApplication::QEngineApplication(int& argc, char** argv)
 	: QApplication(argc,argv)
 {
-	QEnginePluginManager::Get().loadConfig(QENGINE_PLUGINS_JSON_FILE);
+	//QEnginePluginManager::Get().loadConfig(QENGINE_PLUGINS_JSON_FILE);
 	QEnginePluginManager::Get().startupPlugins("Runtime");
 #ifdef QENGINE_WITH_EDITOR
 	QEnginePluginManager::Get().startupPlugins("Editor");

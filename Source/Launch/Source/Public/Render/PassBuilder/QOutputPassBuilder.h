@@ -2,12 +2,12 @@
 #define QOutputPassBuilder_h__
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
-#include "QEngineUtilitiesAPI.h"
+#include "QEngineLaunchAPI.h"
 #include "Render/IRenderer.h"
 #include "Render/Painter/DebugUiPainter.h"
 #include "Render/RenderGraph/PassBuilder/QMousePickingPassBuilder.h"
 
-class QENGINEUTILITIES_API QOutputPassBuilder : public::IRenderPassBuilder {
+class QENGINELAUNCH_API QOutputPassBuilder : public::IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QOutputPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, InitialTexture);
 	QRP_INPUT_END()

@@ -1,0 +1,9 @@
+qengine_add_target(QEngineLaunch
+    ENABLE_MOC
+    PUBLIC_DEPENDENCY   
+        QEngineCore
+    PRIVATE_DEPENDENCY
+        $<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QEngineEditor>
+    PUBLIC_DEFINITIONS
+        "$<$<OR:$<CONFIG:DebugEditor>,$<CONFIG:ReleaseEditor>>:QENGINE_WITH_EDITOR>"
+)

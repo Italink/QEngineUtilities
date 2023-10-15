@@ -40,10 +40,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-
-set(QENGINE_BINARIES_DIR ${CMAKE_CURRENT_LIST_DIR}/Binaries CACHE INTERNAL "QENGINE_BINARIES_DIR")
-
 set_property(GLOBAL PROPERTY QENGINE_TARGET_LIST "")
+if(NOT QENGINE_SOURCE_GROUP_PREFIX)
+    set(QENGINE_SOURCE_GROUP_PREFIX "QEngineUtilities" CACHE INTERNAL "")
+endif()
 
 macro(qengine_generate_export_header TARGET_NAME)
     set(EXPORT_HEADER_PATH ${CMAKE_CURRENT_LIST_DIR}/Source/Public/${TARGET_NAME}API.h)
@@ -92,18 +92,13 @@ macro(qengine_add_target TARGET_NAME)
         set_property(TARGET ${TARGET_NAME} PROPERTY AUTOMOC ON)
     endif()
 
-    if(QENGINE_PLUGIN_TYPE)
-        set_target_properties(${TARGET_NAME} PROPERTIES PLUGIN_TYPE ${QENGINE_PLUGIN_TYPE})
-    endif()
-
     if(NOT QENGINE_SOURCE_GROUP)
         if(QENGINE_PLUGIN_TYPE)
-            set(QENGINE_SOURCE_GROUP "QEngineUtilities/Plugins/${QENGINE_PLUGIN_TYPE}")
+            set(QENGINE_SOURCE_GROUP "${QENGINE_SOURCE_GROUP_PREFIX}/Plugins")
         else()
-            set(QENGINE_SOURCE_GROUP "QEngineUtilities")
+            set(QENGINE_SOURCE_GROUP "${QENGINE_SOURCE_GROUP_PREFIX}")
         endif()
     endif()
-
     set_property(GLOBAL APPEND PROPERTY QENGINE_TARGET_LIST "${TARGET_NAME}")
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${PROJECT_SOURCE})
     target_include_directories(${TARGET_NAME} PUBLIC  ${QENGINE_PUBLIC_INCLUDE}) 
@@ -114,14 +109,32 @@ macro(qengine_add_target TARGET_NAME)
     target_compile_definitions(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEFINITIONS})
     set_target_properties(${TARGET_NAME} PROPERTIES 
         FOLDER ${QENGINE_SOURCE_GROUP}
-        RUNTIME_OUTPUT_DIRECTORY "${QENGINE_BINARIES_DIR}/$<0:>"
     )
     qengine_generate_export_header(${TARGET_NAME})
 endmacro()
 
-macro(qengine_setup_env TARGET_NAME)
-    set_target_properties(${TARGET_NAME} PROPERTIES 
-          VS_DEBUGGER_ENVIRONMENT  "PATH=%PATH%;${QENGINE_BINARIES_DIR}")
+macro(qengine_copy_dll TARGET_NAME)
+    get_property(QENGINE_TARGET_LIST GLOBAL PROPERTY QENGINE_TARGET_LIST)
+
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E 
+        make_directory ${CMAKE_CURRENT_BINARY_DIR}/Plugins/)
+
+    foreach(QENGINE_TARGET ${QENGINE_TARGET_LIST})
+        get_target_property(PLUGIN_TYPE ${QENGINE_TARGET} PLUGIN_TYPE)
+        if(PLUGIN_TYPE)
+            add_dependencies(${TARGET_NAME} ${QENGINE_TARGET})
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+              COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
+              COMMAND_EXPAND_LISTS
+            )
+        else()
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+              COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}
+              COMMAND_EXPAND_LISTS
+            )
+        endif()
+    endforeach()
 endmacro()
 
 add_subdirectory(3rdParty)
@@ -135,7 +148,8 @@ foreach(PLUGIN_DIR ${PLUGIN_DIR_LIST})
     endif()
 endforeach()
 
-add_subdirectory(Source/Engine)
+add_subdirectory(Source/Launch)
 
-add_subdirectory(Examples)
-
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(Examples)
+endif()

@@ -1,0 +1,12 @@
+#ifndef QENGINELAUNCH_API_H
+#define QENGINELAUNCH_API_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(QENGINELAUNCH_LIBRARY)
+#  define QENGINELAUNCH_API Q_DECL_EXPORT
+#else
+#  define QENGINELAUNCH_API Q_DECL_IMPORT
+#endif
+
+#endif // QENGINELAUNCH_API_H

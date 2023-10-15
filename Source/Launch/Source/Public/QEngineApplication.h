@@ -2,9 +2,9 @@
 #define QEngineApplication_h__
 
 #include <QApplication>
-#include "QEngineUtilitiesAPI.h"
+#include "QEngineLaunchAPI.h"
 
-class QENGINEUTILITIES_API QEngineApplication : public QApplication {
+class QENGINELAUNCH_API QEngineApplication : public QApplication {
 public:
 	QEngineApplication(int& argc, char** argv);
 	virtual ~QEngineApplication();

@@ -8,5 +8,4 @@ qengine_add_target(QEngineEditor
         Qt::Multimedia
         QScintilla
     QRC_FILE Resources.qrc
-    SOURCE_GROUP "QEngineUtilities"
 )

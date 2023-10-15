@@ -14,5 +14,4 @@ qengine_add_target(QEngineCore
         ImGuizmo
     PUBLIC_INCLUDE
         ../../3rdParty/fftw3/api
-    SOURCE_GROUP "QEngineUtilities"
 )

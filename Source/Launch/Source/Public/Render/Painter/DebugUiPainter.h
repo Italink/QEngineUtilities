@@ -4,7 +4,7 @@
 #define DebugUiPainter_h__
 
 #include "GraphEditor.h"
-#include "QEngineUtilitiesAPI.h"
+#include "QEngineLaunchAPI.h"
 #include "Render/ISceneRenderComponent.h"
 #include "Render/RenderGraph/Painter/ImGuiPainter.h"
 #include "Render/QPrimitiveRenderProxy.h"
@@ -16,7 +16,7 @@
 
 class RenderGraphView;
 
-class QENGINEUTILITIES_API QDebugUIPainter: public ImGuiPainter {
+class QENGINELAUNCH_API QDebugUIPainter: public ImGuiPainter {
 	Q_OBJECT
 protected:
 	ImGuiWindowFlags mViewportBarFlags;

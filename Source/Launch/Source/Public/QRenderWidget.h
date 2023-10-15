@@ -2,7 +2,7 @@
 #define QRenderWidget_h__
 
 #include "QWidget"
-#include "QEngineUtilitiesAPI.h"
+#include "QEngineLaunchAPI.h"
 
 class QFrameGraph;
 class QInnerRhiWindow;
@@ -10,7 +10,7 @@ class QWindowRenderer;
 class QDetailView;
 class IRenderer;
 
-class QENGINEUTILITIES_API QRenderWidget :public QWidget {
+class QENGINELAUNCH_API QRenderWidget :public QWidget {
 public:
 	QRenderWidget(IRenderer* renderer);
 protected:
