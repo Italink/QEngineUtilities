@@ -90,7 +90,7 @@ void QNumberBox::setVar(QVariant var)
 void QNumberBox::mousePressEvent(QMouseEvent* event)
 {
 	if (event->buttons() & Qt::LeftButton) {
-		mClickPosition = event->pos();
+		mClickPosition = event->globalPos();
 		if (getEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
 			setEditEnabled(false);
 		}
@@ -104,7 +104,7 @@ void QNumberBox::mouseReleaseEvent(QMouseEvent* event)
 			setCursor(Qt::CursorShape::SizeHorCursor);
 			mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 		}
-		else if (mClickPosition == event->pos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
+		else if (mClickPosition == event->globalPos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
 			setEditEnabled(true);
 		}
 	}
@@ -115,7 +115,7 @@ void QNumberBox::mouseMoveEvent(QMouseEvent* event)
 	if (!getEditEnabled() && event->buttons() & Qt::LeftButton) {
 		setCursor(Qt::BlankCursor);
 		mLbArrow->setCursor(Qt::CursorShape::BlankCursor);
-		QPointF offset = event->position() - mClickPosition;
+		QPointF offset = event->globalPos() - mClickPosition;
 		QVariant lastVar = mNumberAdaptor->getVar();
 		mNumberAdaptor->moveOffset(offset);
 		QVariant currentVar = mNumberAdaptor->getVar();
@@ -123,7 +123,7 @@ void QNumberBox::mouseMoveEvent(QMouseEvent* event)
 			Q_EMIT asValueChanged(mNumberAdaptor->getVar());
 		}
 		mLeValue->setText(mNumberAdaptor->getDisplayText());
-		QCursor::setPos(mapToGlobal(mClickPosition.toPoint()));
+		QCursor::setPos(mClickPosition.toPoint());
 	}
 }
 

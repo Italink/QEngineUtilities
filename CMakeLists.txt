@@ -116,27 +116,25 @@ macro(qengine_add_target TARGET_NAME)
 endmacro()
 
 
-macro(qengine_copy_dll TARGET_NAME)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E 
-        make_directory ${CMAKE_CURRENT_BINARY_DIR}/Plugins/)
+macro(qengine_make_copy_target TARGET_NAME)
     get_property(QENGINE_TARGET_LIST GLOBAL PROPERTY QENGINE_TARGET_LIST)
+    set(QENGINE_TARGET_FILE_GENEX "")
+    set(QENGINE_PLUGIN_TARGET_FILE_GENEX "")
+
     foreach(QENGINE_TARGET ${QENGINE_TARGET_LIST})
-        get_target_property(TARGET_FILE_NAME ${QENGINE_TARGET} TARGET_FILE)
         get_target_property(QENGINE_PLUGIN ${QENGINE_TARGET} QENGINE_PLUGIN)
         if(QENGINE_PLUGIN)
-            add_dependencies(${TARGET_NAME} ${QENGINE_TARGET})
-            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-              COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
-              COMMAND_EXPAND_LISTS
-            )
+            list(APPEND QENGINE_PLUGIN_TARGET_FILE_GENEX "$<TARGET_FILE:${QENGINE_TARGET}>")
         else()
-            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-              COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${QENGINE_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}
-              COMMAND_EXPAND_LISTS
-            )
+            list(APPEND QENGINE_TARGET_FILE_GENEX "$<TARGET_FILE:${QENGINE_TARGET}>")
         endif()
     endforeach()
+
+    add_custom_target(${TARGET_NAME}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
+        COMMAND ${CMAKE_COMMAND} -E copy ${QENGINE_TARGET_FILE_GENEX} ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${QENGINE_PLUGIN_TARGET_FILE_GENEX} ${CMAKE_CURRENT_BINARY_DIR}/Plugins/
+    )
 endmacro()
 
 add_subdirectory(3rdParty)

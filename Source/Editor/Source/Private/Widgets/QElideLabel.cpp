@@ -1,9 +1,9 @@
 ﻿#include "Widgets/QElideLabel.h"
 #include "Widgets/QHoverLineEdit.h"
-#include "QBoxLayout"
-#include "QPainter"
-#include "QFontMetrics"
-#include "QStyleOption"
+#include <QBoxLayout>
+#include <QPainter>
+#include <QFontMetrics>
+#include <QStyleOption>
 
 QElideLabel::QElideLabel(const QString& inText)
 	: mText(inText)
