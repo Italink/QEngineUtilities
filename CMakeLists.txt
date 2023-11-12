@@ -48,7 +48,8 @@ endif()
 macro(qengine_generate_export_header TARGET_NAME)
     set(EXPORT_HEADER_PATH ${CMAKE_CURRENT_LIST_DIR}/Source/Public/${TARGET_NAME}API.h)
     string(TOUPPER ${TARGET_NAME} API_NAME)
-    file(WRITE ${EXPORT_HEADER_PATH} "#ifndef ${API_NAME}_API_H
+    if(NOT EXISTS ${EXPORT_HEADER_PATH})
+        file(WRITE ${EXPORT_HEADER_PATH} "#ifndef ${API_NAME}_API_H
 #define ${API_NAME}_API_H
 
 #include <QtCore/qglobal.h>
@@ -60,6 +61,7 @@ macro(qengine_generate_export_header TARGET_NAME)
 #endif
 
 #endif // ${API_NAME}_API_H")
+    endif()
     set_property(TARGET ${TARGET_NAME} APPEND PROPERTY SOURCES ${EXPORT_HEADER_PATH})  
     target_compile_definitions(${TARGET_NAME} PRIVATE ${API_NAME}_LIBRARY)
 endmacro()
