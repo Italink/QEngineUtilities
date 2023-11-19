@@ -1,7 +1,7 @@
 ﻿#include "Widgets/QSvgButton.h"
 
-QSvgButton::QSvgButton(QString inPath)
-	:mIcon(inPath)
+QSvgButton::QSvgButton(QString inPath, QString inIconCategory)
+	:mIcon(inPath,inIconCategory)
 {
 	mIcon.setUpdateCallBack([this]() {
 		setIcon(mIcon.getIcon());

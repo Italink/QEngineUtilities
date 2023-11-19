@@ -53,14 +53,6 @@ void QEngineEditorStyleManager::setHoveredColor(QColor val) {
 	mHoveredColor = val;
 }
 
-QColor QEngineEditorStyleManager::getIconColor() const {
-	return QSvgIcon::getIconColor();
-}
-
-void QEngineEditorStyleManager::setIconColor(QColor val) {
-	QSvgIcon::setIconColor(val);
-}
-
 void QEngineEditorStyleManager::setStyle(QDetailWidgetStyle inStyle) {
 	if (inStyle == QDetailWidgetStyle::Unreal) {
 		mShadowColor = QColor(5, 5, 5);
@@ -69,7 +61,7 @@ void QEngineEditorStyleManager::setStyle(QDetailWidgetStyle inStyle) {
 		mHoveredColor = QColor(79, 110, 242, 150);
 		mSelectedColor = QColor(79, 110, 242, 200);
 		mArrowColor = QColor(220, 220, 220);
-		QSvgIcon::setIconColor(QColor(200, 200, 200));
+		QSvgIcon::setIconColor("DetailView", QColor(200, 200, 200));
 		mStyleSheet = R"(
 QElideLabel{
 	color:rgb(220,220,220);
@@ -156,7 +148,7 @@ QScrollBar::handle:vertical {
 		mHoveredColor = QColor(245, 245, 245);
 		mSelectedColor = QColor(80, 205, 130);
 		mArrowColor = QColor(65, 205, 82);
-		QSvgIcon::setIconColor(QColor(65, 205, 82));
+		QSvgIcon::setIconColor("DetailView",QColor(65, 205, 82));
 		mStyleSheet = R"(
 QWidget{
 	color:rgb(30,30,30);

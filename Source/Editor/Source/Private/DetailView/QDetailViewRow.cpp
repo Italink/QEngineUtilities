@@ -73,8 +73,8 @@ protected:
 public:
 	int mLevel = 0;
 	ExpandState mState = None;
-	QSvgIcon ExpandIcon = QSvgIcon(":/Resources/expand.png");
-	QSvgIcon UnexpandIcon = QSvgIcon(":/Resources/unexpand.png");
+	QSvgIcon ExpandIcon = QSvgIcon(":/Resources/expand.png","DetailView");
+	QSvgIcon UnexpandIcon = QSvgIcon(":/Resources/unexpand.png", "DetailView");
 };
 
 class QDetailViewRowWidget: public QHoverWidget {

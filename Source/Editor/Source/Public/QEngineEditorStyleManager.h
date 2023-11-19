@@ -14,7 +14,7 @@ enum class QDetailWidgetStyle {
 class QENGINEEDITOR_API QEngineEditorStyleManager {
 	QEngineEditorStyleManager();
 private:
-	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Unreal;
+	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Qt;
 	QColor mGridLineColor;
 	QColor mShadowColor;
 	QColor mCategoryColor;
@@ -41,9 +41,6 @@ public:
 
 	QColor getHoveredColor() const;
 	void setHoveredColor(QColor val);
-
-	QColor getIconColor() const;
-	void setIconColor(QColor val);
 
 	QColor getArrowColor() const { return mArrowColor; }
 	void setArrowColor(QColor val) { mArrowColor = val; }

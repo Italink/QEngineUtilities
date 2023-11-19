@@ -1,16 +1,19 @@
 ﻿#include "Widgets/QSvgIcon.h"
 #include <QPainter>
 
-QSvgIcon::QSvgIcon(QString path)
-	: mPath(path)
-	, mColor(mDefaultColor)
+
+QSvgIcon::QSvgIcon(QString path, QString category, QColor initialColor)
+	: mCategory(category)
+	, mPath(path)
+	, mColor(initialColor)
 {
-	mSvgIconList << this;
+	IconMap[mCategory]<< this;
 	updateIcon();
+
 }
 
 QSvgIcon::~QSvgIcon() {
-	mSvgIconList.removeOne(this);
+	IconMap[mCategory].removeOne(this);
 }
 
 const QIcon& QSvgIcon::getIcon() {
@@ -41,16 +44,11 @@ void QSvgIcon::setColor(QColor val) {
 	updateIcon();
 }
 
-void QSvgIcon::setIconColor(QColor color) {
-	mDefaultColor = color;
-	for (auto icon : mSvgIconList) {
-		icon->setColor(mDefaultColor);
-	}
-}
-
-QColor QSvgIcon::getIconColor()
+void QSvgIcon::setIconColor(QString category, QColor color)
 {
-	return mDefaultColor;
+	for (auto icon : IconMap[category]) {
+		icon->setColor(color);
+	}
 }
 
 void QSvgIcon::updateIcon() {

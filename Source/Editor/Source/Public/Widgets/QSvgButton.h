@@ -7,7 +7,7 @@
 
 class QENGINEEDITOR_API QSvgButton : public QPushButton {
 public:
-	QSvgButton(QString inPath = QString());
+	QSvgButton(QString inPath, QString inIconCategory = QString());
 	void setIconPath(QString inPath);
 private:
 	QSvgIcon mIcon;

@@ -96,7 +96,7 @@ void QMediaPlayerEditor::createUI() {
 	mSourceBox = new QFilePathBox();
 	mProgressBox = new QMediaPlayerProgressBox;
 	mProgressLable = new QElideLabel;
-	mBtPlay = new QSvgButton();
+	mBtPlay = new QSvgButton(QString(),"DetailView");
 	setMinimumHeight(60);
 	mProgressLable->setFixedHeight(20);
 	mBtPlay->setFixedSize(25,25);

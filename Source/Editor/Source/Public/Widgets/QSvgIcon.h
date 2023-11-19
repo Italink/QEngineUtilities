@@ -3,13 +3,14 @@
 
 #include <functional>
 #include <QList>
+#include <QMap>
 #include <QColor>
 #include <QIcon>
 #include "QEngineEditorAPI.h"
 
 class QENGINEEDITOR_API QSvgIcon {
 public:
-	QSvgIcon(QString path);
+	QSvgIcon(QString path, QString category, QColor initialColor = Qt::black);
 	~QSvgIcon();
 
 	using IconUpdateCallBack = std::function<void()>;
@@ -22,20 +23,18 @@ public:
 	void setPath(QString path);
 
 	QColor getColor() const;
-
 	void setColor(QColor val);
 
-	static void setIconColor(QColor color);
-	static QColor getIconColor();
+	static void setIconColor(QString category, QColor color);
 private:
 	void updateIcon();
 private:
+	QString mCategory;
 	QString mPath;
 	QColor mColor;
 	QIcon mIcon;
 	IconUpdateCallBack mCallBack;
-	inline static QList<QSvgIcon*> mSvgIconList;
-	inline static QColor mDefaultColor;
+	inline static QMap<QString,QList<QSvgIcon*>> IconMap;
 };  
 
 #endif // QSvgIcon_h__
