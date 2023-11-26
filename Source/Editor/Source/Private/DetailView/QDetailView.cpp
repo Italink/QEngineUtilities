@@ -21,13 +21,13 @@ QDetailView::QDetailView()
 	this->setWidget(mView);
 	this->setWidgetResizable(true);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+	this->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+	this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	mView->setLayout(mLayout);
 	mView->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	mLayout->setSpacing(0);
 	mLayout->setContentsMargins(0, 0, 0, 0);
 	mLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-	qApp->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
 
 	mIgnoreMetaObjects = {
 		&QPropertyHandle::staticMetaObject,

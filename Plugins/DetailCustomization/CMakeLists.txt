@@ -1,5 +1,4 @@
-qengine_add_target(DetailCustomization
-	QENGINE_PLUGIN
+qengine_add_plugin(DetailCustomization
 	PRIVATE_DEPENDENCY
 		QEngineCore
 		QEngineEditor

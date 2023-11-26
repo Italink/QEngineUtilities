@@ -8,61 +8,36 @@ QEngineEditorStyleManager* QEngineEditorStyleManager::Instance() {
 	return &Ins;
 }
 
+void QEngineEditorStyleManager::registerPalette(QString inName, Palette inPalette)
+{
+	mPaletteMap[inName] = inPalette;
+	int id = QFontDatabase::addApplicationFont(mPaletteMap[inName].mFontFilePath);
+	QStringList families = QFontDatabase::applicationFontFamilies(id);
+	mPaletteMap[inName].mFont = QFont(families.first(), 12);
+}
+
+void QEngineEditorStyleManager::setCurrentPalette(QString inName)
+{
+	if (!mPaletteMap.contains(inName)) {
+		mCurrentPalette = mPaletteMap.firstKey();
+	}
+	else {
+		mCurrentPalette = inName;
+	}
+	QSvgIcon::setIconColor("DetailView", mPaletteMap[mCurrentPalette].mIconColor);
+}
+
 QEngineEditorStyleManager::QEngineEditorStyleManager()
 {
-	int id = QFontDatabase::addApplicationFont(mFontFilePath);
-	QStringList families = QFontDatabase::applicationFontFamilies(id);
-	mFont = QFont(families.first(), 12);
-	qApp->setFont(mFont);
-	setStyle(mCurrentStyle);
-}
-
-QByteArray QEngineEditorStyleManager::getStylesheet() {
-	return mStyleSheet;
-}
-
-QColor QEngineEditorStyleManager::getGridLineColor() const {
-	return mGridLineColor;
-}
-
-void QEngineEditorStyleManager::setGridLineColor(QColor val) {
-	mGridLineColor = val;
-}
-
-QColor QEngineEditorStyleManager::getShadowColor() const {
-	return mShadowColor;
-}
-
-void QEngineEditorStyleManager::setShadowColor(QColor val) {
-	mShadowColor = val;
-}
-
-QColor QEngineEditorStyleManager::getCategoryColor() const {
-	return mCategoryColor;
-}
-
-void QEngineEditorStyleManager::setCategoryColor(QColor val) {
-	mCategoryColor = val;
-}
-
-QColor QEngineEditorStyleManager::getHoveredColor() const {
-	return mHoveredColor;
-}
-
-void QEngineEditorStyleManager::setHoveredColor(QColor val) {
-	mHoveredColor = val;
-}
-
-void QEngineEditorStyleManager::setStyle(QDetailWidgetStyle inStyle) {
-	if (inStyle == QDetailWidgetStyle::Unreal) {
-		mShadowColor = QColor(5, 5, 5);
-		mGridLineColor = QColor(5, 5, 5);
-		mCategoryColor = QColor(61, 61, 61, 100);
-		mHoveredColor = QColor(79, 110, 242, 150);
-		mSelectedColor = QColor(79, 110, 242, 200);
-		mArrowColor = QColor(220, 220, 220);
-		QSvgIcon::setIconColor("DetailView", QColor(200, 200, 200));
-		mStyleSheet = R"(
+	Palette UnrealStyle;
+	UnrealStyle.mShadowColor = QColor(5, 5, 5);
+	UnrealStyle.mGridLineColor = QColor(5, 5, 5);
+	UnrealStyle.mCategoryColor = QColor(61, 61, 61, 100);
+	UnrealStyle.mHoveredColor = QColor(79, 110, 242, 150);
+	UnrealStyle.mSelectedColor = QColor(79, 110, 242, 200);
+	UnrealStyle.mArrowColor = QColor(220, 220, 220);
+	UnrealStyle.mIconColor = QColor(200, 200, 200);
+	UnrealStyle.mStyleSheet = R"(
 QElideLabel{
 	color:rgb(220,220,220);
 }
@@ -140,16 +115,18 @@ QScrollBar::handle:vertical {
 	border: none;
 }
 )";
-	}
-	else if (inStyle == QDetailWidgetStyle::Qt) {
-		mShadowColor = QColor(220, 220, 220);
-		mGridLineColor = QColor(220, 220, 220);
-		mCategoryColor = QColor(240, 240, 240);
-		mHoveredColor = QColor(245, 245, 245);
-		mSelectedColor = QColor(80, 205, 130);
-		mArrowColor = QColor(65, 205, 82);
-		QSvgIcon::setIconColor("DetailView",QColor(65, 205, 82));
-		mStyleSheet = R"(
+
+	registerPalette("Unreal", UnrealStyle);
+
+	Palette QtStyle;
+	QtStyle.mShadowColor = QColor(220, 220, 220);
+	QtStyle.mGridLineColor = QColor(220, 220, 220);
+	QtStyle.mCategoryColor = QColor(240, 240, 240);
+	QtStyle.mHoveredColor = QColor(245, 245, 245);
+	QtStyle.mSelectedColor = QColor(80, 205, 130);
+	QtStyle.mArrowColor = QColor(65, 205, 82);
+	QtStyle.mIconColor = QColor(65, 205, 82);
+	QtStyle.mStyleSheet = R"(
 QWidget{
 	color:rgb(30,30,30);
 	background-color:rgb(255,255,255);
@@ -224,6 +201,48 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
 )";
+	registerPalette("Qt", QtStyle);
 
-	}
+	setCurrentPalette("Unreal");
+}
+
+QByteArray QEngineEditorStyleManager::getStylesheet() {
+	return mPaletteMap[mCurrentPalette].mStyleSheet;
+}
+
+QColor QEngineEditorStyleManager::getGridLineColor() const {
+	return mPaletteMap[mCurrentPalette].mGridLineColor;
+}
+
+QColor QEngineEditorStyleManager::getShadowColor() const {
+	return mPaletteMap[mCurrentPalette].mShadowColor;
+}
+
+
+QColor QEngineEditorStyleManager::getCategoryColor() const {
+	return mPaletteMap[mCurrentPalette].mCategoryColor;
+}
+
+QColor QEngineEditorStyleManager::getHoveredColor() const {
+	return mPaletteMap[mCurrentPalette].mHoveredColor;
+}
+
+QColor QEngineEditorStyleManager::getArrowColor() const
+{
+	return mPaletteMap[mCurrentPalette].mArrowColor;
+}
+
+QColor QEngineEditorStyleManager::getSelectedColor() const
+{
+	return mPaletteMap[mCurrentPalette].mSelectedColor;
+}
+
+QString QEngineEditorStyleManager::getFontFilePath() const
+{
+	return mPaletteMap[mCurrentPalette].mFontFilePath;
+}
+
+QFont QEngineEditorStyleManager::getFont() const
+{
+	return mPaletteMap[mCurrentPalette].mFont;
 }

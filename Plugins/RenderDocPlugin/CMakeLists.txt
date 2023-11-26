@@ -1,5 +1,4 @@
-qengine_add_target(RenderDocPlugin
-	QENGINE_PLUGIN
+qengine_add_plugin(RenderDocPlugin
 	PRIVATE_DEPENDENCY
 		QEngineCore
 		QEngineEditor

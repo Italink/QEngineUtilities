@@ -1,58 +1,44 @@
 #ifndef QDetailWidgetStyleManager_h__
 #define QDetailWidgetStyleManager_h__
 
-#include "QObject"
-#include "QColor"
-#include "QFont"
+#include <QObject>
+#include <QColor>
+#include <QFont>
+#include <QMap>
 #include "QEngineEditorAPI.h"
-
-enum class QDetailWidgetStyle {
-	Qt,
-	Unreal
-};
 
 class QENGINEEDITOR_API QEngineEditorStyleManager {
 	QEngineEditorStyleManager();
-private:
-	QDetailWidgetStyle mCurrentStyle = QDetailWidgetStyle::Qt;
-	QColor mGridLineColor;
-	QColor mShadowColor;
-	QColor mCategoryColor;
-	QColor mHoveredColor;
-	QColor mSelectedColor;
-	QColor mArrowColor;
-	QString mFontFilePath = ":/Resources/DroidSans.ttf";
-	QFont mFont;
-	QByteArray mStyleSheet;
 public:
+	struct Palette {
+		QColor mGridLineColor;
+		QColor mShadowColor;
+		QColor mCategoryColor;
+		QColor mHoveredColor;
+		QColor mSelectedColor;
+		QColor mArrowColor;
+		QColor mIconColor;
+		QString mFontFilePath = ":/Resources/DroidSans.ttf";
+		QFont mFont;
+		QByteArray mStyleSheet;
+	};
+
 	static QEngineEditorStyleManager* Instance();
+	void registerPalette(QString inName, Palette inPalette);
+	void setCurrentPalette(QString inName);
 
-	void setStyle(QDetailWidgetStyle inStyle);
 	QByteArray getStylesheet();
-
 	QColor getGridLineColor() const;
-	void setGridLineColor(QColor val);
-
 	QColor getShadowColor() const;
-	void setShadowColor(QColor val);
-
 	QColor getCategoryColor() const;
-	void setCategoryColor(QColor val);
-
 	QColor getHoveredColor() const;
-	void setHoveredColor(QColor val);
-
-	QColor getArrowColor() const { return mArrowColor; }
-	void setArrowColor(QColor val) { mArrowColor = val; }
-
-	QColor getSelectedColor() const { return mSelectedColor; }
-	void setSelectedColor(QColor val) { mSelectedColor = val; }
-
-	QString getFontFilePath() const { return mFontFilePath; }
-	void setFontFilePath(QString val) { mFontFilePath = val; }
-
-	QFont getFont() const { return mFont; }
-	void setFont(QFont val) { mFont = val; }
+	QColor getArrowColor() const;; 
+	QColor getSelectedColor() const;
+	QString getFontFilePath() const;
+	QFont getFont() const;
+private:
+	QString mCurrentPalette;
+	QMap<QString, Palette> mPaletteMap;
 };
 
 #endif // QDetailWidgetStyleManager_h__

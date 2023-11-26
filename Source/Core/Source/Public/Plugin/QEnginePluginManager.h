@@ -3,12 +3,13 @@
 
 #include <QSharedPointer>
 #include <QMap>
+#include <QFileInfo>
 #include <QLibrary>
 #include "IEnginePlugin.h"
 #include "QEngineCoreAPI.h"
 
 
-struct QENGINECORE_API QEnginePluginInfo {
+struct QENGINECORE_API QEnginePluginHandler {
 	bool bAlreadyStarted = false;
 	QSharedPointer<QLibrary> handle;
 	QSharedPointer<IEnginePlugin> plugin;
@@ -28,18 +29,20 @@ struct QENGINECORE_API QEnginePluginInfo {
 	}
 };
 
-class QENGINECORE_API QEnginePluginManager {
+class QENGINECORE_API QEnginePluginManager: public QObject{
+	Q_OBJECT
 public:
 	static QEnginePluginManager& Get();
 	static void TearDown();
-
+	void loadPlugin(QFileInfo fileInfo);
 	void loadPlugins();
-
-	QMap<QString, QEnginePluginInfo>& getPluginMap();
+	QMap<QString, QEnginePluginHandler>& getPluginMap();
+Q_SIGNALS:
+	void asPluginChanged();
 private:
 	static QSharedPointer<QEnginePluginManager>& GetSingleton();
 private:
-	QMap<QString, QEnginePluginInfo> mPluginMap;
+	QMap<QString, QEnginePluginHandler> mPluginMap;
 };
 
 #endif // QEnginePluginManager_h__

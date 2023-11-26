@@ -98,7 +98,7 @@ macro(qengine_add_target TARGET_NAME)
         if(QENGINE_QENGINE_PLUGIN)
             set_target_properties(${TARGET_NAME} PROPERTIES 
                 QENGINE_PLUGIN TRUE
-                FOLDER "${QENGINE_SOURCE_GROUP_PREFIX}/Plugins"
+                FOLDER "Plugins"
             )
         else()
             set_target_properties(${TARGET_NAME} PROPERTIES 
@@ -115,6 +115,10 @@ macro(qengine_add_target TARGET_NAME)
     target_compile_definitions(${TARGET_NAME} PUBLIC ${QENGINE_PUBLIC_DEFINITIONS})
     target_compile_definitions(${TARGET_NAME} PRIVATE ${QENGINE_PRIVATE_DEFINITIONS})
     qengine_generate_export_header(${TARGET_NAME})
+endmacro()
+
+macro(qengine_add_plugin PLUGIN_NAME)
+    qengine_add_target(${PLUGIN_NAME} QENGINE_PLUGIN ${ARGN})
 endmacro()
 
 

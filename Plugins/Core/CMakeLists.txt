@@ -1,5 +1,4 @@
-qengine_add_target(QEngineCorePlugin
-	QENGINE_PLUGIN
+qengine_add_plugin(QEngineCorePlugin
 	PRIVATE_DEPENDENCY
 		QEngineCore
 )
