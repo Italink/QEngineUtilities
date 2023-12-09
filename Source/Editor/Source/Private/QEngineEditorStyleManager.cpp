@@ -8,23 +8,28 @@ QEngineEditorStyleManager* QEngineEditorStyleManager::Instance() {
 	return &Ins;
 }
 
-void QEngineEditorStyleManager::registerPalette(QString inName, Palette inPalette)
+void QEngineEditorStyleManager::registerPalettePreset(QString inName, Palette inPalette)
 {
-	mPaletteMap[inName] = inPalette;
-	int id = QFontDatabase::addApplicationFont(mPaletteMap[inName].mFontFilePath);
+	mPalettePresetMap[inName] = inPalette;
+	int id = QFontDatabase::addApplicationFont(mPalettePresetMap[inName].mFontFilePath);
 	QStringList families = QFontDatabase::applicationFontFamilies(id);
-	mPaletteMap[inName].mFont = QFont(families.first(), 12);
+	mPalettePresetMap[inName].mFont = QFont(families.first(), 12);
 }
 
-void QEngineEditorStyleManager::setCurrentPalette(QString inName)
+void QEngineEditorStyleManager::setPalette(QString inName)
 {
-	if (!mPaletteMap.contains(inName)) {
-		mCurrentPalette = mPaletteMap.firstKey();
+	if (mPalettePresetMap.contains(inName)) {
+		mCurrentPalette = mPalettePresetMap[inName];
+		QSvgIcon::setIconColor("DetailView", mCurrentPalette.mIconColor);
+		Q_EMIT asPaletteChanged();
 	}
-	else {
-		mCurrentPalette = inName;
-	}
-	QSvgIcon::setIconColor("DetailView", mPaletteMap[mCurrentPalette].mIconColor);
+}
+
+void QEngineEditorStyleManager::setPalette(Palette inPalette)
+{
+	mCurrentPalette = inPalette;
+	QSvgIcon::setIconColor("DetailView", mCurrentPalette.mIconColor);
+	Q_EMIT asPaletteChanged();
 }
 
 QEngineEditorStyleManager::QEngineEditorStyleManager()
@@ -116,7 +121,7 @@ QScrollBar::handle:vertical {
 }
 )";
 
-	registerPalette("Unreal", UnrealStyle);
+	registerPalettePreset("Unreal", UnrealStyle);
 
 	Palette QtStyle;
 	QtStyle.mShadowColor = QColor(220, 220, 220);
@@ -201,48 +206,48 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
 )";
-	registerPalette("Qt", QtStyle);
+	registerPalettePreset("Qt", QtStyle);
 
-	setCurrentPalette("Unreal");
+	setPalette("Unreal");
 }
 
 QByteArray QEngineEditorStyleManager::getStylesheet() {
-	return mPaletteMap[mCurrentPalette].mStyleSheet;
+	return mCurrentPalette.mStyleSheet;
 }
 
 QColor QEngineEditorStyleManager::getGridLineColor() const {
-	return mPaletteMap[mCurrentPalette].mGridLineColor;
+	return mCurrentPalette.mGridLineColor;
 }
 
 QColor QEngineEditorStyleManager::getShadowColor() const {
-	return mPaletteMap[mCurrentPalette].mShadowColor;
+	return mCurrentPalette.mShadowColor;
 }
 
 
 QColor QEngineEditorStyleManager::getCategoryColor() const {
-	return mPaletteMap[mCurrentPalette].mCategoryColor;
+	return mCurrentPalette.mCategoryColor;
 }
 
 QColor QEngineEditorStyleManager::getHoveredColor() const {
-	return mPaletteMap[mCurrentPalette].mHoveredColor;
+	return mCurrentPalette.mHoveredColor;
 }
 
 QColor QEngineEditorStyleManager::getArrowColor() const
 {
-	return mPaletteMap[mCurrentPalette].mArrowColor;
+	return mCurrentPalette.mArrowColor;
 }
 
 QColor QEngineEditorStyleManager::getSelectedColor() const
 {
-	return mPaletteMap[mCurrentPalette].mSelectedColor;
+	return mCurrentPalette.mSelectedColor;
 }
 
 QString QEngineEditorStyleManager::getFontFilePath() const
 {
-	return mPaletteMap[mCurrentPalette].mFontFilePath;
+	return mCurrentPalette.mFontFilePath;
 }
 
 QFont QEngineEditorStyleManager::getFont() const
 {
-	return mPaletteMap[mCurrentPalette].mFont;
+	return mCurrentPalette.mFont;
 }

@@ -7,7 +7,8 @@
 #include <QMap>
 #include "QEngineEditorAPI.h"
 
-class QENGINEEDITOR_API QEngineEditorStyleManager {
+class QENGINEEDITOR_API QEngineEditorStyleManager: public QObject {
+	Q_OBJECT
 	QEngineEditorStyleManager();
 public:
 	struct Palette {
@@ -24,9 +25,9 @@ public:
 	};
 
 	static QEngineEditorStyleManager* Instance();
-	void registerPalette(QString inName, Palette inPalette);
-	void setCurrentPalette(QString inName);
-
+	void registerPalettePreset(QString inName, Palette inPalette);
+	void setPalette(QString inName);
+	void setPalette(Palette inPalette);
 	QByteArray getStylesheet();
 	QColor getGridLineColor() const;
 	QColor getShadowColor() const;
@@ -36,9 +37,11 @@ public:
 	QColor getSelectedColor() const;
 	QString getFontFilePath() const;
 	QFont getFont() const;
+Q_SIGNALS:
+	void asPaletteChanged();
 private:
-	QString mCurrentPalette;
-	QMap<QString, Palette> mPaletteMap;
+	Palette mCurrentPalette;
+	QMap<QString, Palette> mPalettePresetMap;
 };
 
 #endif // QDetailWidgetStyleManager_h__

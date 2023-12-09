@@ -10,6 +10,7 @@
 #include <QResizeEvent>
 #include <QQueue>
 #include "QEngineUndoStack.h"
+#include "QAbstractAnimation"
 
 
 QDetailView::QDetailView()
@@ -22,6 +23,9 @@ QDetailView::QDetailView()
 	this->setWidgetResizable(true);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	this->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+	connect(QEngineEditorStyleManager::Instance(), &QEngineEditorStyleManager::asPaletteChanged, this, [this]() {
+		bNeedUpdateStyle = true;
+	});
 	this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	mView->setLayout(mLayout);
 	mView->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -30,6 +34,7 @@ QDetailView::QDetailView()
 	mLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
 	mIgnoreMetaObjects = {
+		&QAbstractAnimation::staticMetaObject,
 		&QPropertyHandle::staticMetaObject,
 		&QEngineUndoEntry::staticMetaObject,
 		&QEngineUndoStack::staticMetaObject,
@@ -106,6 +111,14 @@ void QDetailView::setPage(QWidget* inPage) {
 	takeWidget();
 	setWidget(inPage);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+}
+
+void QDetailView::paintEvent(QPaintEvent* event)
+{
+	if (bNeedUpdateStyle) {
+		setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+		bNeedUpdateStyle = false;
+	}
 }
 
 void QDetailView::resizeEvent(QResizeEvent* event) {
@@ -208,6 +221,7 @@ const QSet<const QMetaObject*>& QDetailView::getIgnoredObjects() const{
 void QDetailView::setIgnoreObjects(QSet<const QMetaObject*> val){
 	mIgnoreMetaObjects = val;
 	mIgnoreMetaObjects 
+		<< &QAbstractAnimation::staticMetaObject
 		<< &QPropertyHandle::staticMetaObject
 		<< &QEngineUndoEntry::staticMetaObject
 		<< &QEngineUndoStack::staticMetaObject;

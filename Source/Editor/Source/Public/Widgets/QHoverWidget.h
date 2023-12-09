@@ -37,7 +37,7 @@ protected:
 			QPainter painter(this);
 			painter.setPen(QPen(QColor(mHoverColor), 1));
 			painter.setBrush(Qt::NoBrush);
-			painter.drawRect(rect().adjusted(1, 1, -1, -1));
+			painter.drawRect(rect().adjusted(0, 0, -1, -1));
 		}
 	}
 	void focusOutEvent(QFocusEvent* event) override {

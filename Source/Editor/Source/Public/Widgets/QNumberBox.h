@@ -134,7 +134,6 @@ protected:
 private:
 	QSharedPointer<QNumberBoxAdaptorBase> mNumberAdaptor;
 	QLineEdit_HasFocusSignal* mLeValue;
-	QLabel* mLbArrow;
 	QPointF mClickPosition;
 };
 

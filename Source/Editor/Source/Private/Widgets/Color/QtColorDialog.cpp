@@ -5,6 +5,7 @@
 #include "Component/ColorPreview.hpp"
 #include "Component/ColorWheel.hpp"
 #include "Component/QColorChannelSlider.hpp"
+#include "QEngineEditorStyleManager.h"
 
 QtColorDialog::QtColorDialog()
 	: mColorWheel(new ColorWheel)
@@ -42,6 +43,12 @@ int QtColorDialog::CreateAndShow(QColor color, QRect inButtonGemotry) {
 	if (dialog == nullptr) {
 		dialog = new QtColorDialog;
 		QtColorDialog::Current = dialog;
+		QtColorDialog::Current->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+		QObject::connect(QEngineEditorStyleManager::Instance(), &QEngineEditorStyleManager::asPaletteChanged, QtColorDialog::Current, []() {
+			if (QtColorDialog::Current) {
+				QtColorDialog::Current->setStyleSheet(QEngineEditorStyleManager::Instance()->getStylesheet());
+			}
+		});
 	}
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->setCloseWhenLoseFocus(true);

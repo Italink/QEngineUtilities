@@ -199,10 +199,11 @@ void QDetailViewRow::setupPropertyHandle(QPropertyHandle* val)
 {
 	mHandle = val;
 	if (mHandle) {
-		connect(mHandle, &QPropertyHandle::asChildEvent, this, [this](QChildEvent* event) {
-			if (!mView->getIgnoredObjects().contains(event->child()->metaObject()))
-				mHandle->asRequestRebuildRow();
-		});
+		//connect(mHandle, &QPropertyHandle::asChildEvent, this, [this](QChildEvent* event) {
+		//	if(event->child()->metaObject())
+		//	if (!mView->getIgnoredObjects().contains(event->child()->metaObject()))
+		//		mHandle->asRequestRebuildRow();
+		//});
 	}
 }
 

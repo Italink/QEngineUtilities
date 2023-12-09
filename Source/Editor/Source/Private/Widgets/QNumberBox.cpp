@@ -7,17 +7,12 @@
 void QNumberBox::createUI(){
 	setAttribute(Qt::WA_StyledBackground);
 	setFixedHeight(20);
-	setStyleSheet("QLineEdit{background-color:transparent; font-size:11px;}");
 	resize(60, 30);
 	mLeValue = new QLineEdit_HasFocusSignal;
-	mLbArrow = new QLabel;
 	QHBoxLayout* h = new QHBoxLayout(this);
-	h->setContentsMargins(2, 2, 2, 2);
+	h->setContentsMargins(0, 0, 0, 0);
 	h->setSpacing(0);
 	h->addWidget(mLeValue);
-	h->addWidget(mLbArrow);
-	mLbArrow->setFixedSize(1, height());
-	mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
 	mLeValue->setFixedHeight(height());
 	mLeValue->setFrame(QFrame::NoFrame);
 	mLeValue->setValidator(new QDoubleValidator);
@@ -91,20 +86,13 @@ void QNumberBox::mousePressEvent(QMouseEvent* event)
 {
 	if (event->buttons() & Qt::LeftButton) {
 		mClickPosition = event->globalPos();
-		if (getEditEnabled() && mLbArrow->geometry().contains(event->pos())) {
-			setEditEnabled(false);
-		}
 	}
 }
 
 void QNumberBox::mouseReleaseEvent(QMouseEvent* event)
 {
 	if (event->button() == Qt::LeftButton) {
-		if (this->cursor() == Qt::BlankCursor) {
-			setCursor(Qt::CursorShape::SizeHorCursor);
-			mLbArrow->setCursor(Qt::CursorShape::SizeHorCursor);
-		}
-		else if (mClickPosition == event->globalPos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
+		if (mClickPosition == event->globalPos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
 			setEditEnabled(true);
 		}
 	}
@@ -114,7 +102,6 @@ void QNumberBox::mouseMoveEvent(QMouseEvent* event)
 {
 	if (!getEditEnabled() && event->buttons() & Qt::LeftButton) {
 		setCursor(Qt::BlankCursor);
-		mLbArrow->setCursor(Qt::CursorShape::BlankCursor);
 		QPointF offset = event->globalPos() - mClickPosition;
 		QVariant lastVar = mNumberAdaptor->getVar();
 		mNumberAdaptor->moveOffset(offset);
@@ -132,9 +119,14 @@ void QNumberBox::paintEvent(QPaintEvent* event)
 	QHoverWidget::paintEvent(event);
 	QPainter painter(this);
 	if (mNumberAdaptor->getLimitedFactor() > 0) {
-		QRect overRect = rect().adjusted(3, 3, -3, -3);
-		overRect.setWidth(overRect.width() * mNumberAdaptor->getLimitedFactor());
-		painter.fillRect(overRect, mHoverd ? mHoverColor : QColor(100, 100, 100, 50));
+		if (mHoverd) {
+			QRect overRect = rect().adjusted(3, 3, -3, -3);
+			overRect.setWidth(overRect.width() * mNumberAdaptor->getLimitedFactor());
+			painter.fillRect(overRect, mHoverd ? mHoverColor : QColor(100, 100, 100, 50));
+		}
+		else {
+
+		}
 	}
 }
 

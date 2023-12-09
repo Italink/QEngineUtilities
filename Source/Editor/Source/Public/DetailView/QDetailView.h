@@ -42,6 +42,7 @@ public:
 Q_SIGNALS: 
 	void asCurrentRowChanged(QDetailViewRow* NewRow);
 protected:
+	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void setPage(QWidget* inPage);
 	void reset();
@@ -60,6 +61,7 @@ private:
 	QVBoxLayout* mLayout;
 	int mValueWidgetWidth = 0;
 	QSharedPointer<QDetailLayoutBuilder> mLayoutBuilder;
+	bool bNeedUpdateStyle = false;
 };
 
 #endif // QDetailView_h__
