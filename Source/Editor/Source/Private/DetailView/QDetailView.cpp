@@ -136,6 +136,7 @@ void QDetailView::resizeEvent(QResizeEvent* event) {
 }
 
 void QDetailView::reset() {
+	mCurrentRow = nullptr;
 	for (auto row : mTopLevelRows) {
 		row->setParent(nullptr);
 		row->deleteLater();

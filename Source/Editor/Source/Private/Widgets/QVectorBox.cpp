@@ -162,5 +162,98 @@ void QVector2DBox::paintEvent(QPaintEvent* event) {
 	painter.fillRect(drawRect, QColor(221, 81, 69));
 	drawRect.moveRight(mY.geometry().left());
 	painter.fillRect(drawRect, QColor(25, 161, 95));
+}
 
+QPointBox::QPointBox(QPoint vec)
+	: mX(0)
+	, mY(0)
+{
+	setValue(vec);
+	QHBoxLayout* h = new QHBoxLayout(this);
+	h->setSpacing(5);
+	h->setContentsMargins(4, 0, 0, 0);
+	h->addWidget(&mX, 0, Qt::AlignLeft);
+	h->addWidget(&mY, 0, Qt::AlignLeft);
+
+	connect(&mX, &QNumberBox::asValueChanged, this, &QPointBox::emitValueChanged);
+	connect(&mY, &QNumberBox::asValueChanged, this, &QPointBox::emitValueChanged);
+}
+
+void QPointBox::setValue(QPoint vec)
+{
+	blockSignals(true);
+	mX.setVar(vec.x());
+	mY.setVar(vec.y());
+	blockSignals(false);
+	emitValueChanged(QVariant());
+}
+
+QPoint QPointBox::getValue()
+{
+	return QPoint(
+		mX.getVar().toInt(),
+		mY.getVar().toInt()
+	);
+}
+
+void QPointBox::emitValueChanged(QVariant)
+{
+	Q_EMIT asValueChanged(getValue());
+}
+
+void QPointBox::paintEvent(QPaintEvent* event) {
+	QWidget::paintEvent(event);
+	QPainter painter(this);
+	QRect drawRect(0, (height() - mX.height()) / 2, 4, mX.height());
+	drawRect.moveRight(mX.geometry().left());
+	painter.fillRect(drawRect, QColor(221, 81, 69));
+	drawRect.moveRight(mY.geometry().left());
+	painter.fillRect(drawRect, QColor(25, 161, 95));
+}
+
+QPointFBox::QPointFBox(QPointF vec)
+	: mX(0.0f)
+	, mY(0.0f)
+{
+	setValue(vec);
+	QHBoxLayout* h = new QHBoxLayout(this);
+	h->setSpacing(5);
+	h->setContentsMargins(4, 0, 0, 0);
+	h->addWidget(&mX, 0, Qt::AlignLeft);
+	h->addWidget(&mY, 0, Qt::AlignLeft);
+
+	connect(&mX, &QNumberBox::asValueChanged, this, &QPointFBox::emitValueChanged);
+	connect(&mY, &QNumberBox::asValueChanged, this, &QPointFBox::emitValueChanged);
+}
+
+void QPointFBox::setValue(QPointF vec)
+{
+	blockSignals(true);
+	mX.setVar(vec.x());
+	mY.setVar(vec.y());
+	blockSignals(false);
+	emitValueChanged(QVariant());
+}
+
+QPointF QPointFBox::getValue()
+{
+	return QPointF(
+		mX.getVar().toFloat(),
+		mY.getVar().toFloat()
+	);
+}
+
+void QPointFBox::emitValueChanged(QVariant)
+{
+	Q_EMIT asValueChanged(getValue());
+}
+
+void QPointFBox::paintEvent(QPaintEvent* event) {
+	QWidget::paintEvent(event);
+	QPainter painter(this);
+	QRect drawRect(0, (height() - mX.height()) / 2, 4, mX.height());
+	drawRect.moveRight(mX.geometry().left());
+	painter.fillRect(drawRect, QColor(221, 81, 69));
+	drawRect.moveRight(mY.geometry().left());
+	painter.fillRect(drawRect, QColor(25, 161, 95));
 }

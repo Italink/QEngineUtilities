@@ -222,6 +222,7 @@ void QDetailViewManager::registerBuiltIn() {
 		});
 		return vec2Box;
 	});
+
 	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector3D>(), [](QPropertyHandle* InHandler) {
 		QVector3DBox* vec3Box = new QVector3DBox();
 		InHandler->bind(vec3Box, &QVector3DBox::asValueChanged,
@@ -233,6 +234,7 @@ void QDetailViewManager::registerBuiltIn() {
 		});
 		return vec3Box;
 	});
+
 	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QVector4D>(), [](QPropertyHandle* InHandler) {
 		QVector4DBox* vec4Box = new QVector4DBox();
 		InHandler->bind(vec4Box, &QVector4DBox::asValueChanged,
@@ -244,5 +246,29 @@ void QDetailViewManager::registerBuiltIn() {
 		});
 		return vec4Box;
 	});
+
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QPoint>(), [](QPropertyHandle* InHandler) {
+		QPointBox* vec2Box = new QPointBox();
+		InHandler->bind(vec2Box, &QPointBox::asValueChanged,
+			[vec2Box]() {
+				return vec2Box->getValue();
+			},
+			[vec2Box](QVariant var) {
+				vec2Box->setValue(var.value<QPoint>());
+			});
+		return vec2Box;
+	});
+
+	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<QPointF>(), [](QPropertyHandle* InHandler) {
+		QPointFBox* vec2Box = new QPointFBox();
+		InHandler->bind(vec2Box, &QPointFBox::asValueChanged,
+			[vec2Box]() {
+				return vec2Box->getValue();
+			},
+			[vec2Box](QVariant var) {
+				vec2Box->setValue(var.value<QPointF>());
+			});
+		return vec2Box;
+		});
 }
 
