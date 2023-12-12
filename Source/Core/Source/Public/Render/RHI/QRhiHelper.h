@@ -29,7 +29,7 @@ struct QENGINECORE_API QRhiHelper {
 	struct QENGINECORE_API InitParams {
 		QRhi::Implementation backend = QRhi::Vulkan;
 		QRhi::Flags rhiFlags = QRhi::Flag();
-		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::NoVSync;
+		QRhiSwapChain::Flags swapChainFlags = QRhiSwapChain::Flag::SurfaceHasNonPreMulAlpha;
 		QRhi::BeginFrameFlags beginFrameFlags;
 		QRhi::EndFrameFlags endFrameFlags;
 		int sampleCount = 1;

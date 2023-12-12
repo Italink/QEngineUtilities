@@ -23,11 +23,11 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	hLayout->setContentsMargins(0, 0, 0, 0);
 	hLayout->setSpacing(0);
 	setMinimumSize(800, 600);
-	mViweport = QWidget::createWindowContainer(renderer->maybeWindow());
+	mViewport = QWidget::createWindowContainer(renderer->maybeWindow());
 #ifdef QENGINE_WITH_EDITOR
 	QSplitter* splitter = new QSplitter;
-	mViweport->setMinimumWidth(400);
-	splitter->addWidget(mViweport);
+	mViewport->setMinimumWidth(400);
+	splitter->addWidget(mViewport);
 	splitter->addWidget(mDetailView);
 	splitter->setSizes({ 700,300 });
 	renderer->maybeWindow()->installEventFilter(this);
@@ -36,9 +36,8 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	mDetailView->setObject(mRenderer);
 	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, &QDetailView::selectSubObject);
 #else
-	hLayout->addWidget(mViweport);
+	hLayout->addWidget(mViewport);
 #endif
-
 }
 
 #ifdef QENGINE_WITH_EDITOR

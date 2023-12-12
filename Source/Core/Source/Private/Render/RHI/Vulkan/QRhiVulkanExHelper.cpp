@@ -295,7 +295,11 @@ QVulkanInstance* QRhiVulkanExHelper::instance()
 		globalVulkanInstance->setApiVersion(QVersionNumber(1, 2));
 	else if (supportedVersion >= QVersionNumber(1, 1))
 		globalVulkanInstance->setApiVersion(QVersionNumber(1, 1));
-	globalVulkanInstance->setFlags(QVulkanInstance::Flag::NoPortabilityDrivers);
+
+	qDebug()<< globalVulkanInstance->supportedApiVersion()
+		<< globalVulkanInstance->supportedExtensions()
+		<< globalVulkanInstance->supportedLayers();
+
 	globalVulkanInstance->setLayers({ "VK_LAYER_KHRONOS_validation"/*,"VK_LAYER_TENCENT_wegame_cross_overlay","VK_LAYER_LUNARG_screenshot","VK_LAYER_NV_optimus","VK_LAYER_LUNARG_gfxreconstruct","VK_LAYER_LUNARG_monitor" */});
 	globalVulkanInstance->setExtensions(QRhiVulkanInitParams::preferredInstanceExtensions());
 	if (!globalVulkanInstance->create()) {
