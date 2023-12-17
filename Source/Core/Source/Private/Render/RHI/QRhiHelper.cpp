@@ -7,6 +7,7 @@
 
 #include "rhi/qshaderbaker.h"
 #include "Vulkan/QRhiVulkanExHelper.h"
+#include "tracy/Tracy.hpp"
 
 
 QShaderDefinitions& QShaderDefinitions::addDefinition(const QByteArray def) {
@@ -36,6 +37,7 @@ bool QRhiSignal::peek() {
 
 QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Flags inFlags, QWindow* inWindow)
 {
+	ZoneScopedN("CreateRhi");
 	QSharedPointer<QRhi> rhi;
 	if (inBackend == QRhi::Null) {
 		QRhiNullInitParams params;
@@ -95,6 +97,7 @@ QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Fl
 
 QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, QByteArray preamble)
 {
+	ZoneScopedN("CompileShader");
 	QShaderBaker baker;
 	baker.setGeneratedShaderVariants({ QShader::StandardShader });
 	baker.setSourceString(code, stage);

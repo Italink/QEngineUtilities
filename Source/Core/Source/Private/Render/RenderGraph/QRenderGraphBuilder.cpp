@@ -164,6 +164,11 @@ IRenderer* QRenderGraphBuilder::getRenderer() const
 	return mRenderer;
 }
 
+float QRenderGraphBuilder::getDeltaSec() const
+{
+	return mRenderer->getDeltaSec();
+}
+
 const QList<QRhiTextureRenderTarget*>& QRenderGraphBuilder::getActivatedRenderTargets() const
 {
 	return mActivatedRenderTargets;

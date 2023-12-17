@@ -31,6 +31,8 @@ public:
 	QRhiCamera* getCamera();
 	QRenderGraphBuilder* getRenderGraphBuilder() const { return mGraphBuilder.get(); }
 	QObject* getCurrentObject() const { return mCurrentObject; }
+	float getDeltaSec() const;
+	void resetTimer();
 	void setCurrentObject(QObject* val);
 	void resize(const QSize& size);
 
@@ -45,6 +47,7 @@ Q_SIGNALS:
 	void currentObjectChanged(QObject*);
 protected:
 	virtual void setupGraph(QRenderGraphBuilder& graphBuilder) {}
+	virtual void endFrame(){}
 private:
 	QRhiHelper::InitParams mInitParams;
 	QRhiCamera* mCamera = nullptr;
@@ -53,9 +56,11 @@ private:
 	QSharedPointer<QRenderGraphBuilder> mGraphBuilder;
 	QSharedPointer<IRendererSurface> mSurface;
 	QSharedPointer<QRenderThreadWorkder> mRenderThreadWorker;
-
 	QVector<IRenderComponent*> mRenderComponents;
 	QVector<QPrimitiveRenderProxy*> mRenderProxies;
+	QElapsedTimer mTimer;
+	int64_t mLastTimeMsec = 0.0;
+	float mDeltaSec = 0.0f;
 };
 
 

@@ -8,10 +8,12 @@ qengine_add_target(QEngineCore
         Qt::ShaderToolsPrivate
         Qt::Multimedia
         Qt::MultimediaPrivate
-        assimp::assimp
-        fftw3
         ImGui
         ImGuizmo
+        Tracy::TracyClient
+    PRIVATE_DEPENDENCY  
+        assimp::assimp
+        fftw3
     PUBLIC_INCLUDE
         ../../3rdParty/fftw3/api
 )

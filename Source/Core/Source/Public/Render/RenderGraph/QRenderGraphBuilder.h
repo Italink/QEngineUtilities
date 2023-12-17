@@ -78,6 +78,7 @@ public:
 	QRhi* getRhi() const;
 	const QShader& getFullScreenVS();
 	IRenderer* getRenderer() const;
+	float getDeltaSec() const;
 	const QList<QRhiTextureRenderTarget*>& getActivatedRenderTargets() const;
 	const QMap<QRhiTextureRenderTarget*, QList<QRhiGraphicsPipeline*>>& getRenderTargetPipelines() const;
 	QRhiRenderTarget* getMainRenderTarget() const;
@@ -93,9 +94,7 @@ private:
 	QShader mFullScreenVertexShader;
 	QScopedPointer<QRGRhiResourcePool> mResourcePool;
 	QVector<std::function<void(QRhiCommandBuffer*)>> mExecutors;
-
 	QHash<QString, QSharedPointer<IRenderPassBuilder>> mPassBuilderMap;
-
 	QList<QRhiTextureRenderTarget*> mActivatedRenderTargets;
 	QMap<QRhiTextureRenderTarget*, QList<QRhiGraphicsPipeline*>> mRenderTargetPipelines;
 };

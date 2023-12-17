@@ -2,6 +2,7 @@
 #define IRenderPassBuilder_h__
 
 #include "QRenderGraphBuilder.h"
+#include "tracy/Tracy.hpp"
 
 #define QRP_INPUT_BEGIN(PassBuilderClass) \
 			friend struct Input; \
@@ -17,9 +18,13 @@
 					QRenderGraphBuilder* mRGBuilder; \
 				public: \
 					Output setup() { \
+						ZoneScopedN(#PassBuilderClass); \
 						mPassBuilder->mInput = *this; \
 						mPassBuilder->setup(*mRGBuilder); \
-						mRGBuilder->addPass(std::bind(&PassBuilderClass::execute, mPassBuilder, std::placeholders::_1)); \
+						mRGBuilder->addPass([PassBuilder = mPassBuilder](QRhiCommandBuffer* cmdBuffer){ \
+							ZoneScopedN(#PassBuilderClass); \
+							PassBuilder->execute(cmdBuffer); \
+						}); \
 						mPassBuilder->mOutput.Pass = mPassBuilder; \
 						return mPassBuilder->mOutput; \
 					} \

@@ -6,6 +6,7 @@
 #include "QRhiCamera.h"
 #include "IRenderComponent.h"
 #include "Render/RenderGraph/QRenderGraphBuilder.h"
+#include "tracy/Tracy.hpp"
 
 class QRenderThreadWorkder : public QObject {
 public:
@@ -17,30 +18,53 @@ public:
 		mThread->start();
 	}
 	void render(){
+		tracy::SetThreadName("RenderThread");
+		FrameMarkStart("RenderThread");
+		ZoneScopedN("Render");
 		QRhiCommandBuffer* cmdBuffer;
 		QRhiRenderTarget* renderTarget;
 
-		if (!mRenderer->mSurface->beginFrame(&cmdBuffer, &renderTarget))
+		if (!mRenderer->mSurface->beginFrame(&cmdBuffer, &renderTarget)) {
+			FrameMarkEnd("RenderThread");
 			return;
+		}
 
 		const QColor clearColor = QColor::fromRgbF(0.0f, 0.0f, 1.0f, 1.0f);
 		const QRhiDepthStencilClearValue dsClearValue = { 1.0f,0 };
 		mRenderer->mGraphBuilder->setMainRenderTarget(renderTarget);
-		mRenderer->setupGraph(*mRenderer->mGraphBuilder.get());
-		mRenderer->mGraphBuilder->compile();
-		mRenderer->mGraphBuilder->execute(cmdBuffer);
 
+		{
+			ZoneScopedN("Setup");
+			mRenderer->setupGraph(*mRenderer->mGraphBuilder.get());
+		}
+		{
+			ZoneScopedN("Compile");
+			mRenderer->mGraphBuilder->compile();
+		}
+		{
+			ZoneScopedN("Execute");
+			mRenderer->mGraphBuilder->execute(cmdBuffer);
+		}
 		mRenderer->mSurface->endFrame();
+		mRenderer->endFrame();
 
 		mRenderer->mGraphBuilder->clear();
 		mCondition.wakeOne();
+		FrameMark;
+		FrameMarkEnd("RenderThread");
+
+		int64_t currMsec = mRenderer->mTimer.elapsed();
+		mRenderer->mDeltaSec = (currMsec - mRenderer->mLastTimeMsec) / 1000.0f;
+		mRenderer->mLastTimeMsec = currMsec;
 	}
 
 	void initialize(){
+		ZoneScopedN("Initialize");
 		mRenderer->mRhi = QRhiHelper::create(mRenderer->mInitParams.backend, mRenderer->mInitParams.rhiFlags, mRenderer->maybeWindow());
 		mRenderer->mCamera->setupRhi(mRenderer->mRhi.get());
 		mRenderer->mSurface->initialize(mRenderer->mRhi.get(), mRenderer->mInitParams);
 		mRenderer->mGraphBuilder = QSharedPointer<QRenderGraphBuilder>::create(mRenderer);
+		mRenderer->mTimer.restart();
 		mCondition.wakeOne();
 	}
 
@@ -115,6 +139,16 @@ QRhi* IRenderer::rhi()
 QRhiCamera* IRenderer::getCamera()
 {
 	return mCamera;
+}
+
+float IRenderer::getDeltaSec() const
+{
+	return mDeltaSec;
+}
+
+void IRenderer::resetTimer()
+{
+	mLastTimeMsec = mTimer.elapsed();
 }
 
 void IRenderer::setCurrentObject(QObject* val)
