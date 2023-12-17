@@ -19,7 +19,7 @@ protected:
 	bool eventFilter(QObject* obj, QEvent* event) override;
 #endif 
 protected:
-	QWidget* mViweport = nullptr;
+	QWidget* mViewport = nullptr;
 	IRenderer* mRenderer;
 #ifdef QENGINE_WITH_EDITOR
 	QDetailView* mDetailView;
