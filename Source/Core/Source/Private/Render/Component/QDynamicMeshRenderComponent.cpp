@@ -1,5 +1,6 @@
 #include "Render/Component/QDynamicMeshRenderComponent.h"
 #include "Type/QColor4D.h"
+#include "QEngineObjectManager.h"
 
 QDynamicMeshRenderComponent::QDynamicMeshRenderComponent() {
 
@@ -81,3 +82,5 @@ void QDynamicMeshRenderComponent::onRebuildResource() {
 		cmdBuffer->draw(mVertices.size());
 	});
 }
+
+QENGINE_REGISTER_CLASS(QDynamicMeshRenderComponent)

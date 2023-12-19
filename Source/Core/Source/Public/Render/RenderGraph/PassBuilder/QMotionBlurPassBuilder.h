@@ -3,7 +3,7 @@
 
 #include "IRenderPassBuilder.h"
 
-class QENGINECORE_API QMotionBlurPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QMotionBlurPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QMotionBlurPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(QRhiTextureRef, PositionTexture);

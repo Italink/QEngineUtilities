@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QSsaoPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QSsaoPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QSsaoPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, PositionTexture);
 		QRP_INPUT_ATTR(QRhiTextureRef, NormalTexture);

@@ -2,7 +2,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QTexutrePassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QTexutrePassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QTexutrePassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(QRhiRenderTarget*, DstRenderTarget);

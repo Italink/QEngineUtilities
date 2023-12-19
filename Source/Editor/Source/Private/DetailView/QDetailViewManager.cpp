@@ -1,5 +1,4 @@
 #include "DetailView/QDetailViewManager.h"
-#include "DetailCustomization_QObject.h"
 #include "Widgets/Color/QColorButton.h"
 #include "Widgets/QFilePathBox.h"
 #include "Widgets/QHoverTextEdit.h"
@@ -93,8 +92,6 @@ QDetailViewManager::QDetailViewManager()
 		});
 
 void QDetailViewManager::registerBuiltIn() {
-	registerCustomClassLayout<DetailCustomization_QObject>(&QObject::staticMetaObject);
-
 	registerCustomPropertyValueWidgetCreator(QMetaType::fromType<bool>(),[](QPropertyHandle* InHandler) {
 		QCheckBox* checkBox = new QCheckBox;
 		InHandler->bind(checkBox, &QCheckBox::stateChanged,

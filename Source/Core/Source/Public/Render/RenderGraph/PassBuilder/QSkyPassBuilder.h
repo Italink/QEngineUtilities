@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QSkyPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QSkyPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QSkyPassBuilder)
 	QRP_INPUT_END()
 

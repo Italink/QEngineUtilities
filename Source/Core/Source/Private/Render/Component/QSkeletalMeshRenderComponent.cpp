@@ -1,4 +1,5 @@
 #include "Render/Component/QSkeletalMeshRenderComponent.h"
+#include "QEngineObjectManager.h"
 
 QSkeletalMeshRenderComponent::QSkeletalMeshRenderComponent() {
 }
@@ -101,3 +102,5 @@ void QSkeletalMeshRenderComponent::onRebuildResource() {
 		});
 	}
 }
+
+QENGINE_REGISTER_CLASS(QSkeletalMeshRenderComponent)

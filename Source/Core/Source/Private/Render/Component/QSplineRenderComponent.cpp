@@ -1,5 +1,6 @@
 #include "Render/Component/QSplineRenderComponent.h"
 #include "Utils/MathUtils.h"
+#include "QEngineObjectManager.h"
 
 QSplineRenderComponent::QSplineRenderComponent() {
 
@@ -151,3 +152,5 @@ void QSplineRenderComponent::onRebuildResource() {
 	}
 	mRenderProxy->mSigUpload.request();
 }
+
+QENGINE_REGISTER_CLASS(QSplineRenderComponent)

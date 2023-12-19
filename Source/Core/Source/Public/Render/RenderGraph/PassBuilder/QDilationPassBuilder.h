@@ -3,7 +3,7 @@
 
 #include "IRenderPassBuilder.h"
 
-class QENGINECORE_API QDilationPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QDilationPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QDilationPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(int, DilationSize) = 2.2f;

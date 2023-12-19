@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QDepthOfFieldPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QDepthOfFieldPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QDepthOfFieldPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(QRhiTextureRef, PositionTexture);

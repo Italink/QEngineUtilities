@@ -1,5 +1,6 @@
 #include "Render/Component/QStaticMeshRenderComponent.h"
 #include "Utils/MathUtils.h"
+#include "QEngineObjectManager.h"
 
 QStaticMeshRenderComponent::QStaticMeshRenderComponent() {
 }
@@ -109,3 +110,5 @@ QRhiMaterialGroup* QStaticMeshRenderComponent::getMaterialGroup()
 {
 	return mMaterialGroup.get();
 }
+
+QENGINE_REGISTER_CLASS(QStaticMeshRenderComponent)

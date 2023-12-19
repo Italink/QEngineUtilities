@@ -15,9 +15,9 @@ class QENGINECORE_API QParticlesRenderComponent :public ISceneRenderComponent {
 		Q_PROPERTY(bool FacingCamera READ getFacingCamera WRITE setFacingCamera)
 
 		Q_BUILDER_BEGIN_SCENE_RENDER_COMP(QParticlesRenderComponent)
-			Q_BUILDER_ATTRIBUTE(IParticleEmitter*, Emitter)
-			Q_BUILDER_ATTRIBUTE(QSharedPointer<QStaticMesh>, ParticleShape)
-			Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
+		Q_BUILDER_ATTRIBUTE(IParticleEmitter*, Emitter)
+		Q_BUILDER_ATTRIBUTE(QSharedPointer<QStaticMesh>, ParticleShape)
+		Q_BUILDER_ATTRIBUTE(bool, FacingCamera)
 		Q_BUILDER_END()
 public:
 	QParticlesRenderComponent();

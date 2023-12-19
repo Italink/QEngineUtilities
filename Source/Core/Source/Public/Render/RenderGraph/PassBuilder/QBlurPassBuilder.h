@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QBlurPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QBlurPassBuilder : public IRenderPassBuilder {
 public:
 	QBlurPassBuilder();
 

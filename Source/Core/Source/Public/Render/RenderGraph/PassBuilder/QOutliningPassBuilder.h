@@ -4,7 +4,7 @@
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 #include "Type/QColor4D.h"
 
-class QENGINECORE_API QOutliningPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QOutliningPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QOutliningPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(QRhiTextureRef, PositionTexture);

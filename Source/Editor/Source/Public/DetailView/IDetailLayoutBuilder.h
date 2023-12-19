@@ -17,7 +17,6 @@ public:
 	struct ObjectContext {
 		void* ObjectPtr = nullptr;
 		const QMetaObject* MetaObject;
-
 		QObject* OwnerObject = nullptr;
 		QString PrePath;
 	};

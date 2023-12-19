@@ -9,7 +9,7 @@
 #include <QtMultimedia/QVideoFrame>
 #include <private/qabstractvideobuffer_p.h>
 
-class QENGINECORE_API QVideoPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QVideoPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QVideoPassBuilder)
 	QRP_INPUT_END()
 	QRP_OUTPUT_BEGIN(QVideoPassBuilder)

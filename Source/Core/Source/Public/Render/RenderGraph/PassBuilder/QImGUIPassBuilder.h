@@ -4,7 +4,7 @@
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 #include "Render/RenderGraph/Painter/ImGuiPainter.h"
 
-class QENGINECORE_API QImGUIPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QImGUIPassBuilder : public IRenderPassBuilder {
 public:
 	QImGUIPassBuilder();
 

@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QGlslSandboxPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QGlslSandboxPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QGlslSandboxPassBuilder)
 		QRP_INPUT_ATTR(QString, ShaderCode);
 	QRP_INPUT_END()

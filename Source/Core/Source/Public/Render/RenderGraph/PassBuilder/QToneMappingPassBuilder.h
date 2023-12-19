@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QToneMappingPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QToneMappingPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QToneMappingPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(float, Gamma) = 2.2f;

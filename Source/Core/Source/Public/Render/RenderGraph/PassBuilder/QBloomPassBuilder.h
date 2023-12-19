@@ -3,7 +3,7 @@
 
 #include "Render/RenderGraph/IRenderPassBuilder.h"
 
-class QENGINECORE_API QBloomPassBuilder : public::IRenderPassBuilder {
+class QENGINECORE_API QBloomPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QBloomPassBuilder)
 		QRP_INPUT_ATTR(QRhiTextureRef, BaseColorTexture);
 		QRP_INPUT_ATTR(QRhiTextureRef, BlurTexture);

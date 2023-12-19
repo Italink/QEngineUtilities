@@ -1,6 +1,7 @@
 #include "Render/Component/QParticlesRenderComponent.h"
 #include "QVulkanInstance"
 #include "qvulkanfunctions.h"
+#include "QEngineObjectManager.h"
 
 static float ParticleShape[] = {
 	 0.01f,   0.01f,
@@ -209,3 +210,5 @@ void QParticlesRenderComponent::onPreRenderTick(QRhiCommandBuffer* cmdBuffer)
 		vkInstance->deviceFunctions(vkHandles->dev)->vkCmdCopyBuffer(vkCmdBufferHandle->commandBuffer, indirectDispatchBuffer, indirectDrawBuffer, 1, &bufferCopy);
 	}
 }
+
+QENGINE_REGISTER_CLASS(QParticlesRenderComponent)
