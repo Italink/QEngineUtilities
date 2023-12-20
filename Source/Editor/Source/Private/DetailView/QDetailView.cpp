@@ -41,6 +41,10 @@ QDetailView::QDetailView()
 	};
 }
 
+QDetailView::~QDetailView()
+{
+}
+
 void QDetailView::setObject(QObject* inObject) {
 	setObjects({ inObject });
 }
@@ -186,6 +190,7 @@ void QDetailView::foreachRows(std::function<bool(QDetailViewRow*)> inProcessor)
 
 QDetailViewRow* QDetailView::addTopLevelRow() {
 	QDetailViewRow* row = new QDetailViewRow(this);
+	row->setParent(this);
 	mTopLevelRows << row;
 	mLayout->addWidget((QWidget*)row->mWidget, 0, Qt::AlignTop);
 	return row;

@@ -63,7 +63,7 @@ public:
 
 	QEngineUndoEntry* getUndoEntry() const { return mUndoEntry; }
 
-	static QVariant createNewVariant(QMetaType inOutputType, QMetaType inRealType = QMetaType());
+	static QVariant createNewVariant(QMetaType inOutputType);
 
 	void setAttachButtonWidgetCallback(std::function<void(QHBoxLayout*)> val) { mAttachButtonWidgetCallback = val; }
 
@@ -86,6 +86,31 @@ protected:
 	QEngineUndoEntry* mUndoEntry = nullptr;
 	QMap<QObject*, QPropertyBinder> mBinderMap;
 	std::function<void(QHBoxLayout*)> mAttachButtonWidgetCallback;
+};
+
+struct QENGINEEDITOR_API ExternalRefCountWithMetaType : public QtSharedPointer::ExternalRefCountData {
+	typedef ExternalRefCountData Parent;
+	QMetaType mMetaType;
+	void* mData;
+
+	static void deleter(ExternalRefCountData* self) {
+		ExternalRefCountWithMetaType* that =
+			static_cast<ExternalRefCountWithMetaType*>(self);
+		that->mMetaType.destroy(that->mData);
+		Q_UNUSED(that); // MSVC warns if T has a trivial destructor
+	}
+
+	static inline ExternalRefCountData* create(QMetaType inMetaType, void* inPtr)
+	{
+		ExternalRefCountWithMetaType* d = static_cast<ExternalRefCountWithMetaType*>(::operator new(sizeof(ExternalRefCountWithMetaType)));
+
+		// initialize the d-pointer sub-object
+		// leave d->data uninitialized
+		new (d) Parent(ExternalRefCountWithMetaType::deleter); // can't throw
+		d->mData = inPtr;
+		d->mMetaType = inMetaType;
+		return d;
+	}
 };
 
 #endif // QPropertyHandle_h__

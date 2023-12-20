@@ -16,6 +16,7 @@ class QENGINEEDITOR_API QDetailViewRow : public QObject{
 	friend class QDetailViewRowWidget;
 public:
 	QDetailViewRow(QDetailView* inView);
+	~QDetailViewRow();
 
 	void setupContentWidget(QWidget* inContent);
 	void setupNameValueWidget(QWidget* inNameWidget,QWidget* inValueWidget);

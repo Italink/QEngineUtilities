@@ -153,7 +153,6 @@ public:
 	bool bExpanded = false;
 };
 
-
 QDetailViewRow::QDetailViewRow(QDetailView* inView)
 	: mView(inView)
 	, mWidget(new QDetailViewRowWidget(this))
@@ -164,6 +163,10 @@ QDetailViewRow::QDetailViewRow(QDetailView* inView)
 	connect(mWidget, &QDetailViewRowWidget::AsShowEvent, this, [this]() {
 		requestRefreshSplitter();
 	});
+}
+
+QDetailViewRow::~QDetailViewRow()
+{
 }
 
 void QDetailViewRow::setupContentWidget(QWidget* inContent) {
@@ -227,6 +230,7 @@ int CountChildrenRow(QDetailViewRow* Root) {
 
 QDetailViewRow* QDetailViewRow::addChildRow() {
 	QDetailViewRow* row = new QDetailViewRow(mView);
+	row->setParent(this);
 	int parentIndex = mView->mLayout->indexOf(mWidget);
 	int childCount = CountChildrenRow(this);
 	mChildren << row;
@@ -246,6 +250,7 @@ void QDetailViewRow::clear() {
 		child->clear();
 		mView->mLayout->removeWidget(child->mWidget);
 		child->mWidget->deleteLater();
+		child->deleteLater();
 	}
 	mChildren.clear();
 }

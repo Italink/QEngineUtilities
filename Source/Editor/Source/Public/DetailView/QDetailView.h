@@ -21,6 +21,7 @@ public:
 
 public:
 	QDetailView();
+	~QDetailView();
 	void setObject(QObject* inObject);
 	void setObjects(const QObjectList& inObjects);
 	void selectSubObject(QObject* inObject);

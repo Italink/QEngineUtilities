@@ -8,11 +8,11 @@ QObjectPropertyHandleImpl::QObjectPropertyHandleImpl(QPropertyHandle* InHandle)
 	:IPropertyHandleImpl(InHandle) {
 	mObjectHolder = mHandle->getValue();
 	QMetaType metaType = mHandle->getType();
-	QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
+	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(metaType.name());
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
-		QMetaType innerMetaType = QMetaType::fromName((matchTexts.back() + "*").toLocal8Bit());
+		QMetaType innerMetaType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
 		mMetaObject = innerMetaType.metaObject();
 		const void* ptr = *(const void**)mObjectHolder.data();
 		bIsSharedPointer = true;

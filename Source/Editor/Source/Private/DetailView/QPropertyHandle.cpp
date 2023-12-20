@@ -34,12 +34,12 @@ QPropertyHandle::QPropertyHandle(QObject* inParent, QMetaType inType, QString in
 		mImpl.reset(new QEnumPropertyHandleImpl(this));
 	}
 	else{
-		QRegularExpression reg("(QSharedPointer|std::shared_ptr|shared_ptr)\\<(.+)\\>");
+		QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 		QRegularExpressionMatch match = reg.match(inType.name(), 0, QRegularExpression::MatchType::PartialPreferCompleteMatch, QRegularExpression::AnchorAtOffsetMatchOption);
 		QStringList matchTexts = match.capturedTexts();
 		QMetaType innerMetaType;
 		if (!matchTexts.isEmpty()) {
-			QString metaTypeName = matchTexts.back() + "*";
+			QString metaTypeName = matchTexts.back();
 			innerMetaType = QMetaType::fromName(metaTypeName.toLocal8Bit());
 		}
 		if(innerMetaType.metaObject()||inType.metaObject()){
@@ -280,31 +280,6 @@ void QPropertyHandle::generateAttachButtonWidget(QHBoxLayout* Layout) {
 	}
 }
 
-struct ExternalRefCountWithMetaType: public QtSharedPointer::ExternalRefCountData{
-	typedef ExternalRefCountData Parent;
-	QMetaType mMetaType;
-	void* mData;
-
-	static void deleter(ExternalRefCountData* self){
-		ExternalRefCountWithMetaType* that =
-			static_cast<ExternalRefCountWithMetaType*>(self);
-		that->mMetaType.destroy(that->mData);
-		Q_UNUSED(that); // MSVC warns if T has a trivial destructor
-	}
-
-	static inline ExternalRefCountData* create(QMetaType inMetaType,void* inPtr)
-	{
-		ExternalRefCountWithMetaType* d = static_cast<ExternalRefCountWithMetaType*>(::operator new(sizeof(ExternalRefCountWithMetaType)));
-
-		// initialize the d-pointer sub-object
-		// leave d->data uninitialized
-		new (d) Parent(ExternalRefCountWithMetaType::deleter); // can't throw
-		d->mData = inPtr;
-		d->mMetaType = inMetaType;
-		return d;
-	}
-};
-
 void QPropertyHandle::refreshBinder() {
 	QVariant mVar = getValue();
 	for (auto& binder : mBinderMap.values()) {
@@ -315,18 +290,17 @@ void QPropertyHandle::refreshBinder() {
 	}
 }
 
-QVariant QPropertyHandle::createNewVariant(QMetaType inOutputType, QMetaType inRealType){
+QVariant QPropertyHandle::createNewVariant(QMetaType inOutputType){
 	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
 	QRegularExpressionMatch match = reg.match(inOutputType.name());
 	QStringList matchTexts = match.capturedTexts();
 	if (!matchTexts.isEmpty()) {
-		if(!inRealType.isValid())
-			inRealType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
-		if (inRealType.isValid()) {
-			void* ptr = inRealType.create();
+		QMetaType innerMetaType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
+		if (innerMetaType.isValid()) {
+			void* ptr = innerMetaType.create();
 			QVariant sharedPtr(inOutputType);
 			memcpy(sharedPtr.data(), &ptr, sizeof(ptr));
-			QtSharedPointer::ExternalRefCountData* data = ExternalRefCountWithMetaType::create(inRealType,ptr);
+			QtSharedPointer::ExternalRefCountData* data = ExternalRefCountWithMetaType::create(innerMetaType,ptr);
 			memcpy((char*)sharedPtr.data() + sizeof(ptr), &data, sizeof(data));
 			return sharedPtr;
 		}
@@ -338,11 +312,9 @@ QVariant QPropertyHandle::createNewVariant(QMetaType inOutputType, QMetaType inR
 			if (obj)
 				return QVariant::fromValue(obj);
 		}
-		if (!inRealType.isValid()) {
-			inRealType = QMetaType::fromName(QString(inOutputType.name()).remove("*").toLocal8Bit());
-		}
-		if (inRealType.isValid()) {
-			void* ptr = inRealType.create();
+		QMetaType innerMetaType = QMetaType::fromName(QString(inOutputType.name()).remove("*").toLocal8Bit());
+		if (innerMetaType.isValid()) {
+			void* ptr = innerMetaType.create();
 			QVariant var(inOutputType, ptr);
 			memcpy(var.data(), &ptr, sizeof(ptr));
 			return var;

@@ -54,8 +54,21 @@ QSharedPointer<IPropertyTypeCustomization> QDetailViewManager::getCustomProperty
 			return It.second();
 		}
 	}
+	const QMetaObject* Child = nullptr;
+	QRegularExpression reg("QSharedPointer\\<(.+)\\>");
+	QRegularExpressionMatch match = reg.match(InMetaType.name());
+	QStringList matchTexts = match.capturedTexts();
+	QMetaType innerMetaType;
+	if (!matchTexts.isEmpty()) {
+		innerMetaType = QMetaType::fromName((matchTexts.back()).toLocal8Bit());
+		Child = innerMetaType.metaObject();
+	}
+	else {
+		Child = InMetaType.metaObject();
+	}
+
 	for (const auto& It : mCustomPropertyTypeLayoutMap.asKeyValueRange()) {
-		const QMetaObject* Child = InMetaType.metaObject();
+	
 		const QMetaObject* Parent = It.first.metaObject();
 		if (Parent && Child && Child->inherits(Parent)) {
 			return It.second();
