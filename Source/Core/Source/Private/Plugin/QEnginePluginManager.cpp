@@ -16,18 +16,19 @@ void QEnginePluginManager::TearDown() {
 
 void QEnginePluginManager::loadPlugin(QFileInfo fileInfo)
 {
-	QEnginePluginHandler info;
-	info.handle.reset(new QLibrary(fileInfo.filePath()));
-	if (info.handle->load()) {
-		InitializePluginFunc InitializePlugin = (InitializePluginFunc)info.handle->resolve("InitializePlugin");
+	QEnginePluginHandler handler;
+	handler.handle.reset(new QLibrary(fileInfo.filePath()));
+	if (handler.handle->load()) {
+		InitializePluginFunc InitializePlugin = (InitializePluginFunc)handler.handle->resolve("InitializePlugin");
 		if (InitializePlugin) {
-			info.plugin.reset(InitializePlugin());
-			mPluginMap[fileInfo.baseName()] = info;
-			qDebug() << QString("-Load %1 Success").arg(info.handle->fileName()).toLatin1().constData();
+			handler.plugin.reset(InitializePlugin());
+			handler.info = handler.plugin->info();
+			mPluginHandlers << handler;
+			qDebug() << QString("-Load %1 Success").arg(handler.handle->fileName()).toLatin1().constData();
 			Q_EMIT asPluginChanged();
 		}
 		else {
-			qDebug() << QString("-Load %1 Failed").arg(info.handle->fileName()).toLatin1().constData();
+			qDebug() << QString("-Load %1 Failed").arg(handler.handle->fileName()).toLatin1().constData();
 		}
 	}
 
@@ -49,9 +50,9 @@ void QEnginePluginManager::loadPlugins() {
 	Q_EMIT asPluginChanged();
 }
 
-QMap<QString, QEnginePluginHandler>& QEnginePluginManager::getPluginMap()
+QList<QEnginePluginHandler>& QEnginePluginManager::getPluginHandlers()
 {
-	return mPluginMap;
+	return mPluginHandlers;
 }
 
 QSharedPointer<QEnginePluginManager>& QEnginePluginManager::GetSingleton() {

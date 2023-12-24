@@ -13,6 +13,7 @@ struct QENGINECORE_API QEnginePluginHandler {
 	bool bAlreadyStarted = false;
 	QSharedPointer<QLibrary> handle;
 	QSharedPointer<IEnginePlugin> plugin;
+	IEnginePlugin::Info info;
 
 	void startup() {
 		if (!bAlreadyStarted) {
@@ -36,13 +37,13 @@ public:
 	static void TearDown();
 	void loadPlugin(QFileInfo fileInfo);
 	void loadPlugins();
-	QMap<QString, QEnginePluginHandler>& getPluginMap();
+	QList<QEnginePluginHandler>& getPluginHandlers();
 Q_SIGNALS:
 	void asPluginChanged();
 private:
 	static QSharedPointer<QEnginePluginManager>& GetSingleton();
 private:
-	QMap<QString, QEnginePluginHandler> mPluginMap;
+	QList<QEnginePluginHandler> mPluginHandlers;
 };
 
 #endif // QEnginePluginManager_h__

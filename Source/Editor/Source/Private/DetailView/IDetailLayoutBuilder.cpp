@@ -123,6 +123,8 @@ void IDetailLayoutBuilder::addObject(IDetailLayoutBuilder::ObjectContext Context
 	else{
 		for (int i = 0; i < Context.MetaObject->propertyCount(); i++) {
 			QMetaProperty prop = Context.MetaObject->property(i);
+			if (prop.isUser())
+				continue;
 			QString propertyPath = prop.name();
 			if (!Context.PrePath.isEmpty()) {
 				propertyPath = Context.PrePath + "." + propertyPath;
