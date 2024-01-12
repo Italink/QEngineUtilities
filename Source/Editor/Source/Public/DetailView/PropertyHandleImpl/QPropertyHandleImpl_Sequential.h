@@ -3,12 +3,11 @@
 
 #include "QMetaContainer"
 #include "IPropertyHandleImpl.h"
-#include "DetailView/QDetailLayoutBuilder.h"
 
-class QSequentialPropertyHandleImpl: public IPropertyHandleImpl
+class QENGINEEDITOR_API QPropertyHandleImpl_Sequential: public IPropertyHandleImpl
 {
 public:
-	QSequentialPropertyHandleImpl(QPropertyHandle* InHandle);
+	QPropertyHandleImpl_Sequential(QPropertyHandle* inHandle);
 
 	int itemCount();
 	void appendItem(QVariant InVar);
@@ -16,8 +15,7 @@ public:
 	void removeItem(int InIndex);
 
 protected:
-	void generateChildrenRow(QRowLayoutBuilder* Builder)  override;
-	QWidget* generateValueWidget() override;
+	QQuickItem* createValueEditor(QQuickItem* inParent)override;
 	QPropertyHandle* createChildHandle(const QString& inSubName) override;
 private:
 	QMetaSequence mMetaSequence;

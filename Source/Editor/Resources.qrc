@@ -32,5 +32,12 @@
         <file>Resources/text-format.png</file>
         <file>Resources/close.png</file>
         <file>Resources/tips.png</file>
+        <file>Resources/Qml/ColorBox.qml</file>
+        <file>Resources/Qml/NumberBox.qml</file>
+        <file>Resources/Qml/TextBox.qml</file>
+        <file>Resources/Qml/TextComboBox.qml</file>
+        <file>Resources/Qml/Vec2Box.qml</file>
+        <file>Resources/Qml/Vec3Box.qml</file>
+        <file>Resources/Qml/Vec4Box.qml</file>
     </qresource>
 </RCC>

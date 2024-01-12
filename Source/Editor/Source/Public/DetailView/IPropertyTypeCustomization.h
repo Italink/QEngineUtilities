@@ -1,22 +1,18 @@
-#ifndef IPROPERTYTYPECUSTOMIZATION_H
-#define IPROPERTYTYPECUSTOMIZATION_H
+#ifndef IPropertyTypeCustomization_h__
+#define IPropertyTypeCustomization_h__
 
 #include <QSharedPointer>
-#include "IDetailLayoutBuilder.h"
-#include "QPropertyHandle.h"
+#include "QEngineEditorAPI.h"
 
+class QPropertyHandle;
+class QQuickDetailsViewHeaderRowBuilder;
+class QQuickDetailsViewLayoutBuilder;
 
-class QENGINEEDITOR_API IHeaderRowBuilder{
-public:
-	virtual void setNameValueWidget(QWidget* InName, QWidget* InValue) = 0;
-	virtual void setWholeContent(QWidget* InContent) = 0;
-};
-
-class IPropertyTypeCustomization :public  QEnableSharedFromThis<IPropertyTypeCustomization>
+class QENGINEEDITOR_API IPropertyTypeCustomization :public  QEnableSharedFromThis<IPropertyTypeCustomization>
 {
 public:
-	virtual void customizeHeader(QPropertyHandle* PropertyHandle , IHeaderRowBuilder* Builder) = 0;
-
-	virtual void customizeChildren(QPropertyHandle* PropertyHandle, IDetailLayoutBuilder* Builder) {}
+	virtual void customizeHeader(QPropertyHandle* inPropertyHandle, QQuickDetailsViewHeaderRowBuilder* inBuilder) = 0;
+	virtual void customizeChildren(QPropertyHandle* inPropertyHandle, QQuickDetailsViewLayoutBuilder* inBuilder) {}
 };
-#endif // IPROPERTYTYPECUSTOMIZATION_H
+
+#endif // IPropertyTypeCustomization_h__

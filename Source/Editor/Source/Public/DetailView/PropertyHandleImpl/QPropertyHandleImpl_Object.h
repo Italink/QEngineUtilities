@@ -1,16 +1,17 @@
-#ifndef QObjectPropertyHandleImpl_h__QObjectPropertyHandleImpl
-#define QObjectPropertyHandleImpl_h__
+#ifndef QPropertyHandleImpl_Object_h__
+#define QPropertyHandleImpl_Object_h__
 
 #include "IPropertyHandleImpl.h"
-#include "QVariant"
 
-class QObjectPropertyHandleImpl : public IPropertyHandleImpl {
+class QENGINEEDITOR_API QPropertyHandleImpl_Object : public IPropertyHandleImpl {
 public:
-	QObjectPropertyHandleImpl(QPropertyHandle* InHandle);
+	QPropertyHandleImpl_Object(QPropertyHandle* inHandle);
+	QObject* getObject();
+	QObject* getOwnerObject();
+	const QMetaObject* getMetaObject() const;
 protected:
 	QPropertyHandle* findChildHandle(const QString& inSubName) override;
-	QWidget* generateValueWidget() override;
-	void generateChildrenRow(QRowLayoutBuilder* Builder)  override;
+	QQuickItem* createValueEditor(QQuickItem* inParent)override;
 	QPropertyHandle* createChildHandle(const QString& inSubName) override;
 	void refreshObjectPtr();
 private:
@@ -22,4 +23,4 @@ private:
 	bool bIsPointer = false;
 };
 
-#endif // QObjectPropertyHandleImpl_h__
+#endif // QPropertyHandleImpl_Object_h__
