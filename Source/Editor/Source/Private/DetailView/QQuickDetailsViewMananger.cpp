@@ -3,11 +3,17 @@
 #include "QQmlHelper.h"
 #include "Color/QtColorDialog.h"
 #include <QRegularExpression>
+#include "QQuickDetailsView.h"
 
 QQuickDetailsViewManager* QQuickDetailsViewManager::Get()
 {
 	static QQuickDetailsViewManager ins;
 	return &ins;
+}
+
+void QQuickDetailsViewManager::registerQml()
+{
+	qmlRegisterType<QQuickDetailsView>("Qt.DetailsView", 1, 0, "DetailsView");
 }
 
 void QQuickDetailsViewManager::unregisterCustomClassLayout(const QMetaObject* InMetaObject)

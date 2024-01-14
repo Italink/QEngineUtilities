@@ -16,7 +16,7 @@ public:
 	QQuickDetailsView(QQuickItem* parent = nullptr);
 	qreal getSpliterPencent() const;
 	void setSpliterPencent(qreal val);
-	void setObject(QObject* inObject);
+	Q_INVOKABLE void setObject(QObject* inObject);
 	QObject* getObject() const;
 Q_SIGNALS:
 	void asSpliterPencentChanged(qreal);

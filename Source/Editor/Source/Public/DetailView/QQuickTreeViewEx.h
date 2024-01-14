@@ -1,8 +1,8 @@
 #ifndef QQuickTreeViewEx_h__
 #define QQuickTreeViewEx_h__
 
-#include "private/qquicktreeview_p.h"
 #include "QEngineEditorAPI.h"
+#include "private/qquicktableview_p.h"
 
 class QQuickTreeViewExPrivate;
 

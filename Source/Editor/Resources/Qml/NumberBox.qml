@@ -97,6 +97,8 @@ Item{
                         lastPressX = mouse.x
                         lastPressY = mouse.y
                         cursorShape = Qt.BlankCursor
+                        var global = dragArea.mapToGlobal(lastPressX,lastPressY)
+                        //console.log("press last:",lastPressX,lastPressY,"  global:",global)
                     }
             }
             onReleased:
@@ -111,7 +113,9 @@ Item{
                     if(!input.enabled && mouse.buttons&Qt.LeftButton){
                         var offset = mouse.x - lastPressX
                         setNumber(number + offset * step)
-                        var global =mapToGlobal(lastPressX,lastPressY)
+                        var global = dragArea.mapToGlobal(lastPressX,lastPressY)
+                        var local = dragArea.mapFromGlobal(global.x,global.y)
+                        console.log("last:",lastPressX,lastPressY,"  global:",global," local:",local)
                         helper.setCursorPos(global.x,global.y)
                     }
                 }

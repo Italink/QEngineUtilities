@@ -21,6 +21,8 @@ public:
 
 	static QQuickDetailsViewManager* Get();
 
+	void registerQml();
+
 	template<typename IDetailCustomizationType>
 	void registerCustomClassLayout(const QMetaObject* InMetaObject)
 	{

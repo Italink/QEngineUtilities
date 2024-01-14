@@ -13,7 +13,15 @@ QString QQmlHelper::numberToString(QVariant var, int precision)
 	return QString::number(value, 'f', precision);
 }
 
- void QQmlHelper::setCursorPos(qreal x, qreal y)
+void QQmlHelper::setCursorPos(qreal x, qreal y)
 {
-	 QCursor::setPos(x, y);
+	//qDebug() << QCursor::pos();
+	//QCursor::setPos(x, y);
+}
+
+void QQmlHelper::setCursorPosTest(QQuickItem* item, qreal x, qreal y)
+{
+	QPointF global = item->mapToGlobal(x, y);
+	QCursor::setPos(global.x(), global.y());
+	qDebug() << x << y << global << QCursor::pos();
 }

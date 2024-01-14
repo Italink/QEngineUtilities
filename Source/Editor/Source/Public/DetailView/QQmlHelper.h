@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QQuickItem>
 #include "QEngineEditorAPI.h"
 
 class QENGINEEDITOR_API QQmlHelper : public QObject {
@@ -12,6 +13,7 @@ public:
 
 	Q_INVOKABLE QString numberToString(QVariant var,int precision);
 	Q_INVOKABLE void setCursorPos(qreal x, qreal y);
+	Q_INVOKABLE void setCursorPosTest(QQuickItem* item, qreal x, qreal y);
 };
 
 class QENGINEEDITOR_API QQmlLambdaHelper : public QObject {
