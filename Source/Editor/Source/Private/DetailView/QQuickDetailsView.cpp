@@ -79,10 +79,6 @@ void QQuickDetailsView::componentComplete()
 		     TapHandler {
                  onTapped: detailsView.toggleExpanded(row)
              }
-		     Button {
-				text :"hello"
-				anchors.fill : parent
-			 }
          })", QUrl("QQuickDetailsView.componentComplete"));;
 	setDelegate(delegate);
     QQuickTreeViewEx::componentComplete();

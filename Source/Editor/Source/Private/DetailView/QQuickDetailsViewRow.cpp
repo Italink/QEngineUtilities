@@ -96,6 +96,8 @@ void QDetailsViewRow_Property::attachChildren()
 	else if (mHandle->getPropertyType() == QPropertyHandle::Object) {
 		auto objectHandle = mHandle->asObject();
 		QObject* object = objectHandle->getObject();
+		if (object == nullptr)
+			return;
         if (mClassLayoutCustomization) {
             QQuickDetailsViewLayoutBuilder builder(this);
             mClassLayoutCustomization->customizeDetails(object, &builder);
