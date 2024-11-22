@@ -27,11 +27,7 @@ RenderGraphView::RenderGraphView(IRenderer* renderer)
 }
 
 void RenderGraphView::Show() {
-	const QList<QRhiTextureRenderTarget*>& currentActivatedRenderTargets = mRenderer->getRenderGraphBuilder()->getActivatedRenderTargets();
-	if (currentActivatedRenderTargets != mLastActivatedRenderTargets) {
-		Rebuild();
-		mLastActivatedRenderTargets = currentActivatedRenderTargets;
-	}
+	Rebuild();
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (bShowFrameComparer) {
 		ShowFrameComparer(1, 2, 2);
@@ -57,18 +53,23 @@ void RenderGraphView::Show() {
 }
 
 void RenderGraphView::Rebuild() {
+	const QList<QRhiTextureRenderTarget*>& currentActivatedRenderTargets = mRenderer->getRenderGraphBuilder()->getActivatedRenderTargets();
+	if (currentActivatedRenderTargets == mLastActivatedRenderTargets) {
+		return;
+	}
+	mLastActivatedRenderTargets = currentActivatedRenderTargets;
+
 	mCompLeft = nullptr;
 	mCompRight = nullptr;
 	mNodes.clear();
 	mNodeTexutes.clear();
 	mLinks.clear();
 	mTemplates.clear();
-	const QList<QRhiTextureRenderTarget*>& activatedRenderTargets = mRenderer->getRenderGraphBuilder()->getActivatedRenderTargets();
 
 	size_t maxOutSlot = 0;
 	QHash<QString, int> renderTargetToNodeIndex;
 	QMap<QRhiTexture*, QRhiTextureRenderTarget*> textureToRT;
-	for (auto& renderTarget : activatedRenderTargets) {
+	for (auto& renderTarget : currentActivatedRenderTargets) {
 		QList<QRhiTexture*> rtTextures;
 		for (int i = 0; i < renderTarget->description().colorAttachmentCount(); i++) {
 			const QRhiColorAttachment* colorAttachment = renderTarget->description().colorAttachmentAt(i);
@@ -235,7 +236,6 @@ void RenderGraphView::ShowFrameComparer(float thickness, float leftMinWidth, flo
 	}
 	ImGui::End();
 }
-
 
 void RenderGraphView::RequestFitScreen() {
 	mFitOnScreen = GraphEditor::Fit_SelectedNodes;

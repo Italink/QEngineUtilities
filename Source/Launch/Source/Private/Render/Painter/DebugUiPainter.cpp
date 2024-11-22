@@ -67,7 +67,6 @@ QDebugUIPainter::QDebugUIPainter(IRenderer* inRenderer)
 					ImGuizmo::Manipulate(View.constData(), Clip.constData(), mOperation, ImGuizmo::LOCAL, Model.data(), NULL, NULL, NULL, NULL);
 				}
 			}
-			QMetaObject::invokeMethod(this, std::bind(&QDebugUIPainter::refreshEditor, this, camera, currComponent, Model), Qt::ConnectionType::QueuedConnection);
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 			auto dpr = qApp->devicePixelRatio();
 			ImVec2 ButtonSize = ImVec2(20 * dpr, 20 * dpr);
@@ -171,14 +170,17 @@ QDebugUIPainter::QDebugUIPainter(IRenderer* inRenderer)
 				//mRenderer->setOverrideOutput(mOutputTexture);
 			}
 			if (bShowStats) {
-				ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 180 * dpr, viewport->WorkSize.y - 100*dpr));
-				ImGui::SetNextWindowSize(ImVec2(200, 200));
-				ImGui::Begin("Stats", 0, mViewportBarFlags);
-				//ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", mRenderer->maybeWindow()->getFps());
-				//ImGui::TextColored(ImColor(0, 255, 0), "CPU Time\t%.2f ms", mRenderer->getRhiWindow()->getCpuFrameTime());
-				//ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", mRenderer->getRhiWindow()->getGpuFrameTime());
-				ImGui::End();
+				if (QRhiWindow* Window = qobject_cast<QRhiWindow*>(mRenderer->maybeWindow())) {
+					ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - 180 * dpr, viewport->WorkSize.y - 100 * dpr));
+					ImGui::SetNextWindowSize(ImVec2(200, 200));
+					ImGui::Begin("Stats", 0, mViewportBarFlags);
+					ImGui::TextColored(ImColor(0, 255, 0), "FPS          \t%d", Window->getFps());
+					ImGui::TextColored(ImColor(0, 255, 0), "CPU Time\t%.2f ms", Window->getCpuFrameTime());
+					ImGui::TextColored(ImColor(0, 255, 0), "GPU Time\t%.2f ms", Window->getGpuFrameTime());
+					ImGui::End();
+				}
 			}
+			QMetaObject::invokeMethod(this, std::bind(&QDebugUIPainter::refreshEditor, this, camera, currComponent, Model), Qt::ConnectionType::QueuedConnection);
 		}
 	});
 }
@@ -191,7 +193,6 @@ void QDebugUIPainter::setup(QRenderGraphBuilder& builder, QRhiRenderTarget* rt)
 void QDebugUIPainter::resourceUpdate(QRhiResourceUpdateBatch* batch, QRhi* rhi)
 {
 	ImGuiPainter::resourceUpdate(batch, rhi);
-	//mRenderGraphView->Rebuild(mRenderer->getFrameGarph());
 }
 
 void QDebugUIPainter::paint(QRhiCommandBuffer* cmdBuffer, QRhiRenderTarget* renderTarget) {
@@ -255,6 +256,8 @@ void QDebugUIPainter::refreshEditor(QRhiCamera* camera, ISceneRenderComponent* c
 			position->refreshBinder();
 		if (QPropertyHandle* rotation = QPropertyHandle::Find(camera, "Rotation"))
 			rotation->refreshBinder();
+		if (QPropertyHandle* moveSpeed = QPropertyHandle::Find(camera, "MoveSpeed"))
+			moveSpeed->refreshBinder();
 	}
 	if (comp) {
 		if(QPropertyHandle* transform = QPropertyHandle::FindOrCreate(comp, "Transform"))

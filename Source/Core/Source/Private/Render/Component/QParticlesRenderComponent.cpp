@@ -10,7 +10,16 @@ static float ParticleShape[] = {
 	-0.01f,  -0.01f,
 };
 
+QSharedPointer<QStaticMesh> QParticlesRenderComponent::DefaultStaticMesh;
+
 QParticlesRenderComponent::QParticlesRenderComponent() {
+	if (DefaultStaticMesh.isNull()) {
+		QImage image(10, 10, QImage::Format_RGBA8888);
+		image.fill(Qt::white);
+		DefaultStaticMesh = QStaticMesh::CreateFromImage(image);
+	}
+	mStaticMesh = DefaultStaticMesh;
+	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 }
 
 void QParticlesRenderComponent::setEmitter(IParticleEmitter* inEmitter) {
@@ -21,6 +30,7 @@ void QParticlesRenderComponent::setEmitter(IParticleEmitter* inEmitter) {
 void QParticlesRenderComponent::setParticleShape(QSharedPointer<QStaticMesh> inStaticMesh)
 {
 	mStaticMesh = inStaticMesh;
+	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 	mSigRebuildResource.request();
 }
 
@@ -39,11 +49,6 @@ bool QParticlesRenderComponent::getFacingCamera() const {
 }
 
 void QParticlesRenderComponent::onRebuildResource() {
-	if (mStaticMesh.isNull()) {
-		QImage image(10, 10, QImage::Format_RGBA8888);
-		image.fill(Qt::white);
-		mStaticMesh = QStaticMesh::CreateFromImage(image);
-	}
 	mEmitter->setupRhi(mRhi);
 	mVertexBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(QStaticMesh::Vertex) * mStaticMesh->mVertices.size()));
 	mVertexBuffer->create();
@@ -113,8 +118,6 @@ void QParticlesRenderComponent::onRebuildResource() {
 				}
 		)");
 	}
-
-	mMaterialGroup.reset(new QRhiMaterialGroup(mStaticMesh->mMaterials));
 	auto materialDesc = mMaterialGroup->getMaterialDesc(mStaticMesh->mSubmeshes[0].materialIndex);
 	mRenderProxy->addMaterial(materialDesc);
 	mRenderProxy->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(

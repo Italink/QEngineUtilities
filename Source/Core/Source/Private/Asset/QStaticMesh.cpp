@@ -189,10 +189,21 @@ QSharedPointer<QStaticMesh> QStaticMesh::CreateFromText(const QString& inText, c
 	}
 	else {
 		QTriangleSet triangleSet = qTriangulate(textPath, QTransform(), lod, true);
+		QVector2D xBound(FLT_MAX, FLT_MIN), yBound(FLT_MAX, FLT_MIN);
 		for (int i = 0; i < triangleSet.vertices.size(); i += 2) {
 			Vertex vertex;
 			vertex.position = QVector3D(triangleSet.vertices[i], triangleSet.vertices[i + 1] , 0);
+			xBound.setX(qMin(xBound.x(), vertex.position.x()));
+			xBound.setY(qMax(xBound.x(), vertex.position.x()));
+			yBound.setX(qMin(yBound.y(), vertex.position.y()));
+			yBound.setY(qMax(yBound.y(), vertex.position.y()));
 			vertices.push_back(vertex);
+		}
+		float xOffset = (xBound.y() + xBound.x()) / 2;
+		float yOffset = (yBound.y() + yBound.x()) / 2;
+		for (auto& vertex : vertices) {
+			vertex.position.setX(vertex.position.x() - xOffset);
+			vertex.position.setY(-(vertex.position.y() - yOffset));  // flip y
 		}
 		Q_ASSERT(triangleSet.indices.type() == QVertexIndexVector::UnsignedInt);
 		unsigned int* indicesData = (unsigned int*)triangleSet.indices.data();

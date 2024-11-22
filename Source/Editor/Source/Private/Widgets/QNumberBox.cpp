@@ -95,6 +95,9 @@ void QNumberBox::mouseReleaseEvent(QMouseEvent* event)
 		if (mClickPosition == event->globalPos() && !getEditEnabled() && this->cursor() != Qt::BlankCursor) {
 			setEditEnabled(true);
 		}
+		if (this->cursor() == Qt::BlankCursor && !getEditEnabled()) {
+			setCursor(Qt::SizeHorCursor);
+		}
 	}
 }
 

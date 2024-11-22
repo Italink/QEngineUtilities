@@ -52,6 +52,8 @@ protected:
 
 	bool bFacingCamera = false;
 	QSharedPointer<QStaticMesh> mStaticMesh;
+
+	static QSharedPointer<QStaticMesh> DefaultStaticMesh;
 };
 
 #endif // QParticlesRenderComponent_h__

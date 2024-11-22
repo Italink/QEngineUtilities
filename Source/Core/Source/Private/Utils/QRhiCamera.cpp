@@ -131,6 +131,20 @@ bool QRhiCamera::eventFilter(QObject* watched, QEvent* event)
 			mKeySet.clear();
 			pressedPos = { 0,0 };
 			mWindow->setCursor(Qt::ArrowCursor);             //显示鼠标光标
+			break;
+		}
+		case QEvent::Wheel: {
+			if (qApp->mouseButtons() & Qt::RightButton) {
+				QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
+				if (wheelEvent->angleDelta().y() > 10) {
+					mMoveSpeed = qBound(0.0f, mMoveSpeed + 0.1f, 10.0f);;
+				}
+				else if (wheelEvent->angleDelta().y() < -10) {
+					mMoveSpeed = qBound(0.0f, mMoveSpeed - 0.1f, 10.0f);;
+				}
+				qDebug() << wheelEvent;
+			}
+			break;
 		}
 		case QEvent::MouseMove: {
 			if (qApp->mouseButtons() & Qt::RightButton && !pressedPos.isNull()) {

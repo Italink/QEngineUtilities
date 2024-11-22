@@ -5,6 +5,7 @@
 #include "QRhiHelper.h"
 
 class QENGINECORE_API QRhiWindow :public QWindow {
+	Q_OBJECT
 public:
 	QRhiWindow(QRhiHelper::InitParams inInitParmas);
 	~QRhiWindow();

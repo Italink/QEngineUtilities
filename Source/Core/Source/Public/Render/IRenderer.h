@@ -16,6 +16,7 @@ class QRenderGraphBuilder;
 
 class QENGINECORE_API IRenderer : public QObject {
 	Q_OBJECT
+	Q_PROPERTY(QRhiCamera* Camera READ getCamera)
 public:
 	friend class QRenderThreadWorkder;
 	enum class Type {

@@ -33,8 +33,15 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	renderer->maybeWindow()->installEventFilter(this);
 	hLayout->addWidget(splitter);
 	mDetailView->setFlags(QDetailView::isChildrenVisible);
-	mDetailView->setObject(mRenderer);
-	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, &QDetailView::selectSubObject);
+	mDetailView->setObject(mRenderer->getCurrentObject()? mRenderer->getCurrentObject() : mRenderer);
+	connect(mRenderer, &IRenderer::currentObjectChanged, mDetailView, [this](QObject* Object) {
+		if (Object == nullptr) {
+			mDetailView->setObject(mRenderer);
+		}
+		else {
+			mDetailView->setObject(Object);
+		}
+	});
 #else
 	hLayout->addWidget(mViewport);
 #endif

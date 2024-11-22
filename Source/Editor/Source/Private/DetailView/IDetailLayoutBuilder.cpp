@@ -121,7 +121,7 @@ void IDetailLayoutBuilder::addObject(IDetailLayoutBuilder::ObjectContext Context
 		mClassCustomizationMap.insert(Context.ObjectPtr, customizationInstance);
 	}
 	else{
-		for (int i = 0; i < Context.MetaObject->propertyCount(); i++) {
+		for (int i = 1; i < Context.MetaObject->propertyCount(); i++) {
 			QMetaProperty prop = Context.MetaObject->property(i);
 			if (prop.isUser())
 				continue;

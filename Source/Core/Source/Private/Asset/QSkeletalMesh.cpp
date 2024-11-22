@@ -6,6 +6,7 @@
 #include "assimp/matrix4x4.h"
 #include "QQueue"
 #include "QVariantAnimation"
+#include "AssetUtils.h"
 
 QSharedPointer<QSkeleton::MeshNode> processSkeletonMeshNode(aiNode* node) {
 	QSharedPointer<QSkeleton::MeshNode> boneNode = QSharedPointer<QSkeleton::MeshNode>::create();

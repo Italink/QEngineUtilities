@@ -6,7 +6,6 @@
 #include "QImage"
 #include "QMap"
 #include "QMatrix4x4"
-#include "AssetUtils.h"
 #include "Utils/MathUtils.h"
 #include "QVariantAnimation"
 #include "QMaterial.h"
