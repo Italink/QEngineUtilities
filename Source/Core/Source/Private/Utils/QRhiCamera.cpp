@@ -137,12 +137,11 @@ bool QRhiCamera::eventFilter(QObject* watched, QEvent* event)
 			if (qApp->mouseButtons() & Qt::RightButton) {
 				QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
 				if (wheelEvent->angleDelta().y() > 10) {
-					mMoveSpeed = qBound(0.0f, mMoveSpeed + 0.1f, 10.0f);;
+					mMoveSpeed = qBound(0.01f, mMoveSpeed + 0.01f, 10.0f);;
 				}
 				else if (wheelEvent->angleDelta().y() < -10) {
-					mMoveSpeed = qBound(0.0f, mMoveSpeed - 0.1f, 10.0f);;
+					mMoveSpeed = qBound(0.01f, mMoveSpeed - 0.01f, 10.0f);;
 				}
-				qDebug() << wheelEvent;
 			}
 			break;
 		}
