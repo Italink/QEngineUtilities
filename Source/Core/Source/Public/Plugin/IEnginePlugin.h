@@ -1,17 +1,25 @@
 #ifndef QEnginePlugin_h__
 #define QEnginePlugin_h__
 
+#include <QUrl>
+#include <QSet>
 #include "QEngineCoreAPI.h"
 
 class QENGINECORE_API IEnginePlugin {
 public:
-	enum Type {
-		Core,
-		Editor
+	struct Info
+	{
+		QUrl icon;
+		QString name;
+		QString author;
+		QString link;
+		QString description;
+		QList<QUrl> images;
+		QSet<QString> tags;
 	};
 
 	virtual ~IEnginePlugin(){}
-	virtual Type type() = 0;
+	virtual Info info() = 0;
 	virtual void startup() {}
 	virtual void shutdown() {}
 };
