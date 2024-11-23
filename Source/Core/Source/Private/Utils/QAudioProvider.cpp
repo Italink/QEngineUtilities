@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <QDebug>
 
 QAudioProvider::QAudioProvider()
 	: mDecoder(new QAudioDecoder)

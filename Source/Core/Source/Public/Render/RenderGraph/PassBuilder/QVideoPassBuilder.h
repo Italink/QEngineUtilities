@@ -7,7 +7,12 @@
 #include <QtMultimedia/QVideoSink>
 #include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QVideoFrame>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0) 
+#include <private/qhwvideobuffer_p.h>
+#else
 #include <private/qabstractvideobuffer_p.h>
+#endif
+
 
 class QENGINECORE_API QVideoPassBuilder : public IRenderPassBuilder {
 	QRP_INPUT_BEGIN(QVideoPassBuilder)

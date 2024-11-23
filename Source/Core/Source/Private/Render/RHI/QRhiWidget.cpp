@@ -165,8 +165,13 @@ void QRhiWidgetPrivate::ensureRhi()
     QWidgetPrivate *wd = get(tlw);
 
     QRhi *currentRhi = nullptr;
-    if (QWidgetRepaintManager *repaintManager = wd->maybeRepaintManager())
-        currentRhi = repaintManager->rhi();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    currentRhi = QWidgetPrivate::rhi();
+#else 
+	if (QWidgetRepaintManager* repaintManager = wd->maybeRepaintManager())
+		currentRhi = repaintManager->rhi();
+#endif 
 
     if (currentRhi && currentRhi->backend() != QBackingStoreRhiSupport::apiToRhiBackend(config.api())) {
         qWarning("The top-level window is already using another graphics API for composition, "
