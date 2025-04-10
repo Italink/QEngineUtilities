@@ -92,8 +92,8 @@ void QSplineRenderComponent::onRebuildResource() {
 			->addParam("ScreenResolution", QVector2D(800, 600));
 
 		mRenderProxy->setInputBindings({
-			QRhiVertexInputBindingEx(mInstanceBuffer.get(),sizeof(QSplinePoint),0 , QRhiVertexInputBinding::PerInstance) ,
-			QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QVector4D)),
+			QRhiVertexInputBindingEx(mInstanceBuffer.get(), sizeof(QSplinePoint), 0 , QRhiVertexInputBinding::PerInstance) ,
+			QRhiVertexInputBindingEx(mVertexBuffer.get(), sizeof(QVector4D)),
 		});
 
 		mRenderProxy->setInputAttribute({
@@ -105,21 +105,21 @@ void QSplineRenderComponent::onRebuildResource() {
 		});
 
 		mRenderProxy->setShaderMainCode(QRhiShaderStage::Vertex, R"(
-				layout(location = 0) out vec4 vColor;
-				void main(){
-					vec4 clip0 = UBO.MVP * vec4(inPointA, 1.0);
-					vec4 clip1 = UBO.MVP * vec4(inPointB, 1.0);
-					vec2 screen0 = UBO.ScreenResolution * (0.5 * clip0.xy/clip0.w + 0.5);
-					vec2 screen1 = UBO.ScreenResolution * (0.5 * clip1.xy/clip1.w + 0.5);
-					vec2 xBasis = normalize(screen1 - screen0);
-					vec2 yBasis = vec2(-xBasis.y, xBasis.x);
-					vec2 pt0 = screen0 + UBO.LineWidth * (inPos.x * xBasis + inPos.y * yBasis);
-					vec2 pt1 = screen1 + UBO.LineWidth * (inPos.x * xBasis + inPos.y * yBasis);
-					vec2 pt = mix(pt0, pt1, inPos.z);
-					vec4 clip = mix(clip0, clip1, inPos.z);
-					gl_Position = vec4(clip.w * ((2.0 * pt) / UBO.ScreenResolution - 1.0), clip.z, clip.w);
-					vColor = mix(inColorA, inColorB, inPos.z);
-				}
+			layout(location = 0) out vec4 vColor;
+			void main(){
+				vec4 clip0 = UBO.MVP * vec4(inPointA, 1.0);
+				vec4 clip1 = UBO.MVP * vec4(inPointB, 1.0);
+				vec2 screen0 = UBO.ScreenResolution * (0.5 * clip0.xy/clip0.w + 0.5);
+				vec2 screen1 = UBO.ScreenResolution * (0.5 * clip1.xy/clip1.w + 0.5);
+				vec2 xBasis = normalize(screen1 - screen0);
+				vec2 yBasis = vec2(-xBasis.y, xBasis.x);
+				vec2 pt0 = screen0 + UBO.LineWidth * (inPos.x * xBasis + inPos.y * yBasis);
+				vec2 pt1 = screen1 + UBO.LineWidth * (inPos.x * xBasis + inPos.y * yBasis);
+				vec2 pt = mix(pt0, pt1, inPos.z);
+				vec4 clip = mix(clip0, clip1, inPos.z);
+				gl_Position = vec4(clip.w * ((2.0 * pt) / UBO.ScreenResolution - 1.0), clip.z, clip.w);
+				vColor = mix(inColorA, inColorB, inPos.z);
+			}
 		)");
 
 		mRenderProxy->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
@@ -135,7 +135,6 @@ void QSplineRenderComponent::onRebuildResource() {
 		});	
 		mRenderProxy->setOnUpdate([this](QRhiResourceUpdateBatch* batch, const QPrimitiveRenderProxy::UniformBlocks& blocks, const QPrimitiveRenderProxy::UpdateContext& ctx) {
 			auto size = getPixelSize();
-
 			QMatrix4x4 MVP = ctx.projectionMatrixWithCorr * ctx.viewMatrix * getModelMatrix();
 			blocks["UBO"]->setParamValue("MVP", QVariant::fromValue(MVP.toGenericMatrix<4, 4>()));
 			blocks["UBO"]->setParamValue("LineWidth", mLineWidth);

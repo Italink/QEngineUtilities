@@ -71,10 +71,10 @@ private:
 	QMatrix4x4 mViewMatrix;
 	QMatrix4x4 mClipMatrix;
 
-	float mFov = 45.0f;
+	float mFov = 90.0f;
 	float mAspectRatio = 1.0;
-	float mNearPlane = 0.1f;
-	float mFarPlane = 3000.0f;
+	float mNearPlane = 0.2f;
+	float mFarPlane = 1000.0;
 
 	QVector3D mCameraDirection;
 	QVector3D mCameraUp;
