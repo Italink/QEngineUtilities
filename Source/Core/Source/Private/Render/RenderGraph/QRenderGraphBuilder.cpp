@@ -21,7 +21,7 @@ QRenderGraphBuilder::QRenderGraphBuilder(IRenderer* renderer)
 #endif 
 		})"
 		, QShaderDefinitions()
-		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC())
+		.addDefinition("Y_UP_IN_NDC", mRhi->isYUpInNDC() != mRhi ->isYUpInFramebuffer())
 	);
 }
 

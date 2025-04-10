@@ -49,6 +49,7 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 		mRenderProxy->addUniformBlock(QRhiShaderStage::Vertex, "UBO")
 			->addParam("M", QGenericMatrix<4, 4, float>())
 			->addParam("V", QGenericMatrix<4, 4, float>())
+			->addParam("VInv", QGenericMatrix<4, 4, float>())
 			->addParam("P", QGenericMatrix<4, 4, float>())
 			->addParam("ViewSize", QVector2D(800, 600));
 
@@ -71,8 +72,9 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 			layout(location = 0) out vec4 vColor;
 			layout(location = 1) out vec2 vQuadPosition;
 
+			const float sqrt8 = sqrt(8.0);
+
 			void main(){
-				const float sqrt8 = sqrt(8.0);
 				vec4 PosInWorld = UBO.M * inGsPosition;
 				vec4 PosInView = UBO.V * PosInWorld;
 				PosInView /= PosInView.w;
@@ -80,6 +82,7 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 				PosInClip = PosInClip / PosInClip.w;
 
 				vec2 Focal = vec2(UBO.P[0][0], UBO.P[1][1]) * UBO.ViewSize * 0.5f;
+
 				mat3 J = mat3(
 					Focal.x / PosInView.z, 0,     -(Focal.x * PosInView.x)/(PosInView.z * PosInView.z),
 					0,     Focal.y / PosInView.z, -(Focal.y * PosInView.y)/(PosInView.z * PosInView.z),
@@ -87,7 +90,8 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 				);
 
 				// Concatenate the projection approximation with the model-view transformation
-				mat3 W = transpose(mat3(UBO.V));
+				mat3 MatViewToLocal =  mat3(transpose(UBO.M) * UBO.VInv);
+				mat3 W = MatViewToLocal;
 				mat3 T = W * J;
 				
 				mat3 Vrk = mat3(inGsSigma);
@@ -127,7 +131,10 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 				float EigenValue1 = TraceOver2 + Term2;
 				float EigenValue2 = TraceOver2 - Term2;
 
-				if (EigenValue2 <= 0.0) return;
+				if (EigenValue2 <= 0.0){
+					gl_Position = vec4(0);
+					return;
+				}
 
 				vec2 EigenVector1 = normalize(vec2(b, EigenValue1 - a));
 				// since the eigen vectors are orthogonal, we derive the second one from the first
@@ -137,8 +144,7 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 				vec2 BasisVector1 = EigenVector1 * min(sqrt8 * sqrt(EigenValue1), 1024.0);
 				vec2 BasisVector2 = EigenVector2 * min(sqrt8 * sqrt(EigenValue2), 1024.0);
 				
-				vec2 NdcOffset = vec2(inQuadPosition.x * BasisVector1 + inQuadPosition.y * BasisVector2) /
-                             UBO.ViewSize * 2.0;
+				vec2 NdcOffset = vec2(inQuadPosition.x * BasisVector1 + inQuadPosition.y * BasisVector2) / UBO.ViewSize * 2.0;
 
 				gl_Position = vec4(PosInClip.xy + NdcOffset, PosInClip.z, 1);
 
@@ -146,6 +152,7 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 				vQuadPosition = inQuadPosition * sqrt8;
 			}
 		)");
+
 		mRenderProxy->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec4 vColor;
 			layout(location = 1) in vec2 vQuadPosition;
@@ -175,7 +182,8 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 			auto size = getPixelSize();
 			blocks["UBO"]->setParamValue("M", QVariant::fromValue(getModelMatrix().toGenericMatrix<4, 4>()));
 			blocks["UBO"]->setParamValue("V", QVariant::fromValue(ctx.viewMatrix.toGenericMatrix<4, 4>()));
-			blocks["UBO"]->setParamValue("P", QVariant::fromValue(ctx.projectionMatrix.toGenericMatrix<4, 4>()));
+			blocks["UBO"]->setParamValue("VInv", QVariant::fromValue(ctx.viewMatrix.inverted().toGenericMatrix<4, 4>()));
+			blocks["UBO"]->setParamValue("P", QVariant::fromValue(ctx.projectionMatrixWithCorr.toGenericMatrix<4, 4>()));
 			blocks["UBO"]->setParamValue("ViewSize", QVector2D(size.width(), size.height()));
 		});
 
@@ -206,8 +214,10 @@ void QGaussianSplattingPointCloudRenderComponent::onCpuSort(QRhiCommandBuffer* c
 
 	maxDist *= maxDist;
 
+	QMatrix4x4 M = getModelMatrix();
 	for (auto const& point : mGaussianSplattingPointCloud->mPoints) {
-		auto v = -camPos - QVector3D(point.Position);
+		QVector3D worldPos = M * QVector3D(point.Position);
+		auto v = -camPos - worldPos;
 		float d = v.x() * v.x() + v.y() * v.y() + v.z() * v.z();    // dot product
 		float d_normalized = bucketCount * d / maxDist;  // between 0 and n_buckets
 		size_t dist = qMin(d_normalized, (float)bucketCount - 1);
