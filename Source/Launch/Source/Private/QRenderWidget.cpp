@@ -24,13 +24,13 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 	hLayout->setSpacing(0);
 	setMinimumSize(800, 600);
 	mViewport = QWidget::createWindowContainer(renderer->maybeWindow());
+	renderer->maybeWindow()->installEventFilter(this);
 #ifdef QENGINE_WITH_EDITOR
 	QSplitter* splitter = new QSplitter;
 	mViewport->setMinimumWidth(400);
 	splitter->addWidget(mViewport);
 	splitter->addWidget(mDetailView);
 	splitter->setSizes({ 700,300 });
-	renderer->maybeWindow()->installEventFilter(this);
 	hLayout->addWidget(splitter);
 	mDetailView->setFlags(QDetailView::isChildrenVisible);
 	mDetailView->setObject(mRenderer->getCurrentObject()? mRenderer->getCurrentObject() : mRenderer);
@@ -47,9 +47,9 @@ QRenderWidget::QRenderWidget(IRenderer* renderer)
 #endif
 }
 
-#ifdef QENGINE_WITH_EDITOR
 void QRenderWidget::keyPressEvent(QKeyEvent* event) {
-	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier) ) {
+#ifdef QENGINE_WITH_EDITOR
+	if (event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier)) {
 		if (event->key() == Qt::Key_Z) {
 			QEngineUndoStack::Instance()->undo();
 		}
@@ -57,6 +57,7 @@ void QRenderWidget::keyPressEvent(QKeyEvent* event) {
 			QEngineUndoStack::Instance()->redo();
 		}
 	}
+#endif // QENGINE_WITH_EDITOR
 	Q_EMIT QEngineCoreSignals::Instance()->asViewportKeyPressEvent(event);
 }
 
@@ -70,4 +71,3 @@ bool QRenderWidget::eventFilter(QObject* obj, QEvent* event) {
 	}
 	return false;
 }
-#endif // QENGINE_WITH_EDITOR

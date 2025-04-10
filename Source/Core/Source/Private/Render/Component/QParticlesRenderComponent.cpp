@@ -73,7 +73,7 @@ void QParticlesRenderComponent::onRebuildResource() {
 	mRenderProxy->setInputBindings({
 		QRhiVertexInputBindingEx(mVertexBuffer.get(),sizeof(QStaticMesh::Vertex)),
 		QRhiVertexInputBindingEx(mIndirectDrawBuffer.get(),sizeof(float) * 16, 0 , QRhiVertexInputBinding::Classification::PerInstance)
-		});
+	});
 
 	mRenderProxy->setInputAttribute({
 			QRhiVertexInputAttributeEx("inPosition"	,0, 0, QRhiVertexInputAttribute::Float3, offsetof(QStaticMesh::Vertex,position)),

@@ -22,10 +22,10 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 		return;
 
 	std::vector<float> verts = { 
-		-2, -2,
-		 2, -2,
-		 2, 2, 
-		-2, 2 
+		-1, -1,
+		 1, -1,
+		 1, 1,
+		-1, 1
 	};
 
 	mQuadBuffer.reset(mRhi->newBuffer(QRhiBuffer::Type::Static, QRhiBuffer::VertexBuffer, sizeof(float) * verts.size()));
@@ -39,10 +39,12 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 		mRenderProxy->setTopology(QRhiGraphicsPipeline::Topology::TriangleFan);
 		QVector<QRhiGraphicsPipeline::TargetBlend> blendState(getColorAttachmentCount());
 		for (auto& state : blendState) {
-			state.enable = true; 
+			state.enable = true;
+			state.srcColor = QRhiGraphicsPipeline::SrcAlpha;
+			state.dstColor = QRhiGraphicsPipeline::OneMinusSrcAlpha;
 		}
-		mRenderProxy->setBlendStates(blendState);
 		mRenderProxy->setDepthTest(false);
+		mRenderProxy->setBlendStates(blendState);
 
 		mRenderProxy->addUniformBlock(QRhiShaderStage::Vertex, "UBO")
 			->addParam("M", QGenericMatrix<4, 4, float>())
@@ -69,88 +71,99 @@ void QGaussianSplattingPointCloudRenderComponent::onRebuildResource() {
 			layout(location = 0) out vec4 vColor;
 			layout(location = 1) out vec2 vQuadPosition;
 
-			vec4 get_basis(mat2 sigma) {
-				float a = sigma[0][0];
-				float b = sigma[0][1];
-				float c = sigma[1][0];
-				float d = sigma[1][1];
-
-				float tr = a + d;
-				float det = a * d - b * c;
-
-				// eigenvalues
-				float s = sqrt((tr * tr) - (4 * det));
-				float lambda1 = 0.5 * (tr + s);
-				float lambda2 = 0.5 * (tr - s);
-
-				// eigenvectors
-				const float epsilon = 0.00001;
-
-				vec2 e1 = vec2(1, 0);
-				if (abs(c) > epsilon) {
-					e1 = vec2(lambda1 - d, c);
-				} else if (abs(b) > epsilon) {
-					e1 = vec2(b, lambda1 - a);
-				}
-				e1 = normalize(e1);
-
-				vec2 e2 = vec2(e1.y, -e1.x);
-
-				const float max_size = 32 * 2048;
-				lambda1 = min(max_size, lambda1);
-				lambda2 = min(max_size, lambda2);
-
-				// basis vectors
-				vec2 b1 = sqrt(2 * lambda1) * e1;
-				vec2 b2 = sqrt(2 * lambda2) * e2;
-
-				return vec4(b1, b2);
-			}
-
 			void main(){
-				vec4 u = UBO.V * inGsPosition;
-				u /= u.w;
-				float focal = UBO.P[0][0] * UBO.ViewSize.x * 0.5f;
-				mat3 jacobian = mat3(
-						focal/u.z, 0,     -(focal * u.x)/(u.z * u.z),
-						0,     focal/u.z, -(focal * u.y)/(u.z * u.z),
-						0,     0,     0
+				const float sqrt8 = sqrt(8.0);
+				vec4 PosInWorld = UBO.M * inGsPosition;
+				vec4 PosInView = UBO.V * PosInWorld;
+				PosInView /= PosInView.w;
+				vec4 PosInClip = UBO.P * PosInView;
+				PosInClip = PosInClip / PosInClip.w;
+
+				vec2 Focal = vec2(UBO.P[0][0], UBO.P[1][1]) * UBO.ViewSize * 0.5f;
+				mat3 J = mat3(
+					Focal.x / PosInView.z, 0,     -(Focal.x * PosInView.x)/(PosInView.z * PosInView.z),
+					0,     Focal.y / PosInView.z, -(Focal.y * PosInView.y)/(PosInView.z * PosInView.z),
+					0,     0,     0
 				);
 
-				// Calculate 2D covariance matrix
-				mat3 t = jacobian * mat3(UBO.V);
-				mat3 sigma_prime = t * mat3(inGsSigma) * transpose(t);
-				mat2 sigma2 = mat2(sigma_prime);  // take upper left
+				// Concatenate the projection approximation with the model-view transformation
+				mat3 W = transpose(mat3(UBO.V));
+				mat3 T = W * J;
+				
+				mat3 Vrk = mat3(inGsSigma);
 
-				// Get basis vectors of the splatted 2D Gaussian
-				vec4 bases = get_basis(sigma2);
-				vec2 b1 = bases.xy;
-				vec2 b2 = bases.zw;
+				// Transform the 3D covariance matrix (Vrk) to compute the 2D covariance matrix
+				mat3 Cov2Dm = transpose(T) * Vrk * T;
 
-				// Position in screen space
-				vec4 pos2d = UBO.P * u;
-				vec2 center = pos2d.xy / pos2d.w;
+				Cov2Dm[0][0] += 0.3f;
+                Cov2Dm[1][1] += 0.3f;
 
-				gl_Position = vec4(center
-						+ (inQuadPosition.x * b1) / (0.5 * UBO.ViewSize)
-						+ (inQuadPosition.y * b2) / (0.5 * UBO.ViewSize),
-						-1, 1);
+				// We are interested in the upper-left 2x2 portion of the projected 3D covariance matrix because
+				// we only care about the X and Y values. We want the X-diagonal, Cov2Dm[0][0],
+				// the Y-diagonal, Cov2Dm[1][1], and the correlation between the two Cov2Dm[0][1]. We don't
+				// need Cov2Dm[1][0] because it is a symetric matrix.
+				vec3 Cov2Dv = vec3(Cov2Dm[0][0], Cov2Dm[0][1], Cov2Dm[1][1]);
 
-				gl_Position.z = pos2d.z / pos2d.w;
+				// We now need to solve for the eigen-values and eigen vectors of the 2D covariance matrix
+				// so that we can determine the 2D Basis for the splat. This is done using the method described
+				// here: https://people.math.harvard.edu/~knill/teaching/math21b2004/exhibits/2dmatrices/index.html
+				// After calculating the eigen-values and eigen-vectors, we calculate the Basis for rendering the splat
+				// by normalizing the eigen-vectors and then multiplying them by (sqrt(8) * sqrt(eigen-value)), which is
+				// equal to scaling them by sqrt(8) standard deviations.
+				//
+				// This is a different approach than in the original work at INRIA. In that work they compute the
+				// max extents of the projected splat in screen space to form a screen-space aligned bounding rectangle
+				// which forms the geometry that is actually rasterized. The dimensions of that bounding box are 3.0
+				// times the square root of the maximum eigen-value, or 3 standard deviations. They then use the inverse
+				// 2D covariance matrix (called 'conic') in the CUDA rendering thread to determine fragment opacity by
+				// calculating the full gaussian: exp(-0.5 * (X - mean) * conic * (X - mean)) * splat opacity
+				float a = Cov2Dv.x;
+				float d = Cov2Dv.z;
+				float b = Cov2Dv.y;
+				float D = a * d - b * b;
+				float Trace = a + d;
+				float TraceOver2 = 0.5 * Trace;
+				float Term2 = sqrt(max(0.1f, TraceOver2 * TraceOver2 - D));
+				float EigenValue1 = TraceOver2 + Term2;
+				float EigenValue2 = TraceOver2 - Term2;
+
+				if (EigenValue2 <= 0.0) return;
+
+				vec2 EigenVector1 = normalize(vec2(b, EigenValue1 - a));
+				// since the eigen vectors are orthogonal, we derive the second one from the first
+				vec2 EigenVector2 = vec2(EigenVector1.y, -EigenVector1.x);
+
+				// We use sqrt(8) standard deviations instead of 3 to eliminate more of the splat with a very low opacity.
+				vec2 BasisVector1 = EigenVector1 * min(sqrt8 * sqrt(EigenValue1), 1024.0);
+				vec2 BasisVector2 = EigenVector2 * min(sqrt8 * sqrt(EigenValue2), 1024.0);
+				
+				vec2 NdcOffset = vec2(inQuadPosition.x * BasisVector1 + inQuadPosition.y * BasisVector2) /
+                             UBO.ViewSize * 2.0;
+
+				gl_Position = vec4(PosInClip.xy + NdcOffset, PosInClip.z, 1);
 
 				vColor = inGsColor;
-				vQuadPosition = inQuadPosition;
+				vQuadPosition = inQuadPosition * sqrt8;
 			}
 		)");
 		mRenderProxy->setShaderMainCode(QRhiShaderStage::Fragment, QString(R"(
 			layout(location = 0) in vec4 vColor;
 			layout(location = 1) in vec2 vQuadPosition;
 			void main(){
-				int f = 1;
-				float A = -dot(f * vQuadPosition, f * vQuadPosition);
-				if (A < -4.0) discard;
-				float B = exp(A) * vColor.a;
-				BaseColor = B * vec4(vColor.rgb, 1);
+				float A = dot(vQuadPosition, vQuadPosition);
+                // Since the positional data in vPosition has been scaled by sqrt(8), the squared result will be
+                // scaled by a factor of 8. If the squared result is larger than 8, it means it is outside the ellipse
+                // defined by the rectangle formed by vPosition. It also means it's farther
+                // away than sqrt(8) standard deviations from the mean.
+                if (A > 8.0) discard;
+                vec3 color = vColor.rgb;
+
+                // Since the rendered splat is scaled by sqrt(8), the inverse covariance matrix that is part of
+                // the gaussian formula becomes the identity matrix. We're then left with (X - mean) * (X - mean),
+                // and since 'mean' is zero, we have X * X, which is the same as A:
+                float opacity = exp(-0.5 * A) * vColor.a;
+
+                BaseColor = vec4(color.rgb, opacity);
 			})")
 			.toLocal8Bit()
 		);

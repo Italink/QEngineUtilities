@@ -14,10 +14,8 @@ class QENGINELAUNCH_API QRenderWidget :public QWidget {
 public:
 	QRenderWidget(IRenderer* renderer);
 protected:
-#ifdef QENGINE_WITH_EDITOR
 	void keyPressEvent(QKeyEvent* event) override;
 	bool eventFilter(QObject* obj, QEvent* event) override;
-#endif 
 protected:
 	QWidget* mViewport = nullptr;
 	IRenderer* mRenderer;

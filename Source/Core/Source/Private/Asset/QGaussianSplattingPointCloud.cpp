@@ -146,7 +146,7 @@ QVector<QGaussianSplattingPoint> parseSplatFromStream(std::istream& in)
 		point.Color = SH_0 * point.Color + QVector4D(0.5f, 0.5f, 0.5f, 0.5f) ;
 		
 		float alpha = values[vertexOffset + alphaIdx[0]];
-		point.Color.setW(1.0f/ (1.0f + qExp(-alpha)));
+		point.Color.setW(1.0f / (1.0f + qExp(-alpha)));
 
 		QVector3D scale = QVector3D(
 			qExp(values[vertexOffset + scaleIdx[0]]),
